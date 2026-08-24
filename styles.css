@@ -7,6 +7,10 @@
 * { box-sizing: border-box; }
 html, body { width: 100%; min-height: 100%; margin: 0; background: #f7f6f8; }
 body { overflow-x: hidden; }
+.overlay-mode { min-height: 100%; overflow: hidden; background: transparent; }
+.overlay-mode .knowledge-page { display: none; }
+.overlay-mode .orb { right: 17px; bottom: 17px; }
+.overlay-mode .messenger { right: 0; bottom: 0; }
 button, input { font: inherit; }
 button { border: 0; cursor: pointer; }
 

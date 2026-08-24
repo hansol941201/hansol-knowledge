@@ -5,6 +5,8 @@ const input = $('#input');
 const messages = $('#messages');
 const chatEmpty = $('#chatEmpty');
 const toast = $('#toast');
+const overlayMode = new URLSearchParams(location.search).get('overlay') === '1';
+if (overlayMode) document.body.classList.add('overlay-mode');
 
 const seed = [
   { id: crypto.randomUUID(), title: '시방서 문의', answer: '심혜진 연구원\n010-9954-7653', aliases: ['시방서', '기술 문의', '공법 자재', '심혜진 번호'] },
@@ -307,6 +309,7 @@ async function deleteAccount(id) {
 }
 
 function openApp() {
+  window.knowledgeAPI?.setExpanded(true);
   orb.classList.add('hidden');
   app.classList.remove('hidden');
   setTimeout(() => input.focus(), 120);
@@ -314,6 +317,7 @@ function openApp() {
 function collapseApp() {
   app.classList.add('hidden');
   orb.classList.remove('hidden');
+  window.knowledgeAPI?.setExpanded(false);
 }
 orb.addEventListener('click', openApp);
 $('#collapseBtn').addEventListener('click', collapseApp);
