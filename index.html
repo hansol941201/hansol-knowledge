@@ -20,7 +20,6 @@
     <div class="page-content">
       <div class="page-title"><div><h1>내 지식</h1><p>기록한 업무 지식을 한눈에 확인하세요.</p></div><b id="pageCount">0</b></div>
       <section id="todayPanel" class="today-panel"></section>
-      <section id="memoryPanel" class="memory-panel hidden"></section>
       <nav id="pageCategories" class="page-categories"></nav>
       <div id="pageGrid" class="page-grid"></div>
       <div id="pageEmpty" class="page-empty hidden">검색 결과 없음</div>
@@ -58,6 +57,13 @@
   </main>
 
   <div id="toast" class="toast"></div>
+  <div id="memoryModal" class="modal hidden" role="dialog" aria-modal="true" aria-label="기억 저장소">
+    <section class="edit-box memory-library-box">
+      <header><div><strong>기억 저장소</strong><small id="memoryCount">0개 기록</small></div><button id="memoryClose" type="button">×</button></header>
+      <label class="memory-search">⌕<input id="memorySearch" placeholder="이름이나 기록 내용 검색" /></label>
+      <section id="memoryPanel" class="memory-panel"></section>
+    </section>
+  </div>
   <div id="editModal" class="modal hidden" role="dialog" aria-modal="true" aria-label="지식 수정">
     <form id="editForm" class="edit-box">
       <header><strong id="editHeading">지식 수정</strong><button id="editClose" type="button">×</button></header>
@@ -91,6 +97,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="firebase-config.js?v=1"></script>
-  <script src="app.js?v=27"></script>
+  <script src="app.js?v=28"></script>
 </body>
 </html>

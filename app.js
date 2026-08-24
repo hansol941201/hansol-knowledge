@@ -161,11 +161,13 @@ function renderTodos() {
 }
 
 function renderMemories() {
+  const query = normalize($('#memorySearch').value || '');
+  const filtered = memories.filter(memory => !query || normalize(`${memory.text} ${memory.createdAt || ''}`).includes(query));
+  $('#memoryCount').textContent = query ? `${filtered.length}개 검색됨` : `${memories.length}개 기록`;
   $('#memoryPanel').innerHTML = `
-    <div class="today-head"><div><i></i><b>기억 저장소</b></div><span>${memories.length}개 기록</span></div>
-    <div class="memory-list">${memories.length ? memories.map(memory => `
+    <div class="memory-list">${filtered.length ? filtered.map(memory => `
       <article class="memory-item" data-memory-id="${memory.id}"><div><p>${escapeHtml(memory.text)}</p><time>${escapeHtml(memory.createdAt || '')}</time></div><button type="button" title="삭제">×</button></article>
-    `).join('') : '<div class="todo-empty">지식창에 “기억 내용”을 입력하면 여기에 따로 모여요.</div>'}</div>`;
+    `).join('') : `<div class="todo-empty">${query ? '검색 결과 없음' : '지식창에 “기억 내용”을 입력하면 여기에 따로 모여요.'}</div>`}</div>`;
   $('#memoryPanel').querySelectorAll('[data-memory-id]').forEach(row => {
     row.querySelector('button').onclick = () => {
       memories = memories.filter(memory => memory.id !== row.dataset.memoryId);
@@ -185,11 +187,15 @@ renderLibrary();
 renderTodos();
 renderMemories();
 $('#memoryToggle').addEventListener('click', () => {
-  const panel = $('#memoryPanel');
-  panel.classList.toggle('hidden');
-  $('#memoryToggle').classList.toggle('active', !panel.classList.contains('hidden'));
-  if (!panel.classList.contains('hidden')) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  $('#memoryModal').classList.remove('hidden');
+  $('#memoryToggle').classList.add('active');
+  renderMemories();
+  setTimeout(() => $('#memorySearch').focus(), 50);
 });
+function closeMemoryLibrary() { $('#memoryModal').classList.add('hidden'); $('#memoryToggle').classList.remove('active'); }
+$('#memoryClose').addEventListener('click', closeMemoryLibrary);
+$('#memoryModal').addEventListener('click', event => { if (event.target.id === 'memoryModal') closeMemoryLibrary(); });
+$('#memorySearch').addEventListener('input', renderMemories);
 $('#pageSearch').addEventListener('input', renderLibrary);
 $('#pageAdd').addEventListener('click', openNewEditor);
 
@@ -356,7 +362,11 @@ $('#siteShortcut').addEventListener('click', () => {
   if (window.knowledgeAPI?.openSite) window.knowledgeAPI.openSite();
   else window.open(siteUrl, '_blank', 'noopener,noreferrer');
 });
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape') collapseApp(); });
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  if (!$('#memoryModal').classList.contains('hidden')) closeMemoryLibrary();
+  else collapseApp();
+});
 
 function addBubble(text, type = 'answer', item = null) {
   chatEmpty.classList.add('off');
