@@ -52,12 +52,15 @@ const partners = Array.isArray(window.PARTNERS) ? window.PARTNERS : [];
 let vaultKey = null;
 let vaultSecrets = {};
 let pendingSecretCopy = null;
+let cloudReady = false;
+let cloudApplying = false;
+let cloudSaveTimer = null;
 const knownTitles = new Set(knowledge.map(item => item.title));
 for (const item of seed) {
   if (!knownTitles.has(item.title)) knowledge.push(item);
 }
-const save = () => localStorage.setItem('knowledge-messenger-data', JSON.stringify(knowledge));
-const saveTodos = () => localStorage.setItem('knowledge-todos', JSON.stringify(todos));
+const save = () => { localStorage.setItem('knowledge-messenger-data', JSON.stringify(knowledge)); queueCloudSave(); };
+const saveTodos = () => { localStorage.setItem('knowledge-todos', JSON.stringify(todos)); queueCloudSave(); };
 const categoryMap = {
   '시방서 문의': '연락처', '공사 일정': '연락처', '하자 보수': '연락처', '스토어': '연락처',
   '폐기물 신청': '연락처', '폐기물 비용': '연락처', '하자 접수': '연락처', '미팅 일정': '연락처', '아파트 문의': '연락처',
@@ -288,7 +291,7 @@ $('#vaultForm').addEventListener('submit', async e => {
     accountMeta.unshift({ id, service: $('#accountService').value.trim(), user: $('#accountId').value.trim() });
     vaultSecrets[id] = $('#accountPassword').value;
     localStorage.setItem('knowledge-account-meta', JSON.stringify(accountMeta));
-    await persistVault(); renderLibrary(); closeVault(); showToast('계정 암호화 저장됨');
+    await persistVault(); queueCloudSave(); renderLibrary(); closeVault(); showToast('계정 암호화 저장됨');
   } catch { showToast('계정 저장 확인'); }
 });
 
@@ -308,6 +311,7 @@ async function deleteAccount(id) {
   accountMeta = accountMeta.filter(x => x.id !== id);
   localStorage.setItem('knowledge-account-meta', JSON.stringify(accountMeta));
   if (vaultKey) { delete vaultSecrets[id]; await persistVault(); }
+  queueCloudSave();
   renderLibrary(); showToast('계정 삭제됨');
 }
 
@@ -498,3 +502,100 @@ $('#fileInput').addEventListener('change', async (e) => {
 if (window.knowledgeAPI) {
   window.knowledgeAPI.onToggle(() => app.classList.contains('hidden') ? openApp() : collapseApp());
 }
+
+function queueCloudSave() {
+  if (!cloudReady || cloudApplying || !window.HANSOL_FIRESTORE) return;
+  clearTimeout(cloudSaveTimer);
+  cloudSaveTimer = setTimeout(saveCloudState, 350);
+}
+
+async function saveCloudState() {
+  if (!cloudReady || cloudApplying || !window.HANSOL_FIRESTORE) return;
+  try {
+    await unlockDeviceVault();
+    await window.HANSOL_FIRESTORE.doc('shared/state').set({
+      knowledge,
+      todos,
+      accountMeta,
+      vaultSecrets,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  } catch (error) {
+    console.error('Firebase 저장 실패', error);
+    showToast('동기화 확인 X');
+  }
+}
+
+async function applyCloudState(state) {
+  cloudApplying = true;
+  knowledge = Array.isArray(state.knowledge) ? state.knowledge : knowledge;
+  todos = Array.isArray(state.todos) ? state.todos : todos;
+  accountMeta = Array.isArray(state.accountMeta) ? state.accountMeta : accountMeta;
+  vaultSecrets = state.vaultSecrets && typeof state.vaultSecrets === 'object' ? state.vaultSecrets : {};
+  localStorage.setItem('knowledge-messenger-data', JSON.stringify(knowledge));
+  localStorage.setItem('knowledge-todos', JSON.stringify(todos));
+  localStorage.setItem('knowledge-account-meta', JSON.stringify(accountMeta));
+  try {
+    vaultKey = vaultKey || await getDeviceKey();
+    await persistVault();
+  } catch (error) { console.error('로컬 계정 보관 실패', error); }
+  renderLibrary();
+  renderTodos();
+  cloudApplying = false;
+}
+
+async function startCloudSync() {
+  if (!window.HANSOL_FIRESTORE) return showToast('오프라인 저장 모드');
+  const stateDoc = window.HANSOL_FIRESTORE.doc('shared/state');
+  try {
+    const first = await stateDoc.get();
+    if (first.exists) await applyCloudState(first.data());
+    else {
+      await unlockDeviceVault();
+      await stateDoc.set({ knowledge, todos, accountMeta, vaultSecrets, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    }
+    cloudReady = true;
+    stateDoc.onSnapshot(snapshot => {
+      if (snapshot.exists && !snapshot.metadata.hasPendingWrites) applyCloudState(snapshot.data());
+    }, error => { console.error('Firebase 실시간 동기화 실패', error); showToast('동기화 연결 X'); });
+  } catch (error) {
+    console.error('Firebase 시작 실패', error);
+    showToast('오프라인 저장 모드');
+  }
+}
+
+async function signInForSync(pin) {
+  const normalizedPin = String(pin || '').trim();
+  if (normalizedPin.length < 6) throw new Error('PIN 형식 확인');
+  await window.HANSOL_AUTH.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+  await window.HANSOL_AUTH.signInWithEmailAndPassword('hansol.sync@local.invalid', normalizedPin);
+  localStorage.setItem('knowledge-sync-pin', normalizedPin);
+  $('#syncModal').classList.add('hidden');
+  await startCloudSync();
+}
+
+async function initCloudAuth() {
+  if (!window.HANSOL_AUTH || !window.HANSOL_FIRESTORE) return showToast('오프라인 저장 모드');
+  await new Promise(resolve => {
+    const stop = window.HANSOL_AUTH.onAuthStateChanged(user => { stop(); resolve(user); });
+  });
+  if (window.HANSOL_AUTH.currentUser) return startCloudSync();
+  const savedPin = localStorage.getItem('knowledge-sync-pin');
+  if (savedPin) {
+    try { return await signInForSync(savedPin); }
+    catch { localStorage.removeItem('knowledge-sync-pin'); }
+  }
+  $('#syncModal').classList.remove('hidden');
+}
+
+$('#syncForm').addEventListener('submit', async event => {
+  event.preventDefault();
+  const button = event.currentTarget.querySelector('button[type="submit"]');
+  button.disabled = true;
+  $('#syncError').textContent = '';
+  try { await signInForSync($('#syncPin').value); }
+  catch { $('#syncError').textContent = 'PIN 확인 X'; }
+  finally { button.disabled = false; }
+});
+
+initCloudAuth();

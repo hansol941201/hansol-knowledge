@@ -1,6 +1,6 @@
 # 한솔 지식창
 
-HTML/CSS/JavaScript로 만든 개인 지식 메신저입니다. 기본 지식이 포함되어 있으며 모든 추가 데이터는 PC 안에 저장됩니다.
+HTML/CSS/JavaScript로 만든 개인 지식 메신저입니다. Firebase Firestore를 통해 지식·할 일·임시 계정 정보가 컴퓨터 간 동기화됩니다.
 
 공개 사이트: https://hansol941201.github.io/hansol-knowledge/
 

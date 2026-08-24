@@ -23,6 +23,7 @@
       "app.js",
       "partners.js",
       "netform-logo.png",
+      "firebase-config.js",
       "main.js",
       "preload.js"
     ],
