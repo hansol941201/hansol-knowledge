@@ -429,6 +429,11 @@ $('#composer').addEventListener('submit', (e) => {
   if (!text) return;
   addBubble(text, 'mine');
   input.value = '';
+  if (/^기억[\s.,:·-]*$/.test(text)) {
+    if (!memories.length) addBubble('기억 저장소 비어 있음\n“기억 내용”으로 기록', 'answer');
+    else memories.slice(0, 8).forEach(memory => addBubble(`기억\n${memory.text}\n${memory.createdAt || '날짜 확인'}`, 'answer'));
+    return;
+  }
   const todoMatch = text.match(/^할일[\s.,:·-]*(.+)$/);
   if (todoMatch?.[1]?.trim()) {
     const todo = { id: crypto.randomUUID(), text: todoMatch[1].trim(), date: todayKey(), done: false };
