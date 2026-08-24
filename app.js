@@ -47,6 +47,7 @@ const seed = [
 let knowledge = JSON.parse(localStorage.getItem('knowledge-messenger-data') || 'null') || [];
 knowledge = knowledge.filter(item => !(item.title === '통신도장' && item.answer === '통신도장'));
 let todos = JSON.parse(localStorage.getItem('knowledge-todos') || '[]');
+let memories = JSON.parse(localStorage.getItem('knowledge-memories') || '[]');
 let accountMeta = JSON.parse(localStorage.getItem('knowledge-account-meta') || '[]');
 const partners = Array.isArray(window.PARTNERS) ? window.PARTNERS : [];
 let vaultKey = null;
@@ -61,6 +62,7 @@ for (const item of seed) {
 }
 const save = () => { localStorage.setItem('knowledge-messenger-data', JSON.stringify(knowledge)); queueCloudSave(); };
 const saveTodos = () => { localStorage.setItem('knowledge-todos', JSON.stringify(todos)); queueCloudSave(); };
+const saveMemories = () => { localStorage.setItem('knowledge-memories', JSON.stringify(memories)); queueCloudSave(); };
 const categoryMap = {
   '시방서 문의': '연락처', '공사 일정': '연락처', '하자 보수': '연락처', '스토어': '연락처',
   '폐기물 신청': '연락처', '폐기물 비용': '연락처', '하자 접수': '연락처', '미팅 일정': '연락처', '아파트 문의': '연락처',
@@ -96,7 +98,7 @@ function renderLibrary() {
     ? accountMeta.filter(item => !query || normalize(`${item.service} ${item.user} ${item.url || ''}`).includes(query)) : [];
   const partnerItems = (pageCategory === '전체' || pageCategory === '협력업체')
     ? partners.filter(item => !query || normalize(`${item.name} ${item.phone} ${item.email}`).includes(query)) : [];
-  $('#pageCount').textContent = `${knowledge.length + accountMeta.length + partners.length}개`;
+  $('#pageCount').textContent = `${knowledge.length + memories.length + accountMeta.length + partners.length}개`;
   $('#pageCategories').innerHTML = categoryRules.filter(name => name !== '기타' || categoryItems('기타').length).map(name => `<button class="${name === pageCategory ? 'active' : ''}" data-category="${name}">${name}</button>`).join('');
   $('#pageGrid').innerHTML = partnerItems.map((item, index) => `
     <article class="page-card partner-card" data-partner-index="${partners.indexOf(item)}">
@@ -146,15 +148,29 @@ function renderTodos() {
   const today = todos.filter(todo => todo.date === todayKey());
   const remain = today.filter(todo => !todo.done).length;
   $('#todayPanel').innerHTML = `
-    <div class="today-head"><div><i></i><b>오늘 할 일</b></div><span>${remain}개 남음</span></div>
+    <div class="today-head"><div><i></i><b>할 일</b></div><span>${remain}개 남음</span></div>
     <div class="todo-list">${today.length ? today.map(todo => `
       <label class="todo-item ${todo.done ? 'done' : ''}" data-todo-id="${todo.id}">
         <input type="checkbox" ${todo.done ? 'checked' : ''}><span>${escapeHtml(todo.text)}</span><button type="button">×</button>
-      </label>`).join('') : '<div class="todo-empty">지식창에 “오늘 할 일”을 입력해보세요.</div>'}</div>`;
+      </label>`).join('') : '<div class="todo-empty">지식창에 “할일 내용”을 입력해보세요.</div>'}</div>`;
   $('#todayPanel').querySelectorAll('[data-todo-id]').forEach(row => {
     const todo = todos.find(x => x.id === row.dataset.todoId);
     row.querySelector('input').onchange = e => { todo.done = e.target.checked; saveTodos(); renderTodos(); };
     row.querySelector('button').onclick = () => { todos = todos.filter(x => x.id !== todo.id); saveTodos(); renderTodos(); };
+  });
+}
+
+function renderMemories() {
+  $('#memoryPanel').innerHTML = `
+    <div class="today-head"><div><i></i><b>기억 저장소</b></div><span>${memories.length}개 기록</span></div>
+    <div class="memory-list">${memories.length ? memories.map(memory => `
+      <article class="memory-item" data-memory-id="${memory.id}"><div><p>${escapeHtml(memory.text)}</p><time>${escapeHtml(memory.createdAt || '')}</time></div><button type="button" title="삭제">×</button></article>
+    `).join('') : '<div class="todo-empty">지식창에 “기억 내용”을 입력하면 여기에 따로 모여요.</div>'}</div>`;
+  $('#memoryPanel').querySelectorAll('[data-memory-id]').forEach(row => {
+    row.querySelector('button').onclick = () => {
+      memories = memories.filter(memory => memory.id !== row.dataset.memoryId);
+      saveMemories(); renderMemories(); renderLibrary();
+    };
   });
 }
 
@@ -167,6 +183,7 @@ function escapeHtml(text) {
 }
 renderLibrary();
 renderTodos();
+renderMemories();
 $('#pageSearch').addEventListener('input', renderLibrary);
 $('#pageAdd').addEventListener('click', openNewEditor);
 
@@ -412,11 +429,22 @@ $('#composer').addEventListener('submit', (e) => {
   if (!text) return;
   addBubble(text, 'mine');
   input.value = '';
-  const todayMatch = text.match(/^오늘[\s.,:·-]*(.+)$/);
-  if (todayMatch?.[1]?.trim()) {
-    const todo = { id: crypto.randomUUID(), text: todayMatch[1].trim(), date: todayKey(), done: false };
+  const todoMatch = text.match(/^할일[\s.,:·-]*(.+)$/);
+  if (todoMatch?.[1]?.trim()) {
+    const todo = { id: crypto.randomUUID(), text: todoMatch[1].trim(), date: todayKey(), done: false };
     todos.unshift(todo); saveTodos(); renderTodos();
-    addBubble(`✓ 오늘 할 일\n${todo.text}`, 'answer');
+    addBubble(`✓ 할 일\n${todo.text}`, 'answer');
+    return;
+  }
+  const memoryMatch = text.match(/^기억[\s.,:·-]*(.+)$/);
+  if (memoryMatch?.[1]?.trim()) {
+    const now = new Date();
+    const memory = {
+      id: crypto.randomUUID(), text: memoryMatch[1].trim(),
+      createdAt: `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`
+    };
+    memories.unshift(memory); saveMemories(); renderMemories(); renderLibrary();
+    addBubble(`✓ 기억 저장\n${memory.text}`, 'answer');
     return;
   }
   const partnerMatches = findPartners(text);
@@ -516,6 +544,7 @@ async function saveCloudState() {
     await window.HANSOL_FIRESTORE.doc('shared/state').set({
       knowledge,
       todos,
+      memories,
       accountMeta,
       vaultSecrets,
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -530,10 +559,12 @@ async function applyCloudState(state) {
   cloudApplying = true;
   knowledge = Array.isArray(state.knowledge) ? state.knowledge : knowledge;
   todos = Array.isArray(state.todos) ? state.todos : todos;
+  memories = Array.isArray(state.memories) ? state.memories : memories;
   accountMeta = Array.isArray(state.accountMeta) ? state.accountMeta : accountMeta;
   vaultSecrets = state.vaultSecrets && typeof state.vaultSecrets === 'object' ? state.vaultSecrets : {};
   localStorage.setItem('knowledge-messenger-data', JSON.stringify(knowledge));
   localStorage.setItem('knowledge-todos', JSON.stringify(todos));
+  localStorage.setItem('knowledge-memories', JSON.stringify(memories));
   localStorage.setItem('knowledge-account-meta', JSON.stringify(accountMeta));
   try {
     vaultKey = vaultKey || await getDeviceKey();
@@ -541,6 +572,7 @@ async function applyCloudState(state) {
   } catch (error) { console.error('로컬 계정 보관 실패', error); }
   renderLibrary();
   renderTodos();
+  renderMemories();
   cloudApplying = false;
 }
 
@@ -552,7 +584,7 @@ async function startCloudSync() {
     if (first.exists) await applyCloudState(first.data());
     else {
       await unlockDeviceVault();
-      await stateDoc.set({ knowledge, todos, accountMeta, vaultSecrets, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+      await stateDoc.set({ knowledge, todos, memories, accountMeta, vaultSecrets, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
     }
     cloudReady = true;
     stateDoc.onSnapshot(snapshot => {
