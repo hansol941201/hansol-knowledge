@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>지식창</title>
+  <link rel="stylesheet" href="styles.css?v=4" />
+</head>
+<body>
+  <section class="knowledge-page">
+    <header class="page-header">
+      <div class="page-brand"><i></i><div><strong>한솔 지식</strong><span>업무 지식 보관함</span></div></div>
+      <div class="page-tools">
+        <label class="page-search">⌕<input id="pageSearch" placeholder="전체 지식 검색" /></label>
+        <button id="accountAdd" class="account-add">🔒 계정 추가</button>
+        <button id="pageAdd">＋ 지식 추가</button>
+      </div>
+    </header>
+    <div class="page-content">
+      <div class="page-title"><div><h1>내 지식</h1><p>기록한 업무 지식을 한눈에 확인하세요.</p></div><b id="pageCount">0</b></div>
+      <section id="todayPanel" class="today-panel"></section>
+      <nav id="pageCategories" class="page-categories"></nav>
+      <div id="pageGrid" class="page-grid"></div>
+      <div id="pageEmpty" class="page-empty hidden">검색 결과 없음</div>
+    </div>
+  </section>
+
+  <button id="orb" class="orb" aria-label="지식창 열기"><span></span></button>
+
+  <main id="app" class="messenger hidden" aria-label="개인 지식 메신저">
+    <header class="header">
+      <div class="brand"><i></i><strong>지식창</strong></div>
+      <div class="header-actions">
+        <button id="importBtn" title="지식 파일 가져오기">＋</button>
+        <button id="collapseBtn" title="접기">−</button>
+      </div>
+    </header>
+
+    <section id="messages" class="messages" aria-live="polite">
+      <div id="chatEmpty" class="chat-empty"><i></i><b>무엇을 찾을까요?</b><span>질문하거나 새 지식을 보내세요</span></div>
+    </section>
+
+    <form id="composer" class="composer">
+      <input id="input" autocomplete="off" placeholder="지식 입력 또는 검색" />
+      <button type="submit" aria-label="보내기">➤</button>
+    </form>
+    <input id="fileInput" type="file" accept=".json" hidden />
+  </main>
+
+  <div id="toast" class="toast"></div>
+  <div id="editModal" class="modal hidden" role="dialog" aria-modal="true" aria-label="지식 수정">
+    <form id="editForm" class="edit-box">
+      <header><strong id="editHeading">지식 수정</strong><button id="editClose" type="button">×</button></header>
+      <label>제목<input id="editTitle" required /></label>
+      <label>답변<textarea id="editAnswer" rows="6" required></textarea></label>
+      <label>분류<select id="editCategory"><option>연락처</option><option>공법·자재</option><option>시공·계약</option><option>문구·절차</option><option>기타</option></select></label>
+      <label>검색어<span class="edit-help">쉼표로 구분</span><input id="editAliases" /></label>
+      <footer><button id="editCancel" type="button">취소</button><button id="editSubmit" type="submit">저장</button></footer>
+    </form>
+  </div>
+  <div id="vaultModal" class="modal hidden" role="dialog" aria-modal="true" aria-label="계정 보관함">
+    <form id="vaultForm" class="edit-box vault-box">
+      <header><strong>새 계정 추가</strong><button id="vaultClose" type="button">×</button></header>
+      <label>사이트명<input id="accountService" required /></label>
+      <label>아이디<input id="accountId" autocomplete="off" required /></label>
+      <label>비밀번호<input id="accountPassword" type="password" autocomplete="new-password" required /></label>
+      <footer><button id="vaultCancel" type="button">취소</button><button type="submit">암호화 저장</button></footer>
+    </form>
+  </div>
+  <script src="partners.js?v=1"></script>
+  <script src="app.js?v=18"></script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+{
+  "name": "hansol-knowledge-messenger",
+  "version": "1.0.0",
+  "private": true,
+  "description": "초소형 개인 지식 메신저",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --win portable"
+  },
+  "devDependencies": {
+    "electron": "latest",
+    "electron-builder": "latest"
+  },
+  "build": {
+    "appId": "kr.hansol.knowledge",
+    "productName": "한솔 지식창",
+    "files": ["index.html", "styles.css", "app.js", "main.js", "preload.js"],
+    "win": { "target": "portable" }
+  }
+}
