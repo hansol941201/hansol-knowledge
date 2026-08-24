@@ -324,6 +324,11 @@ function collapseApp() {
 }
 orb.addEventListener('click', openApp);
 $('#collapseBtn').addEventListener('click', collapseApp);
+$('#siteShortcut').addEventListener('click', () => {
+  const siteUrl = 'https://hansol941201.github.io/hansol-knowledge/';
+  if (window.knowledgeAPI?.openSite) window.knowledgeAPI.openSite();
+  else window.open(siteUrl, '_blank', 'noopener,noreferrer');
+});
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') collapseApp(); });
 
 function addBubble(text, type = 'answer', item = null) {

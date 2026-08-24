@@ -10,12 +10,24 @@
   },
   "devDependencies": {
     "electron": "latest",
-    "electron-builder": "latest"
+    "electron-builder": "latest",
+    "firebase-tools": "^15.28.1"
   },
   "build": {
     "appId": "kr.hansol.knowledge",
     "productName": "한솔 지식창",
-    "files": ["index.html", "styles.css", "app.js", "main.js", "preload.js"],
-    "win": { "target": "portable" }
+    "compression": "store",
+    "files": [
+      "index.html",
+      "styles.css",
+      "app.js",
+      "partners.js",
+      "netform-logo.png",
+      "main.js",
+      "preload.js"
+    ],
+    "win": {
+      "target": "portable"
+    }
   }
 }

@@ -89,10 +89,11 @@ button { border: 0; cursor: pointer; }
   border-bottom: 1px solid #eeeaf1; -webkit-app-region: drag;
 }
 .brand { display: flex; align-items: center; gap: 8px; padding: 0; color: #242129; background: transparent; font-size: 13px; -webkit-app-region: no-drag; }
-.brand i { width: 8px; height: 8px; border-radius: 50%; background: #9b72f2; box-shadow: 0 0 0 3px #eee7fd; }
+.brand img { display: block; width: 94px; height: 24px; object-fit: contain; object-position: left center; }
 .header-actions { display: flex; gap: 2px; -webkit-app-region: no-drag; }
 .header-actions button { width: 28px; height: 28px; color: #77717d; background: transparent; border-radius: 8px; font-size: 17px; }
 .header-actions button:hover { background: #f1eef3; color: #29262e; }
+.header-actions .site-shortcut { font-size: 15px; font-weight: 700; }
 .quick-add { position: absolute; inset: 48px 8px auto; z-index: 5; padding: 13px; border: 1px solid #e0d9e5; border-radius: 13px; background: #fff; box-shadow: 0 14px 40px rgba(40,32,47,.18); }
 .quick-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
 .quick-title strong { font-size: 12px; }

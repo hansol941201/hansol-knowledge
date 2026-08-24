@@ -1,4 +1,4 @@
-const { app, BrowserWindow, globalShortcut, screen, ipcMain } = require('electron');
+const { app, BrowserWindow, globalShortcut, screen, ipcMain, shell } = require('electron');
 const path = require('path');
 
 let win;
@@ -27,6 +27,7 @@ app.whenReady().then(() => {
   createWindow();
   globalShortcut.register('Control+Alt+K', () => win.webContents.send('toggle-knowledge-window'));
   ipcMain.on('set-expanded', (_event, expanded) => setExpanded(Boolean(expanded)));
+  ipcMain.on('open-site', () => shell.openExternal('https://hansol941201.github.io/hansol-knowledge/'));
 });
 app.on('will-quit', () => globalShortcut.unregisterAll());
 app.on('window-all-closed', (e) => e.preventDefault());
