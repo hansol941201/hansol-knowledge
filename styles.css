@@ -27,6 +27,8 @@ button { border: 0; cursor: pointer; }
 .page-search input { min-width: 0; flex: 1; border: 0; outline: 0; background: transparent; font-size: 12px; }
 .page-tools > button { height: 38px; padding: 0 14px; border-radius: 11px; color: #fff; background: #8f66df; font-size: 11px; }
 .page-tools > button.account-add { color: #675b70; background: #eeeaf0; }
+.page-tools > button.memory-toggle { color: #675b70; background: #eeeaf0; }
+.page-tools > button.memory-toggle.active { color: #fff; background: #302b34; }
 .page-content { width: min(1100px, 90vw); margin: 0 auto; padding: 42px 0 100px; }
 .page-title { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 25px; }
 .page-title h1 { margin: 0 0 7px; font-size: 27px; letter-spacing: -.8px; }

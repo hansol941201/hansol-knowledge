@@ -12,6 +12,7 @@
       <div class="page-brand"><i></i><div><strong>한솔 지식</strong><span>업무 지식 보관함</span></div></div>
       <div class="page-tools">
         <label class="page-search">⌕<input id="pageSearch" placeholder="전체 지식 검색" /></label>
+        <button id="memoryToggle" class="memory-toggle">📝 기억 저장소</button>
         <button id="accountAdd" class="account-add">🔒 계정 추가</button>
         <button id="pageAdd">＋ 지식 추가</button>
       </div>
@@ -19,7 +20,7 @@
     <div class="page-content">
       <div class="page-title"><div><h1>내 지식</h1><p>기록한 업무 지식을 한눈에 확인하세요.</p></div><b id="pageCount">0</b></div>
       <section id="todayPanel" class="today-panel"></section>
-      <section id="memoryPanel" class="memory-panel"></section>
+      <section id="memoryPanel" class="memory-panel hidden"></section>
       <nav id="pageCategories" class="page-categories"></nav>
       <div id="pageGrid" class="page-grid"></div>
       <div id="pageEmpty" class="page-empty hidden">검색 결과 없음</div>
@@ -90,6 +91,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="firebase-config.js?v=1"></script>
-  <script src="app.js?v=26"></script>
+  <script src="app.js?v=27"></script>
 </body>
 </html>

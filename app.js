@@ -184,6 +184,12 @@ function escapeHtml(text) {
 renderLibrary();
 renderTodos();
 renderMemories();
+$('#memoryToggle').addEventListener('click', () => {
+  const panel = $('#memoryPanel');
+  panel.classList.toggle('hidden');
+  $('#memoryToggle').classList.toggle('active', !panel.classList.contains('hidden'));
+  if (!panel.classList.contains('hidden')) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
 $('#pageSearch').addEventListener('input', renderLibrary);
 $('#pageAdd').addEventListener('click', openNewEditor);
 
