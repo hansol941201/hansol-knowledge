@@ -72,9 +72,12 @@ const categoryMap = {
   '소비자 자재 구매': '문구·절차', '소규모 셀프시공': '문구·절차', '특허번호 차이': '문구·절차'
 };
 for (const item of knowledge) item.category = item.category || categoryMap[item.title] || '기타';
+for (const item of knowledge) {
+  if (['공법·자재', '시공·계약', '문구·절차'].includes(item.category)) item.category = '업무지식';
+}
 save();
 
-const categoryRules = ['전체', '협력업체', '계정', '연락처', '공법·자재', '시공·계약', '문구·절차', '기타'];
+const categoryRules = ['전체', '협력업체', '계정', '연락처', '업무지식', '기타'];
 let pageCategory = '전체';
 
 function categoryItems(name) {
