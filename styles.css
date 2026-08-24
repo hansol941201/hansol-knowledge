@@ -89,6 +89,15 @@ button { border: 0; cursor: pointer; }
 .header-actions { display: flex; gap: 2px; -webkit-app-region: no-drag; }
 .header-actions button { width: 28px; height: 28px; color: #77717d; background: transparent; border-radius: 8px; font-size: 17px; }
 .header-actions button:hover { background: #f1eef3; color: #29262e; }
+.quick-add { position: absolute; inset: 48px 8px auto; z-index: 5; padding: 13px; border: 1px solid #e0d9e5; border-radius: 13px; background: #fff; box-shadow: 0 14px 40px rgba(40,32,47,.18); }
+.quick-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.quick-title strong { font-size: 12px; }
+.quick-title button { width: 24px; height: 24px; border-radius: 7px; color: #918995; background: #f1eef3; }
+.quick-add > input, .quick-add textarea, .quick-add select { width: 100%; margin: 4px 0; padding: 9px 10px; border: 1px solid #ded8e1; border-radius: 9px; outline: 0; background: #fff; font-size: 11px; resize: none; }
+.quick-add > input:focus, .quick-add textarea:focus, .quick-add select:focus { border-color: #aa8be5; }
+.quick-add > div:last-child { display: flex; align-items: center; gap: 7px; }
+.quick-add > div:last-child select { flex: 1; }
+.quick-add > div:last-child button { height: 34px; padding: 0 14px; border-radius: 9px; color: #fff; background: #8f66df; font-size: 10px; }
 
 .messages { padding: 15px 12px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #d8d1dd transparent; }
 .chat-empty { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; color: #aaa3ad; text-align: center; }

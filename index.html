@@ -31,10 +31,17 @@
     <header class="header">
       <div class="brand"><i></i><strong>지식창</strong></div>
       <div class="header-actions">
-        <button id="importBtn" title="지식 파일 가져오기">＋</button>
+        <button id="importBtn" title="빠른 지식 추가">＋</button>
         <button id="collapseBtn" title="접기">−</button>
       </div>
     </header>
+
+    <form id="quickAdd" class="quick-add hidden">
+      <div class="quick-title"><strong>빠른 지식 추가</strong><button id="quickClose" type="button">×</button></div>
+      <input id="quickTitle" placeholder="제목  예) 시방서 문의" required />
+      <textarea id="quickAnswer" placeholder="답변" rows="4" required></textarea>
+      <div><select id="quickCategory"><option>연락처</option><option>공법·자재</option><option>시공·계약</option><option>문구·절차</option><option>기타</option></select><button type="submit">저장</button></div>
+    </form>
 
     <section id="messages" class="messages" aria-live="polite">
       <div id="chatEmpty" class="chat-empty"><i></i><b>무엇을 찾을까요?</b><span>질문하거나 새 지식을 보내세요</span></div>
@@ -68,6 +75,6 @@
     </form>
   </div>
   <script src="partners.js?v=1"></script>
-  <script src="app.js?v=18"></script>
+  <script src="app.js?v=19"></script>
 </body>
 </html>
