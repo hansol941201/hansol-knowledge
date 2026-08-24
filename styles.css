@@ -102,8 +102,8 @@ button { border: 0; cursor: pointer; }
   display: flex; align-items: center; justify-content: space-between; padding: 0 13px 0 15px;
   border-bottom: 1px solid #eeeaf1; -webkit-app-region: drag;
 }
-.brand { display: flex; align-items: center; gap: 8px; padding: 0; color: #242129; background: transparent; font-size: 13px; -webkit-app-region: no-drag; }
-.brand img { display: block; width: 94px; height: 24px; object-fit: contain; object-position: left center; }
+.brand { display: flex; align-items: center; gap: 8px; padding: 0; color: #242129; background: transparent; font-size: 13px; -webkit-app-region: drag; user-select: none; }
+.brand img { display: block; width: 94px; height: 24px; object-fit: contain; object-position: left center; pointer-events: none; }
 .header-actions { display: flex; gap: 2px; -webkit-app-region: no-drag; }
 .header-actions button { width: 28px; height: 28px; color: #77717d; background: transparent; border-radius: 8px; font-size: 17px; }
 .header-actions button:hover { background: #f1eef3; color: #29262e; }

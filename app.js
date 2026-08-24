@@ -84,6 +84,7 @@ save();
 
 const categoryRules = ['전체', '협력업체', '계정', '연락처', '업무지식', '기타'];
 let pageCategory = '전체';
+let pageSearchCommitted = '';
 
 function categoryItems(name) {
   if (name === '전체') return knowledge;
@@ -92,12 +93,16 @@ function categoryItems(name) {
 }
 
 function renderLibrary() {
-  const query = normalize($('#pageSearch').value || '');
+  const query = normalize(pageSearchCommitted);
   const items = categoryItems(pageCategory).filter(item => !query || normalize([item.title, item.answer, ...(item.aliases || [])].join(' ')).includes(query));
   const accounts = (pageCategory === '전체' || pageCategory === '계정')
     ? accountMeta.filter(item => !query || normalize(`${item.service} ${item.user} ${item.url || ''}`).includes(query)) : [];
   const partnerItems = (pageCategory === '전체' || pageCategory === '협력업체')
     ? partners.filter(item => !query || normalize(`${item.name} ${item.phone} ${item.email}`).includes(query)) : [];
+  const memoryItems = query && pageCategory === '전체'
+    ? memories.filter(memory => normalize(`${memory.text} ${memory.createdAt || ''}`).includes(query)) : [];
+  const todoItems = query && pageCategory === '전체'
+    ? todos.filter(todo => normalize(`${todo.text} ${todo.date || ''}`).includes(query)) : [];
   $('#pageCount').textContent = `${knowledge.length + memories.length + accountMeta.length + partners.length}개`;
   $('#pageCategories').innerHTML = categoryRules.filter(name => name !== '기타' || categoryItems('기타').length).map(name => `<button class="${name === pageCategory ? 'active' : ''}" data-category="${name}">${name}</button>`).join('');
   $('#pageGrid').innerHTML = partnerItems.map((item, index) => `
@@ -110,6 +115,15 @@ function renderLibrary() {
       <small>🔒 계정</small><h3>${escapeHtml(item.service)}</h3>
       <p>${escapeHtml(item.user)}\n<span class="secret-line">••••••••</span></p>
       <footer><button data-copy-id>아이디 복사</button><button data-copy-pw>비번 복사</button><button data-account-delete>삭제</button></footer>
+    </article>`).join('') + todoItems.map(todo => `
+    <article class="page-card">
+      <small>✓ 할 일</small><h3>${escapeHtml(todo.date || '날짜 확인')}</h3>
+      <p>${escapeHtml(todo.text)}</p>
+    </article>`).join('') + memoryItems.map(memory => `
+    <article class="page-card memory-result-card" data-memory-result="${memory.id}">
+      <small>📝 기억</small><h3>${escapeHtml(memory.createdAt || '저장 날짜 확인')}</h3>
+      <p>${escapeHtml(memory.text)}</p>
+      <footer><button data-memory-open>기억 저장소에서 보기</button></footer>
     </article>`).join('') + items.map(item => `
     <article class="page-card" data-id="${item.id}">
       <small>${escapeHtml(findCategory(item))}</small>
@@ -117,7 +131,7 @@ function renderLibrary() {
       <p>${escapeHtml(item.answer)}</p>
       <footer><button data-copy>복사</button><button data-edit>수정</button><button data-chat>지식창에서 보기</button><button data-delete>삭제</button></footer>
     </article>`).join('');
-  $('#pageEmpty').classList.toggle('hidden', items.length + accounts.length + partnerItems.length !== 0);
+  $('#pageEmpty').classList.toggle('hidden', items.length + accounts.length + partnerItems.length + memoryItems.length + todoItems.length !== 0);
   $('#pageCategories').querySelectorAll('[data-category]').forEach(button => button.onclick = () => { pageCategory = button.dataset.category; renderLibrary(); });
   $('#pageGrid').querySelectorAll('.page-card[data-id]').forEach(card => {
     const item = knowledge.find(x => x.id === card.dataset.id);
@@ -137,6 +151,14 @@ function renderLibrary() {
     card.querySelector('[data-copy-phone]').onclick = () => item.phone ? copyText(item.phone) : showToast('전화번호 확인');
     card.querySelector('[data-copy-email]').onclick = () => item.email ? copyText(item.email) : showToast('이메일 확인');
     card.querySelector('[data-partner-chat]').onclick = () => { openApp(); addPartnerBubble(item); };
+  });
+  $('#pageGrid').querySelectorAll('[data-memory-result]').forEach(card => {
+    card.querySelector('[data-memory-open]').onclick = () => {
+      $('#memorySearch').value = pageSearchCommitted;
+      $('#memoryModal').classList.remove('hidden');
+      $('#memoryToggle').classList.add('active');
+      renderMemories();
+    };
   });
 }
 
@@ -196,7 +218,13 @@ function closeMemoryLibrary() { $('#memoryModal').classList.add('hidden'); $('#m
 $('#memoryClose').addEventListener('click', closeMemoryLibrary);
 $('#memoryModal').addEventListener('click', event => { if (event.target.id === 'memoryModal') closeMemoryLibrary(); });
 $('#memorySearch').addEventListener('input', renderMemories);
-$('#pageSearch').addEventListener('input', renderLibrary);
+$('#pageSearch').addEventListener('keydown', event => {
+  if (event.key !== 'Enter') return;
+  event.preventDefault();
+  pageSearchCommitted = event.currentTarget.value.trim();
+  pageCategory = '전체';
+  renderLibrary();
+});
 $('#pageAdd').addEventListener('click', openNewEditor);
 
 let editingId = null;
