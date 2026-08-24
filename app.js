@@ -453,7 +453,22 @@ function showToast(text) {
   setTimeout(() => toast.classList.remove('show'), 900);
 }
 
-$('#importBtn').addEventListener('click', () => $('#fileInput').click());
+$('#importBtn').addEventListener('click', () => {
+  $('#quickAdd').classList.toggle('hidden');
+  if (!$('#quickAdd').classList.contains('hidden')) setTimeout(() => $('#quickTitle').focus(), 30);
+});
+$('#quickClose').addEventListener('click', () => $('#quickAdd').classList.add('hidden'));
+$('#quickAdd').addEventListener('submit', e => {
+  e.preventDefault();
+  const item = {
+    id: crypto.randomUUID(), title: $('#quickTitle').value.trim(), answer: $('#quickAnswer').value.trim(),
+    category: $('#quickCategory').value, aliases: []
+  };
+  knowledge.unshift(item); save(); renderLibrary();
+  $('#quickTitle').value = ''; $('#quickAnswer').value = '';
+  $('#quickAdd').classList.add('hidden');
+  addBubble(`✓ 저장\n${item.title}\n${item.answer}`, 'answer', item);
+});
 $('#fileInput').addEventListener('change', async (e) => {
   const file = e.target.files[0];
   if (!file) return;
