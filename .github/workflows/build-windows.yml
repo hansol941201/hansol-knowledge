@@ -1,0 +1,25 @@
+name: Build Windows app
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - run: npm run pack
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hansol-knowledge-windows
+          path: dist/*.exe
+          if-no-files-found: error
