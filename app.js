@@ -470,6 +470,17 @@ function addAccountBubble(item) {
   messages.scrollTop = messages.scrollHeight;
 }
 
+function createMemory(text) {
+  const now = new Date();
+  const memory = {
+    id: crypto.randomUUID(), text: text.trim(),
+    createdAt: `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`
+  };
+  memories.unshift(memory);
+  saveMemories(); renderMemories(); renderLibrary();
+  return memory;
+}
+
 $('#composer').addEventListener('submit', (e) => {
   e.preventDefault();
   const text = input.value.trim();
@@ -490,12 +501,7 @@ $('#composer').addEventListener('submit', (e) => {
   }
   const memoryMatch = text.match(/^기억[\s.,:·-]*(.+)$/);
   if (memoryMatch?.[1]?.trim()) {
-    const now = new Date();
-    const memory = {
-      id: crypto.randomUUID(), text: memoryMatch[1].trim(),
-      createdAt: `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`
-    };
-    memories.unshift(memory); saveMemories(); renderMemories(); renderLibrary();
+    const memory = createMemory(memoryMatch[1]);
     addBubble(`✓ 기억 저장\n${memory.text}`, 'answer');
     return;
   }
@@ -510,10 +516,15 @@ $('#composer').addEventListener('submit', (e) => {
     return;
   }
   const matches = findKnowledge(text);
-  if (matches.length) {
-    matches.forEach(item => addBubble(`${item.title}\n${item.answer}`, 'answer', item));
-  } else {
-    addBubble('검색 결과 없음\n지식 추가는 전체 사이트에서', 'answer');
+  const normalizedQuery = normalize(text);
+  const todoMatches = todos.filter(todo => normalize(`${todo.text} ${todo.date || ''}`).includes(normalizedQuery));
+  const memoryMatches = memories.filter(memory => normalize(`${memory.text} ${memory.createdAt || ''}`).includes(normalizedQuery));
+  matches.forEach(item => addBubble(`${item.title}\n${item.answer}`, 'answer', item));
+  todoMatches.forEach(todo => addBubble(`✓ 할 일\n${todo.text}\n${todo.date || '날짜 확인'}`, 'answer'));
+  memoryMatches.forEach(memory => addBubble(`기억\n${memory.text}\n${memory.createdAt || '날짜 확인'}`, 'answer'));
+  if (!matches.length && !todoMatches.length && !memoryMatches.length) {
+    const memory = createMemory(text);
+    addBubble(`✓ 기억 저장\n${memory.text}`, 'answer');
   }
 });
 
