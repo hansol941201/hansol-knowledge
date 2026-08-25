@@ -87,6 +87,12 @@ function mergeById(mine, theirs) {
 function sortByRecent(list) {
   return list.sort((a, b) => Number(b.updatedAt || 0) - Number(a.updatedAt || 0));
 }
+// 구버전 클라이언트는 문서를 통째로 덮어써서 서버에 있던 다른 기기 자료를 지운다.
+// 내가 갖고 있는데 서버에는 없는 항목이 있으면 그 자리에서 다시 올려 복구한다.
+function hasLocalOnlyItems(mine, theirs) {
+  const remoteIds = new Set((Array.isArray(theirs) ? theirs : []).map(item => item && item.id));
+  return (Array.isArray(mine) ? mine : []).some(item => item && item.id && !remoteIds.has(item.id));
+}
 const knownTitles = new Set(knowledge.map(item => item.title));
 const knownIds = new Set(knowledge.map(item => item.id));
 for (const item of seed) {
@@ -802,6 +808,10 @@ async function flushCloudSave() {
 async function applyCloudState(state) {
   if (!state) return;
   cloudApplying = true;
+  const missingOnServer = hasLocalOnlyItems(knowledge, state.knowledge)
+    || hasLocalOnlyItems(todos, state.todos)
+    || hasLocalOnlyItems(memories, state.memories)
+    || hasLocalOnlyItems(accountMeta, state.accountMeta);
   knowledge = mergeById(knowledge, state.knowledge);
   todos = mergeById(todos, state.todos);
   memories = mergeById(memories, state.memories);
@@ -818,6 +828,7 @@ async function applyCloudState(state) {
   renderTodos();
   renderMemories();
   cloudApplying = false;
+  if (missingOnServer) queueCloudSave();
 }
 
 async function startCloudSync() {

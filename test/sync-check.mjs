@@ -235,6 +235,35 @@ check('기억 저장소: 모바일에서 가로 95%', mobile >= 0.92 && mobile <
 await site.setViewportSize({ width: 1280, height: 900 });
 await site.click('#memoryClose');
 
+// 구버전 클라이언트(옛 Windows 앱 / 캐시된 옛 탭)와 섞여 있을 때
+const oldClientWrite = (page, todoList) => page.evaluate(async (list) => {
+  await window.HANSOL_FIRESTORE.doc('shared/state').set({
+    knowledge: [], todos: list, memories: [], accountMeta: [], vaultSecrets: {},
+    updatedAt: { __serverTimestamp: true }
+  });
+}, todoList);
+
+// 구버전 앱은 항목별 updatedAt 없이, 문서를 통째로 덮어쓴다.
+await oldClientWrite(site, [{ id: 'old-client-todo', text: '구버전앱 할일', date: '2026-08-25', done: false }]);
+await site.waitForTimeout(2000);
+check('구버전 앱이 올린 할 일이 새 사이트에 표시', (await site.textContent('#todayPanel')).includes('구버전앱 할일'));
+
+const survived = await site.evaluate(async () => {
+  const cloud = (await window.HANSOL_FIRESTORE.doc('shared/state').get()).data() || {};
+  return {
+    cloudTodos: (cloud.todos || []).map(t => t.text),
+    cloudMemories: (cloud.memories || []).map(m => m.text)
+  };
+});
+check('구버전 앱 덮어쓰기로 지워진 할 일을 서버에 자동 복구', survived.cloudTodos.includes(TODO_TEXT), survived.cloudTodos.join(', '));
+check('구버전 앱 덮어쓰기로 지워진 기억을 서버에 자동 복구', survived.cloudMemories.includes(MEMO_TEXT), survived.cloudMemories.join(', '));
+
+// 복구 로직이 무한 쓰기 루프를 만들지 않는지
+const before = await site.evaluate(() => window.__FAKE_WRITES);
+await site.waitForTimeout(3000);
+const after = await site.evaluate(() => window.__FAKE_WRITES);
+check('복구가 무한 쓰기 루프로 번지지 않음', after - before <= 1, `3초 동안 쓰기 ${after - before}회`);
+
 // 브라우저를 닫았다 열어도 유지되는지
 await popup.close();
 const reopened = await open('');
