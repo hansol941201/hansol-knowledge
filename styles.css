@@ -96,7 +96,7 @@ button { border: 0; cursor: pointer; }
   box-shadow: 0 22px 65px rgba(30, 25, 38, .2);
   transform-origin: right bottom; transition: opacity .18s ease, transform .18s ease;
 }
-.messenger.hidden { opacity: 0; transform: scale(.86) translate(6px, 6px); pointer-events: none; }
+.messenger.hidden:not(.orb) { opacity: 0; transform: scale(.86) translate(6px, 6px); pointer-events: none; }
 
 .header {
   display: flex; align-items: center; justify-content: space-between; padding: 0 13px 0 15px;
