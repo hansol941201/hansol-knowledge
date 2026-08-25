@@ -688,10 +688,12 @@ async function commitEntry(item, kind) {
   const bubble = addBubble(`${label} 저장 중…\n${detail}`, 'answer');
   const result = await saveCloudState({ verifyIds: [item.id] });   // 4~5. Firebase 저장 + 확인
 
+  const needsLogin = !result.verified && !cloudReady && Boolean(window.HANSOL_AUTH) && !window.HANSOL_AUTH.currentUser;
   bubble.textContent = result.verified
     ? `✓ ${label} 저장 및 연동 완료\n${detail}`
-    : `로컬 저장 완료·클라우드 연동 대기 중\n${detail}`;
+    : `로컬 저장 완료·클라우드 연동 대기 중\n${needsLogin ? '동기화 PIN 로그인이 필요합니다\n' : ''}${detail}`;
   showToast(result.verified ? `✓ ${label} 저장 및 연동 완료` : '로컬 저장 완료·클라우드 연동 대기 중');
+  if (needsLogin && $('#syncModal').classList.contains('hidden')) { syncPromptDismissed = false; openSyncModal(); }
   messages.scrollTop = messages.scrollHeight;
   return result.verified;
 }
@@ -834,18 +836,25 @@ if (window.knowledgeAPI) {
   window.knowledgeAPI.onToggle(() => app.classList.contains('hidden') ? openApp() : collapseApp());
 }
 
+// 라벨은 함수 안에 둔다. setCloudStatus 는 모듈 초기화 중에도 불리므로
+// 바깥 const 를 참조하면 초기화 전 접근(TDZ)으로 터진다.
 function setCloudStatus(status) {
-  cloudStatus = status;
-  const badge = $('#syncState');
-  if (!badge) return;
   const labels = {
     live: '실시간 연동 중',
     syncing: '연동 중…',
     pending: '오프라인 보관 · 재연결 시 자동 업로드',
     offline: '오프라인 저장 모드'
   };
-  badge.textContent = labels[status] || labels.offline;
-  badge.dataset.state = status;
+  cloudStatus = status;
+  const label = labels[status] || labels.offline;
+  const badge = $('#syncState');
+  if (badge) { badge.textContent = label; badge.dataset.state = status; }
+  // 팝업(오버레이)에서는 사이트 헤더가 안 보이므로 작은 점으로 같은 상태를 보여 준다.
+  const dot = $('#syncDot');
+  if (dot) {
+    dot.dataset.state = status;
+    dot.title = status === 'live' ? label : `${label} · 눌러서 동기화 로그인`;
+  }
 }
 
 function markPending() {
@@ -1019,6 +1028,11 @@ function closeSyncModal() {
 $('#syncClose').addEventListener('click', closeSyncModal);
 $('#syncLater').addEventListener('click', closeSyncModal);
 $('#syncModal').addEventListener('click', event => { if (event.target.id === 'syncModal') closeSyncModal(); });
+$('#syncDot').addEventListener('click', () => {
+  if (cloudReady) return showToast('실시간 연동 중');
+  if (!window.HANSOL_AUTH) return showToast('오프라인 저장 모드');
+  openSyncModal();
+});
 $('#syncState').addEventListener('click', () => {
   if (cloudReady || !window.HANSOL_AUTH) return showToast(cloudReady ? '이미 연동 중' : '오프라인 저장 모드');
   openSyncModal();

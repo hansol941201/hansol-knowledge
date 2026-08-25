@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>지식창</title>
-  <link rel="stylesheet" href="styles.css?v=10" />
+  <link rel="stylesheet" href="styles.css?v=11" />
 </head>
 <body>
   <section class="knowledge-page">
@@ -33,6 +33,7 @@
     <header class="header">
       <div class="brand"><img src="netform-logo.png" alt="NETFORM" /></div>
       <div class="header-actions">
+        <button id="syncDot" class="sync-dot" type="button" data-state="offline" title="동기화 상태" aria-label="동기화 상태">●</button>
         <button id="siteShortcut" class="site-shortcut" title="전체 지식 사이트 열기" aria-label="전체 지식 사이트 열기">↗</button>
         <button id="importBtn" title="빠른 지식 추가">＋</button>
         <button id="collapseBtn" title="접기">−</button>
@@ -98,6 +99,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="firebase-config.js?v=2"></script>
-  <script src="app.js?v=34"></script>
+  <script src="app.js?v=35"></script>
 </body>
 </html>
