@@ -11,7 +11,7 @@ function createWindow() {
     resizable: false, show: true,
     webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false }
   });
-  win.loadFile('index.html', { query: { overlay: '1' } });
+  win.setAlwaysOnTop(true, 'screen-saver');  win.loadFile('index.html', { query: { overlay: '1' } });
 }
 
 function setExpanded(expanded) {
@@ -20,7 +20,7 @@ function setExpanded(expanded) {
   const width = expanded ? 360 : 56;
   const height = expanded ? 460 : 56;
   win.setBounds({ x: area.x + area.width - width - 14, y: area.y + area.height - height - 14, width, height }, true);
-  win.setAlwaysOnTop(true, 'floating');
+  win.setAlwaysOnTop(true, 'screen-saver');
 }
 
 app.whenReady().then(() => {
