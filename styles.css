@@ -8,6 +8,11 @@
 html, body { width: 100%; min-height: 100%; margin: 0; background: #f7f6f8; }
 body { overflow-x: hidden; }
 .overlay-mode { min-height: 100%; overflow: hidden; background: transparent; }
+/* 팝업 창은 아주 작아서 스크롤바가 뜨면 점 옆에 회색 막대로 보인다. 아예 없앤다. */
+html:has(> .overlay-mode) { overflow: hidden; }
+.overlay-mode, .overlay-mode * { scrollbar-width: none; }
+.overlay-mode::-webkit-scrollbar, .overlay-mode *::-webkit-scrollbar { width: 0; height: 0; display: none; }
+.overlay-mode .memory-panel, .overlay-mode .messages { scrollbar-width: thin; }
 .overlay-mode .knowledge-page { display: none; }
 .overlay-mode .orb { right: 17px; bottom: 17px; }
 .overlay-mode .messenger { right: 0; bottom: 0; }

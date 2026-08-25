@@ -1,4 +1,4 @@
-const { app, BrowserWindow, globalShortcut, screen, ipcMain, shell } = require('electron');
+const { app, BrowserWindow, Menu, Tray, globalShortcut, nativeImage, screen, ipcMain, shell } = require('electron');
 const path = require('path');
 
 const SITE_URL = 'https://hansol941201.github.io/hansol-knowledge/';
@@ -7,6 +7,15 @@ const SITE_URL = 'https://hansol941201.github.io/hansol-knowledge/';
 // 인터넷이 안 되면 실행 파일에 들어 있는 사본으로 내려간다.
 let usingBundledCopy = false;
 let win;
+let tray = null;
+let quitting = false;
+
+// 실행 파일을 여러 번 열어도 점(orb)이 겹쳐 뜨지 않도록 한 개만 돌게 한다.
+if (!app.requestSingleInstanceLock()) {
+  app.quit();
+} else {
+  app.on('second-instance', () => showKnowledgeWindow());
+}
 
 function loadKnowledgeWindow() {
   usingBundledCopy = false;
@@ -28,7 +37,37 @@ function createWindow() {
   });
   win.setAlwaysOnTop(true, 'screen-saver');
   win.webContents.on('did-fail-load', (_event, _code, _desc, _url, isMainFrame) => { if (isMainFrame) loadBundledCopy(); });
+  // 창을 닫아도 앱이 꺼지지 않고 점(orb)으로 접힌다. 트레이 메뉴의 "종료" 로만 완전히 끝난다.
+  win.on('close', (event) => {
+    if (quitting) return;
+    event.preventDefault();
+    win.webContents.send('collapse-knowledge-window');
+    setExpanded(false);
+    win.show();
+  });
+  win.on('closed', () => { win = null; });
   loadKnowledgeWindow();
+}
+
+function showKnowledgeWindow() {
+  if (!win || win.isDestroyed()) { createWindow(); return; }
+  if (!win.isVisible()) win.show();
+  setExpanded(true);
+  win.webContents.send('open-knowledge-window');
+  win.focus();
+}
+
+function createTray() {
+  const icon = nativeImage.createFromPath(path.join(__dirname, 'netform-logo.png')).resize({ width: 16, height: 16 });
+  tray = new Tray(icon);
+  tray.setToolTip('한솔 지식창');
+  tray.setContextMenu(Menu.buildFromTemplate([
+    { label: '지식창 열기', click: showKnowledgeWindow },
+    { label: '전체 지식 사이트 열기', click: () => shell.openExternal(SITE_URL) },
+    { type: 'separator' },
+    { label: '종료', click: () => { quitting = true; app.quit(); } }
+  ]));
+  tray.on('click', showKnowledgeWindow);
 }
 
 function setExpanded(expanded) {
@@ -42,12 +81,17 @@ function setExpanded(expanded) {
 
 app.whenReady().then(() => {
   createWindow();
-  globalShortcut.register('Control+Alt+K', () => win.webContents.send('toggle-knowledge-window'));
+  createTray();
+  globalShortcut.register('Control+Alt+K', () => {
+    if (!win || win.isDestroyed()) return createWindow();   // 창이 사라졌으면 다시 만든다
+    win.webContents.send('toggle-knowledge-window');
+  });
   ipcMain.on('set-expanded', (_event, expanded) => {
     setExpanded(Boolean(expanded));
     if (expanded && usingBundledCopy) loadKnowledgeWindow();   // 연결이 돌아오면 최신 사이트로 복귀
   });
   ipcMain.on('open-site', () => shell.openExternal('https://hansol941201.github.io/hansol-knowledge/'));
 });
+app.on('before-quit', () => { quitting = true; });
 app.on('will-quit', () => globalShortcut.unregisterAll());
 app.on('window-all-closed', (e) => e.preventDefault());

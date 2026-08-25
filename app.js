@@ -834,6 +834,8 @@ $('#fileInput').addEventListener('change', async (e) => {
 
 if (window.knowledgeAPI) {
   window.knowledgeAPI.onToggle(() => app.classList.contains('hidden') ? openApp() : collapseApp());
+  window.knowledgeAPI.onOpen?.(() => openApp());
+  window.knowledgeAPI.onCollapse?.(() => collapseApp());
 }
 
 // 라벨은 함수 안에 둔다. setCloudStatus 는 모듈 초기화 중에도 불리므로
