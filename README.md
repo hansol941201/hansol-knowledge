@@ -15,7 +15,13 @@ HTML/CSS/JavaScript로 만든 개인 지식 메신저입니다. Firebase Firesto
 3. `npm start`
 
 Windows 단독 실행 파일은 `npm run pack`으로 생성합니다.
-GitHub Actions 의 **Build Windows app** 실행 결과에서 `hansol-knowledge-windows` 를 내려받아도 됩니다.
+### 실행 파일 내려받기
+
+로그인 없이 아래 주소에서 바로 받을 수 있습니다(항상 최신 빌드).
+
+**https://github.com/hansol941201/hansol-knowledge/releases/latest/download/hansol-knowledge.exe**
+
+main 에 푸시할 때마다 자동으로 빌드해서 `latest` 릴리스로 올립니다.
 
 앱은 실행할 때 배포된 사이트(https://hansol941201.github.io/hansol-knowledge/)를 직접 띄웁니다.
 그래서 사이트를 고치면 앱을 다시 받지 않아도 바로 반영되고, 팝업과 웹사이트가 같은 주소·같은
