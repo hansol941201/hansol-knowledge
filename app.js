@@ -9,39 +9,39 @@ const overlayMode = new URLSearchParams(location.search).get('overlay') === '1';
 if (overlayMode) document.body.classList.add('overlay-mode');
 
 const seed = [
-  { id: crypto.randomUUID(), title: '시방서 문의', answer: '심혜진 연구원\n010-9954-7653', aliases: ['시방서', '기술 문의', '공법 자재', '심혜진 번호'] },
-  { id: crypto.randomUUID(), title: '공사 일정', answer: '한준엽 과장\n010-3355-3458', aliases: ['일정 문의', '공사일정', '한준엽'] },
-  { id: crypto.randomUUID(), title: '하자 보수', answer: '정정훈 과장\n010-8003-6900', aliases: ['하자 문의', '하자보수', '정정훈'] },
-  { id: crypto.randomUUID(), title: '스토어', answer: '이란 매니저\n1800-8203', aliases: ['자재 구매', '소비자 구매', '스토어 문의'] },
-  { id: crypto.randomUUID(), title: '폐기물 신청', answer: '용인공장\n010-2737-3394', aliases: ['폐기물', '폐기물 처리', '폐기물 과정'] },
-  { id: crypto.randomUUID(), title: '폐기물 비용', answer: '미연님\n번호 확인', aliases: ['폐기물비용', '폐기물 금액', '미연'] },
-  { id: crypto.randomUUID(), title: '하자 접수', answer: '경미님\n번호 확인', aliases: ['하자접수', '경미'] },
-  { id: crypto.randomUUID(), title: '미팅 일정', answer: '재연님\n010-9291-3892', aliases: ['시공사 문의', '미팅일정', '시공사', '재연'] },
-  { id: crypto.randomUUID(), title: '아파트 문의', answer: '010-8678-9398', aliases: ['아파트 담당', '아파트 연락처'] },
-  { id: crypto.randomUUID(), title: '자재 문의', answer: '김미연님', aliases: ['자재 담당', '자재 누구', '자재관련담당'] },
-  { id: crypto.randomUUID(), title: '컨설팅 문의', answer: '김미연님', aliases: ['컨설팅 담당', '컨설팅 누구', '컨설팅관련담당'] },
-  { id: crypto.randomUUID(), title: '컨설팅 내역서', answer: '채명님', aliases: ['컨설팅 내역', '컨설팅 내역서 담당', '내역서 문의', '채명'] },
-  { id: crypto.randomUUID(), title: '특허료 문의', answer: '김미연님', aliases: ['특허료 담당', '특허 비용', '특허료 누구'] },
-  { id: crypto.randomUUID(), title: '노무비 문의', answer: '김미연님', aliases: ['노무비 담당', '노무 비용', '노무비 누구'] },
-  { id: crypto.randomUUID(), title: '유지보수 수수료 문의', answer: '김미연님', aliases: ['유지보수 담당', '유지보수 수수료', '유지보수 비용'] },
-  { id: crypto.randomUUID(), title: '대금 관련 문의', answer: '김미연님', aliases: ['대금 담당', '대금 문의', '결제 대금', '대금관련담당'] },
-  { id: crypto.randomUUID(), title: 'MSDS 공법명 발행', answer: '공법명만 발행 X\n사용 자재 확인', aliases: ['MSDS', '엠에스디에스', '공법 발행'] },
-  { id: crypto.randomUUID(), title: 'MSDS 발행', answer: '공법 사용 자재 확인\n자재별 MSDS 발행', aliases: ['자재 MSDS', 'MSDS 요청', '엠에스디에스 발행'] },
-  { id: crypto.randomUUID(), title: '듀얼강화방수', answer: '슬라브', aliases: ['듀얼 강화 방수', '슬라브 공법'] },
-  { id: crypto.randomUUID(), title: '평옥상 공법', answer: '폴리우레아 / 우레탄 / PVC\n슬라브듀얼', aliases: ['평옥상', '폴리우레아', '우레탄', 'PVC', '피브이씨'] },
-  { id: crypto.randomUUID(), title: '5도 이하 시공', answer: '작업 권장 X\n갈라짐 주의', aliases: ['겨울 시공', '저온 시공', '5도', '수용성 페인트'] },
-  { id: crypto.randomUUID(), title: '아크릴 배면차수', answer: '개인시공 X', aliases: ['배면차수', '개인 시공'] },
-  { id: crypto.randomUUID(), title: '지하주차장 에폭시', answer: '컨플럭스\n크리스탈 논파우더', aliases: ['주차장 에폭시', '지하주차장', '에폭시 자재'] },
-  { id: crypto.randomUUID(), title: '여신 거래', answer: '물품공급계약서', aliases: ['여신거래', '계약서', '물품 공급 계약'] },
-  { id: crypto.randomUUID(), title: '보증보험', answer: '필수 X\n보증보험 / 증납형태 선택', aliases: ['보증 보험', '증납', '계약 보증'] },
-  { id: crypto.randomUUID(), title: '남은 자재', answer: '환불 가능 여부 확인', aliases: ['자재 환불', '남은자재', '잔여 자재', '평균 소모량'] },
-  { id: crypto.randomUUID(), title: '공법 비교표', answer: '방수 / 재도장 확인\n공정별 비교표 발송', aliases: ['비교표 요청', '공법표', '공사 방법', '시공 방법', '공법 문의'] },
-  { id: crypto.randomUUID(), title: '발주 기본 절차', answer: '소요량 확인\n발주 요청서 작성\n입고일 확인 / 현장 공유', aliases: ['발주', '자재 발주', '발주 방법', '입고 예정일'] },
-  { id: crypto.randomUUID(), title: '자재공급승인원 요청', answer: '공장장님 자재공급승인원 자료 부탁드립니다.\n아파트명(현장):\n주소:\n특허번호:\n확인 부탁드립니다.\n감사합니다.', aliases: ['자재 공급 승인원', '승인원 요청', '공장장 요청 문구'] },
-  { id: crypto.randomUUID(), title: '승인원 문서번호', answer: '문서번호 / 업체명\n각각 다르게 작성', aliases: ['적기문서번호', '승인원 주의', '업체명 다르게'] },
-  { id: crypto.randomUUID(), title: '소비자 자재 구매', answer: '스토어 연결\n1800-8203\n공고문 같이 발송', aliases: ['일반 소비자', '자재 문의', '전화 문의', '소비자 안내'] },
-  { id: crypto.randomUUID(), title: '소규모 셀프시공', answer: '소장님 연결 가능', aliases: ['셀프 시공', '소규모 시공', '소장 연결'] },
-  { id: crypto.randomUUID(), title: '특허번호 차이', answer: '내용 확인', aliases: ['특허 번호', '특허번호'] }
+  { id: `seed-시방서문의`, title: '시방서 문의', answer: '심혜진 연구원\n010-9954-7653', aliases: ['시방서', '기술 문의', '공법 자재', '심혜진 번호'] },
+  { id: `seed-공사일정`, title: '공사 일정', answer: '한준엽 과장\n010-3355-3458', aliases: ['일정 문의', '공사일정', '한준엽'] },
+  { id: `seed-하자보수`, title: '하자 보수', answer: '정정훈 과장\n010-8003-6900', aliases: ['하자 문의', '하자보수', '정정훈'] },
+  { id: `seed-스토어`, title: '스토어', answer: '이란 매니저\n1800-8203', aliases: ['자재 구매', '소비자 구매', '스토어 문의'] },
+  { id: `seed-폐기물신청`, title: '폐기물 신청', answer: '용인공장\n010-2737-3394', aliases: ['폐기물', '폐기물 처리', '폐기물 과정'] },
+  { id: `seed-폐기물비용`, title: '폐기물 비용', answer: '미연님\n번호 확인', aliases: ['폐기물비용', '폐기물 금액', '미연'] },
+  { id: `seed-하자접수`, title: '하자 접수', answer: '경미님\n번호 확인', aliases: ['하자접수', '경미'] },
+  { id: `seed-미팅일정`, title: '미팅 일정', answer: '재연님\n010-9291-3892', aliases: ['시공사 문의', '미팅일정', '시공사', '재연'] },
+  { id: `seed-아파트문의`, title: '아파트 문의', answer: '010-8678-9398', aliases: ['아파트 담당', '아파트 연락처'] },
+  { id: `seed-자재문의`, title: '자재 문의', answer: '김미연님', aliases: ['자재 담당', '자재 누구', '자재관련담당'] },
+  { id: `seed-컨설팅문의`, title: '컨설팅 문의', answer: '김미연님', aliases: ['컨설팅 담당', '컨설팅 누구', '컨설팅관련담당'] },
+  { id: `seed-컨설팅내역서`, title: '컨설팅 내역서', answer: '채명님', aliases: ['컨설팅 내역', '컨설팅 내역서 담당', '내역서 문의', '채명'] },
+  { id: `seed-특허료문의`, title: '특허료 문의', answer: '김미연님', aliases: ['특허료 담당', '특허 비용', '특허료 누구'] },
+  { id: `seed-노무비문의`, title: '노무비 문의', answer: '김미연님', aliases: ['노무비 담당', '노무 비용', '노무비 누구'] },
+  { id: `seed-유지보수수수료문의`, title: '유지보수 수수료 문의', answer: '김미연님', aliases: ['유지보수 담당', '유지보수 수수료', '유지보수 비용'] },
+  { id: `seed-대금관련문의`, title: '대금 관련 문의', answer: '김미연님', aliases: ['대금 담당', '대금 문의', '결제 대금', '대금관련담당'] },
+  { id: `seed-MSDS공법명발행`, title: 'MSDS 공법명 발행', answer: '공법명만 발행 X\n사용 자재 확인', aliases: ['MSDS', '엠에스디에스', '공법 발행'] },
+  { id: `seed-MSDS발행`, title: 'MSDS 발행', answer: '공법 사용 자재 확인\n자재별 MSDS 발행', aliases: ['자재 MSDS', 'MSDS 요청', '엠에스디에스 발행'] },
+  { id: `seed-듀얼강화방수`, title: '듀얼강화방수', answer: '슬라브', aliases: ['듀얼 강화 방수', '슬라브 공법'] },
+  { id: `seed-평옥상공법`, title: '평옥상 공법', answer: '폴리우레아 / 우레탄 / PVC\n슬라브듀얼', aliases: ['평옥상', '폴리우레아', '우레탄', 'PVC', '피브이씨'] },
+  { id: `seed-5도이하시공`, title: '5도 이하 시공', answer: '작업 권장 X\n갈라짐 주의', aliases: ['겨울 시공', '저온 시공', '5도', '수용성 페인트'] },
+  { id: `seed-아크릴배면차수`, title: '아크릴 배면차수', answer: '개인시공 X', aliases: ['배면차수', '개인 시공'] },
+  { id: `seed-지하주차장에폭시`, title: '지하주차장 에폭시', answer: '컨플럭스\n크리스탈 논파우더', aliases: ['주차장 에폭시', '지하주차장', '에폭시 자재'] },
+  { id: `seed-여신거래`, title: '여신 거래', answer: '물품공급계약서', aliases: ['여신거래', '계약서', '물품 공급 계약'] },
+  { id: `seed-보증보험`, title: '보증보험', answer: '필수 X\n보증보험 / 증납형태 선택', aliases: ['보증 보험', '증납', '계약 보증'] },
+  { id: `seed-남은자재`, title: '남은 자재', answer: '환불 가능 여부 확인', aliases: ['자재 환불', '남은자재', '잔여 자재', '평균 소모량'] },
+  { id: `seed-공법비교표`, title: '공법 비교표', answer: '방수 / 재도장 확인\n공정별 비교표 발송', aliases: ['비교표 요청', '공법표', '공사 방법', '시공 방법', '공법 문의'] },
+  { id: `seed-발주기본절차`, title: '발주 기본 절차', answer: '소요량 확인\n발주 요청서 작성\n입고일 확인 / 현장 공유', aliases: ['발주', '자재 발주', '발주 방법', '입고 예정일'] },
+  { id: `seed-자재공급승인원요청`, title: '자재공급승인원 요청', answer: '공장장님 자재공급승인원 자료 부탁드립니다.\n아파트명(현장):\n주소:\n특허번호:\n확인 부탁드립니다.\n감사합니다.', aliases: ['자재 공급 승인원', '승인원 요청', '공장장 요청 문구'] },
+  { id: `seed-승인원문서번호`, title: '승인원 문서번호', answer: '문서번호 / 업체명\n각각 다르게 작성', aliases: ['적기문서번호', '승인원 주의', '업체명 다르게'] },
+  { id: `seed-소비자자재구매`, title: '소비자 자재 구매', answer: '스토어 연결\n1800-8203\n공고문 같이 발송', aliases: ['일반 소비자', '자재 문의', '전화 문의', '소비자 안내'] },
+  { id: `seed-소규모셀프시공`, title: '소규모 셀프시공', answer: '소장님 연결 가능', aliases: ['셀프 시공', '소규모 시공', '소장 연결'] },
+  { id: `seed-특허번호차이`, title: '특허번호 차이', answer: '내용 확인', aliases: ['특허 번호', '특허번호'] }
 ];
 
 let knowledge = JSON.parse(localStorage.getItem('knowledge-messenger-data') || 'null') || [];
@@ -56,11 +56,55 @@ let pendingSecretCopy = null;
 let cloudReady = false;
 let cloudApplying = false;
 let cloudSaveTimer = null;
+let cloudSyncing = false;
 let syncLoginPending = false;
-const knownTitles = new Set(knowledge.map(item => item.title));
-for (const item of seed) {
-  if (!knownTitles.has(item.title)) knowledge.push(item);
+let pendingCloudSync = localStorage.getItem('knowledge-sync-pending') === '1';
+let cloudStatus = 'offline';
+
+// 삭제는 즉시 지우지 않고 표시만 남긴다(다른 기기와 ID 기준으로 병합할 때 되살아나지 않도록).
+const alive = (list) => (Array.isArray(list) ? list : []).filter(item => item && !item.deleted);
+const stampTime = () => Date.now();
+function touch(item) { item.updatedAt = stampTime(); return item; }
+function ensureStamps(list) {
+  for (const item of Array.isArray(list) ? list : []) {
+    if (item && !item.updatedAt) item.updatedAt = 0;
+  }
+  return list;
 }
+ensureStamps(knowledge); ensureStamps(todos); ensureStamps(memories); ensureStamps(accountMeta);
+
+// ID 기준 병합 — 같은 ID면 updatedAt이 최신인 쪽을 남기고, 없는 ID는 양쪽 모두 살린다.
+function mergeById(mine, theirs) {
+  const merged = new Map();
+  for (const item of [...(Array.isArray(theirs) ? theirs : []), ...(Array.isArray(mine) ? mine : [])]) {
+    if (!item || !item.id) continue;
+    const previous = merged.get(item.id);
+    if (!previous) { merged.set(item.id, item); continue; }
+    merged.set(item.id, Number(item.updatedAt || 0) >= Number(previous.updatedAt || 0) ? item : previous);
+  }
+  return [...merged.values()];
+}
+function sortByRecent(list) {
+  return list.sort((a, b) => Number(b.updatedAt || 0) - Number(a.updatedAt || 0));
+}
+const knownTitles = new Set(knowledge.map(item => item.title));
+const knownIds = new Set(knowledge.map(item => item.id));
+for (const item of seed) {
+  if (!knownTitles.has(item.title) && !knownIds.has(item.id)) knowledge.push(item);
+}
+// 예전 버전이 만든 임의 ID 시드가 남아 있으면 고정 ID 시드와 겹치지 않게 정리한다.
+(() => {
+  const seen = new Map();
+  for (const item of knowledge) {
+    const key = `${item.title}\u0000${item.answer}`;
+    const previous = seen.get(key);
+    if (!previous) { seen.set(key, item); continue; }
+    const keep = String(item.id).startsWith('seed-') ? item : previous;
+    const drop = keep === item ? previous : item;
+    drop.deleted = true;
+    seen.set(key, keep);
+  }
+})();
 const save = () => { localStorage.setItem('knowledge-messenger-data', JSON.stringify(knowledge)); queueCloudSave(); };
 const saveTodos = () => { localStorage.setItem('knowledge-todos', JSON.stringify(todos)); queueCloudSave(); };
 const saveMemories = () => { localStorage.setItem('knowledge-memories', JSON.stringify(memories)); queueCloudSave(); };
@@ -83,28 +127,30 @@ for (const item of knowledge) {
 }
 save();
 
-const categoryRules = ['전체', '협력업체', '계정', '연락처', '업무지식', '기타'];
+const categoryRules = ['전체', '할 일', '기억', '협력업체', '계정', '연락처', '업무지식', '기타'];
+const virtualCategories = ['계정', '협력업체', '할 일', '기억'];
 let pageCategory = '전체';
 let pageSearchCommitted = '';
 
 function categoryItems(name) {
-  if (name === '전체') return knowledge;
-  if (name === '계정' || name === '협력업체') return [];
-  return knowledge.filter(item => item.category === name);
+  if (name === '전체') return alive(knowledge);
+  if (virtualCategories.includes(name)) return [];
+  return alive(knowledge).filter(item => item.category === name);
 }
 
 function renderLibrary() {
   const query = normalize(pageSearchCommitted);
   const items = categoryItems(pageCategory).filter(item => !query || normalize([item.title, item.answer, ...(item.aliases || [])].join(' ')).includes(query));
   const accounts = (pageCategory === '전체' || pageCategory === '계정')
-    ? accountMeta.filter(item => !query || normalize(`${item.service} ${item.user} ${item.url || ''}`).includes(query)) : [];
+    ? alive(accountMeta).filter(item => !query || normalize(`${item.service} ${item.user} ${item.url || ''}`).includes(query)) : [];
   const partnerItems = (pageCategory === '전체' || pageCategory === '협력업체')
     ? partners.filter(item => !query || normalize(`${item.name} ${item.phone} ${item.email}`).includes(query)) : [];
-  const memoryItems = query && pageCategory === '전체'
-    ? memories.filter(memory => normalize(`${memory.text} ${memory.createdAt || ''}`).includes(query)) : [];
-  const todoItems = query && pageCategory === '전체'
-    ? todos.filter(todo => normalize(`${todo.text} ${todo.date || ''}`).includes(query)) : [];
-  $('#pageCount').textContent = `${knowledge.length + memories.length + accountMeta.length + partners.length}개`;
+  const searchAll = pageCategory === '전체';
+  const todoItems = (searchAll ? Boolean(query) : pageCategory === '할 일')
+    ? sortBySaved(alive(todos).filter(todo => !query || normalize(`${todo.text} ${todo.date || ''} ${savedLabel(todo)} ${todo.done ? '완료' : '미완료진행중'}`).includes(query))) : [];
+  const memoryItems = (searchAll ? Boolean(query) : pageCategory === '기억')
+    ? sortBySaved(alive(memories).filter(memory => !query || normalize(`${memory.text} ${memory.createdAt || ''} ${savedLabel(memory)}`).includes(query))) : [];
+  $('#pageCount').textContent = `${alive(knowledge).length + alive(todos).length + alive(memories).length + alive(accountMeta).length + partners.length}개`;
   $('#pageCategories').innerHTML = categoryRules.filter(name => name !== '기타' || categoryItems('기타').length).map(name => `<button class="${name === pageCategory ? 'active' : ''}" data-category="${name}">${name}</button>`).join('');
   $('#pageGrid').innerHTML = partnerItems.map((item, index) => `
     <article class="page-card partner-card" data-partner-index="${partners.indexOf(item)}">
@@ -117,12 +163,13 @@ function renderLibrary() {
       <p>${escapeHtml(item.user)}\n<span class="secret-line">••••••••</span></p>
       <footer><button data-copy-id>아이디 복사</button><button data-copy-pw>비번 복사</button><button data-account-delete>삭제</button></footer>
     </article>`).join('') + todoItems.map(todo => `
-    <article class="page-card">
+    <article class="page-card todo-result-card ${todo.done ? 'done' : ''}" data-todo-result="${todo.id}">
       <small>✓ 할 일</small><h3>${escapeHtml(todo.date || '날짜 확인')}</h3>
       <p>${escapeHtml(todo.text)}</p>
+      <footer><span class="todo-state ${todo.done ? 'done' : ''}">${todo.done ? '완료' : '진행중'}</span><button data-todo-toggle>${todo.done ? '완료 취소' : '완료 표시'}</button></footer>
     </article>`).join('') + memoryItems.map(memory => `
     <article class="page-card memory-result-card" data-memory-result="${memory.id}">
-      <small>📝 기억</small><h3>${escapeHtml(memory.createdAt || '저장 날짜 확인')}</h3>
+      <small>📝 기억</small><h3>${escapeHtml(savedLabel(memory))}</h3>
       <p>${escapeHtml(memory.text)}</p>
       <footer><button data-memory-open>기억 저장소에서 보기</button></footer>
     </article>`).join('') + items.map(item => `
@@ -153,6 +200,12 @@ function renderLibrary() {
     card.querySelector('[data-copy-email]').onclick = () => item.email ? copyText(item.email) : showToast('이메일 확인');
     card.querySelector('[data-partner-chat]').onclick = () => { openApp(); addPartnerBubble(item); };
   });
+  $('#pageGrid').querySelectorAll('[data-todo-result]').forEach(card => {
+    const todo = todos.find(x => x.id === card.dataset.todoResult);
+    card.querySelector('[data-todo-toggle]').onclick = () => {
+      todo.done = !todo.done; touch(todo); saveTodos(); renderTodos(); renderLibrary();
+    };
+  });
   $('#pageGrid').querySelectorAll('[data-memory-result]').forEach(card => {
     card.querySelector('[data-memory-open]').onclick = () => {
       $('#memorySearch').value = pageSearchCommitted;
@@ -168,32 +221,43 @@ function todayKey() {
   return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
 }
 function renderTodos() {
-  const today = todos.filter(todo => todo.date === todayKey());
-  const remain = today.filter(todo => !todo.done).length;
+  const list = alive(todos).slice().sort((a, b) => {
+    if (a.done !== b.done) return a.done ? 1 : -1;
+    return String(b.date || '').localeCompare(String(a.date || '')) || Number(b.updatedAt || 0) - Number(a.updatedAt || 0);
+  });
+  const remain = list.filter(todo => !todo.done).length;
   $('#todayPanel').innerHTML = `
-    <div class="today-head"><div><i></i><b>할 일</b></div><span>${remain}개 남음</span></div>
-    <div class="todo-list">${today.length ? today.map(todo => `
+    <div class="today-head"><div><i></i><b>할 일</b></div><span>${remain}개 남음 · 전체 ${list.length}개</span></div>
+    <div class="todo-list">${list.length ? list.map(todo => `
       <label class="todo-item ${todo.done ? 'done' : ''}" data-todo-id="${todo.id}">
-        <input type="checkbox" ${todo.done ? 'checked' : ''}><span>${escapeHtml(todo.text)}</span><button type="button">×</button>
+        <input type="checkbox" ${todo.done ? 'checked' : ''}>
+        <span>${escapeHtml(todo.text)}</span>
+        <time>${escapeHtml(todo.date || '날짜 확인')}</time>
+        <em class="todo-state ${todo.done ? 'done' : ''}">${todo.done ? '완료' : '진행중'}</em>
+        <button type="button" title="삭제">×</button>
       </label>`).join('') : '<div class="todo-empty">지식창에 “할일 내용”을 입력해보세요.</div>'}</div>`;
   $('#todayPanel').querySelectorAll('[data-todo-id]').forEach(row => {
     const todo = todos.find(x => x.id === row.dataset.todoId);
-    row.querySelector('input').onchange = e => { todo.done = e.target.checked; saveTodos(); renderTodos(); };
-    row.querySelector('button').onclick = () => { todos = todos.filter(x => x.id !== todo.id); saveTodos(); renderTodos(); };
+    row.querySelector('input').onchange = e => { todo.done = e.target.checked; touch(todo); saveTodos(); renderTodos(); renderLibrary(); };
+    row.querySelector('button').onclick = () => {
+      todo.deleted = true; touch(todo); saveTodos(); renderTodos(); renderLibrary();
+    };
   });
 }
 
 function renderMemories() {
   const query = normalize($('#memorySearch').value || '');
-  const filtered = memories.filter(memory => !query || normalize(`${memory.text} ${memory.createdAt || ''}`).includes(query));
-  $('#memoryCount').textContent = query ? `${filtered.length}개 검색됨` : `${memories.length}개 기록`;
+  const filtered = sortBySaved(alive(memories).filter(memory => !query || normalize(`${memory.text} ${memory.createdAt || ''} ${savedLabel(memory)}`).includes(query)));
+  $('#memoryCount').textContent = query ? `${filtered.length}개 검색됨` : `${alive(memories).length}개 기록`;
   $('#memoryPanel').innerHTML = `
     <div class="memory-list">${filtered.length ? filtered.map(memory => `
-      <article class="memory-item" data-memory-id="${memory.id}"><div><p>${escapeHtml(memory.text)}</p><time>${escapeHtml(memory.createdAt || '')}</time></div><button type="button" title="삭제">×</button></article>
-    `).join('') : `<div class="todo-empty">${query ? '검색 결과 없음' : '지식창에 “기억 내용”을 입력하면 여기에 따로 모여요.'}</div>`}</div>`;
+      <article class="memory-item" data-memory-id="${memory.id}"><div><p>${escapeHtml(memory.text)}</p><time>${escapeHtml(savedLabel(memory))}</time></div><button type="button" title="삭제">×</button></article>
+    `).join('') : `<div class="todo-empty">${query ? '검색 결과 없음' : '지식창에 “기록 내용”을 입력하면 여기에 따로 모여요.'}</div>`}</div>`;
   $('#memoryPanel').querySelectorAll('[data-memory-id]').forEach(row => {
     row.querySelector('button').onclick = () => {
-      memories = memories.filter(memory => memory.id !== row.dataset.memoryId);
+      const memory = memories.find(x => x.id === row.dataset.memoryId);
+      if (!memory) return;
+      memory.deleted = true; touch(memory);
       saveMemories(); renderMemories(); renderLibrary();
     };
   });
@@ -268,10 +332,10 @@ $('#editForm').addEventListener('submit', e => {
   if (editingId) {
     const item = knowledge.find(x => x.id === editingId);
     if (!item) return closeEditor();
-    Object.assign(item, values);
+    Object.assign(item, values); touch(item);
     showToast('수정됨');
   } else {
-    knowledge.unshift({ id: crypto.randomUUID(), ...values });
+    knowledge.unshift(touch({ id: crypto.randomUUID(), ...values }));
     showToast('저장됨');
   }
   save(); renderLibrary(); closeEditor();
@@ -346,7 +410,7 @@ $('#vaultForm').addEventListener('submit', async e => {
   try {
     await unlockDeviceVault();
     const id = crypto.randomUUID();
-    accountMeta.unshift({ id, service: $('#accountService').value.trim(), user: $('#accountId').value.trim() });
+    accountMeta.unshift(touch({ id, service: $('#accountService').value.trim(), user: $('#accountId').value.trim() }));
     vaultSecrets[id] = $('#accountPassword').value;
     localStorage.setItem('knowledge-account-meta', JSON.stringify(accountMeta));
     await persistVault(); queueCloudSave(); renderLibrary(); closeVault(); showToast('계정 암호화 저장됨');
@@ -366,7 +430,8 @@ async function copySecret(secret) {
 }
 async function deleteAccount(id) {
   if (!confirm('계정 삭제?')) return;
-  accountMeta = accountMeta.filter(x => x.id !== id);
+  const account = accountMeta.find(x => x.id === id);
+  if (account) { account.deleted = true; touch(account); }
   localStorage.setItem('knowledge-account-meta', JSON.stringify(accountMeta));
   if (vaultKey) { delete vaultSecrets[id]; await persistVault(); }
   queueCloudSave();
@@ -418,6 +483,7 @@ function addBubble(text, type = 'answer', item = null) {
   row.append(bubble);
   messages.append(row);
   messages.scrollTop = messages.scrollHeight;
+  return bubble;
 }
 
 function normalize(text) { return text.toLowerCase().replace(/[?!.\s]/g, ''); }
@@ -427,13 +493,13 @@ function score(item, query) {
   return terms.reduce((best, term) => term.includes(q) || q.includes(term) ? Math.max(best, Math.min(q.length, term.length)) : best, 0);
 }
 function findKnowledge(query) {
-  return knowledge.map(item => ({ item, points: score(item, query) })).filter(x => x.points > 0).sort((a, b) => b.points - a.points).slice(0, 3).map(x => x.item);
+  return alive(knowledge).map(item => ({ item, points: score(item, query) })).filter(x => x.points > 0).sort((a, b) => b.points - a.points).slice(0, 3).map(x => x.item);
 }
 
 function findAccounts(query) {
   const q = normalize(query).replace(/(아이디|비번|비밀번호|계정|로그인)/g, '');
   if (!q) return [];
-  return accountMeta.filter(item => normalize(`${item.service} ${item.user}`).includes(q) || q.includes(normalize(item.service))).slice(0, 3);
+  return alive(accountMeta).filter(item => normalize(`${item.service} ${item.user}`).includes(q) || q.includes(normalize(item.service))).slice(0, 3);
 }
 
 function findPartners(query) {
@@ -470,16 +536,69 @@ function addAccountBubble(item) {
   messages.scrollTop = messages.scrollHeight;
 }
 
+function stampLabel(date = new Date()) {
+  return `${date.getFullYear()}.${String(date.getMonth()+1).padStart(2,'0')}.${String(date.getDate()).padStart(2,'0')} ${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
+}
+// 예전 기록은 "2026.08.25 06:30" 문자열만 갖고 있어 이를 그대로 되살려 쓴다.
+function savedDateOf(item) {
+  if (!item) return null;
+  if (Number.isFinite(item.savedAt)) return new Date(item.savedAt);
+  const legacy = String(item.createdAt || '').match(/^(\d{4})\.(\d{2})\.(\d{2})[ T](\d{2}):(\d{2})/);
+  if (legacy) return new Date(Number(legacy[1]), Number(legacy[2]) - 1, Number(legacy[3]), Number(legacy[4]), Number(legacy[5]));
+  const dayOnly = String(item.date || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (dayOnly) return new Date(Number(dayOnly[1]), Number(dayOnly[2]) - 1, Number(dayOnly[3]));
+  if (Number.isFinite(item.updatedAt) && item.updatedAt > 0) return new Date(item.updatedAt);
+  return null;
+}
+function savedMillis(item) { const date = savedDateOf(item); return date ? date.getTime() : 0; }
+function clockLabel(date) {
+  const hour = date.getHours();
+  return `${hour < 12 ? '오전' : '오후'} ${hour % 12 === 0 ? 12 : hour % 12}:${String(date.getMinutes()).padStart(2, '0')}`;
+}
+function dayLabel(date) {
+  return `${date.getFullYear()}.${String(date.getMonth()+1).padStart(2,'0')}.${String(date.getDate()).padStart(2,'0')}`;
+}
+// 오늘 저장한 기록은 "오늘 오후 3:25", 그 외에는 "2026.08.25 오후 3:25".
+function savedLabel(item) {
+  const date = savedDateOf(item);
+  if (!date) return '저장 날짜 확인';
+  const day = dayLabel(date);
+  return `${day === dayLabel(new Date()) ? '오늘' : day} ${clockLabel(date)}`;
+}
+function sortBySaved(list) { return list.sort((a, b) => savedMillis(b) - savedMillis(a)); }
+
 function createMemory(text) {
   const now = new Date();
-  const memory = {
-    id: crypto.randomUUID(), text: text.trim(),
-    createdAt: `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`
-  };
+  const memory = touch({ id: crypto.randomUUID(), text: text.trim(), createdAt: stampLabel(now), savedAt: now.getTime() });
   memories.unshift(memory);
   saveMemories(); renderMemories(); renderLibrary();
   return memory;
 }
+function createTodo(text) {
+  const now = new Date();
+  const todo = touch({ id: crypto.randomUUID(), text: text.trim(), date: todayKey(), done: false, createdAt: stampLabel(now), savedAt: now.getTime() });
+  todos.unshift(todo);
+  saveTodos(); renderTodos(); renderLibrary();
+  return todo;
+}
+
+// 저장은 로컬에 먼저 끝내고, Firebase 업로드 결과를 같은 말풍선에 이어서 알린다.
+async function announceSave(kind, body) {
+  const label = kind === 'todo' ? '할 일' : '기록';
+  const bubble = addBubble(`${label} 저장 중…\n${body}`, 'answer');
+  const uploaded = await flushCloudSave();
+  bubble.textContent = uploaded
+    ? `✓ ${label} 저장 및 연동 완료\n${body}`
+    : `✓ ${label} 저장 완료 · 오프라인 보관\n인터넷이 연결되면 자동 업로드\n${body}`;
+  showToast(uploaded ? `✓ ${label} 저장 및 연동 완료` : `${label} 저장됨 · 업로드 대기`);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+// 팝업 명령어 — “할일/할 일 …”은 할 일 목록, “기록/기억 …”은 기억 저장소로 보낸다.
+const TODO_COMMAND = /^(?:할\s*일|todo)[\s.,:·\-]*(.+)$/i;
+const MEMORY_COMMAND = /^(?:기록|기억|메모)[\s.,:·\-]*(.+)$/i;
+const MEMORY_LIST_COMMAND = /^(?:기록|기억|메모)[\s.,:·\-]*$/;
+const TODO_LIST_COMMAND = /^(?:할\s*일|todo)[\s.,:·\-]*$/i;
 
 $('#composer').addEventListener('submit', (e) => {
   e.preventDefault();
@@ -487,22 +606,32 @@ $('#composer').addEventListener('submit', (e) => {
   if (!text) return;
   addBubble(text, 'mine');
   input.value = '';
-  if (/^기억[\s.,:·-]*$/.test(text)) {
-    if (!memories.length) addBubble('기억 저장소 비어 있음\n“기억 내용”으로 기록', 'answer');
-    else memories.slice(0, 8).forEach(memory => addBubble(`기억\n${memory.text}\n${memory.createdAt || '날짜 확인'}`, 'answer'));
+  handleComposerText(text);
+});
+
+function handleComposerText(text) {
+  if (MEMORY_LIST_COMMAND.test(text)) {
+    const list = sortBySaved(alive(memories));
+    if (!list.length) addBubble('기억 저장소 비어 있음\n“기록 내용”으로 저장하세요', 'answer');
+    else list.slice(0, 8).forEach(memory => addBubble(`기억\n${memory.text}\n${savedLabel(memory)}`, 'answer'));
     return;
   }
-  const todoMatch = text.match(/^할일[\s.,:·-]*(.+)$/);
+  if (TODO_LIST_COMMAND.test(text)) {
+    const list = alive(todos);
+    if (!list.length) addBubble('할 일 없음\n“할일 내용”으로 저장하세요', 'answer');
+    else list.slice(0, 8).forEach(todo => addBubble(`✓ 할 일\n${todo.text}\n${todo.date || '날짜 확인'} · ${todo.done ? '완료' : '진행중'}`, 'answer'));
+    return;
+  }
+  const todoMatch = text.match(TODO_COMMAND);
   if (todoMatch?.[1]?.trim()) {
-    const todo = { id: crypto.randomUUID(), text: todoMatch[1].trim(), date: todayKey(), done: false };
-    todos.unshift(todo); saveTodos(); renderTodos();
-    addBubble(`✓ 할 일\n${todo.text}`, 'answer');
+    const todo = createTodo(todoMatch[1]);
+    announceSave('todo', `${todo.text}\n${todo.date} · 진행중`);
     return;
   }
-  const memoryMatch = text.match(/^기억[\s.,:·-]*(.+)$/);
+  const memoryMatch = text.match(MEMORY_COMMAND);
   if (memoryMatch?.[1]?.trim()) {
     const memory = createMemory(memoryMatch[1]);
-    addBubble(`✓ 기억 저장\n${memory.text}`, 'answer');
+    announceSave('memory', `${memory.text}\n${savedLabel(memory)}`);
     return;
   }
   const partnerMatches = findPartners(text);
@@ -517,16 +646,17 @@ $('#composer').addEventListener('submit', (e) => {
   }
   const matches = findKnowledge(text);
   const normalizedQuery = normalize(text);
-  const todoMatches = todos.filter(todo => normalize(`${todo.text} ${todo.date || ''}`).includes(normalizedQuery));
-  const memoryMatches = memories.filter(memory => normalize(`${memory.text} ${memory.createdAt || ''}`).includes(normalizedQuery));
+  const todoMatches = alive(todos).filter(todo => normalize(`${todo.text} ${todo.date || ''}`).includes(normalizedQuery));
+  const memoryMatches = alive(memories).filter(memory => normalize(`${memory.text} ${memory.createdAt || ''}`).includes(normalizedQuery));
   matches.forEach(item => addBubble(`${item.title}\n${item.answer}`, 'answer', item));
-  todoMatches.forEach(todo => addBubble(`✓ 할 일\n${todo.text}\n${todo.date || '날짜 확인'}`, 'answer'));
-  memoryMatches.forEach(memory => addBubble(`기억\n${memory.text}\n${memory.createdAt || '날짜 확인'}`, 'answer'));
+  todoMatches.forEach(todo => addBubble(`✓ 할 일\n${todo.text}\n${todo.date || '날짜 확인'} · ${todo.done ? '완료' : '진행중'}`, 'answer'));
+  memoryMatches.forEach(memory => addBubble(`기억\n${memory.text}\n${savedLabel(memory)}`, 'answer'));
+  // 명령어도 아니고 찾은 것도 없는 일반 문장은 기억 저장소로 자동 저장한다.
   if (!matches.length && !todoMatches.length && !memoryMatches.length) {
     const memory = createMemory(text);
-    addBubble(`✓ 기억 저장\n${memory.text}`, 'answer');
+    announceSave('memory', `${memory.text}\n${savedLabel(memory)}`);
   }
-});
+}
 
 function parseKnowledge(text) {
   const parts = text.split(/\s*=\s*/);
@@ -546,13 +676,13 @@ async function copyText(text) {
 function addAlias(item) {
   const alias = prompt('추가할 검색어');
   if (!alias?.trim()) return;
-  item.aliases = [...(item.aliases || []), alias.trim()];
+  item.aliases = [...(item.aliases || []), alias.trim()]; touch(item);
   save();
   showToast('검색어 추가됨');
 }
 function removeItem(item, row = null) {
   if (!confirm(`「${item.title}」 삭제?`)) return;
-  knowledge = knowledge.filter(x => x.id !== item.id);
+  item.deleted = true; touch(item);
   save(); if (row) row.remove(); renderLibrary(); showToast('삭제됨');
 }
 function showToast(text) {
@@ -571,7 +701,7 @@ $('#quickAdd').addEventListener('submit', e => {
     id: crypto.randomUUID(), title: $('#quickTitle').value.trim(), answer: $('#quickAnswer').value.trim(),
     category: $('#quickCategory').value, aliases: []
   };
-  knowledge.unshift(item); save(); renderLibrary();
+  knowledge.unshift(touch(item)); save(); renderLibrary();
   $('#quickTitle').value = ''; $('#quickAnswer').value = '';
   $('#quickAdd').classList.add('hidden');
   addBubble(`✓ 저장\n${item.title}\n${item.answer}`, 'answer', item);
@@ -582,8 +712,8 @@ $('#fileInput').addEventListener('change', async (e) => {
   try {
     const incoming = JSON.parse(await file.text());
     if (!Array.isArray(incoming)) throw new Error();
-    const existing = new Set(knowledge.map(x => normalize(x.title)));
-    const fresh = incoming.filter(x => x.title && x.answer && !existing.has(normalize(x.title))).map(x => ({ id: crypto.randomUUID(), aliases: [], ...x }));
+    const existing = new Set(alive(knowledge).map(x => normalize(x.title)));
+    const fresh = incoming.filter(x => x.title && x.answer && !existing.has(normalize(x.title))).map(x => touch({ id: crypto.randomUUID(), aliases: [], ...x }));
     knowledge = [...fresh, ...knowledge]; save(); renderLibrary();
     addBubble(`가져오기 완료\n${fresh.length}개 추가`, 'answer');
   } catch { addBubble('가져오기 X\nJSON 형식 확인', 'answer'); }
@@ -594,41 +724,92 @@ if (window.knowledgeAPI) {
   window.knowledgeAPI.onToggle(() => app.classList.contains('hidden') ? openApp() : collapseApp());
 }
 
-function queueCloudSave() {
-  if (!cloudReady || cloudApplying || !window.HANSOL_FIRESTORE) return;
-  clearTimeout(cloudSaveTimer);
-  cloudSaveTimer = setTimeout(saveCloudState, 350);
+function setCloudStatus(status) {
+  cloudStatus = status;
+  const badge = $('#syncState');
+  if (!badge) return;
+  const labels = {
+    live: '실시간 연동 중',
+    syncing: '연동 중…',
+    pending: '오프라인 보관 · 재연결 시 자동 업로드',
+    offline: '오프라인 저장 모드'
+  };
+  badge.textContent = labels[status] || labels.offline;
+  badge.dataset.state = status;
 }
 
-async function saveCloudState() {
-  if (!cloudReady || cloudApplying || !window.HANSOL_FIRESTORE) return;
-  try {
-    await unlockDeviceVault();
-    await window.HANSOL_FIRESTORE.doc('shared/state').set({
-      knowledge,
-      todos,
-      memories,
-      accountMeta,
-      vaultSecrets,
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-  } catch (error) {
-    console.error('Firebase 저장 실패', error);
-    showToast('동기화 확인 X');
-  }
+function markPending() {
+  pendingCloudSync = true;
+  localStorage.setItem('knowledge-sync-pending', '1');
+  setCloudStatus('pending');
+}
+function clearPending() {
+  pendingCloudSync = false;
+  localStorage.removeItem('knowledge-sync-pending');
+  setCloudStatus('live');
 }
 
-async function applyCloudState(state) {
-  cloudApplying = true;
-  knowledge = Array.isArray(state.knowledge) ? state.knowledge : knowledge;
-  todos = Array.isArray(state.todos) ? state.todos : todos;
-  memories = Array.isArray(state.memories) ? state.memories : memories;
-  accountMeta = Array.isArray(state.accountMeta) ? state.accountMeta : accountMeta;
-  vaultSecrets = state.vaultSecrets && typeof state.vaultSecrets === 'object' ? state.vaultSecrets : {};
+function saveLocalSnapshot() {
   localStorage.setItem('knowledge-messenger-data', JSON.stringify(knowledge));
   localStorage.setItem('knowledge-todos', JSON.stringify(todos));
   localStorage.setItem('knowledge-memories', JSON.stringify(memories));
   localStorage.setItem('knowledge-account-meta', JSON.stringify(accountMeta));
+}
+
+function queueCloudSave() {
+  if (cloudApplying) return;
+  if (!cloudReady || !window.HANSOL_FIRESTORE) { markPending(); return; }
+  clearTimeout(cloudSaveTimer);
+  cloudSaveTimer = setTimeout(() => { flushCloudSave(); }, 350);
+}
+
+// 업로드는 항상 트랜잭션 안에서 원격 문서를 다시 읽어 ID 기준으로 병합한다(덮어쓰기 금지).
+async function flushCloudSave() {
+  clearTimeout(cloudSaveTimer);
+  if (!cloudReady || !window.HANSOL_FIRESTORE) { markPending(); return false; }
+  while (cloudSyncing) await new Promise(resolve => setTimeout(resolve, 60));
+  cloudSyncing = true;
+  setCloudStatus('syncing');
+  try {
+    await unlockDeviceVault();
+    const stateDoc = window.HANSOL_FIRESTORE.doc('shared/state');
+    const merged = await window.HANSOL_FIRESTORE.runTransaction(async (transaction) => {
+      const snapshot = await transaction.get(stateDoc);
+      const remote = snapshot.exists ? (snapshot.data() || {}) : {};
+      const next = {
+        knowledge: mergeById(knowledge, remote.knowledge),
+        todos: mergeById(todos, remote.todos),
+        memories: mergeById(memories, remote.memories),
+        accountMeta: mergeById(accountMeta, remote.accountMeta),
+        vaultSecrets: { ...(remote.vaultSecrets || {}), ...vaultSecrets }
+      };
+      transaction.set(stateDoc, { ...next, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+      return next;
+    });
+    cloudSyncing = false;
+    await applyCloudState(merged);
+    clearPending();
+    return true;
+  } catch (error) {
+    console.error('Firebase 저장 실패', error);
+    markPending();
+    return false;
+  } finally {
+    cloudSyncing = false;
+  }
+}
+
+async function applyCloudState(state) {
+  if (!state) return;
+  cloudApplying = true;
+  knowledge = mergeById(knowledge, state.knowledge);
+  todos = mergeById(todos, state.todos);
+  memories = mergeById(memories, state.memories);
+  accountMeta = mergeById(accountMeta, state.accountMeta);
+  const remoteSecrets = state.vaultSecrets && typeof state.vaultSecrets === 'object' ? state.vaultSecrets : {};
+  vaultSecrets = { ...remoteSecrets, ...vaultSecrets };
+  for (const account of accountMeta) if (account.deleted) delete vaultSecrets[account.id];
+  saveLocalSnapshot();
   try {
     vaultKey = vaultKey || await getDeviceKey();
     await persistVault();
@@ -640,24 +821,32 @@ async function applyCloudState(state) {
 }
 
 async function startCloudSync() {
-  if (!window.HANSOL_FIRESTORE) return showToast('오프라인 저장 모드');
+  if (!window.HANSOL_FIRESTORE) { setCloudStatus('offline'); return showToast('오프라인 저장 모드'); }
   const stateDoc = window.HANSOL_FIRESTORE.doc('shared/state');
+  cloudReady = true;
   try {
     const first = await stateDoc.get();
     if (first.exists) await applyCloudState(first.data());
-    else {
-      await unlockDeviceVault();
-      await stateDoc.set({ knowledge, todos, memories, accountMeta, vaultSecrets, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
-    }
-    cloudReady = true;
-    stateDoc.onSnapshot(snapshot => {
-      if (snapshot.exists && !snapshot.metadata.hasPendingWrites) applyCloudState(snapshot.data());
-    }, error => { console.error('Firebase 실시간 동기화 실패', error); showToast('동기화 연결 X'); });
-  } catch (error) {
-    console.error('Firebase 시작 실패', error);
-    showToast('오프라인 저장 모드');
-  }
+  } catch (error) { console.error('Firebase 최초 읽기 실패', error); }
+  await flushCloudSave();
+  stateDoc.onSnapshot(snapshot => {
+    if (!snapshot.exists || snapshot.metadata.hasPendingWrites) return;
+    applyCloudState(snapshot.data());
+  }, error => { console.error('Firebase 실시간 동기화 실패', error); markPending(); });
 }
+
+// 인터넷이 끊겼다 다시 붙으면 로컬에 쌓인 변경을 자동으로 올린다.
+function retryPendingSync() {
+  if (!pendingCloudSync) return;
+  if (navigator.onLine === false) return;
+  if (!cloudReady) {
+    if (window.HANSOL_AUTH && window.HANSOL_AUTH.currentUser) startCloudSync();
+    return;
+  }
+  flushCloudSave();
+}
+window.addEventListener('online', retryPendingSync);
+setInterval(retryPendingSync, 15000);
 
 async function signInForSync(pin) {
   const normalizedPin = String(pin || '').trim();
@@ -671,7 +860,8 @@ async function signInForSync(pin) {
 }
 
 async function initCloudAuth() {
-  if (!window.HANSOL_AUTH || !window.HANSOL_FIRESTORE) return showToast('오프라인 저장 모드');
+  setCloudStatus(pendingCloudSync ? 'pending' : 'offline');
+  if (!window.HANSOL_AUTH || !window.HANSOL_FIRESTORE) { setCloudStatus('offline'); return showToast('오프라인 저장 모드'); }
   await new Promise(resolve => {
     const stop = window.HANSOL_AUTH.onAuthStateChanged(user => { stop(); resolve(user); });
   });

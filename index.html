@@ -4,14 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>지식창</title>
-  <link rel="stylesheet" href="styles.css?v=6" />
+  <link rel="stylesheet" href="styles.css?v=8" />
 </head>
 <body>
   <section class="knowledge-page">
     <header class="page-header">
       <div class="page-brand"><i></i><div><strong>한솔 지식</strong><span>업무 지식 보관함</span></div></div>
       <div class="page-tools">
-        <label class="page-search">⌕<input id="pageSearch" placeholder="지식·연락처·기억 통합 검색 후 Enter" /></label>
+        <label class="page-search">⌕<input id="pageSearch" placeholder="지식·연락처·할 일·기억 통합 검색 후 Enter" /></label>
+        <span id="syncState" class="sync-state" data-state="offline">오프라인 저장 모드</span>
         <button id="memoryToggle" class="memory-toggle">📝 기억 저장소</button>
         <button id="accountAdd" class="account-add">🔒 계정 추가</button>
         <button id="pageAdd">＋ 지식 추가</button>
@@ -50,7 +51,7 @@
     </section>
 
     <form id="composer" class="composer">
-      <input id="input" autocomplete="off" placeholder="지식 입력 또는 검색" />
+      <input id="input" autocomplete="off" placeholder="할일 …  /  기록 …  또는 검색어" />
       <button type="submit" aria-label="보내기">➤</button>
     </form>
     <input id="fileInput" type="file" accept=".json" hidden />
@@ -96,7 +97,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-  <script src="firebase-config.js?v=1"></script>
-  <script src="app.js?v=29"></script>
+  <script src="firebase-config.js?v=2"></script>
+  <script src="app.js?v=31"></script>
 </body>
 </html>

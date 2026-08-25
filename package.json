@@ -6,12 +6,14 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "pack": "electron-builder --win portable"
+    "pack": "electron-builder --win portable",
+    "test": "node test/sync-check.mjs"
   },
   "devDependencies": {
     "electron": "latest",
     "electron-builder": "latest",
-    "firebase-tools": "^15.28.1"
+    "firebase-tools": "^15.28.1",
+    "playwright": "^1.48.0"
   },
   "build": {
     "appId": "kr.hansol.knowledge",
