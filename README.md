@@ -48,8 +48,14 @@ Windows 단독 실행 파일은 `npm run pack`으로 생성합니다.
 
 ```bash
 npm install
-node test/sync-check.mjs
+npm test
 ```
 
-Firebase 대역(`test/fake-firebase.js`)을 끼운 브라우저 두 탭으로 팝업 ↔ 사이트 실시간 연동,
-오프라인 보관 후 자동 업로드, ID 기준 병합, 기억 저장소 화면 크기와 날짜 표기를 점검합니다.
+- `test/sync-check.mjs` — Firebase 대역(`test/fake-firebase.js`)을 끼운 브라우저 두 탭으로 팝업 ↔ 사이트
+  실시간 연동, 오프라인 보관 후 자동 업로드, ID 기준 병합, 구버전 클라이언트와 섞였을 때의 자동 복구,
+  기억 저장소 화면 크기와 날짜 표기를 점검합니다.
+- `test/offline-check.mjs` — Firebase 가 아예 안 붙거나 동기화 로그인이 안 된 상태에서도
+  팝업 저장과 사이트 표시가 정상인지 점검합니다.
+
+동기화 PIN 창은 언제든 닫을 수 있습니다. 닫아도 저장은 이 컴퓨터에 계속 쌓이고,
+상단 연동 상태 배지를 누르면 다시 로그인 창을 열 수 있습니다.

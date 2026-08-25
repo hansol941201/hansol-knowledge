@@ -53,8 +53,8 @@ button { border: 0; cursor: pointer; }
 .todo-result-card .todo-state { padding: 3px 8px; border-radius: 999px; background: #ece4fb; color: #6f4bc0; font-size: 10px; }
 .todo-result-card .todo-state.done { background: #e6eae9; color: #7c8a86; }
 .todo-result-card.done h3, .todo-result-card.done p { color: #a39ba7; }
-.sync-state { padding: 5px 10px; border-radius: 999px; background: #eeeaf0; color: #7b7280; font-size: 10px; white-space: nowrap; }
-.sync-state[data-state="live"] { background: #e4f4ea; color: #2f7d51; }
+.sync-state { border: 0; cursor: pointer; font: inherit; padding: 5px 10px; border-radius: 999px; background: #eeeaf0; color: #7b7280; font-size: 10px; white-space: nowrap; }
+.sync-state[data-state="live"] { background: #e4f4ea; color: #2f7d51; cursor: default; }
 .sync-state[data-state="syncing"] { background: #eaeefb; color: #4a5aa8; }
 .sync-state[data-state="pending"] { background: #fdf0dd; color: #96650f; }
 .sync-state[data-state="offline"] { background: #f0eef1; color: #7b7280; }

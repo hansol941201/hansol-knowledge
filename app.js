@@ -58,6 +58,7 @@ let cloudApplying = false;
 let cloudSaveTimer = null;
 let cloudSyncing = false;
 let syncLoginPending = false;
+let syncPromptDismissed = false;
 let pendingCloudSync = localStorage.getItem('knowledge-sync-pending') === '1';
 let cloudStatus = 'offline';
 
@@ -448,7 +449,7 @@ function openApp() {
   window.knowledgeAPI?.setExpanded(true);
   orb.classList.add('hidden');
   app.classList.remove('hidden');
-  if (syncLoginPending) $('#syncModal').classList.remove('hidden');
+  if (syncLoginPending && !syncPromptDismissed) $('#syncModal').classList.remove('hidden');
   setTimeout(() => input.focus(), 120);
 }
 function collapseApp() {
@@ -466,7 +467,8 @@ $('#siteShortcut').addEventListener('click', () => {
 });
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
-  if (!$('#memoryModal').classList.contains('hidden')) closeMemoryLibrary();
+  if (!$('#syncModal').classList.contains('hidden')) closeSyncModal();
+  else if (!$('#memoryModal').classList.contains('hidden')) closeMemoryLibrary();
   else collapseApp();
 });
 
@@ -866,6 +868,7 @@ async function signInForSync(pin) {
   await window.HANSOL_AUTH.signInWithEmailAndPassword('hansol.sync@local.invalid', normalizedPin);
   localStorage.setItem('knowledge-sync-pin', normalizedPin);
   syncLoginPending = false;
+  syncPromptDismissed = false;
   $('#syncModal').classList.add('hidden');
   await startCloudSync();
 }
@@ -883,8 +886,27 @@ async function initCloudAuth() {
     catch { localStorage.removeItem('knowledge-sync-pin'); }
   }
   syncLoginPending = true;
-  if (!overlayMode || !app.classList.contains('hidden')) $('#syncModal').classList.remove('hidden');
+  if (!syncPromptDismissed && (!overlayMode || !app.classList.contains('hidden'))) $('#syncModal').classList.remove('hidden');
 }
+
+// PIN 창이 화면을 막아 아무것도 못 누르는 일이 없도록 언제든 닫을 수 있게 한다.
+// 닫아도 저장은 로컬에 계속되고, 나중에 로그인하면 밀린 항목이 함께 올라간다.
+function openSyncModal() {
+  $('#syncError').textContent = '';
+  $('#syncModal').classList.remove('hidden');
+  setTimeout(() => $('#syncPin').focus(), 50);
+}
+function closeSyncModal() {
+  syncPromptDismissed = true;
+  $('#syncModal').classList.add('hidden');
+}
+$('#syncClose').addEventListener('click', closeSyncModal);
+$('#syncLater').addEventListener('click', closeSyncModal);
+$('#syncModal').addEventListener('click', event => { if (event.target.id === 'syncModal') closeSyncModal(); });
+$('#syncState').addEventListener('click', () => {
+  if (cloudReady || !window.HANSOL_AUTH) return showToast(cloudReady ? '이미 연동 중' : '오프라인 저장 모드');
+  openSyncModal();
+});
 
 $('#syncForm').addEventListener('submit', async event => {
   event.preventDefault();

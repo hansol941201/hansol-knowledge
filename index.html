@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>지식창</title>
-  <link rel="stylesheet" href="styles.css?v=8" />
+  <link rel="stylesheet" href="styles.css?v=9" />
 </head>
 <body>
   <section class="knowledge-page">
@@ -12,7 +12,7 @@
       <div class="page-brand"><i></i><div><strong>한솔 지식</strong><span>업무 지식 보관함</span></div></div>
       <div class="page-tools">
         <label class="page-search">⌕<input id="pageSearch" placeholder="지식·연락처·할 일·기억 통합 검색 후 Enter" /></label>
-        <span id="syncState" class="sync-state" data-state="offline">오프라인 저장 모드</span>
+        <button id="syncState" class="sync-state" type="button" data-state="offline" title="동기화 상태">오프라인 저장 모드</button>
         <button id="memoryToggle" class="memory-toggle">📝 기억 저장소</button>
         <button id="accountAdd" class="account-add">🔒 계정 추가</button>
         <button id="pageAdd">＋ 지식 추가</button>
@@ -86,11 +86,11 @@
   </div>
   <div id="syncModal" class="modal hidden" role="dialog" aria-modal="true" aria-label="지식 동기화 로그인">
     <form id="syncForm" class="edit-box sync-box">
-      <header><strong>모든 컴퓨터 동기화</strong></header>
-      <p class="sync-help">처음 한 번만 6자 이상의 동기화 PIN을 입력하세요.</p>
+      <header><strong>모든 컴퓨터 동기화</strong><button id="syncClose" type="button" title="닫기">×</button></header>
+      <p class="sync-help">처음 한 번만 6자 이상의 동기화 PIN을 입력하세요.<br />나중에 해도 됩니다. 그동안 저장한 내용은 이 컴퓨터에 보관했다가 로그인하면 함께 올라갑니다.</p>
       <label>동기화 PIN<input id="syncPin" type="password" inputmode="numeric" autocomplete="current-password" required /></label>
       <div id="syncError" class="sync-error"></div>
-      <footer><button type="submit">동기화 시작</button></footer>
+      <footer><button id="syncLater" type="button">나중에 하기</button><button type="submit">동기화 시작</button></footer>
     </form>
   </div>
   <script src="partners.js?v=1"></script>
@@ -98,6 +98,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="firebase-config.js?v=2"></script>
-  <script src="app.js?v=32"></script>
+  <script src="app.js?v=33"></script>
 </body>
 </html>
