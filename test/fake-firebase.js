@@ -6,6 +6,7 @@
   const listeners = new Set();
   window.__FAKE_OFFLINE = false;
   window.__FAKE_WRITES = 0;
+  window.__FAKE_SWALLOW = false;
 
   // localStorage 는 탭 사이 반영이 한 박자 늦을 수 있어, 현재 문서는 메모리에 들고
   // 변경 내용을 BroadcastChannel 메시지에 실어 보낸다(새 탭 부팅용으로만 localStorage 사용).
@@ -66,7 +67,8 @@
         set: (_ref, data) => { staged = resolveStamps(data); }
       });
       if (window.__FAKE_OFFLINE) throw offlineError();
-      if (staged) writeStore(staged);
+      // __FAKE_SWALLOW: 쓰기는 성공한 척하지만 문서에는 반영하지 않는다(확인 로직 검증용).
+      if (staged && !window.__FAKE_SWALLOW) writeStore(staged);
       return result;
     }
   };

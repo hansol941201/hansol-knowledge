@@ -7,7 +7,7 @@
   "scripts": {
     "start": "electron .",
     "pack": "electron-builder --win portable",
-    "test": "node test/sync-check.mjs && node test/offline-check.mjs"
+    "test": "node test/entry-check.mjs && node test/sync-check.mjs && node test/offline-check.mjs"
   },
   "devDependencies": {
     "electron": "latest",

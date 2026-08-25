@@ -64,11 +64,26 @@ let cloudStatus = 'offline';
 
 // 삭제는 즉시 지우지 않고 표시만 남긴다(다른 기기와 ID 기준으로 병합할 때 되살아나지 않도록).
 const alive = (list) => (Array.isArray(list) ? list : []).filter(item => item && !item.deleted);
-const stampTime = () => Date.now();
-function touch(item) { item.updatedAt = stampTime(); return item; }
+const nowIso = () => new Date().toISOString();
+// updatedAt 은 버전에 따라 숫자(ms) · ISO · "2026.08.25 06:30" 이 섞여 있어 전부 읽는다.
+function timeOf(value) {
+  if (value === null || value === undefined) return 0;
+  if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
+  const text = String(value);
+  const parsed = Date.parse(text);
+  if (!Number.isNaN(parsed)) return parsed;
+  const legacy = text.match(/^(\d{4})\.(\d{2})\.(\d{2})[ T](\d{2}):(\d{2})/);
+  if (legacy) return new Date(Number(legacy[1]), Number(legacy[2]) - 1, Number(legacy[3]), Number(legacy[4]), Number(legacy[5])).getTime();
+  return 0;
+}
+function updatedTime(item) {
+  if (!item) return 0;
+  return timeOf(item.updatedAt) || timeOf(item.savedAt) || timeOf(item.createdAt);
+}
+function touch(item) { item.updatedAt = nowIso(); return item; }
 function ensureStamps(list) {
   for (const item of Array.isArray(list) ? list : []) {
-    if (item && !item.updatedAt) item.updatedAt = 0;
+    if (item && !item.updatedAt) item.updatedAt = item.savedAt || item.createdAt || 0;
   }
   return list;
 }
@@ -81,12 +96,12 @@ function mergeById(mine, theirs) {
     if (!item || !item.id) continue;
     const previous = merged.get(item.id);
     if (!previous) { merged.set(item.id, item); continue; }
-    merged.set(item.id, Number(item.updatedAt || 0) >= Number(previous.updatedAt || 0) ? item : previous);
+    merged.set(item.id, updatedTime(item) >= updatedTime(previous) ? item : previous);
   }
   return [...merged.values()];
 }
 function sortByRecent(list) {
-  return list.sort((a, b) => Number(b.updatedAt || 0) - Number(a.updatedAt || 0));
+  return list.sort((a, b) => updatedTime(b) - updatedTime(a));
 }
 // 구버전 클라이언트는 문서를 통째로 덮어써서 서버에 있던 다른 기기 자료를 지운다.
 // 내가 갖고 있는데 서버에는 없는 항목이 있으면 그 자리에서 다시 올려 복구한다.
@@ -112,9 +127,9 @@ for (const item of seed) {
     seen.set(key, keep);
   }
 })();
-const save = () => { localStorage.setItem('knowledge-messenger-data', JSON.stringify(knowledge)); queueCloudSave(); };
-const saveTodos = () => { localStorage.setItem('knowledge-todos', JSON.stringify(todos)); queueCloudSave(); };
-const saveMemories = () => { localStorage.setItem('knowledge-memories', JSON.stringify(memories)); queueCloudSave(); };
+const save = () => { saveLocalState(); queueCloudSave(); };
+const saveTodos = save;
+const saveMemories = save;
 const categoryMap = {
   '시방서 문의': '연락처', '공사 일정': '연락처', '하자 보수': '연락처', '스토어': '연락처',
   '폐기물 신청': '연락처', '폐기물 비용': '연락처', '하자 접수': '연락처', '미팅 일정': '연락처', '아파트 문의': '연락처',
@@ -163,6 +178,7 @@ function renderLibrary() {
     <article class="page-card partner-card" data-partner-index="${partners.indexOf(item)}">
       <small>협력업체</small><h3>${escapeHtml(item.name)}</h3>
       <p>${escapeHtml(item.phone || '전화번호 확인')}\n${escapeHtml(item.email || '이메일 확인')}</p>
+      ${partnerRecordsHtml(item.name)}
       <footer><button data-copy-phone>번호 복사</button><button data-copy-email>메일 복사</button><button data-partner-chat>지식창에서 보기</button></footer>
     </article>`).join('') + accounts.map(item => `
     <article class="page-card account-card" data-account-id="${item.id}">
@@ -270,6 +286,28 @@ function renderMemories() {
   });
 }
 
+// 협력업체 고객카드에 붙는 관련 할 일·기억. 업체명(㈜ 등 접두어 제외)이 들어간 기록을 모은다.
+function partnerKey(name) {
+  return normalize(String(name || '').replace(/㈜|\(주\)|주식회사/g, ''));
+}
+function partnerRecords(name) {
+  const key = partnerKey(name);
+  if (key.length < 2) return { todos: [], memories: [] };
+  return {
+    todos: sortBySaved(alive(todos).filter(todo => normalize(todo.text).includes(key))),
+    memories: sortBySaved(alive(memories).filter(memory => normalize(memory.text).includes(key)))
+  };
+}
+function partnerRecordsHtml(name) {
+  const { todos: todoHits, memories: memoryHits } = partnerRecords(name);
+  const total = todoHits.length + memoryHits.length;
+  if (!total) return '';
+  return `<div class="partner-records"><b>관련 기록 ${total}건</b>`
+    + todoHits.map(todo => `<div class="partner-record"><span>✓ 할 일</span><p>${escapeHtml(todo.text)}</p><time>${escapeHtml(todo.date || '')} · ${todo.done ? '완료' : '진행중'}</time></div>`).join('')
+    + memoryHits.map(memory => `<div class="partner-record"><span>📝 기억</span><p>${escapeHtml(memory.text)}</p><time>${escapeHtml(savedLabel(memory))}</time></div>`).join('')
+    + '</div>';
+}
+
 function findCategory(item) {
   return item.category || '기타';
 }
@@ -342,10 +380,10 @@ $('#editForm').addEventListener('submit', e => {
     Object.assign(item, values); touch(item);
     showToast('수정됨');
   } else {
-    knowledge.unshift(touch({ id: crypto.randomUUID(), ...values }));
+    createKnowledge(values.title, values.answer, { category: values.category, aliases: values.aliases });
     showToast('저장됨');
   }
-  save(); renderLibrary(); closeEditor();
+  save(); renderAll(); closeEditor();
 });
 
 const enc = new TextEncoder();
@@ -417,7 +455,7 @@ $('#vaultForm').addEventListener('submit', async e => {
   try {
     await unlockDeviceVault();
     const id = crypto.randomUUID();
-    accountMeta.unshift(touch({ id, service: $('#accountService').value.trim(), user: $('#accountId').value.trim() }));
+    accountMeta.unshift(newEntry({ id, service: $('#accountService').value.trim(), user: $('#accountId').value.trim() }));
     vaultSecrets[id] = $('#accountPassword').value;
     localStorage.setItem('knowledge-account-meta', JSON.stringify(accountMeta));
     await persistVault(); queueCloudSave(); renderLibrary(); closeVault(); showToast('계정 암호화 저장됨');
@@ -520,7 +558,10 @@ function addPartnerBubble(item) {
   chatEmpty.classList.add('off');
   const row = document.createElement('div'); row.className = 'row answer';
   const bubble = document.createElement('div'); bubble.className = 'bubble';
-  bubble.textContent = `${item.name}\n${item.phone || '전화번호 확인'}\n${item.email || '이메일 확인'}`;
+  const linked = partnerRecords(item.name);
+  const linkedText = [...linked.todos.map(todo => `✓ 할 일  ${todo.text}`), ...linked.memories.map(memory => `📝 ${memory.text}  (${savedLabel(memory)})`)];
+  bubble.textContent = [`${item.name}`, item.phone || '전화번호 확인', item.email || '이메일 확인',
+    ...(linkedText.length ? ['', `관련 기록 ${linkedText.length}건`, ...linkedText] : [])].join('\n');
   const actions = document.createElement('div'); actions.className = 'actions';
   actions.innerHTML = '<button data-phone>번호 복사</button><button data-email>메일 복사</button>';
   actions.querySelector('[data-phone]').onclick = () => item.phone ? copyText(item.phone) : showToast('전화번호 확인');
@@ -547,16 +588,10 @@ function addAccountBubble(item) {
 function stampLabel(date = new Date()) {
   return `${date.getFullYear()}.${String(date.getMonth()+1).padStart(2,'0')}.${String(date.getDate()).padStart(2,'0')} ${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
 }
-// 예전 기록은 "2026.08.25 06:30" 문자열만 갖고 있어 이를 그대로 되살려 쓴다.
 function savedDateOf(item) {
-  if (!item) return null;
-  if (Number.isFinite(item.savedAt)) return new Date(item.savedAt);
-  const legacy = String(item.createdAt || '').match(/^(\d{4})\.(\d{2})\.(\d{2})[ T](\d{2}):(\d{2})/);
-  if (legacy) return new Date(Number(legacy[1]), Number(legacy[2]) - 1, Number(legacy[3]), Number(legacy[4]), Number(legacy[5]));
-  const dayOnly = String(item.date || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (dayOnly) return new Date(Number(dayOnly[1]), Number(dayOnly[2]) - 1, Number(dayOnly[3]));
-  if (Number.isFinite(item.updatedAt) && item.updatedAt > 0) return new Date(item.updatedAt);
-  return null;
+  const value = item && (item.createdAt || item.savedAt || item.updatedAt);
+  const millis = timeOf(value);
+  return millis ? new Date(millis) : null;
 }
 function savedMillis(item) { const date = savedDateOf(item); return date ? date.getTime() : 0; }
 function clockLabel(date) {
@@ -575,36 +610,96 @@ function savedLabel(item) {
 }
 function sortBySaved(list) { return list.sort((a, b) => savedMillis(b) - savedMillis(a)); }
 
-function createMemory(text) {
-  const now = new Date();
-  const memory = touch({ id: crypto.randomUUID(), text: text.trim(), createdAt: stampLabel(now), savedAt: now.getTime() });
-  memories.unshift(memory);
-  saveMemories(); renderMemories(); renderLibrary();
-  return memory;
+// ── 공통 저장 함수 ──────────────────────────────────────────────
+// 팝업이든 사이트 화면이든 저장은 반드시 아래 함수들만 거친다.
+// 같은 배열(knowledge/todos/memories)과 같은 localStorage 키, 같은 Firebase 문서를 쓴다.
+
+const ENTRY_SOURCE = overlayMode ? '팝업' : '사이트';
+
+function newEntry(fields, source) {
+  const now = nowIso();
+  return {
+    id: crypto.randomUUID(),
+    createdAt: now,        // 생성 날짜·시간
+    updatedAt: now,        // 수정 날짜·시간
+    source: source || ENTRY_SOURCE,   // 입력 출처
+    ...fields
+  };
 }
-function createTodo(text) {
-  const now = new Date();
-  const todo = touch({ id: crypto.randomUUID(), text: text.trim(), date: todayKey(), done: false, createdAt: stampLabel(now), savedAt: now.getTime() });
+
+function createTodo(text, source) {
+  const raw = String(text || '').trim();
+  if (!raw) return null;
+  const todo = newEntry({ text: raw, raw, date: todayKey(), done: false }, source);
   todos.unshift(todo);
-  saveTodos(); renderTodos(); renderLibrary();
   return todo;
 }
 
-// 저장은 로컬에 먼저 끝내고, Firebase 업로드 결과를 같은 말풍선에 이어서 알린다.
-async function announceSave(kind, body) {
-  const label = kind === 'todo' ? '할 일' : '기록';
-  const bubble = addBubble(`${label} 저장 중…\n${body}`, 'answer');
-  const uploaded = await flushCloudSave();
-  bubble.textContent = uploaded
-    ? `✓ ${label} 저장 및 연동 완료\n${body}`
-    : `✓ ${label} 저장 완료 · 오프라인 보관\n인터넷이 연결되면 자동 업로드\n${body}`;
-  showToast(uploaded ? `✓ ${label} 저장 및 연동 완료` : `${label} 저장됨 · 업로드 대기`);
-  messages.scrollTop = messages.scrollHeight;
+function createMemory(text, source) {
+  const raw = String(text || '').trim();
+  if (!raw) return null;
+  const memory = newEntry({ text: raw, raw }, source);
+  memories.unshift(memory);
+  return memory;
 }
 
-// 팝업 명령어 — “할일/할 일 …”은 할 일 목록, “기록/기억 …”은 기억 저장소로 보낸다.
+function createKnowledge(title, answer, options = {}) {
+  const name = String(title || '').trim();
+  const body = String(answer === undefined || answer === null ? '' : answer).trim();
+  if (!name) return null;
+  const item = newEntry({
+    title: name,
+    answer: body || name,
+    text: body ? `${name} | ${body}` : name,
+    raw: options.raw || (body ? `${name} | ${body}` : name),
+    category: options.category || '기타',
+    aliases: Array.isArray(options.aliases) ? options.aliases : []
+  }, options.source);
+  knowledge.unshift(item);
+  return item;
+}
+
+function saveLocalState() {
+  localStorage.setItem('knowledge-messenger-data', JSON.stringify(knowledge));
+  localStorage.setItem('knowledge-todos', JSON.stringify(todos));
+  localStorage.setItem('knowledge-memories', JSON.stringify(memories));
+  localStorage.setItem('knowledge-account-meta', JSON.stringify(accountMeta));
+}
+
+function renderAll() {
+  renderLibrary();
+  renderTodos();
+  renderMemories();
+}
+
+// 저장 순서: 배열 → 로컬 저장 → 화면 갱신 → Firebase → 저장된 문서 확인.
+async function commitEntry(item, kind) {
+  const labels = { todo: '할 일', memory: '기록', knowledge: '지식' };
+  const label = labels[kind] || '기록';
+  const detail = kind === 'todo'
+    ? `${item.text}\n${item.date} · 진행중`
+    : kind === 'knowledge'
+      ? `${item.title}\n${item.answer}`
+      : `${item.text}\n${savedLabel(item)}`;
+
+  saveLocalState();          // 2. 로컬 저장 완료
+  renderAll();               // 3. 내 지식 · 할 일 · 기억 저장소 즉시 다시 표시
+
+  const bubble = addBubble(`${label} 저장 중…\n${detail}`, 'answer');
+  const result = await saveCloudState({ verifyIds: [item.id] });   // 4~5. Firebase 저장 + 확인
+
+  bubble.textContent = result.verified
+    ? `✓ ${label} 저장 및 연동 완료\n${detail}`
+    : `로컬 저장 완료·클라우드 연동 대기 중\n${detail}`;
+  showToast(result.verified ? `✓ ${label} 저장 및 연동 완료` : '로컬 저장 완료·클라우드 연동 대기 중');
+  messages.scrollTop = messages.scrollHeight;
+  return result.verified;
+}
+
+// 팝업 명령어 — 어떤 입력이든 반드시 실제 배열과 Firebase 문서에 저장된다.
 const TODO_COMMAND = /^(?:할\s*일|todo)[\s.,:·\-]*(.+)$/i;
 const MEMORY_COMMAND = /^(?:기록|기억|메모)[\s.,:·\-]*(.+)$/i;
+const KNOWLEDGE_COMMAND = /^(?:지식|knowledge)[\s.,:·\-]*(.+)$/i;
 const MEMORY_LIST_COMMAND = /^(?:기록|기억|메모)[\s.,:·\-]*$/;
 const TODO_LIST_COMMAND = /^(?:할\s*일|todo)[\s.,:·\-]*$/i;
 
@@ -617,53 +712,61 @@ $('#composer').addEventListener('submit', (e) => {
   handleComposerText(text);
 });
 
+function showSearchHits(text) {
+  const query = normalize(text);
+  if (!query) return;
+  findPartners(text).forEach(addPartnerBubble);
+  findAccounts(text).forEach(addAccountBubble);
+  findKnowledge(text).forEach(item => addBubble(`${item.title}\n${item.answer}`, 'answer', item));
+  alive(todos)
+    .filter(todo => normalize(`${todo.text} ${todo.date || ''}`).includes(query))
+    .forEach(todo => addBubble(`✓ 할 일\n${todo.text}\n${todo.date || '날짜 확인'} · ${todo.done ? '완료' : '진행중'}`, 'answer'));
+  alive(memories)
+    .filter(memory => normalize(memory.text).includes(query))
+    .forEach(memory => addBubble(`기억\n${memory.text}\n${savedLabel(memory)}`, 'answer'));
+}
+
 function handleComposerText(text) {
+  // 목록 보기 명령만 저장하지 않는다.
   if (MEMORY_LIST_COMMAND.test(text)) {
     const list = sortBySaved(alive(memories));
     if (!list.length) addBubble('기억 저장소 비어 있음\n“기록 내용”으로 저장하세요', 'answer');
     else list.slice(0, 8).forEach(memory => addBubble(`기억\n${memory.text}\n${savedLabel(memory)}`, 'answer'));
-    return;
+    return Promise.resolve(false);
   }
   if (TODO_LIST_COMMAND.test(text)) {
     const list = alive(todos);
     if (!list.length) addBubble('할 일 없음\n“할일 내용”으로 저장하세요', 'answer');
     else list.slice(0, 8).forEach(todo => addBubble(`✓ 할 일\n${todo.text}\n${todo.date || '날짜 확인'} · ${todo.done ? '완료' : '진행중'}`, 'answer'));
-    return;
+    return Promise.resolve(false);
   }
+
+  // 지식 제목 | 내용 → knowledge
+  const knowledgeMatch = text.match(KNOWLEDGE_COMMAND);
+  if (knowledgeMatch?.[1]?.trim()) {
+    const [title, ...rest] = knowledgeMatch[1].split('|');
+    const item = createKnowledge(title, rest.join('|'), { raw: text });
+    if (item) return commitEntry(item, 'knowledge');
+  }
+
+  // 할일 내용 / 할 일 내용 → todos
   const todoMatch = text.match(TODO_COMMAND);
   if (todoMatch?.[1]?.trim()) {
     const todo = createTodo(todoMatch[1]);
-    announceSave('todo', `${todo.text}\n${todo.date} · 진행중`);
-    return;
+    if (todo) return commitEntry(todo, 'todo');
   }
+
+  // 기록 내용 / 기억 내용 → memories
   const memoryMatch = text.match(MEMORY_COMMAND);
   if (memoryMatch?.[1]?.trim()) {
     const memory = createMemory(memoryMatch[1]);
-    announceSave('memory', `${memory.text}\n${savedLabel(memory)}`);
-    return;
+    if (memory) return commitEntry(memory, 'memory');
   }
-  const partnerMatches = findPartners(text);
-  if (partnerMatches.length) {
-    partnerMatches.forEach(addPartnerBubble);
-    return;
-  }
-  const accountMatches = findAccounts(text);
-  if (accountMatches.length) {
-    accountMatches.forEach(addAccountBubble);
-    return;
-  }
-  const matches = findKnowledge(text);
-  const normalizedQuery = normalize(text);
-  const todoMatches = alive(todos).filter(todo => normalize(`${todo.text} ${todo.date || ''}`).includes(normalizedQuery));
-  const memoryMatches = alive(memories).filter(memory => normalize(`${memory.text} ${memory.createdAt || ''}`).includes(normalizedQuery));
-  matches.forEach(item => addBubble(`${item.title}\n${item.answer}`, 'answer', item));
-  todoMatches.forEach(todo => addBubble(`✓ 할 일\n${todo.text}\n${todo.date || '날짜 확인'} · ${todo.done ? '완료' : '진행중'}`, 'answer'));
-  memoryMatches.forEach(memory => addBubble(`기억\n${memory.text}\n${savedLabel(memory)}`, 'answer'));
-  // 명령어도 아니고 찾은 것도 없는 일반 문장은 기억 저장소로 자동 저장한다.
-  if (!matches.length && !todoMatches.length && !memoryMatches.length) {
-    const memory = createMemory(text);
-    announceSave('memory', `${memory.text}\n${savedLabel(memory)}`);
-  }
+
+  // 그 외 일반 문장 → 찾은 결과를 보여 주고, 문장 자체도 기억 저장소에 저장한다.
+  showSearchHits(text);
+  const memory = createMemory(text);
+  return memory ? commitEntry(memory, 'memory') : Promise.resolve(false);
 }
 
 function parseKnowledge(text) {
@@ -705,11 +808,9 @@ $('#importBtn').addEventListener('click', () => {
 $('#quickClose').addEventListener('click', () => $('#quickAdd').classList.add('hidden'));
 $('#quickAdd').addEventListener('submit', e => {
   e.preventDefault();
-  const item = {
-    id: crypto.randomUUID(), title: $('#quickTitle').value.trim(), answer: $('#quickAnswer').value.trim(),
-    category: $('#quickCategory').value, aliases: []
-  };
-  knowledge.unshift(touch(item)); save(); renderLibrary();
+  const item = createKnowledge($('#quickTitle').value, $('#quickAnswer').value, { category: $('#quickCategory').value });
+  if (!item) return;
+  saveLocalState(); queueCloudSave(); renderAll();
   $('#quickTitle').value = ''; $('#quickAnswer').value = '';
   $('#quickAdd').classList.add('hidden');
   addBubble(`✓ 저장\n${item.title}\n${item.answer}`, 'answer', item);
@@ -721,8 +822,9 @@ $('#fileInput').addEventListener('change', async (e) => {
     const incoming = JSON.parse(await file.text());
     if (!Array.isArray(incoming)) throw new Error();
     const existing = new Set(alive(knowledge).map(x => normalize(x.title)));
-    const fresh = incoming.filter(x => x.title && x.answer && !existing.has(normalize(x.title))).map(x => touch({ id: crypto.randomUUID(), aliases: [], ...x }));
-    knowledge = [...fresh, ...knowledge]; save(); renderLibrary();
+    const fresh = incoming.filter(x => x.title && x.answer && !existing.has(normalize(x.title)));
+    fresh.forEach(x => createKnowledge(x.title, x.answer, { category: x.category, aliases: x.aliases, source: '가져오기' }));
+    save(); renderAll();
     addBubble(`가져오기 완료\n${fresh.length}개 추가`, 'answer');
   } catch { addBubble('가져오기 X\nJSON 형식 확인', 'answer'); }
   e.target.value = '';
@@ -757,24 +859,22 @@ function clearPending() {
   setCloudStatus('live');
 }
 
-function saveLocalSnapshot() {
-  localStorage.setItem('knowledge-messenger-data', JSON.stringify(knowledge));
-  localStorage.setItem('knowledge-todos', JSON.stringify(todos));
-  localStorage.setItem('knowledge-memories', JSON.stringify(memories));
-  localStorage.setItem('knowledge-account-meta', JSON.stringify(accountMeta));
-}
-
 function queueCloudSave() {
   if (cloudApplying) return;
   if (!cloudReady || !window.HANSOL_FIRESTORE) { markPending(); return; }
   clearTimeout(cloudSaveTimer);
-  cloudSaveTimer = setTimeout(() => { flushCloudSave(); }, 350);
+  cloudSaveTimer = setTimeout(() => { saveCloudState(); }, 350);
 }
 
-// 업로드는 항상 트랜잭션 안에서 원격 문서를 다시 읽어 ID 기준으로 병합한다(덮어쓰기 금지).
-async function flushCloudSave() {
+// Firebase 저장. 트랜잭션 안에서 원격 문서를 다시 읽어 ID 기준으로 병합하고(덮어쓰기 금지),
+// 쓰기가 끝나면 서버에서 문서를 한 번 더 읽어 실제로 들어갔는지 확인한다.
+// "실시간 연동 중" 상태만으로 성공 처리하지 않는다.
+async function saveCloudState({ verifyIds = [] } = {}) {
   clearTimeout(cloudSaveTimer);
-  if (!cloudReady || !window.HANSOL_FIRESTORE) { markPending(); return false; }
+  if (!cloudReady || !window.HANSOL_FIRESTORE) {
+    markPending();
+    return { ok: false, verified: false, reason: 'offline' };
+  }
   while (cloudSyncing) await new Promise(resolve => setTimeout(resolve, 60));
   cloudSyncing = true;
   setCloudStatus('syncing');
@@ -794,14 +894,32 @@ async function flushCloudSave() {
       transaction.set(stateDoc, { ...next, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
       return next;
     });
+
+    // 저장된 문서를 서버에서 직접 다시 읽어 확인한다(캐시가 아니라 서버).
+    let saved = null;
+    try { saved = (await stateDoc.get({ source: 'server' })).data(); }
+    catch { saved = (await stateDoc.get()).data(); }
+    const storedIds = new Set([
+      ...((saved && saved.knowledge) || []),
+      ...((saved && saved.todos) || []),
+      ...((saved && saved.memories) || []),
+      ...((saved && saved.accountMeta) || [])
+    ].map(entry => entry && entry.id));
+    const missing = verifyIds.filter(id => !storedIds.has(id));
+
     cloudSyncing = false;
     await applyCloudState(merged);
+    if (missing.length) {
+      console.error('Firebase 저장 확인 실패', missing);
+      markPending();
+      return { ok: true, verified: false, reason: 'not-found', missing };
+    }
     clearPending();
-    return true;
+    return { ok: true, verified: true };
   } catch (error) {
     console.error('Firebase 저장 실패', error);
     markPending();
-    return false;
+    return { ok: false, verified: false, reason: 'error' };
   } finally {
     cloudSyncing = false;
   }
@@ -821,14 +939,12 @@ async function applyCloudState(state) {
   const remoteSecrets = state.vaultSecrets && typeof state.vaultSecrets === 'object' ? state.vaultSecrets : {};
   vaultSecrets = { ...remoteSecrets, ...vaultSecrets };
   for (const account of accountMeta) if (account.deleted) delete vaultSecrets[account.id];
-  saveLocalSnapshot();
+  saveLocalState();
   try {
     vaultKey = vaultKey || await getDeviceKey();
     await persistVault();
   } catch (error) { console.error('로컬 계정 보관 실패', error); }
-  renderLibrary();
-  renderTodos();
-  renderMemories();
+  renderAll();
   cloudApplying = false;
   if (missingOnServer) queueCloudSave();
 }
@@ -841,7 +957,7 @@ async function startCloudSync() {
     const first = await stateDoc.get();
     if (first.exists) await applyCloudState(first.data());
   } catch (error) { console.error('Firebase 최초 읽기 실패', error); }
-  await flushCloudSave();
+  await saveCloudState();
   stateDoc.onSnapshot(snapshot => {
     if (!snapshot.exists || snapshot.metadata.hasPendingWrites) return;
     applyCloudState(snapshot.data());
@@ -856,7 +972,7 @@ function retryPendingSync() {
     if (window.HANSOL_AUTH && window.HANSOL_AUTH.currentUser) startCloudSync();
     return;
   }
-  flushCloudSave();
+  saveCloudState();
 }
 window.addEventListener('online', retryPendingSync);
 setInterval(retryPendingSync, 15000);
