@@ -56,6 +56,7 @@ let pendingSecretCopy = null;
 let cloudReady = false;
 let cloudApplying = false;
 let cloudSaveTimer = null;
+let syncLoginPending = false;
 const knownTitles = new Set(knowledge.map(item => item.title));
 for (const item of seed) {
   if (!knownTitles.has(item.title)) knowledge.push(item);
@@ -376,9 +377,11 @@ function openApp() {
   window.knowledgeAPI?.setExpanded(true);
   orb.classList.add('hidden');
   app.classList.remove('hidden');
+  if (syncLoginPending) $('#syncModal').classList.remove('hidden');
   setTimeout(() => input.focus(), 120);
 }
 function collapseApp() {
+  if (overlayMode && syncLoginPending) $('#syncModal').classList.add('hidden');
   app.classList.add('hidden');
   orb.classList.remove('hidden');
   window.knowledgeAPI?.setExpanded(false);
@@ -651,6 +654,7 @@ async function signInForSync(pin) {
   await window.HANSOL_AUTH.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
   await window.HANSOL_AUTH.signInWithEmailAndPassword('hansol.sync@local.invalid', normalizedPin);
   localStorage.setItem('knowledge-sync-pin', normalizedPin);
+  syncLoginPending = false;
   $('#syncModal').classList.add('hidden');
   await startCloudSync();
 }
@@ -666,7 +670,8 @@ async function initCloudAuth() {
     try { return await signInForSync(savedPin); }
     catch { localStorage.removeItem('knowledge-sync-pin'); }
   }
-  $('#syncModal').classList.remove('hidden');
+  syncLoginPending = true;
+  if (!overlayMode || !app.classList.contains('hidden')) $('#syncModal').classList.remove('hidden');
 }
 
 $('#syncForm').addEventListener('submit', async event => {
