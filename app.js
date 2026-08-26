@@ -848,27 +848,23 @@ const LEGACY_DEFAULTS = {
   'shortcut-naver': 'https://www.naver.com'
 };
 
-// 기본 카드에 어울리는 기본 아이콘. 이미 이미지를 넣어 둔 카드는 건드리지 않고,
-// 한 번 채운 뒤에는(직접 지웠더라도) 다시 채우지 않는다.
-const DEFAULT_SHORTCUT_ICONS = {
-  'shortcut-pour-contract': 'contract',
-  'shortcut-pour-support': 'lab',
-  'shortcut-team-schedule': 'calendar',
-  'shortcut-sales': 'b2b'
-};
+// 카드 이름에 맞는 대표 아이콘을 한 번만 넣어 준다.
+// 이름·주소·순서·클릭은 건드리지 않고 image 만 바꾼다.
+const SHORTCUT_ICON_VERSION = 'v2';
 
 function fillDefaultShortcutIcons() {
-  if (localStorage.getItem('knowledge-shortcut-icons') === 'v1') return false;
+  if (localStorage.getItem('knowledge-shortcut-icons') === SHORTCUT_ICON_VERSION) return false;
   let changed = false;
-  for (const [id, icon] of Object.entries(DEFAULT_SHORTCUT_ICONS)) {
-    const item = shortcuts.find(x => x.id === id && !x.deleted);
-    if (!item || item.image) continue;                 // 직접 올린 이미지는 그대로 둔다
-    item.image = builtinIconUrl(icon);
+  for (const item of shortcuts) {
+    if (item.deleted) continue;
+    const url = builtinIconUrl(iconForShortcut(item));
+    if (!url || item.image === url) continue;          // 어울리는 아이콘이 없으면 그대로 둔다
+    item.image = url;
     item.imageFit = SHORTCUT_FIT;
     touch(item);
     changed = true;
   }
-  localStorage.setItem('knowledge-shortcut-icons', 'v1');
+  localStorage.setItem('knowledge-shortcut-icons', SHORTCUT_ICON_VERSION);
   return changed;
 }
 
@@ -882,7 +878,9 @@ function seedShortcuts() {
   for (const preset of DEFAULT_SHORTCUTS) {
     if (shortcuts.some(item => item.id === preset.id)) continue;          // 지운 것도 다시 만들지 않는다
     if (shortcuts.some(item => !item.deleted && item.url === preset.url)) continue;
-    shortcuts.push(newEntry({ type: 'shortcut', image: '', imageFit: SHORTCUT_FIT, order: order++, ...preset }, '기본'));
+    shortcuts.push(newEntry({
+      type: 'shortcut', image: builtinIconUrl(iconForShortcut(preset)), imageFit: SHORTCUT_FIT, order: order++, ...preset
+    }, '기본'));
     changed = true;
   }
   if (fillDefaultShortcutIcons()) changed = true;

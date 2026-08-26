@@ -53,22 +53,23 @@ ok('기본 7개 · 순서대로', JSON.stringify(names)===JSON.stringify(NAMES),
 ok('옛 기본값(K-APT/Gmail/네이버) 없음', !names.some(n=>['K-APT','Gmail','네이버'].includes(n)));
 ok('+ 사이트 추가 유지', await page.isVisible('#shortcutAdd'));
 ok('도메인 텍스트 없음', !(await page.textContent('#shortcutGrid')).includes('github.io'));
-ok('이미지 없으면 placeholder', (await page.$$eval('.shortcut-badge', n=>n.map(x=>x.textContent))).includes('HS'));
-// 기본 아이콘 4개가 자동으로 들어간다
+// 이름에 맞는 대표 아이콘이 카드마다 자동으로 들어간다
 const icons = await page.evaluate(()=>{
-  const pick = id => {
-    const img = document.querySelector(`.shortcut[data-shortcut="${id}"] .shortcut-thumb .thumb-face`);
-    if (!img) return null;
-    const r = img.getBoundingClientRect();
-    return { svg: img.src.startsWith('data:image/svg+xml'), w: Math.round(r.width), h: Math.round(r.height) };
-  };
-  return { contract: pick('shortcut-pour-contract'), lab: pick('shortcut-pour-support'),
-           calendar: pick('shortcut-team-schedule'), b2b: pick('shortcut-sales'),
-           untouched: !document.querySelector('.shortcut[data-shortcut="shortcut-knowledge"] .shortcut-thumb .thumb-face') };
+  const rows = [...document.querySelectorAll('.shortcut[data-shortcut]')].map(card => {
+    const img = card.querySelector('.thumb-face');
+    const r = img && img.getBoundingClientRect();
+    return { name: card.querySelector('a b').textContent, src: img ? img.src : '',
+             w: r ? Math.round(r.width) : 0, h: r ? Math.round(r.height) : 0 };
+  });
+  return { rows, unique: new Set(rows.map(r=>r.src)).size };
 });
-ok('기본 아이콘 자동 적용', ['contract','lab','calendar','b2b'].every(k=>icons[k] && icons[k].svg), JSON.stringify(icons));
-ok('아이콘도 카드 안에 맞춰 들어감', icons.contract.h<=90 && icons.contract.w<=152, JSON.stringify(icons.contract));
-ok('아이콘 없는 카드는 그대로', icons.untouched);
+ok('카드마다 대표 아이콘', icons.rows.every(r=>r.src.startsWith('data:image/svg+xml')), JSON.stringify(icons.rows.map(r=>r.name)));
+ok('7개 카드 색·그림이 전부 다름', icons.unique===icons.rows.length, `${icons.unique}/${icons.rows.length}`);
+ok('아이콘도 카드 안에 맞춰 들어감', icons.rows.every(r=>r.h<=90 && r.w<=152), JSON.stringify(icons.rows[0]));
+ok('이름 없는 새 카드는 placeholder', await page.evaluate(()=>{
+  const el = document.createElement('div');   // 렌더 규칙만 확인
+  return typeof iconForShortcut === 'function' && iconForShortcut({ name: '무관한사이트', id: 'x' }) === '';
+}));
 const url = await page.getAttribute('.shortcut[data-shortcut="shortcut-pour-contract"] a','href');
 const target = await page.getAttribute('.shortcut[data-shortcut="shortcut-pour-contract"] a','target');
 ok('URL · 새 탭', url==='https://poursolution.github.io/pour-contract/' && target==='_blank', `${url} / ${target}`);
@@ -90,10 +91,10 @@ await page.waitForTimeout(500);
 ok('미리보기 표시', await page.isVisible('#shortcutPreview .thumb-face'));
 ok('미리보기도 contain', (await page.$eval('#shortcutPreview .thumb-face', n=>getComputedStyle(n).objectFit))==='contain');
 // 기본 아이콘 고르기
-ok('기본 아이콘 5개 제공', (await page.$$('#iconPicker [data-icon]')).length===5);
-await page.click('#iconPicker [data-icon="lounge"]'); await page.waitForTimeout(200);
+ok('기본 아이콘 8개 제공', (await page.$$('#iconPicker [data-icon]')).length===8);
+await page.click('#iconPicker [data-icon="tracker"]'); await page.waitForTimeout(200);
 ok('아이콘을 고르면 미리보기 교체', (await page.getAttribute('#shortcutPreview .thumb-face','src')).startsWith('data:image/svg+xml'));
-ok('고른 아이콘 표시', await page.evaluate(()=>document.querySelector('#iconPicker [data-icon="lounge"]').classList.contains('active')));
+ok('고른 아이콘 표시', await page.evaluate(()=>document.querySelector('#iconPicker [data-icon="tracker"]').classList.contains('active')));
 await page.setInputFiles('#shortcutFile', { name:'logo.png', mimeType:'image/png', buffer: png });
 await page.waitForTimeout(500);
 ok('채우기/맞추기 선택 없음', (await page.$$('[data-fit]')).length===0);
@@ -183,6 +184,30 @@ await page.fill('#shortcutName','새 사이트'); await page.fill('#shortcutUrl'
 await page.click('#shortcutForm button[type="submit"]'); await page.waitForTimeout(400);
 names = await page.$$eval('.shortcut[data-shortcut] a b', n=>n.map(x=>x.textContent));
 ok('사이트 추가는 맨 뒤에', names.at(-1)==='새 사이트', JSON.stringify(names));
+
+// 이름을 바꿔 쓰는 실제 카드 8개에도 각각 다른 대표 아이콘이 붙는지
+const mine = ['협약서','T4','고객관리','한솔지식','팀장님구글일정','Q&A','영업팀 일정','B2B트래커'].map((name,i)=>({
+  id:`mine-${i}`, type:'shortcut', name, url:`https://example.com/${i}`, image:'data:image/jpeg;base64,AAAA',
+  imageFit:'contain', order:i, source:'테스트',
+  createdAt:'2026-08-26T01:00:00.000Z', updatedAt:'2026-08-26T01:00:00.000Z' }));
+const ctx2 = await b.newContext({viewport:{width:1400,height:900}});
+await ctx2.addInitScript(stub);
+await ctx2.addInitScript(l=>{ localStorage.setItem('knowledge-shortcuts', JSON.stringify(l)); }, mine);
+await ctx2.route('**gstatic.com/**',r=>r.abort());
+const page2 = await ctx2.newPage();
+await page2.goto(base+'/index.html');
+await page2.waitForFunction(()=>document.querySelector('#syncState')?.dataset.state==='live',null,{timeout:10000});
+await page2.waitForTimeout(700);
+const mineOut = await page2.evaluate(()=>[...document.querySelectorAll('.shortcut[data-shortcut^="mine-"]')].map(card=>({
+  name: card.querySelector('a b').textContent,
+  url: card.querySelector('a').getAttribute('href'),
+  src: (card.querySelector('.thumb-face')||{}).src || '' })));
+ok('내 카드 8개 모두 아이콘', mineOut.length===8 && mineOut.every(r=>r.src.startsWith('data:image/svg+xml')),
+   JSON.stringify(mineOut.map(r=>r.name)));
+ok('8개 색·그림이 전부 다름', new Set(mineOut.map(r=>r.src)).size===8, `${new Set(mineOut.map(r=>r.src)).size}/8`);
+ok('이름 그대로', mineOut.map(r=>r.name).join('|')==='협약서|T4|고객관리|한솔지식|팀장님구글일정|Q&A|영업팀 일정|B2B트래커', JSON.stringify(mineOut.map(r=>r.name)));
+ok('주소 그대로', mineOut.every((r,i)=>r.url===`https://example.com/${i}`), JSON.stringify(mineOut.map(r=>r.url)));
+await ctx2.close();
 
 await b.close(); server.close();
 if (errors.length) console.log('JS 오류:\n'+errors.join('\n'));
