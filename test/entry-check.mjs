@@ -40,10 +40,10 @@ ok('1. Firebase shared/state 문서에 저장됨', ((await cloud(site)).todos||[
 
 // 2) 웹사이트 할 일 탭과 상단 검색
 ok('2. 할 일 목록에 표시', (await site.textContent('#todayPanel')).includes('금화기업 전화'));
-await site.click('#pageCategories [data-category="할 일"]');
+await site.click('.side-item[data-nav="할 일"]');
 await site.waitForTimeout(300);
 ok('2. 할 일 탭에 표시', (await site.textContent('#pageGrid')).includes('금화기업 전화'));
-await site.click('#pageCategories [data-category="전체"]');
+await site.click('.side-item[data-nav="대시보드"]');
 ok('2. 상단 검색에서 "금화기업" 확인', (await search(site, '금화기업')).includes('금화기업 전화'));
 await search(site, '');
 

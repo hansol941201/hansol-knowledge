@@ -3,30 +3,57 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>지식창</title>
-  <link rel="stylesheet" href="styles.css?v=15" />
+  <title>한솔 지식</title>
+  <link rel="stylesheet" href="styles.css?v=16" />
 </head>
 <body>
-  <section class="knowledge-page">
-    <header class="page-header">
-      <div class="page-brand"><i></i><div><strong>한솔 지식</strong><span>업무 지식 보관함</span></div></div>
-      <div class="page-tools">
-        <label class="page-search">⌕<input id="pageSearch" placeholder="특허번호·지식·연락처·할 일·기억 통합 검색 후 Enter" /></label>
-        <button id="syncState" class="sync-state" type="button" data-state="offline" title="동기화 상태">오프라인 저장 모드</button>
-        <button id="memoryToggle" class="memory-toggle">📝 기억 저장소</button>
-        <button id="accountAdd" class="account-add">🔒 계정 추가</button>
-        <button id="pageAdd">＋ 지식 추가</button>
-        <button id="resetOpen" class="reset-open" title="자료 초기화">⟳ 초기화</button>
+  <div class="workspace">
+    <aside class="sidebar">
+      <div class="side-brand">
+        <span class="side-mark" data-icon="sparkle"></span>
+        <div><strong>한솔 지식</strong><small>나만의 지식 비서</small></div>
       </div>
-    </header>
-    <div class="page-content">
-      <div class="page-title"><div><h1>내 지식</h1><p>기록한 업무 지식을 한눈에 확인하세요.</p></div><b id="pageCount">0</b></div>
-      <section id="todayPanel" class="today-panel"></section>
-      <nav id="pageCategories" class="page-categories"></nav>
-      <div id="pageGrid" class="page-grid"></div>
-      <div id="pageEmpty" class="page-empty hidden">검색 결과 없음</div>
-    </div>
-  </section>
+      <nav id="sideNav" class="side-nav"></nav>
+      <div class="side-foot">
+        <button id="memoryToggle" class="side-link" type="button"><span data-icon="bookmark"></span>기억 저장소</button>
+        <button id="syncOpen" class="side-link" type="button"><span data-icon="settings"></span>동기화 설정</button>
+        <button id="resetBackupSide" class="side-link" type="button"><span data-icon="download"></span>데이터 백업</button>
+        <button id="resetOpen" class="side-link" type="button"><span data-icon="refresh"></span>초기화</button>
+        <button id="syncState" class="sync-state" type="button" data-state="offline">오프라인 저장 모드</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <label class="page-search"><span data-icon="search"></span><input id="pageSearch" placeholder="지식, 특허번호, 업체명, 연락처를 검색하세요" /></label>
+        <button id="accountAdd" class="hidden" type="button" aria-hidden="true"></button>
+        <button id="pageAdd" class="primary-btn" type="button"><span data-icon="plus"></span>지식 추가</button>
+      </header>
+
+      <div class="main-scroll">
+        <section id="shortcutSection" class="block">
+          <div class="block-head">
+            <div><h2>자주 가는 사이트</h2><p>자주 사용하는 업무 사이트를 바로 열어보세요.</p></div>
+          </div>
+          <div id="shortcutGrid" class="shortcut-grid"></div>
+        </section>
+
+        <section id="todayPanel" class="today-panel"></section>
+
+        <section id="aiInsight" class="ai-insight"></section>
+
+        <section class="block">
+          <div class="block-head">
+            <div><h2 id="pageHeading">내 지식</h2><p id="pageLead">기록한 업무 지식을 한눈에 확인하세요.</p></div>
+            <b id="pageCount">0</b>
+          </div>
+          <nav id="pageCategories" class="page-categories"></nav>
+          <div id="pageGrid" class="page-grid"></div>
+          <div id="pageEmpty" class="page-empty hidden">검색 결과 없음</div>
+        </section>
+      </div>
+    </main>
+  </div>
 
   <button id="orb" class="orb" aria-label="지식창 열기"><span></span></button>
 
@@ -65,6 +92,41 @@
       <header><div><strong>기억 저장소</strong><small id="memoryCount">0개 기록</small></div><button id="memoryClose" type="button">×</button></header>
       <label class="memory-search">⌕<input id="memorySearch" placeholder="이름이나 기록 내용 검색" /></label>
       <section id="memoryPanel" class="memory-panel"></section>
+    </section>
+  </div>
+  <div id="shortcutModal" class="modal hidden" role="dialog" aria-modal="true" aria-label="사이트 바로가기">
+    <form id="shortcutForm" class="edit-box">
+      <header><strong id="shortcutHeading">사이트 추가</strong><button id="shortcutClose" type="button">×</button></header>
+      <label>사이트 이름<input id="shortcutName" placeholder="예) K-APT" required /></label>
+      <label>주소<input id="shortcutUrl" placeholder="예) k-apt.go.kr" required /></label>
+      <p class="edit-help">아이콘은 주소에서 자동으로 가져옵니다.</p>
+      <footer><button id="shortcutDelete" type="button" class="danger-text">삭제</button><button id="shortcutCancel" type="button">취소</button><button type="submit">저장</button></footer>
+    </form>
+  </div>
+  <div id="addModal" class="modal hidden" role="dialog" aria-modal="true" aria-label="지식 추가">
+    <section class="edit-box">
+      <header><strong>무엇을 추가할까요?</strong><button id="addClose" type="button">×</button></header>
+      <div class="add-kinds">
+        <button type="button" data-add="기억"><span data-icon="bookmark"></span><b>기억</b><small>메모처럼 남기기</small></button>
+        <button type="button" data-add="할 일"><span data-icon="check"></span><b>할 일</b><small>오늘 할 일 추가</small></button>
+        <button type="button" data-add="업무지식"><span data-icon="book"></span><b>업무지식</b><small>제목과 내용</small></button>
+        <button type="button" data-add="연락처"><span data-icon="phone"></span><b>연락처</b><small>이름과 번호</small></button>
+        <button type="button" data-add="계정"><span data-icon="lock"></span><b>계정</b><small>암호화 보관</small></button>
+      </div>
+      <form id="quickTextForm" class="quick-text hidden">
+        <label id="quickTextLabel">내용</label>
+        <textarea id="quickTextInput" rows="3" placeholder="내용을 입력하세요"></textarea>
+        <footer><button id="quickTextCancel" type="button">뒤로</button><button type="submit">저장</button></footer>
+      </form>
+    </section>
+  </div>
+  <div id="detailModal" class="modal hidden" role="dialog" aria-modal="true" aria-label="상세 보기">
+    <section class="edit-box detail-box">
+      <header><strong id="detailKind">상세</strong><button id="detailClose" type="button">×</button></header>
+      <h3 id="detailTitle"></h3>
+      <pre id="detailBody"></pre>
+      <div id="detailMeta" class="detail-meta"></div>
+      <footer><button id="detailCopy" type="button">복사</button></footer>
     </section>
   </div>
   <div id="resetModal" class="modal hidden" role="dialog" aria-modal="true" aria-label="자료 초기화">
@@ -120,6 +182,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="firebase-config.js?v=2"></script>
-  <script src="app.js?v=44"></script>
+  <script src="app.js?v=45"></script>
 </body>
 </html>

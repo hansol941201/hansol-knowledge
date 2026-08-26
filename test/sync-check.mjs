@@ -85,7 +85,9 @@ const hitB = await search(site, '자오건설');
 check('통합 검색: "자오건설" → 기억 결과', hitB.includes(MEMO_TEXT) && hitB.includes('기억'));
 
 // 통합 검색이 지식·연락처·협력업체·계정까지 덮는지
-await site.click('#accountAdd');
+await site.click('#pageAdd');
+await site.waitForTimeout(200);
+await site.click('[data-add="계정"]');
 await site.fill('#accountService', '나라장터');
 await site.fill('#accountId', 'hansol-test');
 await site.fill('#accountPassword', 'pw-test-1234');

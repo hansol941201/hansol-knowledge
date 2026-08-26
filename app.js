@@ -49,6 +49,11 @@ knowledge = knowledge.filter(item => !(item.title === '통신도장' && item.ans
 let todos = JSON.parse(localStorage.getItem('knowledge-todos') || '[]');
 let memories = JSON.parse(localStorage.getItem('knowledge-memories') || '[]');
 let accountMeta = JSON.parse(localStorage.getItem('knowledge-account-meta') || '[]');
+let shortcuts = JSON.parse(localStorage.getItem('knowledge-shortcuts') || 'null') || [
+  { id: 'shortcut-kapt', name: 'K-APT', url: 'https://www.k-apt.go.kr' },
+  { id: 'shortcut-gmail', name: 'Gmail', url: 'https://mail.google.com' },
+  { id: 'shortcut-naver', name: '네이버', url: 'https://www.naver.com' }
+];
 const partners = Array.isArray(window.PARTNERS) ? window.PARTNERS : [];
 const patents = Array.isArray(window.PATENTS) ? window.PATENTS : [];
 let vaultKey = null;
@@ -88,7 +93,7 @@ function ensureStamps(list) {
   }
   return list;
 }
-ensureStamps(knowledge); ensureStamps(todos); ensureStamps(memories); ensureStamps(accountMeta);
+ensureStamps(knowledge); ensureStamps(todos); ensureStamps(memories); ensureStamps(accountMeta); ensureStamps(shortcuts);
 
 // 배열마다 자기 종류만 남긴다. 예전 버전이 기억을 todos 에 넣어 둔 경우처럼
 // 잘못 들어간 항목은 화면에서 숨기는 게 아니라 제 배열로 옮겨서 실제로 분리한다.
@@ -170,15 +175,92 @@ for (const item of knowledge) {
 }
 save();
 
-const categoryRules = ['전체', '할 일', '기억', '특허', '협력업체', '계정', '연락처', '업무지식', '기타'];
-const virtualCategories = ['계정', '협력업체', '할 일', '기억'];
-let pageCategory = '전체';
+// ── 아이콘 (Lucide 계열 얇은 라인) ─────────────────────────────
+const ICONS = {
+  sparkle: 'M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z',
+  grid: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',
+  book: 'M5 4h11a2 2 0 012 2v14H7a2 2 0 01-2-2zM5 17h13',
+  check: 'M4 12l5 5L20 6',
+  bookmark: 'M7 4h10a1 1 0 011 1v15l-6-4-6 4V5a1 1 0 011-1z',
+  patent: 'M12 3l8 4.5v9L12 21l-8-4.5v-9zM12 12l8-4.5M12 12v9M12 12L4 7.5',
+  building: 'M4 21V6a1 1 0 011-1h6a1 1 0 011 1v15M12 21V10h7a1 1 0 011 1v10M7 9h2M7 13h2M7 17h2M16 14h1M16 18h1',
+  lock: 'M7 11V8a5 5 0 0110 0v3M6 11h12v9H6z',
+  phone: 'M7 3h3l2 5-2.5 1.5a12 12 0 005 5L16 12l5 2v3a2 2 0 01-2 2A16 16 0 015 5a2 2 0 012-2z',
+  settings: 'M12 9a3 3 0 100 6 3 3 0 000-6zM19.4 15a1.6 1.6 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.6 1.6 0 00-1.8-.3 1.6 1.6 0 00-1 1.5V21a2 2 0 11-4 0v-.1A1.6 1.6 0 008 19.4a1.6 1.6 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.6 1.6 0 00.3-1.8 1.6 1.6 0 00-1.5-1H2a2 2 0 110-4h.1A1.6 1.6 0 004.6 8a1.6 1.6 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.6 1.6 0 001.8.3H9a1.6 1.6 0 001-1.5V2a2 2 0 114 0v.1a1.6 1.6 0 001 1.5 1.6 1.6 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.6 1.6 0 00-.3 1.8V9a1.6 1.6 0 001.5 1H22a2 2 0 110 4h-.1a1.6 1.6 0 00-1.5 1z',
+  download: 'M12 3v12M7 11l5 5 5-5M4 20h16',
+  refresh: 'M20 11a8 8 0 10-2.3 6M20 5v6h-6',
+  search: 'M11 4a7 7 0 100 14 7 7 0 000-14zM20 20l-4-4',
+  plus: 'M12 5v14M5 12h14',
+  more: 'M6 12h.01M12 12h.01M18 12h.01',
+  star: 'M12 4l2.3 5 5.7.6-4.3 3.9 1.2 5.5-4.9-2.8-4.9 2.8 1.2-5.5L4 9.6 9.7 9z',
+  link: 'M10 13a5 5 0 007 0l3-3a5 5 0 00-7-7l-2 2M14 11a5 5 0 00-7 0l-3 3a5 5 0 007 7l2-2',
+  clock: 'M12 4a8 8 0 100 16 8 8 0 000-16zM12 8v4l3 2'
+};
+function icon(name, size = 16) {
+  const path = ICONS[name] || ICONS.grid;
+  return `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${path}"/></svg>`;
+}
+function paintIcons(root = document) {
+  root.querySelectorAll('[data-icon]').forEach(node => {
+    if (node.dataset.painted === '1') return;
+    node.innerHTML = icon(node.dataset.icon, Number(node.dataset.size || 16));
+    node.dataset.painted = '1';
+  });
+}
+
+// ── 화면 구성 ──────────────────────────────────────────────────
+const NAV_ITEMS = [
+  { name: '대시보드', icon: 'grid' },
+  { name: '내 지식', icon: 'book', category: '전체' },
+  { name: '할 일', icon: 'check' },
+  { name: '기억', icon: 'bookmark' },
+  { name: '특허', icon: 'patent' },
+  { name: '협력업체', icon: 'building' },
+  { name: '계정', icon: 'lock' },
+  { name: '연락처', icon: 'phone' },
+  { name: '업무지식', icon: 'book' }
+];
+const VIEW_LEAD = {
+  '대시보드': ['모아 보기', '오늘 챙길 것과 최근 지식을 한눈에.'],
+  '전체': ['내 지식', '기록한 업무 지식을 한눈에 확인하세요.'],
+  '할 일': ['할 일', '오늘 챙겨야 할 일들입니다.'],
+  '기억': ['기억 저장소', '메모처럼 남겨 둔 기록입니다.'],
+  '특허': ['특허', '특허·상표·디자인 목록입니다.'],
+  '협력업체': ['협력업체', '업체 연락처와 관련 기록입니다.'],
+  '계정': ['계정', '암호화해서 보관 중인 계정입니다.'],
+  '연락처': ['연락처', '자주 찾는 담당자 연락처입니다.'],
+  '업무지식': ['업무지식', '업무에 필요한 지식 모음입니다.'],
+  '기타': ['기타', '분류하지 않은 지식입니다.']
+};
+const categoryRules = ['전체', '기억', '특허', '협력업체', '계정', '연락처', '업무지식', '기타'];
+const virtualCategories = ['계정', '협력업체', '할 일', '기억', '특허', '대시보드'];
+let pageCategory = '대시보드';
 let pageSearchCommitted = '';
+let showAllTodos = false;
+let viewBeforeSearch = '';   // 검색을 지우면 보던 화면으로 되돌린다
 
 function categoryItems(name) {
-  if (name === '전체') return alive(knowledge);
+  if (name === '전체' || name === '대시보드') return alive(knowledge);
   if (virtualCategories.includes(name)) return [];
   return alive(knowledge).filter(item => item.category === name);
+}
+
+function renderSideNav() {
+  $('#sideNav').innerHTML = NAV_ITEMS.map(item => {
+    const target = item.category || item.name;
+    return `<button type="button" class="side-item ${target === pageCategory ? 'active' : ''}" data-nav="${target}">${icon(item.icon)}<span>${item.name}</span></button>`;
+  }).join('');
+  $('#sideNav').querySelectorAll('[data-nav]').forEach(button => {
+    button.onclick = () => {
+      pageCategory = button.dataset.nav;
+      viewBeforeSearch = '';
+      showAllTodos = pageCategory === '할 일';
+      $('#pageSearch').value = '';
+      pageSearchCommitted = '';
+      renderAll();
+      $('.main-scroll').scrollTop = 0;
+    };
+  });
 }
 
 function renderLibrary() {
@@ -201,52 +283,61 @@ function renderLibrary() {
   $('#pageCategories').innerHTML = categoryRules.filter(name => name !== '기타' || categoryItems('기타').length).map(name => `<button class="${name === pageCategory ? 'active' : ''}" data-category="${name}">${name}</button>`).join('');
   const term = pageSearchCommitted.trim();
   const mark = (text) => highlight(text, term);
-  $('#pageGrid').innerHTML = patentItems.map(item => `
-    <article class="page-card patent-card" data-patent-key="${escapeHtml(item.num || item.name)}">
-      <small class="card-kind">📐 ${escapeHtml(item.kind)}</small>
-      <h3>${item.num ? mark(item.num) : escapeHtml(item.status || '번호 확인')}</h3>
-      ${(item.gongjong || []).length
-        ? `<div class="patent-tags">${item.gongjong.map(tag => `<span>${mark(tag)}</span>`).join('')}</div>`
-        : ''}
-      ${item.name ? `<p>${mark(item.name)}</p>` : ''}
-      <dl class="patent-meta">
-        ${item.gongbeop ? `<div><dt>공법</dt><dd>${mark(item.gongbeop)}</dd></div>` : ''}
-        ${item.owner ? `<div><dt>특허권자</dt><dd>${mark(item.owner)}</dd></div>` : ''}
-        ${patentStatusNote(item) ? `<div><dt>상태</dt><dd>${escapeHtml(patentStatusNote(item))}</dd></div>` : ''}
-      </dl>
-      <footer><button data-patent-copy>특허번호 복사</button><button data-patent-chat>지식창에서 보기</button></footer>
-    </article>`).join('') + partnerItems.map((item, index) => `
-    <article class="page-card partner-card" data-partner-index="${partners.indexOf(item)}">
-      <small>협력업체</small><h3>${mark(item.name)}</h3>
-      <p>${mark(item.phone || '전화번호 확인')}\n${mark(item.email || '이메일 확인')}</p>
-      ${partnerRecordsHtml(item.name, term)}
-      <footer><button data-copy-phone>번호 복사</button><button data-copy-email>메일 복사</button><button data-partner-chat>지식창에서 보기</button></footer>
-    </article>`).join('') + accounts.map(item => `
-    <article class="page-card account-card" data-account-id="${item.id}">
-      <small>🔒 계정</small><h3>${mark(item.service)}</h3>
-      <p>${mark(item.user)}\n<span class="secret-line">••••••••</span></p>
-      <footer><button data-copy-id>아이디 복사</button><button data-copy-pw>비번 복사</button><button data-account-delete>삭제</button></footer>
-    </article>`).join('') + todoItems.map(todo => `
-    <article class="page-card todo-result-card ${todo.done ? 'done' : ''}" data-todo-result="${todo.id}">
-      <small class="card-kind">✓ 할 일</small>
-      <p>${mark(todo.text)}</p>
-      <time class="card-time">${escapeHtml(todo.date || '날짜 확인')}</time>
-      <footer><span class="todo-state ${todo.done ? 'done' : ''}">${todo.done ? '완료' : '진행중'}</span><button data-todo-toggle>${todo.done ? '완료 취소' : '완료 표시'}</button></footer>
-    </article>`).join('') + memoryItems.map(memory => `
-    <article class="page-card memory-result-card" data-memory-result="${memory.id}">
-      <small class="card-kind">📝 기억</small>
-      <p>${mark(memory.text)}</p>
-      <time class="card-time">${escapeHtml(savedLabel(memory))}</time>
-      <footer><button data-memory-open>기억 저장소에서 보기</button></footer>
-    </article>`).join('') + items.map(item => `
-    <article class="page-card" data-id="${item.id}">
-      <small>${escapeHtml(findCategory(item))}</small>
-      <h3>${mark(item.title)}</h3>
-      <p>${mark(item.answer)}</p>
-      <footer><button data-copy>복사</button><button data-edit>수정</button><button data-chat>지식창에서 보기</button><button data-delete>삭제</button></footer>
-    </article>`).join('');
-  // ── 3) 검색 중에는 상단 할 일 목록을 숨긴다
-  $('#todayPanel').classList.toggle('hidden', Boolean(term));
+  const shell = (kind, iconName, cls, attrs, body, foot) => `
+    <article class="page-card ${cls}" ${attrs}>
+      <header class="card-kind">${icon(iconName, 14)}<span>${escapeHtml(kind)}</span></header>
+      ${body}
+      <footer>${foot}</footer>
+    </article>`;
+
+  $('#pageGrid').innerHTML = patentItems.map(item => shell('특허', 'patent', 'patent-card',
+      `data-patent-key="${escapeHtml(item.num || item.name)}"`,
+      `<h3>${item.num ? mark(item.num) : escapeHtml(item.status || '번호 확인')}</h3>
+       ${item.name ? `<p>${mark(item.name)}</p>` : ''}
+       ${(item.gongjong || []).length ? `<div class="tag-row">${item.gongjong.map(tag => `<span>${mark(tag)}</span>`).join('')}</div>` : ''}
+       <dl class="patent-meta">
+         ${item.gongbeop ? `<div><dt>공법</dt><dd>${mark(item.gongbeop)}</dd></div>` : ''}
+         ${item.owner ? `<div><dt>특허권자</dt><dd>${mark(item.owner)}</dd></div>` : ''}
+         ${patentStatusNote(item) ? `<div><dt>상태</dt><dd>${escapeHtml(patentStatusNote(item))}</dd></div>` : ''}
+       </dl>`,
+      '<button data-patent-copy>특허번호 복사</button><button data-patent-chat>지식창에서 보기</button>')).join('')
+    + partnerItems.map(item => shell('협력업체', 'building', 'partner-card',
+      `data-partner-index="${partners.indexOf(item)}"`,
+      `<h3>${mark(item.name)}</h3>
+       <p>${mark(item.phone || '전화번호 확인')}\n${mark(item.email || '이메일 확인')}</p>
+       ${partnerRecordsHtml(item.name, term)}`,
+      '<button data-copy-phone>번호 복사</button><button data-copy-email>메일 복사</button><button data-partner-chat>지식창에서 보기</button>')).join('')
+    + accounts.map(item => shell('계정', 'lock', 'account-card',
+      `data-account-id="${item.id}"`,
+      `<h3>${mark(item.service)}</h3><p>${mark(item.user)}\n<span class="secret-line">••••••••</span></p>`,
+      '<button data-copy-id>아이디 복사</button><button data-copy-pw>비번 복사</button><button data-account-delete>삭제</button>')).join('')
+    + todoItems.map(todo => shell('할 일', 'check', `todo-result-card ${todo.done ? 'done' : ''}`,
+      `data-todo-result="${todo.id}"`,
+      `<p class="card-body">${mark(todo.text)}</p><time class="card-time">${escapeHtml(todo.date || '날짜 확인')}</time>`,
+      `<span class="todo-state ${todo.done ? 'done' : ''}">${todo.done ? '완료' : '진행중'}</span><button data-todo-toggle>${todo.done ? '완료 취소' : '완료 표시'}</button>`)).join('')
+    + memoryItems.map(memory => shell('기억', 'bookmark', 'memory-result-card',
+      `data-memory-result="${memory.id}"`,
+      `<p class="card-body">${mark(memory.text)}</p><time class="card-time">${escapeHtml(savedLabel(memory))}</time>`,
+      '<button data-memory-open>기억 저장소에서 보기</button>')).join('')
+    + items.map(item => shell(findCategory(item), findCategory(item) === '연락처' ? 'phone' : 'book', '',
+      `data-id="${item.id}"`,
+      `<h3>${mark(item.title)}</h3><p>${mark(item.answer)}</p>${savedDateOf(item) ? `<time class="card-time">${escapeHtml(savedLabel(item))}</time>` : ''}`,
+      '<button data-copy>복사</button><button data-edit>수정</button><button data-chat>지식창에서 보기</button><button data-delete>삭제</button>')).join('');
+
+  // 화면별 제목과 영역 표시
+  const [heading, lead] = VIEW_LEAD[pageCategory] || VIEW_LEAD['전체'];
+  $('#pageHeading').textContent = term ? '검색 결과' : heading;
+  $('#pageLead').textContent = term ? `“${term}” 으로 찾은 내용입니다.` : lead;
+  $('#shortcutSection').classList.toggle('hidden', Boolean(term) || pageCategory !== '대시보드');
+  $('#pageCategories').classList.toggle('hidden', Boolean(term));
+  paintIcons($('#pageGrid'));
+  // 카드 본문을 누르면 상세로 연다(버튼 클릭은 제외).
+  $('#pageGrid').querySelectorAll('.page-card').forEach(card => {
+    card.addEventListener('click', event => {
+      if (event.target.closest('button') || event.target.closest('a')) return;
+      openDetailFromCard(card);
+    });
+  });
   $('#pageEmpty').classList.toggle('hidden', items.length + accounts.length + partnerItems.length + memoryItems.length + todoItems.length + patentItems.length !== 0);
   $('#pageCategories').querySelectorAll('[data-category]').forEach(button => button.onclick = () => { pageCategory = button.dataset.category; renderLibrary(); });
   $('#pageGrid').querySelectorAll('.page-card[data-id]').forEach(card => {
@@ -296,29 +387,76 @@ function todayKey() {
   return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
 }
 const isTodoEntry = (item) => Boolean(item) && (!item.type || item.type === 'todo');
+const TODO_PREVIEW = 6;
 function renderTodos() {
-  const list = alive(todos).filter(isTodoEntry).slice().sort((a, b) => {
+  const panel = $('#todayPanel');
+  const onTodoView = pageCategory === '할 일';
+  const searching = Boolean(pageSearchCommitted.trim());
+  // 검색 중이거나 다른 화면이면 상단 할 일 카드는 접어 둔다.
+  panel.classList.toggle('hidden', searching || !(pageCategory === '대시보드' || onTodoView));
+
+  const all = alive(todos).filter(isTodoEntry).slice().sort((a, b) => {
     if (a.done !== b.done) return a.done ? 1 : -1;
-    return String(b.date || '').localeCompare(String(a.date || '')) || Number(b.updatedAt || 0) - Number(a.updatedAt || 0);
+    return String(b.date || '').localeCompare(String(a.date || '')) || updatedTime(b) - updatedTime(a);
   });
-  const remain = list.filter(todo => !todo.done).length;
-  $('#todayPanel').innerHTML = `
-    <div class="today-head"><div><i></i><b>할 일</b></div><span>${remain}개 남음 · 전체 ${list.length}개</span></div>
+  const expanded = showAllTodos || onTodoView;
+  const list = expanded ? all : all.slice(0, TODO_PREVIEW);
+  const remain = all.filter(todo => !todo.done).length;
+
+  panel.innerHTML = `
+    <div class="block-head">
+      <div><h2>오늘의 할 일</h2><p>${remain}개 남음 · 전체 ${all.length}개</p></div>
+      ${all.length > TODO_PREVIEW && !onTodoView ? `<button type="button" class="ghost-btn" id="todoToggle">${expanded ? '접기' : '전체 보기'}</button>` : ''}
+    </div>
     <div class="todo-list">${list.length ? list.map(todo => `
       <label class="todo-item ${todo.done ? 'done' : ''}" data-todo-id="${todo.id}">
         <input type="checkbox" ${todo.done ? 'checked' : ''}>
-        <span>${escapeHtml(todo.text)}</span>
+        <span class="todo-check">${icon('check', 13)}</span>
+        <span class="todo-text">${escapeHtml(todo.text)}</span>
         <time>${escapeHtml(todo.date || '날짜 확인')}</time>
         <em class="todo-state ${todo.done ? 'done' : ''}">${todo.done ? '완료' : '진행중'}</em>
-        <button type="button" title="삭제">×</button>
+        <button type="button" class="todo-remove" title="삭제">${icon('more', 14)}</button>
       </label>`).join('') : '<div class="todo-empty">지식창에 “할일 내용”을 입력해보세요.</div>'}</div>`;
-  $('#todayPanel').querySelectorAll('[data-todo-id]').forEach(row => {
+
+  const toggle = $('#todoToggle');
+  if (toggle) toggle.onclick = () => { showAllTodos = !showAllTodos; renderTodos(); };
+  panel.querySelectorAll('[data-todo-id]').forEach(row => {
     const todo = todos.find(x => x.id === row.dataset.todoId);
-    row.querySelector('input').onchange = e => { todo.done = e.target.checked; touch(todo); saveTodos(); renderTodos(); renderLibrary(); };
-    row.querySelector('button').onclick = () => {
-      todo.deleted = true; touch(todo); saveTodos(); renderTodos(); renderLibrary();
+    row.querySelector('input').onchange = event => {
+      todo.done = event.target.checked; touch(todo);
+      row.classList.toggle('done', todo.done);
+      row.classList.add('just-changed');
+      saveTodos(); setTimeout(() => { renderTodos(); renderLibrary(); }, 220);
+    };
+    row.querySelector('.todo-remove').onclick = event => {
+      event.preventDefault();
+      todo.deleted = true; touch(todo);
+      saveTodos(); renderTodos(); renderLibrary();
     };
   });
+}
+
+// 최근 저장한 지식에서 눈에 띄는 낱말 하나를 골라 한 줄로 알려 준다.
+const INSIGHT_STOPWORDS = new Set(['확인하기', '부탁드립니다', '감사합니다', '있습니다', '해주세요', '보내주세요']);
+function renderInsight() {
+  const box = $('#aiInsight');
+  const searching = Boolean(pageSearchCommitted.trim());
+  const recent = sortBySaved(alive(memories).concat(alive(knowledge))).slice(0, 40);
+  const counts = new Map();
+  for (const item of recent) {
+    for (const word of `${item.title || ''} ${item.text || item.answer || ''}`.split(/[^0-9A-Za-z가-힣]+/)) {
+      // 전화번호 조각이나 흔한 말은 인사이트 낱말로 쓰지 않는다.
+      if (word.length < 3 || /^\d+$/.test(word) || INSIGHT_STOPWORDS.has(word)) continue;
+      counts.set(word, (counts.get(word) || 0) + 1);
+    }
+  }
+  const top = [...counts.entries()].sort((a, b) => b[1] - a[1]).find(([, n]) => n >= 3);
+  const undone = alive(todos).filter(isTodoEntry).filter(todo => !todo.done).length;
+  const line = top
+    ? `최근 저장한 지식 중 <b>${escapeHtml(top[0])}</b> 관련 자료가 ${top[1]}건 있습니다.`
+    : (undone ? `아직 끝내지 않은 할 일이 <b>${undone}건</b> 있습니다.` : '');
+  box.classList.toggle('hidden', searching || pageCategory !== '대시보드' || !line);
+  if (line) box.innerHTML = `<span class="insight-mark">${icon('sparkle', 14)}</span><div><strong>AI 인사이트</strong><p>${line}</p></div>`;
 }
 
 function renderMemories() {
@@ -386,9 +524,7 @@ function highlight(text, query) {
 function escapeHtml(text) {
   return String(text).replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]));
 }
-renderLibrary();
-renderTodos();
-renderMemories();
+renderAll();
 $('#memoryToggle').addEventListener('click', () => {
   $('#memoryModal').classList.remove('hidden');
   $('#memoryToggle').classList.add('active');
@@ -399,14 +535,165 @@ function closeMemoryLibrary() { $('#memoryModal').classList.add('hidden'); $('#m
 $('#memoryClose').addEventListener('click', closeMemoryLibrary);
 $('#memoryModal').addEventListener('click', event => { if (event.target.id === 'memoryModal') closeMemoryLibrary(); });
 $('#memorySearch').addEventListener('input', renderMemories);
+$('#pageSearch').addEventListener('input', event => {
+  if (event.currentTarget.value.trim() || !pageSearchCommitted) return;
+  pageSearchCommitted = '';   // 검색어를 지우면 바로 원래 화면으로 돌아간다
+  if (viewBeforeSearch) { pageCategory = viewBeforeSearch; viewBeforeSearch = ''; }
+  renderAll();
+});
 $('#pageSearch').addEventListener('keydown', event => {
   if (event.key !== 'Enter') return;
   event.preventDefault();
   pageSearchCommitted = event.currentTarget.value.trim();
-  pageCategory = '전체';
-  renderLibrary();
+  if (pageSearchCommitted && pageCategory === '대시보드') { viewBeforeSearch = pageCategory; pageCategory = '전체'; }
+  if (!pageSearchCommitted && viewBeforeSearch) { pageCategory = viewBeforeSearch; viewBeforeSearch = ''; }
+  renderAll();
 });
-$('#pageAdd').addEventListener('click', openNewEditor);
+
+// ── 카드 상세 보기 ─────────────────────────────────────────────
+let detailText = '';
+function showDetail(kind, title, body, meta) {
+  detailText = [title, body].filter(Boolean).join('\n');
+  $('#detailKind').textContent = kind;
+  $('#detailTitle').textContent = title || '';
+  $('#detailTitle').classList.toggle('hidden', !title);
+  $('#detailBody').textContent = body || '';
+  $('#detailMeta').innerHTML = (meta || []).filter(row => row[1]).map(row => `<div><dt>${escapeHtml(row[0])}</dt><dd>${escapeHtml(row[1])}</dd></div>`).join('');
+  $('#detailModal').classList.remove('hidden');
+}
+function closeDetail() { $('#detailModal').classList.add('hidden'); }
+$('#detailClose').addEventListener('click', closeDetail);
+$('#detailModal').addEventListener('click', event => { if (event.target.id === 'detailModal') closeDetail(); });
+$('#detailCopy').addEventListener('click', () => copyText(detailText));
+
+function openDetailFromCard(card) {
+  const data = card.dataset;
+  if (data.id) {
+    const item = knowledge.find(x => x.id === data.id);
+    if (item) showDetail(findCategory(item), item.title, item.answer,
+      [['저장', savedLabel(item)], ['검색어', (item.aliases || []).join(', ')], ['출처', item.source]]);
+  } else if (data.memoryResult) {
+    const item = memories.find(x => x.id === data.memoryResult);
+    if (item) showDetail('기억', '', item.text, [['저장', savedLabel(item)], ['출처', item.source]]);
+  } else if (data.todoResult) {
+    const item = todos.find(x => x.id === data.todoResult);
+    if (item) showDetail('할 일', '', item.text, [['날짜', item.date], ['상태', item.done ? '완료' : '진행중'], ['출처', item.source]]);
+  } else if (data.patentKey) {
+    const item = patents.find(x => (x.num || x.name) === data.patentKey);
+    if (item) showDetail(item.kind, item.num || item.status, item.name,
+      [['공종', (item.gongjong || []).join(' · ')], ['공법', item.gongbeop], ['특허권자', item.owner], ['상태', patentStatusNote(item)]]);
+  } else if (data.partnerIndex) {
+    const item = partners[Number(data.partnerIndex)];
+    if (item) showDetail('협력업체', item.name, '', [['전화', item.phone], ['이메일', item.email]]);
+  }
+}
+
+// ── 지식 추가 ──────────────────────────────────────────────────
+let addKind = '';
+function openAddModal() {
+  addKind = '';
+  $('#quickTextForm').classList.add('hidden');
+  $('.add-kinds').classList.remove('hidden');
+  $('#addModal').classList.remove('hidden');
+  paintIcons($('#addModal'));
+}
+function closeAddModal() { $('#addModal').classList.add('hidden'); }
+$('#pageAdd').addEventListener('click', openAddModal);
+$('#addClose').addEventListener('click', closeAddModal);
+$('#addModal').addEventListener('click', event => { if (event.target.id === 'addModal') closeAddModal(); });
+$('#quickTextCancel').addEventListener('click', () => {
+  $('#quickTextForm').classList.add('hidden');
+  $('.add-kinds').classList.remove('hidden');
+});
+document.querySelectorAll('[data-add]').forEach(button => {
+  button.onclick = () => {
+    addKind = button.dataset.add;
+    if (addKind === '계정') { closeAddModal(); return openVault(); }
+    if (addKind === '기억' || addKind === '할 일') {
+      $('.add-kinds').classList.add('hidden');
+      $('#quickTextLabel').textContent = addKind === '기억' ? '기억할 내용' : '할 일 내용';
+      $('#quickTextInput').value = '';
+      $('#quickTextForm').classList.remove('hidden');
+      setTimeout(() => $('#quickTextInput').focus(), 50);
+      return;
+    }
+    closeAddModal();
+    openNewEditor(addKind);   // 업무지식 · 연락처는 기존 지식 편집기로
+  };
+});
+$('#quickTextForm').addEventListener('submit', async event => {
+  event.preventDefault();
+  const text = $('#quickTextInput').value.trim();
+  if (!text) return;
+  const item = addKind === '할 일' ? createTodo(text, '사이트') : createMemory(text, '사이트');
+  if (!item) return;
+  closeAddModal();
+  await commitEntry(item, addKind === '할 일' ? 'todo' : 'memory');
+});
+
+// ── 자주 가는 사이트 ───────────────────────────────────────────
+function shortcutHref(url) {
+  const raw = String(url || '').trim();
+  if (!raw) return '';
+  return /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+}
+function shortcutHost(url) {
+  try { return new URL(shortcutHref(url)).hostname.replace(/^www\./, ''); }
+  catch { return String(url || '').replace(/^https?:\/\//i, '').split('/')[0]; }
+}
+function renderShortcuts() {
+  const list = alive(shortcuts);
+  $('#shortcutGrid').innerHTML = list.map(item => `
+    <div class="shortcut" data-shortcut="${item.id}">
+      <a href="${escapeHtml(shortcutHref(item.url))}" target="_blank" rel="noopener noreferrer">
+        <img alt="" loading="lazy" src="https://www.google.com/s2/favicons?sz=64&domain=${encodeURIComponent(shortcutHost(item.url))}" />
+        <b>${escapeHtml(item.name)}</b>
+        <small>${escapeHtml(shortcutHost(item.url))}</small>
+      </a>
+      <button type="button" class="shortcut-more" data-shortcut-edit title="수정·삭제">${icon('more', 14)}</button>
+    </div>`).join('') + `
+    <button type="button" class="shortcut add" id="shortcutAdd">${icon('plus', 18)}<b>사이트 추가</b></button>`;
+  $('#shortcutGrid').querySelectorAll('[data-shortcut]').forEach(node => {
+    node.querySelector('[data-shortcut-edit]').onclick = (event) => {
+      event.preventDefault();
+      openShortcutModal(shortcuts.find(x => x.id === node.dataset.shortcut));
+    };
+  });
+  $('#shortcutAdd').onclick = () => openShortcutModal(null);
+}
+
+let editingShortcutId = null;
+function openShortcutModal(item) {
+  editingShortcutId = item ? item.id : null;
+  $('#shortcutHeading').textContent = item ? '사이트 수정' : '사이트 추가';
+  $('#shortcutName').value = item ? item.name : '';
+  $('#shortcutUrl').value = item ? item.url : '';
+  $('#shortcutDelete').classList.toggle('hidden', !item);
+  $('#shortcutModal').classList.remove('hidden');
+  setTimeout(() => $('#shortcutName').focus(), 50);
+}
+function closeShortcutModal() { $('#shortcutModal').classList.add('hidden'); editingShortcutId = null; }
+$('#shortcutClose').addEventListener('click', closeShortcutModal);
+$('#shortcutCancel').addEventListener('click', closeShortcutModal);
+$('#shortcutModal').addEventListener('click', event => { if (event.target.id === 'shortcutModal') closeShortcutModal(); });
+$('#shortcutForm').addEventListener('submit', event => {
+  event.preventDefault();
+  const name = $('#shortcutName').value.trim();
+  const url = $('#shortcutUrl').value.trim();
+  if (!name || !url) return;
+  const existing = shortcuts.find(x => x.id === editingShortcutId);
+  if (existing) Object.assign(existing, { name, url }, { updatedAt: nowIso() });
+  else shortcuts.unshift(newEntry({ type: 'shortcut', name, url }));
+  saveLocalState(); queueCloudSave(); renderShortcuts(); closeShortcutModal();
+  showToast(existing ? '사이트 수정됨' : '사이트 추가됨');
+});
+$('#shortcutDelete').addEventListener('click', () => {
+  const item = shortcuts.find(x => x.id === editingShortcutId);
+  if (!item || !confirm(`「${item.name}」 바로가기를 지울까요?`)) return;
+  item.deleted = true; touch(item);
+  saveLocalState(); queueCloudSave(); renderShortcuts(); closeShortcutModal();
+  showToast('사이트 삭제됨');
+});
 
 // ── 자료 초기화 ────────────────────────────────────────────────
 function resetCounts() {
@@ -421,12 +708,14 @@ function openResetModal() {
 }
 function closeResetModal() { $('#resetModal').classList.add('hidden'); }
 $('#resetOpen').addEventListener('click', openResetModal);
+$('#resetBackupSide').addEventListener('click', () => $('#resetBackup').click());
+$('#syncOpen').addEventListener('click', () => (cloudReady ? showToast('실시간 연동 중') : openSyncModal()));
 $('#resetClose').addEventListener('click', closeResetModal);
 $('#resetModal').addEventListener('click', event => { if (event.target.id === 'resetModal') closeResetModal(); });
 $('#resetConfirm').addEventListener('input', event => { $('#resetAll').disabled = event.currentTarget.value.trim() !== '삭제'; });
 
 $('#resetBackup').addEventListener('click', () => {
-  const backup = JSON.stringify({ savedAt: nowIso(), knowledge, todos, memories, accountMeta }, null, 2);
+  const backup = JSON.stringify({ savedAt: nowIso(), knowledge, todos, memories, accountMeta, shortcuts }, null, 2);
   const url = URL.createObjectURL(new Blob([backup], { type: 'application/json' }));
   const link = document.createElement('a');
   link.href = url;
@@ -442,7 +731,7 @@ $('#resetBackup').addEventListener('click', () => {
 $('#resetLocal').addEventListener('click', () => {
   if (!confirm('이 컴퓨터에 저장된 사본을 지웁니다.\n클라우드 자료는 그대로 남고, 다시 내려받습니다.\n진행할까요?')) return;
   ['knowledge-messenger-data', 'knowledge-todos', 'knowledge-memories', 'knowledge-account-meta',
-   'knowledge-vault-data', 'knowledge-sync-pending'].forEach(key => localStorage.removeItem(key));
+   'knowledge-vault-data', 'knowledge-sync-pending', 'knowledge-shortcuts'].forEach(key => localStorage.removeItem(key));
   location.reload();
 });
 
@@ -453,7 +742,7 @@ $('#resetAll').addEventListener('click', async () => {
   if (!confirm('지식·할 일·기억·계정을 모두 삭제합니다.\n다른 컴퓨터에서도 사라집니다.\n정말 진행할까요?')) return;
   $('#resetAll').disabled = true;
   $('#resetAll').textContent = '삭제 중…';
-  for (const list of [knowledge, todos, memories, accountMeta]) {
+  for (const list of [knowledge, todos, memories, accountMeta, shortcuts]) {
     for (const item of list) { item.deleted = true; touch(item); }
   }
   vaultSecrets = {};
@@ -477,13 +766,13 @@ function openEditor(item) {
   $('#editModal').classList.remove('hidden');
   setTimeout(() => $('#editTitle').focus(), 50);
 }
-function openNewEditor() {
+function openNewEditor(category = '기타') {
   editingId = null;
-  $('#editHeading').textContent = '새 지식 추가';
+  $('#editHeading').textContent = category === '기타' ? '새 지식 추가' : `새 ${category} 추가`;
   $('#editSubmit').textContent = '지식 저장';
   $('#editTitle').value = '';
   $('#editAnswer').value = '';
-  $('#editCategory').value = '기타';
+  $('#editCategory').value = ['업무지식', '연락처', '기타'].includes(category) ? category : '기타';
   $('#editAliases').value = '';
   $('#editModal').classList.remove('hidden');
   setTimeout(() => $('#editTitle').focus(), 50);
@@ -574,7 +863,6 @@ async function openVault() {
 }
 function closeVault() { $('#vaultModal').classList.add('hidden'); pendingSecretCopy = null; }
 
-$('#accountAdd').addEventListener('click', openVault);
 $('#vaultClose').addEventListener('click', closeVault);
 $('#vaultCancel').addEventListener('click', closeVault);
 $('#vaultModal').addEventListener('click', e => { if (e.target.id === 'vaultModal') closeVault(); });
@@ -633,7 +921,10 @@ $('#siteShortcut').addEventListener('click', () => {
 });
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
-  if (!$('#resetModal').classList.contains('hidden')) closeResetModal();
+  if (!$('#detailModal').classList.contains('hidden')) closeDetail();
+  else if (!$('#shortcutModal').classList.contains('hidden')) closeShortcutModal();
+  else if (!$('#addModal').classList.contains('hidden')) closeAddModal();
+  else if (!$('#resetModal').classList.contains('hidden')) closeResetModal();
   else if (!$('#syncModal').classList.contains('hidden')) closeSyncModal();
   else if (!$('#memoryModal').classList.contains('hidden')) closeMemoryLibrary();
   else collapseApp();
@@ -848,12 +1139,17 @@ function saveLocalState() {
   localStorage.setItem('knowledge-todos', JSON.stringify(todos));
   localStorage.setItem('knowledge-memories', JSON.stringify(memories));
   localStorage.setItem('knowledge-account-meta', JSON.stringify(accountMeta));
+  localStorage.setItem('knowledge-shortcuts', JSON.stringify(shortcuts));
 }
 
 function renderAll() {
+  renderSideNav();
+  renderShortcuts();
   renderLibrary();
   renderTodos();
   renderMemories();
+  renderInsight();
+  paintIcons();
 }
 
 // 나중에 자동 재전송으로 올라간 항목의 말풍선을 완료로 바꾸기 위해 들고 있는다.
@@ -1112,6 +1408,7 @@ async function saveCloudState({ verifyIds = [] } = {}) {
         todos: mergeById(todos, remote.todos),
         memories: mergeById(memories, remote.memories),
         accountMeta: mergeById(accountMeta, remote.accountMeta),
+        shortcuts: mergeById(shortcuts, remote.shortcuts),
         vaultSecrets: { ...(remote.vaultSecrets || {}), ...vaultSecrets }
       };
       transaction.set(stateDoc, { ...next, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
@@ -1126,7 +1423,8 @@ async function saveCloudState({ verifyIds = [] } = {}) {
       ...((saved && saved.knowledge) || []),
       ...((saved && saved.todos) || []),
       ...((saved && saved.memories) || []),
-      ...((saved && saved.accountMeta) || [])
+      ...((saved && saved.accountMeta) || []),
+      ...((saved && saved.shortcuts) || [])
     ].map(entry => entry && entry.id));
     const missing = verifyIds.filter(id => !storedIds.has(id));
     resolveWaitingBubbles(storedIds);   // 뒤늦게 올라간 항목의 말풍선을 완료로 바꾼다
@@ -1155,11 +1453,13 @@ async function applyCloudState(state) {
   const missingOnServer = hasLocalOnlyItems(knowledge, state.knowledge)
     || hasLocalOnlyItems(todos, state.todos)
     || hasLocalOnlyItems(memories, state.memories)
-    || hasLocalOnlyItems(accountMeta, state.accountMeta);
+    || hasLocalOnlyItems(accountMeta, state.accountMeta)
+    || hasLocalOnlyItems(shortcuts, state.shortcuts);
   knowledge = mergeById(knowledge, state.knowledge);
   todos = mergeById(todos, state.todos);
   memories = mergeById(memories, state.memories);
   accountMeta = mergeById(accountMeta, state.accountMeta);
+  shortcuts = mergeById(shortcuts, state.shortcuts);
   sortIntoCollections();   // 병합 뒤에도 종류별로 갈라 둔다
   const remoteSecrets = state.vaultSecrets && typeof state.vaultSecrets === 'object' ? state.vaultSecrets : {};
   vaultSecrets = { ...remoteSecrets, ...vaultSecrets };
