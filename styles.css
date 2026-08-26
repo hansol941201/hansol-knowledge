@@ -223,3 +223,18 @@ mark { padding: 0 1px; border-radius: 2px; background: #fff3a0; color: #000; }
 .sync-dot[data-state="syncing"] { color: #4a5aa8; }
 .sync-dot[data-state="pending"] { color: #e0a02a; }
 .sync-dot[data-state="offline"] { color: #b8b0c0; }
+
+.page-tools > button.reset-open { color: #8a6a6a; background: #f5eded; }
+.page-tools > button.reset-open:hover { color: #fff; background: #c05a5a; }
+.edit-box.reset-box { width: min(94vw, 460px); }
+.reset-count { margin: 0 0 6px; color: #4a444f; font-size: 12px; font-weight: 600; }
+.reset-help { margin: 0 0 12px; color: #8b8391; font-size: 11px; line-height: 1.6; }
+.reset-backup { width: 100%; margin-bottom: 14px; padding: 11px; border-radius: 10px; color: #4a5aa8; background: #eef1fb; font-size: 12px; }
+.reset-choice { margin-bottom: 11px; padding: 13px; border: 1px solid #e6e1ea; border-radius: 12px; display: grid; gap: 7px; }
+.reset-choice strong { font-size: 12.5px; }
+.reset-choice small { color: #8b8391; font-size: 11px; line-height: 1.6; }
+.reset-choice button { padding: 9px; border-radius: 9px; color: #574f5e; background: #efecf1; font-size: 12px; }
+.reset-choice input { width: 100%; padding: 9px 11px; border: 1px solid #ddd7e0; border-radius: 9px; outline: 0; font: 12px/1.5 inherit; }
+.reset-choice.danger { border-color: #eccfcf; background: #fdf7f7; }
+.reset-choice.danger button { color: #fff; background: #c05a5a; }
+.reset-choice.danger button:disabled { color: #b9aeae; background: #ece2e2; cursor: not-allowed; }
