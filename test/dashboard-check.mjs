@@ -73,14 +73,16 @@ ok('클라우드에도 저장', await page.evaluate(async()=>{const d=(await win
 
 // 수정 · 삭제
 await page.click(`.cal-cell[data-day="${iso(0)}"]`); await page.waitForTimeout(200);
-await page.hover('.schedule-row'); await page.click('.schedule-row .schedule-more'); await page.waitForTimeout(200);
+await page.click('.schedule-row .schedule-more'); await page.waitForTimeout(200);
+ok('⋯ 메뉴에 수정·삭제', (await page.$$eval('.row-menu button', n=>n.map(x=>x.textContent))).join('/')==='수정/삭제');
+await page.click('.row-menu button:has-text("수정")'); await page.waitForTimeout(200);
 await page.fill('#scheduleTitle','1차 미팅(변경)');
 await page.click('#scheduleForm button[type="submit"]'); await page.waitForTimeout(300);
 ok('일정 수정', (await page.textContent('#schedulePanel')).includes('1차 미팅(변경)'));
 page.on('dialog', d=>d.accept());
-await page.hover('.schedule-row'); await page.click('.schedule-row .schedule-more'); await page.waitForTimeout(200);
-await page.click('#scheduleDelete'); await page.waitForTimeout(300);
-ok('일정 삭제', !(await page.textContent('#schedulePanel')).includes('1차 미팅(변경)'));
+await page.click('.schedule-row .schedule-more'); await page.waitForTimeout(200);
+await page.click('.row-menu button:has-text("삭제")'); await page.waitForTimeout(400);
+ok('⋯ → 삭제로 바로 지워짐', !(await page.textContent('#schedulePanel')).includes('1차 미팅(변경)'));
 
 await page.screenshot({path:out+'/dash.png'});
 

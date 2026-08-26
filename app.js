@@ -608,6 +608,38 @@ $('#quickTextForm').addEventListener('submit', async event => {
   await commitEntry(item, addKind === '할 일' ? 'todo' : 'memory');
 });
 
+// ── ⋯ 메뉴 (수정 · 삭제) ──────────────────────────────────────
+let openMenu = null;
+function closeRowMenu() { if (openMenu) { openMenu.remove(); openMenu = null; } }
+function openRowMenu(anchor, actions) {
+  closeRowMenu();
+  const menu = document.createElement('div');
+  menu.className = 'row-menu';
+  menu.innerHTML = actions
+    .map((action, index) => `<button type="button" data-index="${index}" class="${action.danger ? 'danger' : ''}">${escapeHtml(action.label)}</button>`)
+    .join('');
+  document.body.append(menu);
+  const rect = anchor.getBoundingClientRect();
+  menu.style.top = `${Math.min(rect.bottom + 6, window.innerHeight - menu.offsetHeight - 10)}px`;
+  menu.style.left = `${Math.min(rect.left, window.innerWidth - menu.offsetWidth - 10)}px`;
+  menu.querySelectorAll('button').forEach(button => {
+    button.onclick = () => { closeRowMenu(); actions[Number(button.dataset.index)].run(); };
+  });
+  openMenu = menu;
+}
+document.addEventListener('click', event => {
+  if (openMenu && !openMenu.contains(event.target) && !event.target.closest('[data-row-menu]')) closeRowMenu();
+}, true);
+window.addEventListener('resize', closeRowMenu);
+document.addEventListener('scroll', closeRowMenu, true);
+
+function deleteSchedule(item) {
+  if (!item || !confirm(`「${item.title}」 일정을 지울까요?`)) return;
+  item.deleted = true; touch(item);
+  saveLocalState(); queueCloudSave(); renderSchedule();
+  showToast('일정 삭제됨');
+}
+
 // ── 일정 (월 달력) ────────────────────────────────────────────
 const dayKeyOf = (date) => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
@@ -676,7 +708,7 @@ function renderSchedule() {
             <b>${escapeHtml(item.title)}</b>
             ${item.memo ? `<small>${escapeHtml(item.memo)}</small>` : ''}
           </div>
-          <button type="button" class="schedule-more" title="수정·삭제">${icon('more', 14)}</button>
+          <button type="button" class="schedule-more" data-row-menu title="수정·삭제">${icon('more', 14)}</button>
         </div>`).join('') : '<div class="todo-empty">이 날은 일정이 없습니다.</div>'}
     </div>`;
 
@@ -693,8 +725,14 @@ function renderSchedule() {
     cell.onclick = () => { selectedDay = cell.dataset.day; renderSchedule(); };
   });
   $('#schedulePanel').querySelectorAll('[data-schedule]').forEach(row => {
-    row.querySelector('.schedule-more').onclick = () =>
-      openScheduleModal(schedule.find(x => x.id === row.dataset.schedule));
+    const item = schedule.find(x => x.id === row.dataset.schedule);
+    const button = row.querySelector('.schedule-more');
+    button.onclick = () => openRowMenu(button, [
+      { label: '수정', run: () => openScheduleModal(item) },
+      { label: '삭제', danger: true, run: () => deleteSchedule(item) }
+    ]);
+    // 줄을 눌러도 수정 창이 열린다.
+    row.onclick = event => { if (!event.target.closest('button')) openScheduleModal(item); };
   });
 }
 
@@ -741,10 +779,10 @@ $('#scheduleForm').addEventListener('submit', event => {
 });
 $('#scheduleDelete').addEventListener('click', () => {
   const item = schedule.find(x => x.id === editingScheduleId);
-  if (!item || !confirm(`「${item.title}」 일정을 지울까요?`)) return;
-  item.deleted = true; touch(item);
-  saveLocalState(); queueCloudSave(); renderSchedule(); closeScheduleModal();
-  showToast('일정 삭제됨');
+  const id = editingScheduleId;
+  deleteSchedule(item);
+  if (item && item.deleted) closeScheduleModal();
+  else editingScheduleId = id;
 });
 
 // ── 자주 가는 사이트 ───────────────────────────────────────────
@@ -808,14 +846,19 @@ function renderShortcuts() {
           : `<span class="shortcut-badge">${escapeHtml(shortcutBadge(item))}</span>`}</span>
         <b>${escapeHtml(item.name)}</b>
       </a>
-      <button type="button" class="shortcut-more" data-shortcut-edit title="수정·삭제">${icon('more', 14)}</button>
+      <button type="button" class="shortcut-more" data-row-menu data-shortcut-edit title="수정·삭제">${icon('more', 14)}</button>
     </div>`).join('') + `
     <button type="button" class="shortcut add" id="shortcutAdd">${icon('plus', 18)}<b>사이트 추가</b></button>`;
 
   $('#shortcutGrid').querySelectorAll('[data-shortcut]').forEach(node => {
-    node.querySelector('[data-shortcut-edit]').onclick = (event) => {
+    const menuButton = node.querySelector('[data-shortcut-edit]');
+    menuButton.onclick = (event) => {
       event.preventDefault();
-      openShortcutModal(shortcuts.find(x => x.id === node.dataset.shortcut));
+      const item = shortcuts.find(x => x.id === node.dataset.shortcut);
+      openRowMenu(menuButton, [
+        { label: '수정', run: () => openShortcutModal(item) },
+        { label: '삭제', danger: true, run: () => deleteShortcut(item) }
+      ]);
     };
     // 드래그로 순서 바꾸기
     node.addEventListener('dragstart', event => {
@@ -935,12 +978,15 @@ $('#shortcutForm').addEventListener('submit', event => {
   saveLocalState(); queueCloudSave(); renderShortcuts(); closeShortcutModal();
   showToast(existing ? '사이트 수정됨' : '사이트 추가됨');
 });
-$('#shortcutDelete').addEventListener('click', () => {
-  const item = shortcuts.find(x => x.id === editingShortcutId);
-  if (!item || !confirm(`「${item.name}」 바로가기를 지울까요?`)) return;
+function deleteShortcut(item) {
+  if (!item || !confirm(`「${item.name}」 바로가기를 지울까요?`)) return false;
   item.deleted = true; touch(item);
-  saveLocalState(); queueCloudSave(); renderShortcuts(); closeShortcutModal();
+  saveLocalState(); queueCloudSave(); renderShortcuts();
   showToast('사이트 삭제됨');
+  return true;
+}
+$('#shortcutDelete').addEventListener('click', () => {
+  if (deleteShortcut(shortcuts.find(x => x.id === editingShortcutId))) closeShortcutModal();
 });
 
 // ── 자료 초기화 ────────────────────────────────────────────────
@@ -1169,7 +1215,8 @@ $('#siteShortcut').addEventListener('click', () => {
 });
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
-  if (!$('#scheduleModal').classList.contains('hidden')) closeScheduleModal();
+  if (openMenu) closeRowMenu();
+  else if (!$('#scheduleModal').classList.contains('hidden')) closeScheduleModal();
   else if (!$('#detailModal').classList.contains('hidden')) closeDetail();
   else if (!$('#shortcutModal').classList.contains('hidden')) closeShortcutModal();
   else if (!$('#addModal').classList.contains('hidden')) closeAddModal();

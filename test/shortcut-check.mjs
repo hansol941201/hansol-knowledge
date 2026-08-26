@@ -39,8 +39,9 @@ ok('7개 + 추가가 한 줄', await page.evaluate(()=>{
   return rows.size===1; }));
 
 // 이미지 업로드 → 미리보기 → 저장
-await page.hover('.shortcut[data-shortcut="shortcut-card"]');
 await page.click('.shortcut[data-shortcut="shortcut-card"] [data-shortcut-edit]');
+await page.waitForTimeout(200);
+await page.click('.row-menu button:has-text("수정")');
 await page.waitForTimeout(250);
 ok('수정 창에 기존 값', (await page.inputValue('#shortcutName'))==='고객관리');
 const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAAAPUlEQVR42u3OMQEAAAgDoC252H0MMwZQkk73RgQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBP4LFsFcAAHl9K3RAAAAAElFTkSuQmCC','base64');
@@ -75,9 +76,8 @@ await page.screenshot({path:out+'/launcher.png'});
 
 // 삭제한 기본값은 되살아나지 않는다
 page.on('dialog', d=>d.accept());
-await page.hover('.shortcut[data-shortcut="shortcut-qna"]');
 await page.click('.shortcut[data-shortcut="shortcut-qna"] [data-shortcut-edit]'); await page.waitForTimeout(200);
-await page.click('#shortcutDelete'); await page.waitForTimeout(400);
+await page.click('.row-menu button:has-text("삭제")'); await page.waitForTimeout(400);
 await page.reload();
 await page.waitForFunction(()=>document.querySelector('#syncState')?.dataset.state==='live',null,{timeout:10000});
 await page.waitForTimeout(600);
