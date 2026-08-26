@@ -84,6 +84,12 @@ button { border: 0; cursor: pointer; }
 .page-card { min-height: 125px; display: flex; flex-direction: column; padding: 17px; border: 1px solid #e8e3ea; border-radius: 15px; background: #fff; box-shadow: 0 4px 15px rgba(43,35,50,.035); }
 .page-card:hover { border-color: #d4c5ed; box-shadow: 0 8px 25px rgba(43,35,50,.07); transform: translateY(-1px); }
 .page-card small { color: #9a75e4; font-size: 9px; }
+/* 검색 결과 카드 — 분류(할 일/기억)는 크고 또렷하게, 시간은 작고 연하게. */
+.page-card small.card-kind { margin-bottom: 9px; color: #7b53d6; font-size: 13.5px; font-weight: 600; letter-spacing: -.1px; }
+.page-card .card-time { margin-top: 10px; color: #a49bad; font-size: 10.5px; }
+.page-card.todo-result-card p, .page-card.memory-result-card p { color: #2f2b34; font-size: 13px; line-height: 1.65; }
+.memory-result-card small.card-kind { color: #4a7fb5; }
+mark { padding: 0 1px; border-radius: 2px; background: #fff3a0; color: #000; }
 .page-card h3 { margin: 9px 0 7px; font-size: 13px; }
 .page-card p { flex: 1; margin: 0; overflow: hidden; color: #716a75; font-size: 11px; line-height: 1.55; white-space: pre-line; }
 .page-card footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 12px; padding-top: 9px; border-top: 1px solid #f0edf1; }

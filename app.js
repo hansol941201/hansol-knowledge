@@ -89,6 +89,26 @@ function ensureStamps(list) {
 }
 ensureStamps(knowledge); ensureStamps(todos); ensureStamps(memories); ensureStamps(accountMeta);
 
+// 배열마다 자기 종류만 남긴다. 예전 버전이 기억을 todos 에 넣어 둔 경우처럼
+// 잘못 들어간 항목은 화면에서 숨기는 게 아니라 제 배열로 옮겨서 실제로 분리한다.
+function sortIntoCollections() {
+  const buckets = { todo: [], memory: [], knowledge: [] };
+  const keep = { todos: [], memories: [], knowledge: [] };
+  const claim = (list, own, target) => {
+    for (const item of Array.isArray(list) ? list : []) {
+      if (!item) continue;
+      if (item.type && item.type !== own && buckets[item.type]) buckets[item.type].push(item);
+      else target.push(item);
+    }
+  };
+  claim(todos, 'todo', keep.todos);
+  claim(memories, 'memory', keep.memories);
+  claim(knowledge, 'knowledge', keep.knowledge);
+  todos = mergeById(keep.todos, buckets.todo);
+  memories = mergeById(keep.memories, buckets.memory);
+  knowledge = mergeById(keep.knowledge, buckets.knowledge);
+}
+
 // ID 기준 병합 — 같은 ID면 updatedAt이 최신인 쪽을 남기고, 없는 ID는 양쪽 모두 살린다.
 function mergeById(mine, theirs) {
   const merged = new Map();
@@ -174,34 +194,40 @@ function renderLibrary() {
     ? sortBySaved(alive(memories).filter(memory => !query || normalize(`${memory.text} ${memory.createdAt || ''} ${savedLabel(memory)}`).includes(query))) : [];
   $('#pageCount').textContent = `${alive(knowledge).length + alive(todos).length + alive(memories).length + alive(accountMeta).length + partners.length}개`;
   $('#pageCategories').innerHTML = categoryRules.filter(name => name !== '기타' || categoryItems('기타').length).map(name => `<button class="${name === pageCategory ? 'active' : ''}" data-category="${name}">${name}</button>`).join('');
+  const term = pageSearchCommitted.trim();
+  const mark = (text) => highlight(text, term);
   $('#pageGrid').innerHTML = partnerItems.map((item, index) => `
     <article class="page-card partner-card" data-partner-index="${partners.indexOf(item)}">
-      <small>협력업체</small><h3>${escapeHtml(item.name)}</h3>
-      <p>${escapeHtml(item.phone || '전화번호 확인')}\n${escapeHtml(item.email || '이메일 확인')}</p>
-      ${partnerRecordsHtml(item.name)}
+      <small>협력업체</small><h3>${mark(item.name)}</h3>
+      <p>${mark(item.phone || '전화번호 확인')}\n${mark(item.email || '이메일 확인')}</p>
+      ${partnerRecordsHtml(item.name, term)}
       <footer><button data-copy-phone>번호 복사</button><button data-copy-email>메일 복사</button><button data-partner-chat>지식창에서 보기</button></footer>
     </article>`).join('') + accounts.map(item => `
     <article class="page-card account-card" data-account-id="${item.id}">
-      <small>🔒 계정</small><h3>${escapeHtml(item.service)}</h3>
-      <p>${escapeHtml(item.user)}\n<span class="secret-line">••••••••</span></p>
+      <small>🔒 계정</small><h3>${mark(item.service)}</h3>
+      <p>${mark(item.user)}\n<span class="secret-line">••••••••</span></p>
       <footer><button data-copy-id>아이디 복사</button><button data-copy-pw>비번 복사</button><button data-account-delete>삭제</button></footer>
     </article>`).join('') + todoItems.map(todo => `
     <article class="page-card todo-result-card ${todo.done ? 'done' : ''}" data-todo-result="${todo.id}">
-      <small>✓ 할 일</small><h3>${escapeHtml(todo.date || '날짜 확인')}</h3>
-      <p>${escapeHtml(todo.text)}</p>
+      <small class="card-kind">✓ 할 일</small>
+      <p>${mark(todo.text)}</p>
+      <time class="card-time">${escapeHtml(todo.date || '날짜 확인')}</time>
       <footer><span class="todo-state ${todo.done ? 'done' : ''}">${todo.done ? '완료' : '진행중'}</span><button data-todo-toggle>${todo.done ? '완료 취소' : '완료 표시'}</button></footer>
     </article>`).join('') + memoryItems.map(memory => `
     <article class="page-card memory-result-card" data-memory-result="${memory.id}">
-      <small>📝 기억</small><h3>${escapeHtml(savedLabel(memory))}</h3>
-      <p>${escapeHtml(memory.text)}</p>
+      <small class="card-kind">📝 기억</small>
+      <p>${mark(memory.text)}</p>
+      <time class="card-time">${escapeHtml(savedLabel(memory))}</time>
       <footer><button data-memory-open>기억 저장소에서 보기</button></footer>
     </article>`).join('') + items.map(item => `
     <article class="page-card" data-id="${item.id}">
       <small>${escapeHtml(findCategory(item))}</small>
-      <h3>${escapeHtml(item.title)}</h3>
-      <p>${escapeHtml(item.answer)}</p>
+      <h3>${mark(item.title)}</h3>
+      <p>${mark(item.answer)}</p>
       <footer><button data-copy>복사</button><button data-edit>수정</button><button data-chat>지식창에서 보기</button><button data-delete>삭제</button></footer>
     </article>`).join('');
+  // ── 3) 검색 중에는 상단 할 일 목록을 숨긴다
+  $('#todayPanel').classList.toggle('hidden', Boolean(term));
   $('#pageEmpty').classList.toggle('hidden', items.length + accounts.length + partnerItems.length + memoryItems.length + todoItems.length !== 0);
   $('#pageCategories').querySelectorAll('[data-category]').forEach(button => button.onclick = () => { pageCategory = button.dataset.category; renderLibrary(); });
   $('#pageGrid').querySelectorAll('.page-card[data-id]').forEach(card => {
@@ -243,8 +269,9 @@ function todayKey() {
   const date = new Date();
   return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
 }
+const isTodoEntry = (item) => Boolean(item) && (!item.type || item.type === 'todo');
 function renderTodos() {
-  const list = alive(todos).slice().sort((a, b) => {
+  const list = alive(todos).filter(isTodoEntry).slice().sort((a, b) => {
     if (a.done !== b.done) return a.done ? 1 : -1;
     return String(b.date || '').localeCompare(String(a.date || '')) || Number(b.updatedAt || 0) - Number(a.updatedAt || 0);
   });
@@ -274,7 +301,7 @@ function renderMemories() {
   $('#memoryCount').textContent = query ? `${filtered.length}개 검색됨` : `${alive(memories).length}개 기록`;
   $('#memoryPanel').innerHTML = `
     <div class="memory-list">${filtered.length ? filtered.map(memory => `
-      <article class="memory-item" data-memory-id="${memory.id}"><div><p>${escapeHtml(memory.text)}</p><time>${escapeHtml(savedLabel(memory))}</time></div><button type="button" title="삭제">×</button></article>
+      <article class="memory-item" data-memory-id="${memory.id}"><div><p>${highlight(memory.text, ($('#memorySearch').value || '').trim())}</p><time>${escapeHtml(savedLabel(memory))}</time></div><button type="button" title="삭제">×</button></article>
     `).join('') : `<div class="todo-empty">${query ? '검색 결과 없음' : '지식창에 “기록 내용”을 입력하면 여기에 따로 모여요.'}</div>`}</div>`;
   $('#memoryPanel').querySelectorAll('[data-memory-id]').forEach(row => {
     row.querySelector('button').onclick = () => {
@@ -298,18 +325,36 @@ function partnerRecords(name) {
     memories: sortBySaved(alive(memories).filter(memory => normalize(memory.text).includes(key)))
   };
 }
-function partnerRecordsHtml(name) {
+function partnerRecordsHtml(name, term = '') {
   const { todos: todoHits, memories: memoryHits } = partnerRecords(name);
   const total = todoHits.length + memoryHits.length;
   if (!total) return '';
   return `<div class="partner-records"><b>관련 기록 ${total}건</b>`
-    + todoHits.map(todo => `<div class="partner-record"><span>✓ 할 일</span><p>${escapeHtml(todo.text)}</p><time>${escapeHtml(todo.date || '')} · ${todo.done ? '완료' : '진행중'}</time></div>`).join('')
-    + memoryHits.map(memory => `<div class="partner-record"><span>📝 기억</span><p>${escapeHtml(memory.text)}</p><time>${escapeHtml(savedLabel(memory))}</time></div>`).join('')
+    + todoHits.map(todo => `<div class="partner-record"><span>✓ 할 일</span><p>${highlight(todo.text, term)}</p><time>${escapeHtml(todo.date || '')} · ${todo.done ? '완료' : '진행중'}</time></div>`).join('')
+    + memoryHits.map(memory => `<div class="partner-record"><span>📝 기억</span><p>${highlight(memory.text, term)}</p><time>${escapeHtml(savedLabel(memory))}</time></div>`).join('')
     + '</div>';
 }
 
 function findCategory(item) {
   return item.category || '기타';
+}
+
+// 검색어와 글자 그대로 일치하는 부분을 전부 <mark> 로 감싼다(대소문자 무시).
+function highlight(text, query) {
+  const raw = String(text === undefined || text === null ? '' : text);
+  const needle = String(query || '').trim();
+  if (!needle) return escapeHtml(raw);
+  const haystack = raw.toLowerCase();
+  const target = needle.toLowerCase();
+  let out = '';
+  let from = 0;
+  for (;;) {
+    const at = haystack.indexOf(target, from);
+    if (at === -1) break;
+    out += escapeHtml(raw.slice(from, at)) + `<mark>${escapeHtml(raw.slice(at, at + needle.length))}</mark>`;
+    from = at + needle.length;
+  }
+  return out + escapeHtml(raw.slice(from));
 }
 
 function escapeHtml(text) {
@@ -630,16 +675,16 @@ function newEntry(fields, source) {
 function createTodo(text, source) {
   const raw = String(text || '').trim();
   if (!raw) return null;
-  const todo = newEntry({ text: raw, raw, date: todayKey(), done: false }, source);
-  todos.unshift(todo);
+  const todo = newEntry({ type: 'todo', text: raw, raw, date: todayKey(), done: false }, source);
+  todos.unshift(todo);          // 할 일은 todos 에만 들어간다
   return todo;
 }
 
 function createMemory(text, source) {
   const raw = String(text || '').trim();
   if (!raw) return null;
-  const memory = newEntry({ text: raw, raw }, source);
-  memories.unshift(memory);
+  const memory = newEntry({ type: 'memory', text: raw, raw }, source);
+  memories.unshift(memory);     // 기억은 memories 에만 들어간다
   return memory;
 }
 
@@ -648,6 +693,7 @@ function createKnowledge(title, answer, options = {}) {
   const body = String(answer === undefined || answer === null ? '' : answer).trim();
   if (!name) return null;
   const item = newEntry({
+    type: 'knowledge',
     title: name,
     answer: body || name,
     text: body ? `${name} | ${body}` : name,
@@ -660,6 +706,7 @@ function createKnowledge(title, answer, options = {}) {
 }
 
 function saveLocalState() {
+  sortIntoCollections();
   localStorage.setItem('knowledge-messenger-data', JSON.stringify(knowledge));
   localStorage.setItem('knowledge-todos', JSON.stringify(todos));
   localStorage.setItem('knowledge-memories', JSON.stringify(memories));
@@ -947,6 +994,7 @@ async function applyCloudState(state) {
   todos = mergeById(todos, state.todos);
   memories = mergeById(memories, state.memories);
   accountMeta = mergeById(accountMeta, state.accountMeta);
+  sortIntoCollections();   // 병합 뒤에도 종류별로 갈라 둔다
   const remoteSecrets = state.vaultSecrets && typeof state.vaultSecrets === 'object' ? state.vaultSecrets : {};
   vaultSecrets = { ...remoteSecrets, ...vaultSecrets };
   for (const account of accountMeta) if (account.deleted) delete vaultSecrets[account.id];
