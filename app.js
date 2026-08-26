@@ -50,6 +50,7 @@ let todos = JSON.parse(localStorage.getItem('knowledge-todos') || '[]');
 let memories = JSON.parse(localStorage.getItem('knowledge-memories') || '[]');
 let accountMeta = JSON.parse(localStorage.getItem('knowledge-account-meta') || '[]');
 const partners = Array.isArray(window.PARTNERS) ? window.PARTNERS : [];
+const patents = Array.isArray(window.PATENTS) ? window.PATENTS : [];
 let vaultKey = null;
 let vaultSecrets = {};
 let pendingSecretCopy = null;
@@ -169,7 +170,7 @@ for (const item of knowledge) {
 }
 save();
 
-const categoryRules = ['전체', '할 일', '기억', '협력업체', '계정', '연락처', '업무지식', '기타'];
+const categoryRules = ['전체', '할 일', '기억', '특허', '협력업체', '계정', '연락처', '업무지식', '기타'];
 const virtualCategories = ['계정', '협력업체', '할 일', '기억'];
 let pageCategory = '전체';
 let pageSearchCommitted = '';
@@ -188,15 +189,35 @@ function renderLibrary() {
   const partnerItems = (pageCategory === '전체' || pageCategory === '협력업체')
     ? partners.filter(item => !query || normalize(`${item.name} ${item.phone} ${item.email}`).includes(query)) : [];
   const searchAll = pageCategory === '전체';
+  const patentTerm = pageSearchCommitted.trim();
+  const patentItems = pageCategory === '특허'
+    ? (patentTerm ? findPatents(patentTerm, patents.length) : patents)
+    : (query ? findPatents(patentTerm, 5) : []);
   const todoItems = (searchAll ? Boolean(query) : pageCategory === '할 일')
     ? sortBySaved(alive(todos).filter(todo => !query || normalize(`${todo.text} ${todo.date || ''} ${savedLabel(todo)} ${todo.done ? '완료' : '미완료진행중'}`).includes(query))) : [];
   const memoryItems = (searchAll ? Boolean(query) : pageCategory === '기억')
     ? sortBySaved(alive(memories).filter(memory => !query || normalize(`${memory.text} ${memory.createdAt || ''} ${savedLabel(memory)}`).includes(query))) : [];
-  $('#pageCount').textContent = `${alive(knowledge).length + alive(todos).length + alive(memories).length + alive(accountMeta).length + partners.length}개`;
+  $('#pageCount').textContent = `${alive(knowledge).length + alive(todos).length + alive(memories).length + alive(accountMeta).length + partners.length + patents.length}개`;
   $('#pageCategories').innerHTML = categoryRules.filter(name => name !== '기타' || categoryItems('기타').length).map(name => `<button class="${name === pageCategory ? 'active' : ''}" data-category="${name}">${name}</button>`).join('');
   const term = pageSearchCommitted.trim();
   const mark = (text) => highlight(text, term);
-  $('#pageGrid').innerHTML = partnerItems.map((item, index) => `
+  $('#pageGrid').innerHTML = patentItems.map(item => `
+    <article class="page-card patent-card" data-patent-key="${escapeHtml(item.num || item.name)}">
+      <small class="card-kind">📐 ${escapeHtml(item.kind)}</small>
+      <h3>${mark(item.num || '번호 부여 전')}</h3>
+      ${(item.gongjong || []).length
+        ? `<div class="patent-tags">${item.gongjong.map(tag => `<span>${mark(tag)}</span>`).join('')}</div>`
+        : ''}
+      <p>${mark(item.name)}</p>
+      <dl class="patent-meta">
+        ${item.gongbeop ? `<div><dt>공법</dt><dd>${mark(item.gongbeop)}</dd></div>` : ''}
+        ${item.owner ? `<div><dt>특허권자</dt><dd>${mark(item.owner)}</dd></div>` : ''}
+        ${item.inventor ? `<div><dt>발명자</dt><dd>${mark(item.inventor)}</dd></div>` : ''}
+        ${item.appNum ? `<div><dt>출원</dt><dd>${mark(item.appNum)}${item.appDate ? ` (${escapeHtml(item.appDate)})` : ''}</dd></div>` : ''}
+        <div><dt>${item.regDate ? '등록' : '상태'}</dt><dd>${escapeHtml(item.regDate || item.status)}</dd></div>
+      </dl>
+      <footer><button data-patent-copy>특허번호 복사</button><button data-patent-chat>지식창에서 보기</button></footer>
+    </article>`).join('') + partnerItems.map((item, index) => `
     <article class="page-card partner-card" data-partner-index="${partners.indexOf(item)}">
       <small>협력업체</small><h3>${mark(item.name)}</h3>
       <p>${mark(item.phone || '전화번호 확인')}\n${mark(item.email || '이메일 확인')}</p>
@@ -228,7 +249,7 @@ function renderLibrary() {
     </article>`).join('');
   // ── 3) 검색 중에는 상단 할 일 목록을 숨긴다
   $('#todayPanel').classList.toggle('hidden', Boolean(term));
-  $('#pageEmpty').classList.toggle('hidden', items.length + accounts.length + partnerItems.length + memoryItems.length + todoItems.length !== 0);
+  $('#pageEmpty').classList.toggle('hidden', items.length + accounts.length + partnerItems.length + memoryItems.length + todoItems.length + patentItems.length !== 0);
   $('#pageCategories').querySelectorAll('[data-category]').forEach(button => button.onclick = () => { pageCategory = button.dataset.category; renderLibrary(); });
   $('#pageGrid').querySelectorAll('.page-card[data-id]').forEach(card => {
     const item = knowledge.find(x => x.id === card.dataset.id);
@@ -242,6 +263,13 @@ function renderLibrary() {
     card.querySelector('[data-copy-id]').onclick = () => copyText(item.user);
     card.querySelector('[data-copy-pw]').onclick = () => requestPasswordCopy(item.id);
     card.querySelector('[data-account-delete]').onclick = () => deleteAccount(item.id);
+  });
+  $('#pageGrid').querySelectorAll('[data-patent-key]').forEach(card => {
+    const item = patentItems.find(x => (x.num || x.name) === card.dataset.patentKey);
+    if (!item) return;
+    card.querySelector('[data-patent-copy]').onclick = () =>
+      item.num ? copyText(item.num) : showToast('아직 번호가 부여되지 않았습니다');
+    card.querySelector('[data-patent-chat]').onclick = () => { openApp(); addPatentBubble(item); };
   });
   $('#pageGrid').querySelectorAll('[data-partner-index]').forEach(card => {
     const item = partners[Number(card.dataset.partnerIndex)];
@@ -593,6 +621,54 @@ function findAccounts(query) {
   return alive(accountMeta).filter(item => normalize(`${item.service} ${item.user}`).includes(q) || q.includes(normalize(item.service))).slice(0, 3);
 }
 
+// 특허번호는 "제 10-2119347호" · "10-2119347" · "2119347" 이 모두 같은 번호다.
+function patentDigits(text) { return String(text || '').replace(/[^0-9]/g, ''); }
+
+function patentText(item) {
+  return [item.num, item.name, item.gongbeop, item.owner, item.inventor, item.appNum,
+    ...(item.gongjong || [])].join(' ');
+}
+
+function findPatents(query, limit = 5) {
+  const raw = String(query || '').trim();
+  if (!raw) return [];
+  const digits = patentDigits(raw);
+  // 번호로 찾을 때는 네 자리 이상이어야 한다(“10” 이 전부를 물고 오지 않도록).
+  if (digits.length >= 4) {
+    const byNumber = patents.filter(item =>
+      patentDigits(item.num).includes(digits) || patentDigits(item.appNum).includes(digits));
+    if (byNumber.length) return byNumber.slice(0, limit);
+  }
+  const q = normalize(raw);
+  if (q.length < 2) return [];
+  return patents.filter(item => normalize(patentText(item)).includes(q)).slice(0, limit);
+}
+
+function patentLines(item) {
+  const lines = [`${item.kind}  ${item.num || '번호 부여 전'}`, item.name];
+  if ((item.gongjong || []).length) lines.push(`공종  ${item.gongjong.join(' · ')}`);
+  if (item.gongbeop) lines.push(`공법  ${item.gongbeop}`);
+  if (item.owner) lines.push(`특허권자  ${item.owner}`);
+  if (item.inventor) lines.push(`발명자  ${item.inventor}`);
+  if (item.appNum) lines.push(`출원  ${item.appNum}${item.appDate ? `  (${item.appDate})` : ''}`);
+  lines.push(item.regDate ? `등록  ${item.regDate}` : `상태  ${item.status}`);
+  return lines;
+}
+
+function addPatentBubble(item) {
+  chatEmpty.classList.add('off');
+  const row = document.createElement('div'); row.className = 'row answer';
+  const bubble = document.createElement('div'); bubble.className = 'bubble patent-bubble';
+  bubble.textContent = patentLines(item).join('\n');
+  const actions = document.createElement('div'); actions.className = 'actions';
+  actions.innerHTML = '<button data-patent-num>특허번호 복사</button><button data-patent-all>전체 복사</button>';
+  actions.querySelector('[data-patent-num]').onclick = () =>
+    item.num ? copyText(item.num) : showToast('아직 번호가 부여되지 않았습니다');
+  actions.querySelector('[data-patent-all]').onclick = () => copyText(patentLines(item).join('\n'));
+  bubble.append(actions); row.append(bubble); messages.append(row);
+  messages.scrollTop = messages.scrollHeight;
+}
+
 function findPartners(query) {
   const q = normalize(query).replace(/(업체|전화|전화번호|번호|메일|이메일|연락처|담당)/g, '');
   if (q.length < 2) return [];
@@ -764,6 +840,7 @@ $('#composer').addEventListener('submit', (e) => {
 function showSearchHits(text) {
   const query = normalize(text);
   if (!query) return;
+  findPatents(text).forEach(addPatentBubble);
   findPartners(text).forEach(addPartnerBubble);
   findAccounts(text).forEach(addAccountBubble);
   findKnowledge(text).forEach(item => addBubble(`${item.title}\n${item.answer}`, 'answer', item));
@@ -810,6 +887,13 @@ function handleComposerText(text) {
   if (memoryMatch?.[1]?.trim()) {
     const memory = createMemory(memoryMatch[1]);
     if (memory) return commitEntry(memory, 'memory');
+  }
+
+  // 특허번호 조회는 검색이지 메모가 아니다 — 결과만 보여 주고 기억에 남기지 않는다.
+  const patentHits = findPatents(text);
+  if (patentHits.length && patentDigits(text).length >= 4) {
+    patentHits.forEach(addPatentBubble);
+    return Promise.resolve(false);
   }
 
   // 그 외 일반 문장 → 찾은 결과를 보여 주고, 문장 자체도 기억 저장소에 저장한다.

@@ -223,3 +223,50 @@ mark { padding: 0 1px; border-radius: 2px; background: #fff3a0; color: #000; }
 .sync-dot[data-state="syncing"] { color: #4a5aa8; }
 .sync-dot[data-state="pending"] { color: #e0a02a; }
 .sync-dot[data-state="offline"] { color: #b8b0c0; }
+
+/* ── 특허 카드 · 특허 말풍선 ───────────────────────────────── */
+.page-card.patent-card h3 {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .01em;
+}
+.patent-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 6px 0 2px;
+}
+.patent-tags span {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, .1);
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.patent-meta {
+  margin: 8px 0 0;
+  display: grid;
+  gap: 3px;
+  font-size: 13px;
+}
+.patent-meta div {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+.patent-meta dt {
+  flex: 0 0 56px;
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 600;
+}
+.patent-meta dd {
+  margin: 0;
+  color: #475569;
+  word-break: keep-all;
+}
+.bubble.patent-bubble {
+  white-space: pre-wrap;
+  font-variant-numeric: tabular-nums;
+}
