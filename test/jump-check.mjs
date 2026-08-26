@@ -65,11 +65,44 @@ const search = await page.evaluate(()=>({
   text: document.querySelector('#pageGrid')?.textContent || '' }));
 ok('일반 검색어는 그대로 검색', search.box==='천민호부사장' && search.text.includes('천민호부사장'), JSON.stringify({box:search.box,cards:search.cards}));
 
-// "할일 천민호" 처럼 뒤에 말이 붙으면 검색으로 동작
-await page.fill('#pageSearch','할일 천민호부사장');
+// "할일 한솔" 처럼 내용이 붙으면 저장되고 할 일 목록으로 이동한다
+await page.fill('#pageSearch','할일 한솔');
 await page.keyboard.press('Enter');
-await page.waitForTimeout(300);
-ok('"할일 + 내용" 은 검색으로', await page.evaluate(()=>document.querySelector('#pageSearch').value==='할일 천민호부사장'));
+await page.waitForTimeout(1200);
+const saved = await page.evaluate(()=>({
+  view: document.querySelector('#sideNav .side-item.active span')?.textContent,
+  box: document.querySelector('#pageSearch').value,
+  shown: [...document.querySelectorAll('.todo-item .todo-text')].map(n=>n.textContent),
+  todos: todos.filter(t=>!t.deleted).map(t=>({text:t.text, type:t.type, source:t.source})),
+  memories: memories.filter(m=>!m.deleted).length,
+  stored: JSON.parse(localStorage.getItem('knowledge-todos')||'[]').filter(t=>!t.deleted).map(t=>t.text) }));
+ok('"할일 한솔" → 할 일로 저장', saved.todos.some(t=>t.text==='한솔' && t.type==='todo'), JSON.stringify(saved.todos));
+ok('할 일 목록으로 이동 · 화면에 보임', saved.view==='할 일' && saved.shown.includes('한솔'), JSON.stringify(saved));
+ok('검색창은 비워짐', saved.box==='', `"${saved.box}"`);
+ok('로컬에도 저장', saved.stored.includes('한솔'), JSON.stringify(saved.stored));
+ok('기억에는 안 들어감', saved.memories===0, `${saved.memories}개`);
+const toast = await page.evaluate(()=>document.querySelector('.toast')?.textContent || '');
+ok('저장 안내 표시', toast.includes('저장'), toast);
+
+// "기록 …" 은 기억으로
+await page.fill('#pageSearch','기록 자오건설 PDF 확인');
+await page.keyboard.press('Enter');
+await page.waitForTimeout(1200);
+const mem = await page.evaluate(()=>({
+  view: document.querySelector('#sideNav .side-item.active span')?.textContent,
+  memories: memories.filter(m=>!m.deleted).map(m=>({text:m.text, type:m.type})),
+  todos: todos.filter(t=>!t.deleted).length }));
+ok('"기록 …" → 기억으로 저장', mem.memories.some(m=>m.text==='자오건설 PDF 확인' && m.type==='memory'), JSON.stringify(mem.memories));
+ok('기억 화면으로 이동 · 할 일은 그대로', mem.view==='기억' && mem.todos===2, JSON.stringify(mem));
+
+// 명령어가 없으면 저장하지 않고 검색만 한다
+await page.fill('#pageSearch','저장되면안되는말');
+await page.keyboard.press('Enter');
+await page.waitForTimeout(400);
+const none = await page.evaluate(()=>({
+  box: document.querySelector('#pageSearch').value,
+  todos: todos.filter(t=>!t.deleted).length, memories: memories.filter(m=>!m.deleted).length }));
+ok('일반 문장은 저장 안 됨', none.todos===2 && none.memories===1 && none.box==='저장되면안되는말', JSON.stringify(none));
 
 await b.close(); server.close();
 console.log(failures.length ? `\n실패 ${failures.length}건` : '\n모두 통과');

@@ -542,8 +542,17 @@ $('#pageSearch').addEventListener('input', event => {
 $('#pageSearch').addEventListener('keydown', event => {
   if (event.key !== 'Enter') return;
   event.preventDefault();
-  const view = viewForSearch(event.currentTarget.value);
+  const typed = event.currentTarget.value;
+  const view = viewForSearch(typed);
   if (view) return goToView(view);      // "할일" 처럼 화면 이름이면 그 목록으로 바로 이동
+
+  // "할일 한솔" 처럼 내용이 붙어 있으면 저장하고 그 목록으로 이동한다
+  const entry = entryFromCommand(typed, '사이트 검색창');
+  if (entry) {
+    goToView(entry.view);
+    commitEntry(entry.item, entry.kind);
+    return;
+  }
   pageSearchCommitted = event.currentTarget.value.trim();
   if (pageSearchCommitted && pageCategory === '대시보드') { viewBeforeSearch = pageCategory; pageCategory = '전체'; }
   if (!pageSearchCommitted && viewBeforeSearch) { pageCategory = viewBeforeSearch; viewBeforeSearch = ''; }
@@ -1579,6 +1588,33 @@ function resolveWaitingBubbles(savedIds) {
 }
 
 // 저장 순서: 배열 → 로컬 저장 → 화면 갱신 → Firebase → 저장된 문서 확인.
+// "할일 …" / "기록 …" / "지식 제목 | 내용" 을 읽어 저장할 항목을 만든다.
+// 팝업 지식창과 사이트 검색창이 같은 규칙을 쓴다.
+function entryFromCommand(text, source) {
+  const raw = String(text || '').trim();
+  if (!raw) return null;
+
+  const knowledgeMatch = raw.match(KNOWLEDGE_COMMAND);
+  if (knowledgeMatch?.[1]?.trim()) {
+    const [title, ...rest] = knowledgeMatch[1].split('|');
+    const item = createKnowledge(title, rest.join('|'), { raw, source });
+    if (item) return { item, kind: 'knowledge', view: '전체' };
+  }
+
+  const todoMatch = raw.match(TODO_COMMAND);          // 할일 내용 → todos 에만
+  if (todoMatch?.[1]?.trim()) {
+    const item = createTodo(todoMatch[1], source);
+    if (item) return { item, kind: 'todo', view: '할 일' };
+  }
+
+  const memoryMatch = raw.match(MEMORY_COMMAND);      // 기록·기억 내용 → memories 에만
+  if (memoryMatch?.[1]?.trim()) {
+    const item = createMemory(memoryMatch[1], source);
+    if (item) return { item, kind: 'memory', view: '기억' };
+  }
+  return null;
+}
+
 async function commitEntry(item, kind) {
   const labels = { todo: '할 일', memory: '기록', knowledge: '지식' };
   const label = labels[kind] || '기록';
@@ -1665,27 +1701,9 @@ function handleComposerText(text) {
     return Promise.resolve(false);
   }
 
-  // 지식 제목 | 내용 → knowledge
-  const knowledgeMatch = text.match(KNOWLEDGE_COMMAND);
-  if (knowledgeMatch?.[1]?.trim()) {
-    const [title, ...rest] = knowledgeMatch[1].split('|');
-    const item = createKnowledge(title, rest.join('|'), { raw: text });
-    if (item) return commitEntry(item, 'knowledge');
-  }
-
-  // 할일 내용 / 할 일 내용 → todos
-  const todoMatch = text.match(TODO_COMMAND);
-  if (todoMatch?.[1]?.trim()) {
-    const todo = createTodo(todoMatch[1]);
-    if (todo) return commitEntry(todo, 'todo');
-  }
-
-  // 기록 내용 / 기억 내용 → memories
-  const memoryMatch = text.match(MEMORY_COMMAND);
-  if (memoryMatch?.[1]?.trim()) {
-    const memory = createMemory(memoryMatch[1]);
-    if (memory) return commitEntry(memory, 'memory');
-  }
+  // 지식 제목 | 내용 → knowledge, 할일 내용 → todos, 기록 내용 → memories
+  const entry = entryFromCommand(text);
+  if (entry) return commitEntry(entry.item, entry.kind);
 
   // 명령어가 없으면 검색이다. 저장하지 않는다.
   // 기억 저장소에는 "기억 …" / "기록 …" 으로 입력했을 때만 들어간다.
