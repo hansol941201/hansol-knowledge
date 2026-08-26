@@ -407,6 +407,63 @@ $('#pageSearch').addEventListener('keydown', event => {
 });
 $('#pageAdd').addEventListener('click', openNewEditor);
 
+// ── 자료 초기화 ────────────────────────────────────────────────
+function resetCounts() {
+  return { knowledge: alive(knowledge).length, todos: alive(todos).length, memories: alive(memories).length, accounts: alive(accountMeta).length };
+}
+function openResetModal() {
+  const count = resetCounts();
+  $('#resetCount').textContent = `지식 ${count.knowledge}개 · 할 일 ${count.todos}개 · 기억 ${count.memories}개 · 계정 ${count.accounts}개`;
+  $('#resetConfirm').value = '';
+  $('#resetAll').disabled = true;
+  $('#resetModal').classList.remove('hidden');
+}
+function closeResetModal() { $('#resetModal').classList.add('hidden'); }
+$('#resetOpen').addEventListener('click', openResetModal);
+$('#resetClose').addEventListener('click', closeResetModal);
+$('#resetModal').addEventListener('click', event => { if (event.target.id === 'resetModal') closeResetModal(); });
+$('#resetConfirm').addEventListener('input', event => { $('#resetAll').disabled = event.currentTarget.value.trim() !== '삭제'; });
+
+$('#resetBackup').addEventListener('click', () => {
+  const backup = JSON.stringify({ savedAt: nowIso(), knowledge, todos, memories, accountMeta }, null, 2);
+  const url = URL.createObjectURL(new Blob([backup], { type: 'application/json' }));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `hansol-knowledge-backup-${todayKey()}.json`;
+  document.body.append(link);
+  link.click();
+  // 링크를 바로 지우면 파일 이름이 붙지 않는 브라우저가 있어 한 박자 뒤에 정리한다.
+  setTimeout(() => { link.remove(); URL.revokeObjectURL(url); }, 2000);
+  showToast('백업 내려받음');
+});
+
+// 이 컴퓨터 사본만 지운다. 클라우드 자료는 그대로라 새로고침하면 다시 내려온다.
+$('#resetLocal').addEventListener('click', () => {
+  if (!confirm('이 컴퓨터에 저장된 사본을 지웁니다.\n클라우드 자료는 그대로 남고, 다시 내려받습니다.\n진행할까요?')) return;
+  ['knowledge-messenger-data', 'knowledge-todos', 'knowledge-memories', 'knowledge-account-meta',
+   'knowledge-vault-data', 'knowledge-sync-pending'].forEach(key => localStorage.removeItem(key));
+  location.reload();
+});
+
+// 전체 삭제는 문서를 비우는 게 아니라 삭제 표시를 남긴다.
+// 그냥 비우면 다른 기기가 갖고 있던 사본을 다시 올려서 되살아난다.
+$('#resetAll').addEventListener('click', async () => {
+  if ($('#resetConfirm').value.trim() !== '삭제') return;
+  if (!confirm('지식·할 일·기억·계정을 모두 삭제합니다.\n다른 컴퓨터에서도 사라집니다.\n정말 진행할까요?')) return;
+  $('#resetAll').disabled = true;
+  $('#resetAll').textContent = '삭제 중…';
+  for (const list of [knowledge, todos, memories, accountMeta]) {
+    for (const item of list) { item.deleted = true; touch(item); }
+  }
+  vaultSecrets = {};
+  saveLocalState();
+  renderAll();
+  const result = await saveCloudState();
+  $('#resetAll').textContent = '전체 삭제';
+  closeResetModal();
+  showToast(result.verified || result.ok ? '전체 삭제 완료' : '이 컴퓨터에서 삭제됨 · 클라우드 연동 대기 중');
+});
+
 let editingId = null;
 function openEditor(item) {
   editingId = item.id;
@@ -575,7 +632,8 @@ $('#siteShortcut').addEventListener('click', () => {
 });
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
-  if (!$('#syncModal').classList.contains('hidden')) closeSyncModal();
+  if (!$('#resetModal').classList.contains('hidden')) closeResetModal();
+  else if (!$('#syncModal').classList.contains('hidden')) closeSyncModal();
   else if (!$('#memoryModal').classList.contains('hidden')) closeMemoryLibrary();
   else collapseApp();
 });
@@ -789,6 +847,17 @@ function renderAll() {
   renderMemories();
 }
 
+// 나중에 자동 재전송으로 올라간 항목의 말풍선을 완료로 바꾸기 위해 들고 있는다.
+const waitingBubbles = new Map();
+function resolveWaitingBubbles(savedIds) {
+  if (!waitingBubbles.size) return;
+  for (const [id, entry] of [...waitingBubbles]) {
+    if (savedIds && !savedIds.has(id)) continue;
+    entry.bubble.textContent = `✓ ${entry.label} 저장 및 연동 완료\n${entry.detail}`;
+    waitingBubbles.delete(id);
+  }
+}
+
 // 저장 순서: 배열 → 로컬 저장 → 화면 갱신 → Firebase → 저장된 문서 확인.
 async function commitEntry(item, kind) {
   const labels = { todo: '할 일', memory: '기록', knowledge: '지식' };
@@ -803,13 +872,23 @@ async function commitEntry(item, kind) {
   renderAll();               // 3. 내 지식 · 할 일 · 기억 저장소 즉시 다시 표시
 
   const bubble = addBubble(`${label} 저장 중…\n${detail}`, 'answer');
-  const result = await saveCloudState({ verifyIds: [item.id] });   // 4~5. Firebase 저장 + 확인
+  let result = await saveCloudState({ verifyIds: [item.id] });     // 4~5. Firebase 저장 + 확인
+  // 일시적인 실패면 한 번 더 시도한다(연결은 살아 있는데 쓰기만 밀린 경우).
+  if (!result.verified && cloudReady) {
+    await new Promise(resolve => setTimeout(resolve, 700));
+    result = await saveCloudState({ verifyIds: [item.id] });
+  }
 
   const needsLogin = !result.verified && !cloudReady && Boolean(window.HANSOL_AUTH) && !window.HANSOL_AUTH.currentUser;
-  bubble.textContent = result.verified
-    ? `✓ ${label} 저장 및 연동 완료\n${detail}`
-    : `로컬 저장 완료·클라우드 연동 대기 중\n${needsLogin ? '동기화 PIN 로그인이 필요합니다\n' : ''}${detail}`;
-  showToast(result.verified ? `✓ ${label} 저장 및 연동 완료` : '로컬 저장 완료·클라우드 연동 대기 중');
+  if (result.verified) {
+    bubble.textContent = `✓ ${label} 저장 및 연동 완료\n${detail}`;
+    showToast(`✓ ${label} 저장 및 연동 완료`);
+  } else {
+    bubble.textContent = `로컬 저장 완료·클라우드 연동 대기 중\n${needsLogin ? '동기화 PIN 로그인이 필요합니다\n' : ''}${detail}`;
+    showToast('로컬 저장 완료·클라우드 연동 대기 중');
+    // 자동 재전송으로 올라가면 이 말풍선을 완료로 바꾼다.
+    waitingBubbles.set(item.id, { bubble, label, detail });
+  }
   if (needsLogin && $('#syncModal').classList.contains('hidden')) { syncPromptDismissed = false; openSyncModal(); }
   messages.scrollTop = messages.scrollHeight;
   return result.verified;
@@ -1042,6 +1121,7 @@ async function saveCloudState({ verifyIds = [] } = {}) {
       ...((saved && saved.accountMeta) || [])
     ].map(entry => entry && entry.id));
     const missing = verifyIds.filter(id => !storedIds.has(id));
+    resolveWaitingBubbles(storedIds);   // 뒤늦게 올라간 항목의 말풍선을 완료로 바꾼다
 
     cloudSyncing = false;
     await applyCloudState(merged);
