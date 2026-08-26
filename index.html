@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>한솔 지식</title>
-  <link rel="stylesheet" href="styles.css?v=16" />
+  <link rel="stylesheet" href="styles.css?v=17" />
 </head>
 <body>
   <div class="workspace">
@@ -14,11 +14,13 @@
         <div><strong>한솔 지식</strong><small>나만의 지식 비서</small></div>
       </div>
       <nav id="sideNav" class="side-nav"></nav>
+      <div class="side-extra">
+        <button id="memoryToggle" class="side-item" type="button"><span data-icon="bookmark"></span><span>기억 저장소</span></button>
+      </div>
       <div class="side-foot">
-        <button id="memoryToggle" class="side-link" type="button"><span data-icon="bookmark"></span>기억 저장소</button>
-        <button id="syncOpen" class="side-link" type="button"><span data-icon="settings"></span>동기화 설정</button>
-        <button id="resetBackupSide" class="side-link" type="button"><span data-icon="download"></span>데이터 백업</button>
-        <button id="resetOpen" class="side-link" type="button"><span data-icon="refresh"></span>초기화</button>
+        <button id="syncOpen" class="side-mini" type="button"><span data-icon="settings" data-size="13"></span>동기화 설정</button>
+        <button id="resetBackupSide" class="side-mini" type="button"><span data-icon="download" data-size="13"></span>데이터 백업</button>
+        <button id="resetOpen" class="side-mini" type="button"><span data-icon="refresh" data-size="13"></span>초기화</button>
         <button id="syncState" class="sync-state" type="button" data-state="offline">오프라인 저장 모드</button>
       </div>
     </aside>
@@ -182,6 +184,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="firebase-config.js?v=2"></script>
-  <script src="app.js?v=45"></script>
+  <script src="app.js?v=46"></script>
 </body>
 </html>

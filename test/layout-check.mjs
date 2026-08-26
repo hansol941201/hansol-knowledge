@@ -23,7 +23,8 @@ await page.waitForFunction(()=>document.querySelector('#syncState')?.dataset.sta
 await page.waitForTimeout(600);
 ok('자바스크립트 오류 없음', errors.length===0, errors.join(' | '));
 ok('사이드바 표시', await page.isVisible('.sidebar'));
-ok('사이드바 메뉴 9개', (await page.$$eval('.side-item', n=>n.length))===9);
+ok('사이드바 메뉴 9개', (await page.$$eval('.side-nav .side-item', n=>n.length))===9);
+ok('기억 저장소가 메뉴 아래에 있음', await page.isVisible('.side-extra #memoryToggle'));
 ok('대시보드가 기본 선택', (await page.textContent('.side-item.active')).includes('대시보드'));
 ok('자주 가는 사이트 표시', await page.isVisible('#shortcutSection'));
 ok('오늘의 할 일 표시', await page.isVisible('#todayPanel'));
