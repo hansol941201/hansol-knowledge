@@ -166,8 +166,11 @@ svg { display: block; flex: none; }
 .todo-empty { padding: 6px 2px; color: var(--ink-3); font-size: 12.5px; }
 
 /* ── 일정 (월 달력) ─────────────────────────────────────────── */
-.dash-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: stretch; }
+.dash-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: stretch; min-height: 520px; }
 .dash-cols > .today-panel { align-content: start; }
+/* 팀장 일정 사이트는 카드 안에서만 스크롤되게 한다(페이지가 길어지지 않도록). */
+#schedulePanel:has(.schedule-embed) { display: flex; flex-direction: column; }
+.schedule-embed { flex: 1; width: 100%; min-height: 420px; border: 0; border-radius: 12px; background: #fff; }
 .cal-tools { display: flex; align-items: center; gap: 5px; }
 .cal-nav {
   min-width: 26px; height: 26px; padding: 0 7px; border: 1px solid var(--line); border-radius: 8px;

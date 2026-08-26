@@ -5,7 +5,9 @@ const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..')
 const out = process.env.SHOT_DIR || '/tmp';
 const failures = [];
 const types={'.html':'text/html','.js':'text/javascript','.css':'text/css','.png':'image/png'};
-const server=http.createServer((req,res)=>{const f=path.join(root,decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/,'')||'index.html');
+const server=http.createServer((req,res)=>{
+if (req.url.startsWith('/missing-team/')) { res.writeHead(404,{'Content-Type':'text/html'}); return res.end('<!doctype html><title>404 Not Found</title>'); }
+const f=path.join(root,decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/,'')||'index.html');
 if(!f.startsWith(root)||!fs.existsSync(f)||fs.statSync(f).isDirectory()){res.writeHead(404);return res.end('x');}
 res.writeHead(200,{'Content-Type':types[path.extname(f)]||'application/octet-stream'});res.end(fs.readFileSync(f));});
 await new Promise(r=>server.listen(0,r));
@@ -14,7 +16,9 @@ const stub=fs.readFileSync(path.join(root,'test','fake-firebase.js'),'utf8');
 const ok=(n,p,d='')=>{ if(!p) failures.push(n); console.log(`${p?'PASS':'FAIL'}  ${n}${d?` — ${d}`:''}`); };
 const b=await chromium.launch({executablePath: process.env.PW_CHROME || '/opt/pw-browsers/chromium-1194/chrome-linux/chrome'});
 const ctx=await b.newContext({viewport:{width:1920,height:1080},deviceScaleFactor:1.5});
-await ctx.addInitScript(stub); await ctx.route('**gstatic.com/**',r=>r.abort());
+await ctx.addInitScript(stub);
+// 이 스위트는 자체 달력을 검사하므로 팀장 일정 주소를 404 로 둔다.
+await ctx.addInitScript(u => { window.__TEAM_SCHEDULE_URL = u; }, `${base}/missing-team/`); await ctx.route('**gstatic.com/**',r=>r.abort());
 await ctx.route('**google.com/s2/favicons**', r=>r.fulfill({status:200,contentType:'image/svg+xml',body:'<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="64" height="64" rx="14" fill="#DFD4FA"/></svg>'}));
 const page=await ctx.newPage();
 const errors=[]; page.on('pageerror',e=>errors.push(e.message));
@@ -28,6 +32,7 @@ ok('바로가기 표시', await page.isVisible('#shortcutGrid'));
 ok('바로가기 제목·설명 없음', !(await page.textContent('.main-scroll')).includes('자주 사용하는 업무 사이트'));
 ok('오늘의 할 일 표시', await page.isVisible('#todayPanel'));
 ok('일정 표시', await page.isVisible('#schedulePanel'));
+await page.waitForSelector('.cal-grid', { timeout: 8000 });
 ok('모아 보기 숨김', !(await page.isVisible('#knowledgeBlock')));
 ok('카테고리 버튼 숨김', !(await page.isVisible('#pageCategories')));
 ok('AI 인사이트 제거', (await page.$$('.ai-insight')).length===0 && !(await page.content()).includes('AI 인사이트'));

@@ -657,7 +657,49 @@ function schedulesOn(dateKey) {
     .sort((a, b) => String(a.time || '').localeCompare(String(b.time || '')));
 }
 
+// 오른쪽 일정 칸에는 팀장 일정 사이트를 그대로 띄운다.
+// 같은 출처(hansol941201.github.io)라 iframe 이 막히지 않는다.
+// 주소가 열리지 않으면 아래 자체 달력으로 자동 전환한다.
+const TEAM_SCHEDULE_URL = 'https://hansol941201.github.io/shin/team-schedule/';
+let scheduleEmbedFailed = false;
+
+function teamScheduleUrl() { return window.__TEAM_SCHEDULE_URL || TEAM_SCHEDULE_URL; }
+
 function renderSchedule() {
+  if (scheduleEmbedFailed) return renderScheduleCalendar();
+  const url = teamScheduleUrl();
+  $('#schedulePanel').innerHTML = `
+    <div class="block-head">
+      <div><h2>팀장 일정</h2></div>
+      <a class="ghost-btn" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">새 탭으로 열기</a>
+    </div>
+    <iframe id="scheduleEmbed" class="schedule-embed" src="${escapeHtml(url)}" title="팀장 일정" loading="lazy"></iframe>`;
+
+  const frame = $('#scheduleEmbed');
+  let settled = false;
+  const fallback = (reason) => {
+    if (settled) return;
+    settled = true;
+    console.warn('팀장 일정 표시 실패 — 자체 달력으로 전환', reason);
+    scheduleEmbedFailed = true;
+    renderScheduleCalendar();
+  };
+  frame.addEventListener('error', () => fallback('load-error'));
+  frame.addEventListener('load', () => {
+    if (settled) return;
+    try {
+      const doc = frame.contentDocument;                 // 같은 출처면 안을 볼 수 있다
+      if (doc && /404|not found|page not found/i.test(`${doc.title} ${doc.body ? doc.body.textContent.slice(0, 200) : ''}`)) {
+        return fallback('404');
+      }
+    } catch { /* 다른 출처면 확인은 못 하지만 화면에는 나온다 */ }
+    settled = true;
+  });
+  // 아예 응답이 없으면 기다리지 말고 달력을 보여 준다.
+  setTimeout(() => { if (!settled) fallback('timeout'); }, 6000);
+}
+
+function renderScheduleCalendar() {
   const today = todayKey();
   const year = calendarMonth.getFullYear();
   const month = calendarMonth.getMonth();
