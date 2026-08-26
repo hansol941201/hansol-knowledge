@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>한솔 지식</title>
-  <link rel="stylesheet" href="styles.css?v=19" />
+  <link rel="stylesheet" href="styles.css?v=20" />
 </head>
 <body>
   <div class="workspace">
@@ -97,9 +97,22 @@
   <div id="shortcutModal" class="modal hidden" role="dialog" aria-modal="true" aria-label="사이트 바로가기">
     <form id="shortcutForm" class="edit-box">
       <header><strong id="shortcutHeading">사이트 추가</strong><button id="shortcutClose" type="button">×</button></header>
-      <label>사이트 이름<input id="shortcutName" placeholder="예) K-APT" required /></label>
-      <label>주소<input id="shortcutUrl" placeholder="예) k-apt.go.kr" required /></label>
-      <p class="edit-help">아이콘은 주소에서 자동으로 가져옵니다.</p>
+      <label>사이트 이름<input id="shortcutName" placeholder="예) POUR 협약서" required /></label>
+      <label>URL<input id="shortcutUrl" placeholder="예) poursolution.github.io/pour-contract/" required /></label>
+      <label>대표 이미지
+        <div class="shortcut-image-row">
+          <div id="shortcutPreview" class="shortcut-preview"></div>
+          <div class="shortcut-image-tools">
+            <input id="shortcutFile" type="file" accept="image/png,image/jpeg,image/webp" />
+            <div class="fit-picker">
+              <button type="button" data-fit="cover" class="active">채우기</button>
+              <button type="button" data-fit="contain">맞추기</button>
+            </div>
+            <button type="button" id="shortcutImageClear" class="hidden fit-clear">이미지 지우기</button>
+          </div>
+        </div>
+      </label>
+      <p class="edit-help">PNG · JPG · WEBP. 카드 크기에 맞게 자동으로 줄여 저장합니다.</p>
       <footer><button id="shortcutDelete" type="button" class="danger-text">삭제</button><button id="shortcutCancel" type="button">취소</button><button type="submit">저장</button></footer>
     </form>
   </div>
@@ -192,6 +205,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="firebase-config.js?v=2"></script>
-  <script src="app.js?v=48"></script>
+  <script src="app.js?v=49"></script>
 </body>
 </html>

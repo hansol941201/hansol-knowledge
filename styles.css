@@ -93,22 +93,53 @@ svg { display: block; flex: none; }
 #pageCount { padding: 5px 11px; border-radius: 999px; background: var(--violet-soft); color: var(--violet); font-size: 12px; font-weight: 600; }
 
 /* ── 자주 가는 사이트 ───────────────────────────────────────── */
-.shortcut-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(136px, 1fr)); gap: 10px; }
+/* ── 즐겨찾기(앱 런처) ─────────────────────────────────────── */
+.shortcut-grid { display: flex; flex-wrap: wrap; gap: 10px; }
 .shortcut {
-  position: relative; height: 84px; border: 1px solid var(--line); border-radius: 14px; background: var(--card);
-  box-shadow: var(--shadow); transition: transform var(--ease), box-shadow var(--ease), border-color var(--ease);
+  position: relative; width: 152px; border: 1px solid var(--line); border-radius: 15px;
+  background: var(--card); box-shadow: var(--shadow); overflow: hidden;
+  transition: transform var(--ease), box-shadow var(--ease), border-color var(--ease), opacity var(--ease);
 }
 .shortcut:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); border-color: var(--violet-line); }
-.shortcut a { display: grid; gap: 2px; justify-items: center; align-content: center; height: 100%; padding: 10px; text-decoration: none; color: inherit; }
-.shortcut img { width: 24px; height: 24px; border-radius: 6px; transition: transform var(--ease); }
-.shortcut:hover img { transform: scale(1.08); }
-.shortcut b { font-size: 12.5px; font-weight: 600; }
-.shortcut small { color: var(--ink-3); font-size: 10.5px; }
-.shortcut-more { position: absolute; top: 5px; right: 5px; padding: 4px; border-radius: 7px; color: var(--ink-3); opacity: 0; transition: opacity var(--ease), background var(--ease); }
+.shortcut.dragging { opacity: .5; transform: translateY(-3px) scale(.99); }
+.shortcut.drop-target { border-color: var(--violet); box-shadow: 0 0 0 3px var(--violet-soft); }
+.shortcut a { display: block; text-decoration: none; color: inherit; cursor: pointer; }
+.shortcut-thumb {
+  display: grid; place-items: center; height: 78px; overflow: hidden;
+  background: var(--violet-soft); border-bottom: 1px solid var(--line-soft);
+}
+.shortcut-thumb img { width: 100%; height: 100%; transition: transform var(--ease); }
+.shortcut:hover .shortcut-thumb img { transform: scale(1.02); }
+.shortcut-badge { color: var(--violet); font-size: 15px; font-weight: 700; letter-spacing: .2px; }
+.shortcut a b { display: block; padding: 9px 10px; font-size: 12.5px; font-weight: 600; text-align: center;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.shortcut-more {
+  position: absolute; top: 5px; right: 5px; padding: 4px; border-radius: 7px;
+  color: var(--ink-2); background: rgba(255, 255, 255, .86); opacity: 0; transition: opacity var(--ease);
+}
 .shortcut:hover .shortcut-more { opacity: 1; }
-.shortcut-more:hover { background: var(--line-soft); }
-.shortcut.add { display: grid; gap: 4px; place-content: center; justify-items: center; border-style: dashed; color: var(--ink-3); box-shadow: none; }
-.shortcut.add:hover { color: var(--violet); border-color: var(--violet-line); }
+.shortcut-more:hover { background: #fff; }
+.shortcut.add {
+  display: grid; gap: 5px; place-content: center; justify-items: center; height: 117px;
+  border-style: dashed; color: var(--ink-3); box-shadow: none; background: none;
+}
+.shortcut.add:hover { color: var(--violet); border-color: var(--violet-line); transform: translateY(-2px); }
+.shortcut.add b { font-size: 12.5px; font-weight: 600; }
+
+/* 이미지 등록 · 미리보기 */
+.shortcut-image-row { display: flex; gap: 12px; align-items: flex-start; margin-top: 7px; }
+.shortcut-preview {
+  flex: none; display: grid; place-items: center; width: 152px; height: 78px; overflow: hidden;
+  border: 1px solid var(--line); border-radius: 12px; background: var(--violet-soft);
+}
+.shortcut-preview img { width: 100%; height: 100%; }
+.shortcut-image-tools { flex: 1; min-width: 0; display: grid; gap: 8px; }
+.shortcut-image-tools input[type="file"] { width: 100%; margin: 0; padding: 7px; border: 1px dashed var(--line); border-radius: 9px; font-size: 11px; }
+.fit-picker { display: flex; gap: 5px; }
+.fit-picker button { flex: 1; padding: 7px; border: 1px solid var(--line); border-radius: 9px; color: var(--ink-2); font-size: 11.5px; transition: background var(--ease), color var(--ease), border-color var(--ease); }
+.fit-picker button.active { border-color: var(--violet-line); background: var(--violet-soft); color: var(--violet); font-weight: 600; }
+.fit-clear { justify-self: start; padding: 4px 2px; color: var(--ink-3); font-size: 11px; }
+.fit-clear:hover { color: #C05A5A; }
 
 /* ── 오늘의 할 일 ───────────────────────────────────────────── */
 .today-panel { display: grid; gap: 12px; padding: 20px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); box-shadow: var(--shadow); }

@@ -50,11 +50,7 @@ let todos = JSON.parse(localStorage.getItem('knowledge-todos') || '[]');
 let memories = JSON.parse(localStorage.getItem('knowledge-memories') || '[]');
 let accountMeta = JSON.parse(localStorage.getItem('knowledge-account-meta') || '[]');
 let schedule = JSON.parse(localStorage.getItem('knowledge-schedule') || '[]');
-let shortcuts = JSON.parse(localStorage.getItem('knowledge-shortcuts') || 'null') || [
-  { id: 'shortcut-kapt', name: 'K-APT', url: 'https://www.k-apt.go.kr' },
-  { id: 'shortcut-gmail', name: 'Gmail', url: 'https://mail.google.com' },
-  { id: 'shortcut-naver', name: '네이버', url: 'https://www.naver.com' }
-];
+let shortcuts = JSON.parse(localStorage.getItem('knowledge-shortcuts') || '[]');
 const partners = Array.isArray(window.PARTNERS) ? window.PARTNERS : [];
 const patents = Array.isArray(window.PATENTS) ? window.PATENTS : [];
 let vaultKey = null;
@@ -699,6 +695,40 @@ $('#scheduleDelete').addEventListener('click', () => {
 });
 
 // ── 자주 가는 사이트 ───────────────────────────────────────────
+// 기본 7개. id 가 고정이라 여러 번 열어도 다시 만들어지지 않고,
+// 사용자가 지웠으면(삭제 표시가 남아 있으면) 되살리지 않는다.
+const DEFAULT_SHORTCUTS = [
+  { id: 'shortcut-pour-contract', name: 'POUR 협약서', url: 'https://poursolution.github.io/pour-contract/', badge: 'POUR' },
+  { id: 'shortcut-pour-support', name: '기술지원', url: 'https://pour-support.web.app/login', badge: 'SUPPORT' },
+  { id: 'shortcut-card', name: '고객관리', url: 'https://hansol941201.github.io/card/', badge: '고객관리' },
+  { id: 'shortcut-knowledge', name: '한솔지식', url: 'https://hansol941201.github.io/hansol-knowledge/', badge: 'HS' },
+  { id: 'shortcut-team-schedule', name: '팀일정', url: 'https://hansol941201.github.io/shin/team-schedule/', badge: '일정' },
+  { id: 'shortcut-qna', name: 'Q&A', url: 'https://hansol941201.github.io/Q-A/', badge: 'Q&A' },
+  { id: 'shortcut-sales', name: '영업운영', url: 'https://schedules-cip.pages.dev/', badge: '영업운영' }
+];
+// 예전 기본값 3개는 손대지 않은 것만 치운다(직접 고쳤으면 그대로 둔다).
+const LEGACY_DEFAULTS = {
+  'shortcut-kapt': 'https://www.k-apt.go.kr',
+  'shortcut-gmail': 'https://mail.google.com',
+  'shortcut-naver': 'https://www.naver.com'
+};
+
+function seedShortcuts() {
+  let changed = false;
+  for (const [id, url] of Object.entries(LEGACY_DEFAULTS)) {
+    const old = shortcuts.find(item => item.id === id && !item.deleted);
+    if (old && old.url === url) { old.deleted = true; touch(old); changed = true; }
+  }
+  let order = Math.min(0, ...shortcuts.map(item => Number(item.order) || 0));
+  for (const preset of DEFAULT_SHORTCUTS) {
+    if (shortcuts.some(item => item.id === preset.id)) continue;          // 지운 것도 다시 만들지 않는다
+    if (shortcuts.some(item => !item.deleted && item.url === preset.url)) continue;
+    shortcuts.push(newEntry({ type: 'shortcut', image: '', imageFit: 'cover', order: order++, ...preset }, '기본'));
+    changed = true;
+  }
+  if (changed) { saveLocalState(); queueCloudSave(); }
+}
+
 function shortcutHref(url) {
   const raw = String(url || '').trim();
   if (!raw) return '';
@@ -708,49 +738,147 @@ function shortcutHost(url) {
   try { return new URL(shortcutHref(url)).hostname.replace(/^www\./, ''); }
   catch { return String(url || '').replace(/^https?:\/\//i, '').split('/')[0]; }
 }
+function shortcutBadge(item) {
+  return (item.badge || String(item.name || '').trim().slice(0, 4) || '?').toUpperCase();
+}
+function sortedShortcuts() {
+  return alive(shortcuts).slice().sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
+}
+
 function renderShortcuts() {
-  const list = alive(shortcuts);
+  const list = sortedShortcuts();
   $('#shortcutGrid').innerHTML = list.map(item => `
-    <div class="shortcut" data-shortcut="${item.id}">
-      <a href="${escapeHtml(shortcutHref(item.url))}" target="_blank" rel="noopener noreferrer">
-        <img alt="" loading="lazy" src="https://www.google.com/s2/favicons?sz=64&domain=${encodeURIComponent(shortcutHost(item.url))}" />
+    <div class="shortcut" data-shortcut="${item.id}" draggable="true">
+      <a href="${escapeHtml(shortcutHref(item.url))}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(item.name)}">
+        <span class="shortcut-thumb">${item.image
+          ? `<img alt="" src="${escapeHtml(item.image)}" style="object-fit:${item.imageFit === 'contain' ? 'contain' : 'cover'}" />`
+          : `<span class="shortcut-badge">${escapeHtml(shortcutBadge(item))}</span>`}</span>
         <b>${escapeHtml(item.name)}</b>
-        <small>${escapeHtml(shortcutHost(item.url))}</small>
       </a>
       <button type="button" class="shortcut-more" data-shortcut-edit title="수정·삭제">${icon('more', 14)}</button>
     </div>`).join('') + `
     <button type="button" class="shortcut add" id="shortcutAdd">${icon('plus', 18)}<b>사이트 추가</b></button>`;
+
   $('#shortcutGrid').querySelectorAll('[data-shortcut]').forEach(node => {
     node.querySelector('[data-shortcut-edit]').onclick = (event) => {
       event.preventDefault();
       openShortcutModal(shortcuts.find(x => x.id === node.dataset.shortcut));
     };
+    // 드래그로 순서 바꾸기
+    node.addEventListener('dragstart', event => {
+      draggingShortcutId = node.dataset.shortcut;
+      node.classList.add('dragging');
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/plain', node.dataset.shortcut);
+    });
+    node.addEventListener('dragend', () => { draggingShortcutId = ''; node.classList.remove('dragging'); });
+    node.addEventListener('dragover', event => {
+      if (!draggingShortcutId || draggingShortcutId === node.dataset.shortcut) return;
+      event.preventDefault();
+      node.classList.add('drop-target');
+    });
+    node.addEventListener('dragleave', () => node.classList.remove('drop-target'));
+    node.addEventListener('drop', event => {
+      event.preventDefault();
+      node.classList.remove('drop-target');
+      moveShortcut(draggingShortcutId, node.dataset.shortcut);
+    });
   });
   $('#shortcutAdd').onclick = () => openShortcutModal(null);
 }
 
+let draggingShortcutId = '';
+function moveShortcut(fromId, toId) {
+  if (!fromId || !toId || fromId === toId) return;
+  const list = sortedShortcuts();
+  const from = list.findIndex(item => item.id === fromId);
+  const to = list.findIndex(item => item.id === toId);
+  if (from < 0 || to < 0) return;
+  const [moved] = list.splice(from, 1);
+  list.splice(to, 0, moved);
+  list.forEach((item, index) => { item.order = index; touch(item); });
+  saveLocalState(); queueCloudSave(); renderShortcuts();
+}
+
+// 업로드한 이미지는 카드 크기에 맞게 줄여서 저장한다.
+// 원본을 그대로 담으면 동기화 문서(1MB 제한)가 금방 넘친다.
+const IMAGE_MAX = 420;
+function readShortcutImage(file) {
+  return new Promise((resolve, reject) => {
+    if (!/^image\/(png|jpeg|jpg|webp)$/i.test(file.type)) return reject(new Error('PNG · JPG · WEBP 만 됩니다'));
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('이미지를 읽지 못했습니다'));
+    reader.onload = () => {
+      const image = new Image();
+      image.onerror = () => reject(new Error('이미지를 열지 못했습니다'));
+      image.onload = () => {
+        const scale = Math.min(1, IMAGE_MAX / Math.max(image.width, image.height));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(image.width * scale);
+        canvas.height = Math.round(image.height * scale);
+        const context = canvas.getContext('2d');
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        // 투명도가 있으면 PNG, 아니면 용량이 작은 JPEG 로.
+        const png = canvas.toDataURL('image/png');
+        const jpeg = canvas.toDataURL('image/jpeg', 0.82);
+        resolve(png.length <= jpeg.length * 1.1 ? png : jpeg);
+      };
+      image.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 let editingShortcutId = null;
+let shortcutImage = '';
+let shortcutFit = 'cover';
+function paintShortcutPreview() {
+  const preview = $('#shortcutPreview');
+  preview.innerHTML = shortcutImage
+    ? `<img alt="" src="${escapeHtml(shortcutImage)}" style="object-fit:${shortcutFit}" />`
+    : `<span class="shortcut-badge">${escapeHtml(($('#shortcutName').value || '?').trim().slice(0, 4).toUpperCase())}</span>`;
+  $('#shortcutImageClear').classList.toggle('hidden', !shortcutImage);
+  document.querySelectorAll('[data-fit]').forEach(button => button.classList.toggle('active', button.dataset.fit === shortcutFit));
+}
 function openShortcutModal(item) {
   editingShortcutId = item ? item.id : null;
+  shortcutImage = item ? (item.image || '') : '';
+  shortcutFit = item && item.imageFit === 'contain' ? 'contain' : 'cover';
   $('#shortcutHeading').textContent = item ? '사이트 수정' : '사이트 추가';
   $('#shortcutName').value = item ? item.name : '';
   $('#shortcutUrl').value = item ? item.url : '';
+  $('#shortcutFile').value = '';
   $('#shortcutDelete').classList.toggle('hidden', !item);
+  paintShortcutPreview();
   $('#shortcutModal').classList.remove('hidden');
   setTimeout(() => $('#shortcutName').focus(), 50);
 }
-function closeShortcutModal() { $('#shortcutModal').classList.add('hidden'); editingShortcutId = null; }
+function closeShortcutModal() { $('#shortcutModal').classList.add('hidden'); editingShortcutId = null; shortcutImage = ''; }
 $('#shortcutClose').addEventListener('click', closeShortcutModal);
 $('#shortcutCancel').addEventListener('click', closeShortcutModal);
 $('#shortcutModal').addEventListener('click', event => { if (event.target.id === 'shortcutModal') closeShortcutModal(); });
+$('#shortcutName').addEventListener('input', paintShortcutPreview);
+$('#shortcutImageClear').addEventListener('click', () => { shortcutImage = ''; $('#shortcutFile').value = ''; paintShortcutPreview(); });
+document.querySelectorAll('[data-fit]').forEach(button => {
+  button.onclick = () => { shortcutFit = button.dataset.fit; paintShortcutPreview(); };
+});
+$('#shortcutFile').addEventListener('change', async event => {
+  const file = event.currentTarget.files[0];
+  if (!file) return;
+  try { shortcutImage = await readShortcutImage(file); paintShortcutPreview(); }
+  catch (error) { showToast(error.message); event.currentTarget.value = ''; }
+});
 $('#shortcutForm').addEventListener('submit', event => {
   event.preventDefault();
   const name = $('#shortcutName').value.trim();
   const url = $('#shortcutUrl').value.trim();
   if (!name || !url) return;
   const existing = shortcuts.find(x => x.id === editingShortcutId);
-  if (existing) Object.assign(existing, { name, url }, { updatedAt: nowIso() });
-  else shortcuts.unshift(newEntry({ type: 'shortcut', name, url }));
+  if (existing) { Object.assign(existing, { name, url, image: shortcutImage, imageFit: shortcutFit }); touch(existing); }
+  else {
+    const last = Math.max(-1, ...sortedShortcuts().map(item => Number(item.order) || 0));
+    shortcuts.push(newEntry({ type: 'shortcut', name, url, image: shortcutImage, imageFit: shortcutFit, order: last + 1 }));
+  }
   saveLocalState(); queueCloudSave(); renderShortcuts(); closeShortcutModal();
   showToast(existing ? '사이트 수정됨' : '사이트 추가됨');
 });
@@ -1637,5 +1765,6 @@ $('#syncForm').addEventListener('submit', async event => {
   finally { button.disabled = false; }
 });
 
+seedShortcuts();   // 기본 바로가기는 없을 때만 만든다
 renderAll();   // 모든 정의가 끝난 뒤에 첫 화면을 그린다
 initCloudAuth();
