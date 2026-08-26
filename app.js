@@ -204,7 +204,7 @@ function renderLibrary() {
   $('#pageGrid').innerHTML = patentItems.map(item => `
     <article class="page-card patent-card" data-patent-key="${escapeHtml(item.num || item.name)}">
       <small class="card-kind">📐 ${escapeHtml(item.kind)}</small>
-      <h3>${mark(item.num || '번호 부여 전')}</h3>
+      <h3>${item.num ? mark(item.num) : escapeHtml(item.status || '번호 확인')}</h3>
       ${(item.gongjong || []).length
         ? `<div class="patent-tags">${item.gongjong.map(tag => `<span>${mark(tag)}</span>`).join('')}</div>`
         : ''}
@@ -702,9 +702,11 @@ function findPatents(query, limit = 5) {
 
 // 발명자 · 출원 · 등록일은 표시하지 않는다.
 // 다만 '등록' 이 아닌 상태(출원·심사중, 소멸)는 알아야 하므로 그때만 남긴다.
-const patentStatusNote = (item) => (item && item.status && item.status !== '등록' ? item.status : '');
+const patentStatusNote = (item) =>
+  (item && item.num && item.status && item.status !== '등록' ? item.status : '');
 function patentLines(item) {
-  const lines = [`${item.kind}  ${item.num || '번호 부여 전'}`];
+  // 등록번호가 없는 건은 번호 자리에 상태(출원·심사중)를 보여 준다.
+  const lines = [`${item.kind}  ${item.num || item.status || '번호 확인'}`];
   if (item.name) lines.push(item.name);
   if ((item.gongjong || []).length) lines.push(`공종  ${item.gongjong.join(' · ')}`);
   if (item.gongbeop) lines.push(`공법  ${item.gongbeop}`);

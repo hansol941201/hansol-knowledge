@@ -5,7 +5,7 @@
 
 엑셀은 머리글 없이 아래 순서로 봅니다.
     0 등록번호(또는 공법·신기술 이름)  1 (빈칸)  2 업체  3 공법명  4 명칭  5 명칭(보조)
-이미 patents.js 에 있는 번호는 건너뜁니다.
+이미 patents.js 에 있는 번호와, 등록번호가 없는 행은 건너뜁니다.
 """
 import io
 import json
@@ -42,12 +42,14 @@ def digits(text):
 
 def load_existing():
     source = io.open(PATENTS_JS, encoding='utf-8').read()
-    return json.loads(source[source.index('['):source.rindex(']') + 1])
+    body = source[source.index('['):source.rindex(']') + 1]
+    # 마지막 항목 뒤 쉼표는 JS 에서는 되지만 JSON 에서는 안 되므로 떼고 읽는다.
+    return json.loads(re.sub(r',\s*\]$', ']', body.strip()))
 
 
 def write(records):
     lines = [json.dumps(item, ensure_ascii=False, sort_keys=True) for item in records]
-    io.open(PATENTS_JS, 'w', encoding='utf-8').write(HEADER + ''.join(f'  {line},\n' for line in lines) + '];\n')
+    io.open(PATENTS_JS, 'w', encoding='utf-8').write(HEADER + ',\n'.join(f'  {line}' for line in lines) + '\n];\n')
 
 
 def main(path):
@@ -65,11 +67,12 @@ def main(path):
         number = f'제 {match.group(1)}-{match.group(2)}호' if match else ''
         kind = KIND_BY_PREFIX.get(match.group(1), '특허') if match else '특허'
 
-        # 번호만 있고 이름이 없으면 명칭은 비워 둔다(번호를 두 번 보여 주지 않는다).
-        title = name or alt_name or method or ('' if number else first)
-        if not title and not number:
+        # 등록번호가 없는 행(공법 이름만 적힌 행)은 넣지 않는다.
+        if not number:
             skipped_empty += 1
             continue
+        # 번호만 있고 이름이 없으면 명칭은 비워 둔다(번호를 두 번 보여 주지 않는다).
+        title = name or alt_name or method
 
         if number and digits(number) in seen_numbers:
             skipped_existing += 1
