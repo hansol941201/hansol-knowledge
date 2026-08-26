@@ -71,9 +71,12 @@ ok('5. Firebase 문서에도 저장', ((await cloud(site)).knowledge||[]).some(k
 ok('5. 내 지식에 표시', (await search(site, '폐기물 신청처')).includes('용인공장'));
 await search(site, '');
 
-// 일반 문장도 저장
-await send(site, '시방서 관련해서 다음주에 다시 확인');
-ok('6. 명령어 없는 일반 문장도 memories 에 저장', await site.evaluate(() => memories.some(m => m.text === '시방서 관련해서 다음주에 다시 확인')));
+// 명령어 없는 문장은 검색만 하고 저장하지 않는다
+const beforeCount = await site.evaluate(() => memories.filter(m => !m.deleted).length);
+await send(site, '1935719');
+ok('6. 명령어 없는 문장은 기억에 저장하지 않음', (await site.evaluate(() => memories.filter(m => !m.deleted).length)) === beforeCount, `기억 ${beforeCount}개 유지`);
+await send(site, '기억 1935719 특허 확인 필요');
+ok('6. "기억 …" 을 붙이면 저장됨', await site.evaluate(() => memories.some(m => !m.deleted && m.text === '1935719 특허 확인 필요')));
 
 // 5) 새로고침 후 유지
 await site.reload(); await live(site); await site.waitForTimeout(500);

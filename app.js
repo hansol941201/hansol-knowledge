@@ -916,19 +916,24 @@ $('#composer').addEventListener('submit', (e) => {
   handleComposerText(text);
 });
 
+// 찾은 결과를 말풍선으로 보여 주고 그 개수를 돌려준다. 저장은 하지 않는다.
 function showSearchHits(text) {
   const query = normalize(text);
-  if (!query) return;
-  findPatents(text).forEach(addPatentBubble);
-  findPartners(text).forEach(addPartnerBubble);
-  findAccounts(text).forEach(addAccountBubble);
-  findKnowledge(text).forEach(item => addBubble(`${item.title}\n${item.answer}`, 'answer', item));
-  alive(todos)
-    .filter(todo => normalize(`${todo.text} ${todo.date || ''}`).includes(query))
-    .forEach(todo => addBubble(`✓ 할 일\n${todo.text}\n${todo.date || '날짜 확인'} · ${todo.done ? '완료' : '진행중'}`, 'answer'));
-  alive(memories)
-    .filter(memory => normalize(memory.text).includes(query))
-    .forEach(memory => addBubble(`기억\n${memory.text}\n${savedLabel(memory)}`, 'answer'));
+  if (!query) return 0;
+  let found = 0;
+  const patents = findPatents(text); patents.forEach(addPatentBubble); found += patents.length;
+  const partnerHits = findPartners(text); partnerHits.forEach(addPartnerBubble); found += partnerHits.length;
+  const accountHits = findAccounts(text); accountHits.forEach(addAccountBubble); found += accountHits.length;
+  const knowledgeHits = findKnowledge(text);
+  knowledgeHits.forEach(item => addBubble(`${item.title}\n${item.answer}`, 'answer', item));
+  found += knowledgeHits.length;
+  const todoHits = alive(todos).filter(todo => normalize(`${todo.text} ${todo.date || ''}`).includes(query));
+  todoHits.forEach(todo => addBubble(`✓ 할 일\n${todo.text}\n${todo.date || '날짜 확인'} · ${todo.done ? '완료' : '진행중'}`, 'answer'));
+  found += todoHits.length;
+  const memoryHits = alive(memories).filter(memory => normalize(memory.text).includes(query));
+  memoryHits.forEach(memory => addBubble(`기억\n${memory.text}\n${savedLabel(memory)}`, 'answer'));
+  found += memoryHits.length;
+  return found;
 }
 
 function handleComposerText(text) {
@@ -968,17 +973,16 @@ function handleComposerText(text) {
     if (memory) return commitEntry(memory, 'memory');
   }
 
-  // 특허번호 조회는 검색이지 메모가 아니다 — 결과만 보여 주고 기억에 남기지 않는다.
+  // 명령어가 없으면 검색이다. 저장하지 않는다.
+  // 기억 저장소에는 "기억 …" / "기록 …" 으로 입력했을 때만 들어간다.
   const patentHits = findPatents(text);
   if (patentHits.length && patentDigits(text).length >= 4) {
     patentHits.forEach(addPatentBubble);
     return Promise.resolve(false);
   }
-
-  // 그 외 일반 문장 → 찾은 결과를 보여 주고, 문장 자체도 기억 저장소에 저장한다.
-  showSearchHits(text);
-  const memory = createMemory(text);
-  return memory ? commitEntry(memory, 'memory') : Promise.resolve(false);
+  const found = showSearchHits(text);
+  if (!found) addBubble(`찾은 결과 없음\n저장하려면 “기록 ${text}” 처럼 앞에 기록을 붙이세요`, 'answer');
+  return Promise.resolve(false);
 }
 
 function parseKnowledge(text) {
