@@ -608,58 +608,108 @@ $('#quickTextForm').addEventListener('submit', async event => {
   await commitEntry(item, addKind === '할 일' ? 'todo' : 'memory');
 });
 
-// ── 일정 ───────────────────────────────────────────────────────
-let showPastSchedule = false;
+// ── 일정 (월 달력) ────────────────────────────────────────────
 const dayKeyOf = (date) => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
+let calendarMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+let selectedDay = todayKey();
+
 function scheduleBadge(dateKey) {
   const today = new Date();
   if (dateKey === dayKeyOf(today)) return '오늘';
-  const tomorrow = new Date(today.getTime() + 86400000);
-  return dateKey === dayKeyOf(tomorrow) ? '내일' : '';
+  return dateKey === dayKeyOf(new Date(today.getTime() + 86400000)) ? '내일' : '';
 }
-function scheduleDayLabel(dateKey) {
-  const parts = String(dateKey || '').split('-');
-  return parts.length === 3 ? `${parts[1]}.${parts[2]}` : (dateKey || '');
+function schedulesOn(dateKey) {
+  return alive(schedule)
+    .filter(item => String(item.date) === dateKey)
+    .sort((a, b) => String(a.time || '').localeCompare(String(b.time || '')));
 }
+
 function renderSchedule() {
   const today = todayKey();
-  const all = alive(schedule).slice().sort((a, b) =>
-    String(a.date).localeCompare(String(b.date)) || String(a.time || '').localeCompare(String(b.time || '')));
-  const upcoming = all.filter(item => String(item.date) >= today);
-  const past = all.filter(item => String(item.date) < today).reverse();
-  const list = showPastSchedule ? [...upcoming, ...past] : upcoming;
+  const year = calendarMonth.getFullYear();
+  const month = calendarMonth.getMonth();
+  const first = new Date(year, month, 1);
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const lead = first.getDay();
+  const counts = new Map();
+  for (const item of alive(schedule)) counts.set(item.date, (counts.get(item.date) || 0) + 1);
+
+  const cells = [];
+  for (let i = 0; i < lead; i += 1) cells.push('<span class="cal-cell empty"></span>');
+  for (let day = 1; day <= daysInMonth; day += 1) {
+    const key = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const classes = ['cal-cell'];
+    if (key === today) classes.push('today');
+    if (key === selectedDay) classes.push('selected');
+    if (counts.get(key)) classes.push('has');
+    cells.push(`<button type="button" class="${classes.join(' ')}" data-day="${key}">
+      <span>${day}</span>${counts.get(key) ? `<i class="cal-dot"></i>` : ''}</button>`);
+  }
+
+  const picked = schedulesOn(selectedDay);
+  const monthCount = alive(schedule).filter(item => String(item.date).startsWith(`${year}-${String(month + 1).padStart(2, '0')}`)).length;
 
   $('#schedulePanel').innerHTML = `
     <div class="block-head">
-      <div><h2>일정</h2><p>${upcoming.length}건 예정</p></div>
-      <button type="button" class="ghost-btn" id="scheduleAdd">＋ 일정</button>
+      <div><h2>일정</h2><p>${year}년 ${month + 1}월 · ${monthCount}건</p></div>
+      <div class="cal-tools">
+        <button type="button" class="cal-nav" id="calPrev" title="이전 달">‹</button>
+        <button type="button" class="cal-nav" id="calToday" title="오늘">오늘</button>
+        <button type="button" class="cal-nav" id="calNext" title="다음 달">›</button>
+        <button type="button" class="ghost-btn" id="scheduleAdd">＋ 일정</button>
+      </div>
     </div>
-    <div class="schedule-list">${list.length ? list.map(item => `
-      <div class="schedule-row ${String(item.date) < today ? 'past' : ''}" data-schedule="${item.id}">
-        <span class="schedule-date">${escapeHtml(scheduleDayLabel(item.date))}</span>
-        <div class="schedule-body">
-          <b>${escapeHtml(item.title)}</b>
-          ${item.time || item.memo ? `<small>${escapeHtml([item.time, item.memo].filter(Boolean).join(' · '))}</small>` : ''}
-        </div>
-        ${scheduleBadge(item.date) ? `<em class="schedule-badge">${scheduleBadge(item.date)}</em>` : ''}
-        <button type="button" class="schedule-more" title="수정·삭제">${icon('more', 14)}</button>
-      </div>`).join('') : '<div class="todo-empty">예정된 일정이 없습니다.</div>'}</div>
-    ${past.length ? `<button type="button" class="link-btn" id="schedulePast">${showPastSchedule ? '지난 일정 숨기기' : `지난 일정 보기 (${past.length})`}</button>` : ''}`;
+    <div class="cal-grid">
+      ${WEEKDAYS.map((name, index) => `<span class="cal-week ${index === 0 ? 'sun' : ''}">${name}</span>`).join('')}
+      ${cells.join('')}
+    </div>
+    <div class="cal-day">
+      <div class="cal-day-head">
+        <b>${escapeHtml(scheduleDayTitle(selectedDay))}</b>
+        ${scheduleBadge(selectedDay) ? `<em class="schedule-badge">${scheduleBadge(selectedDay)}</em>` : ''}
+      </div>
+      ${picked.length ? picked.map(item => `
+        <div class="schedule-row" data-schedule="${item.id}">
+          ${item.time ? `<span class="schedule-date">${escapeHtml(item.time)}</span>` : '<span class="schedule-date muted">종일</span>'}
+          <div class="schedule-body">
+            <b>${escapeHtml(item.title)}</b>
+            ${item.memo ? `<small>${escapeHtml(item.memo)}</small>` : ''}
+          </div>
+          <button type="button" class="schedule-more" title="수정·삭제">${icon('more', 14)}</button>
+        </div>`).join('') : '<div class="todo-empty">이 날은 일정이 없습니다.</div>'}
+    </div>`;
 
-  $('#scheduleAdd').onclick = () => openScheduleModal(null);
-  const pastToggle = $('#schedulePast');
-  if (pastToggle) pastToggle.onclick = () => { showPastSchedule = !showPastSchedule; renderSchedule(); };
+  $('#calPrev').onclick = () => { calendarMonth = new Date(year, month - 1, 1); renderSchedule(); };
+  $('#calNext').onclick = () => { calendarMonth = new Date(year, month + 1, 1); renderSchedule(); };
+  $('#calToday').onclick = () => {
+    const now = new Date();
+    calendarMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    selectedDay = todayKey();
+    renderSchedule();
+  };
+  $('#scheduleAdd').onclick = () => openScheduleModal(null, selectedDay);
+  $('#schedulePanel').querySelectorAll('[data-day]').forEach(cell => {
+    cell.onclick = () => { selectedDay = cell.dataset.day; renderSchedule(); };
+  });
   $('#schedulePanel').querySelectorAll('[data-schedule]').forEach(row => {
-    const item = schedule.find(x => x.id === row.dataset.schedule);
-    row.querySelector('.schedule-more').onclick = () => openScheduleModal(item);
+    row.querySelector('.schedule-more').onclick = () =>
+      openScheduleModal(schedule.find(x => x.id === row.dataset.schedule));
   });
 }
 
+function scheduleDayTitle(dateKey) {
+  const parts = String(dateKey || '').split('-').map(Number);
+  if (parts.length !== 3) return dateKey || '';
+  const date = new Date(parts[0], parts[1] - 1, parts[2]);
+  return `${parts[1]}월 ${parts[2]}일 (${WEEKDAYS[date.getDay()]})`;
+}
+
 let editingScheduleId = null;
-function openScheduleModal(item) {
+function openScheduleModal(item, presetDate) {
   editingScheduleId = item ? item.id : null;
   $('#scheduleHeading').textContent = item ? '일정 수정' : '일정 추가';
-  $('#scheduleDate').value = item ? item.date : todayKey();
+  $('#scheduleDate').value = item ? item.date : (presetDate || todayKey());
   $('#scheduleTitle').value = item ? item.title : '';
   $('#scheduleTime').value = item ? (item.time || '') : '';
   $('#scheduleMemo').value = item ? (item.memo || '') : '';
@@ -683,6 +733,9 @@ $('#scheduleForm').addEventListener('submit', event => {
   const existing = schedule.find(x => x.id === editingScheduleId);
   if (existing) { Object.assign(existing, values); touch(existing); }
   else schedule.unshift(newEntry({ type: 'schedule', ...values }));
+  selectedDay = values.date;
+  const [y, m] = values.date.split('-').map(Number);
+  calendarMonth = new Date(y, m - 1, 1);
   saveLocalState(); queueCloudSave(); renderSchedule(); closeScheduleModal();
   showToast(existing ? '일정 수정됨' : '일정 추가됨');
 });

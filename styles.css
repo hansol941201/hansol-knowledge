@@ -165,28 +165,48 @@ svg { display: block; flex: none; }
 .todo-item:hover .todo-remove { opacity: 1; }
 .todo-empty { padding: 6px 2px; color: var(--ink-3); font-size: 12.5px; }
 
-/* ── 일정 ───────────────────────────────────────────────────── */
+/* ── 일정 (월 달력) ─────────────────────────────────────────── */
 .dash-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: stretch; }
 .dash-cols > .today-panel { align-content: start; }
-.schedule-list { display: grid; gap: 2px; }
+.cal-tools { display: flex; align-items: center; gap: 5px; }
+.cal-nav {
+  min-width: 26px; height: 26px; padding: 0 7px; border: 1px solid var(--line); border-radius: 8px;
+  color: var(--ink-2); font-size: 12px; line-height: 1; transition: background var(--ease), border-color var(--ease);
+}
+.cal-nav:hover { background: var(--line-soft); border-color: var(--violet-line); }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.cal-week { padding: 4px 0 6px; color: var(--ink-3); font-size: 11px; font-weight: 600; text-align: center; }
+.cal-week.sun { color: #C07A7A; }
+.cal-cell {
+  position: relative; display: grid; place-items: center; height: 34px; border-radius: 9px;
+  color: var(--ink-2); font-size: 12.5px; transition: background var(--ease), color var(--ease);
+}
+.cal-cell.empty { pointer-events: none; }
+.cal-cell:not(.empty):hover { background: var(--line-soft); }
+.cal-cell.has { color: var(--ink); font-weight: 600; }
+.cal-cell.today { color: var(--violet); font-weight: 700; }
+.cal-cell.selected { background: var(--violet-soft); color: var(--violet); font-weight: 700; }
+.cal-dot { position: absolute; bottom: 5px; width: 4px; height: 4px; border-radius: 50%; background: var(--violet); }
+.cal-cell.selected .cal-dot { background: var(--violet); }
+.cal-day { margin-top: 14px; padding-top: 13px; border-top: 1px solid var(--line-soft); display: grid; gap: 2px; }
+.cal-day-head { display: flex; align-items: center; gap: 7px; margin-bottom: 5px; }
+.cal-day-head b { font-size: 12.5px; }
 .schedule-row {
-  display: flex; align-items: center; gap: 12px; padding: 9px 10px; border-radius: var(--radius-sm);
+  display: flex; align-items: center; gap: 11px; padding: 8px 9px; border-radius: var(--radius-sm);
   transition: background var(--ease);
 }
 .schedule-row:hover { background: var(--line-soft); }
-.schedule-row.past { opacity: .55; }
 .schedule-date {
-  flex: none; min-width: 46px; padding: 4px 8px; border-radius: 8px; background: var(--violet-soft);
+  flex: none; min-width: 50px; padding: 4px 8px; border-radius: 8px; background: var(--violet-soft);
   color: var(--violet); font-size: 11.5px; font-weight: 700; text-align: center; font-variant-numeric: tabular-nums;
 }
+.schedule-date.muted { background: var(--line-soft); color: var(--ink-3); font-weight: 600; }
 .schedule-body { flex: 1; min-width: 0; }
-.schedule-body b { display: block; font-size: 13.5px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.schedule-body b { display: block; font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .schedule-body small { display: block; margin-top: 1px; color: var(--ink-3); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .schedule-badge { flex: none; padding: 3px 8px; border-radius: 999px; background: #EAF3EE; color: #2F7D51; font-size: 10.5px; font-style: normal; font-weight: 600; }
 .schedule-more { flex: none; padding: 3px; border-radius: 6px; color: var(--ink-3); opacity: 0; transition: opacity var(--ease); }
 .schedule-row:hover .schedule-more { opacity: 1; }
-.link-btn { justify-self: start; margin-top: 4px; padding: 4px 2px; color: var(--ink-3); font-size: 11.5px; }
-.link-btn:hover { color: var(--violet); }
 
 /* ── 분류 칩 ────────────────────────────────────────────────── */
 .page-categories { display: flex; flex-wrap: wrap; gap: 6px; }

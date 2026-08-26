@@ -39,7 +39,7 @@ const cols = await page.evaluate(()=>{
 ok('2열 · 폭 동일', cols.sameRow && Math.abs(cols.todoW-cols.schedW)<2, JSON.stringify(cols));
 ok('카드 간격 16~20px', cols.gap>=16 && cols.gap<=20, `${cols.gap}px`);
 
-// 일정 추가 → 정렬 → 배지
+// 일정 추가 → 달력 표시
 const iso = (offset) => { const d=new Date(); d.setDate(d.getDate()+offset); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
 const add = async (date, title, time='') => {
   await page.click('#scheduleAdd'); await page.waitForTimeout(200);
@@ -47,26 +47,32 @@ const add = async (date, title, time='') => {
   if (time) await page.fill('#scheduleTime', time);
   await page.click('#scheduleForm button[type="submit"]'); await page.waitForTimeout(350);
 };
-await add(iso(10), '공법설명회');
+ok('달력 격자 표시', (await page.$$eval('.cal-week', n=>n.map(x=>x.textContent))).join('')==='일월화수목금토');
 await add(iso(0), '1차 미팅', '14:00');
 await add(iso(1), '시공사 방문');
-await add(iso(-5), '지난 현장 방문');
-const rows = await page.$$eval('.schedule-row .schedule-body b', n=>n.map(x=>x.textContent));
-ok('가까운 일정이 위로 정렬', JSON.stringify(rows)===JSON.stringify(['1차 미팅','시공사 방문','공법설명회']), JSON.stringify(rows));
-ok('지난 일정은 기본 숨김', !rows.includes('지난 현장 방문'));
-const badges = await page.$$eval('.schedule-badge', n=>n.map(x=>x.textContent));
-ok('오늘·내일 배지', badges.includes('오늘') && badges.includes('내일'), JSON.stringify(badges));
-ok('그 외에는 배지 없음', badges.length===2);
-ok('시간·메모 표시', (await page.textContent('#schedulePanel')).includes('14:00'));
-await page.click('#schedulePast'); await page.waitForTimeout(250);
-ok('지난 일정 보기', (await page.textContent('#schedulePanel')).includes('지난 현장 방문'));
-await page.click('#schedulePast'); await page.waitForTimeout(200);
+await add(iso(10), '공법설명회');
+await page.click('#calToday'); await page.waitForTimeout(250);   // 저장하면 그 달로 이동하므로 이번 달로 되돌린다
+ok('일정 있는 날에 점 표시', (await page.$$('.cal-cell.has .cal-dot')).length>=2);
+ok('오늘 칸 강조', await page.isVisible('.cal-cell.today'));
+await page.click(`.cal-cell[data-day="${iso(0)}"]`); await page.waitForTimeout(250);
+ok('오늘 선택 시 그 날 일정 표시', (await page.textContent('.cal-day')).includes('1차 미팅'));
+ok('시간 표시', (await page.textContent('.cal-day')).includes('14:00'));
+ok('오늘 배지', (await page.textContent('.cal-day-head')).includes('오늘'));
+await page.click(`.cal-cell[data-day="${iso(1)}"]`); await page.waitForTimeout(250);
+ok('다른 날 선택', (await page.textContent('.cal-day')).includes('시공사 방문'));
+ok('내일 배지', (await page.textContent('.cal-day-head')).includes('내일'));
+ok('시간 없으면 종일', (await page.textContent('.cal-day')).includes('종일'));
+await page.click('#calNext'); await page.waitForTimeout(250);
+const shifted = await page.textContent('#schedulePanel .block-head p');
+await page.click('#calToday'); await page.waitForTimeout(250);
+ok('달 이동 · 오늘로 복귀', shifted !== (await page.textContent('#schedulePanel .block-head p')), shifted);
 
 // 저장 확인
 ok('localStorage 에 저장', await page.evaluate(()=>JSON.parse(localStorage.getItem('knowledge-schedule')||'[]').some(x=>x.title==='1차 미팅')));
 ok('클라우드에도 저장', await page.evaluate(async()=>{const d=(await window.HANSOL_FIRESTORE.doc('shared/state').get()).data()||{};return (d.schedule||[]).some(x=>x.title==='1차 미팅');}));
 
 // 수정 · 삭제
+await page.click(`.cal-cell[data-day="${iso(0)}"]`); await page.waitForTimeout(200);
 await page.hover('.schedule-row'); await page.click('.schedule-row .schedule-more'); await page.waitForTimeout(200);
 await page.fill('#scheduleTitle','1차 미팅(변경)');
 await page.click('#scheduleForm button[type="submit"]'); await page.waitForTimeout(300);
@@ -82,7 +88,8 @@ await page.screenshot({path:out+'/dash.png'});
 await page.reload();
 await page.waitForFunction(()=>document.querySelector('#syncState')?.dataset.state==='live',null,{timeout:10000});
 await page.waitForTimeout(500);
-ok('새로고침 후 일정 유지', (await page.textContent('#schedulePanel')).includes('시공사 방문'));
+await page.click(`.cal-cell[data-day="${iso(1)}"]`); await page.waitForTimeout(250);
+ok('새로고침 후 일정 유지', (await page.textContent('.cal-day')).includes('시공사 방문'));
 
 // 다른 화면은 그대로
 await page.click('.side-item[data-nav="특허"]'); await page.waitForTimeout(500);
