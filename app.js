@@ -212,9 +212,6 @@ function renderLibrary() {
       <dl class="patent-meta">
         ${item.gongbeop ? `<div><dt>공법</dt><dd>${mark(item.gongbeop)}</dd></div>` : ''}
         ${item.owner ? `<div><dt>특허권자</dt><dd>${mark(item.owner)}</dd></div>` : ''}
-        ${item.inventor ? `<div><dt>발명자</dt><dd>${mark(item.inventor)}</dd></div>` : ''}
-        ${item.appNum ? `<div><dt>출원</dt><dd>${mark(item.appNum)}${item.appDate ? ` (${escapeHtml(item.appDate)})` : ''}</dd></div>` : ''}
-        <div><dt>${item.regDate ? '등록' : '상태'}</dt><dd>${escapeHtml(item.regDate || item.status)}</dd></div>
       </dl>
       <footer><button data-patent-copy>특허번호 복사</button><button data-patent-chat>지식창에서 보기</button></footer>
     </article>`).join('') + partnerItems.map((item, index) => `
@@ -649,9 +646,6 @@ function patentLines(item) {
   if ((item.gongjong || []).length) lines.push(`공종  ${item.gongjong.join(' · ')}`);
   if (item.gongbeop) lines.push(`공법  ${item.gongbeop}`);
   if (item.owner) lines.push(`특허권자  ${item.owner}`);
-  if (item.inventor) lines.push(`발명자  ${item.inventor}`);
-  if (item.appNum) lines.push(`출원  ${item.appNum}${item.appDate ? `  (${item.appDate})` : ''}`);
-  lines.push(item.regDate ? `등록  ${item.regDate}` : `상태  ${item.status}`);
   return lines;
 }
 
