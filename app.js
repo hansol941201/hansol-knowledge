@@ -49,6 +49,7 @@ knowledge = knowledge.filter(item => !(item.title === '통신도장' && item.ans
 let todos = JSON.parse(localStorage.getItem('knowledge-todos') || '[]');
 let memories = JSON.parse(localStorage.getItem('knowledge-memories') || '[]');
 let accountMeta = JSON.parse(localStorage.getItem('knowledge-account-meta') || '[]');
+let schedule = JSON.parse(localStorage.getItem('knowledge-schedule') || '[]');
 let shortcuts = JSON.parse(localStorage.getItem('knowledge-shortcuts') || 'null') || [
   { id: 'shortcut-kapt', name: 'K-APT', url: 'https://www.k-apt.go.kr' },
   { id: 'shortcut-gmail', name: 'Gmail', url: 'https://mail.google.com' },
@@ -93,7 +94,7 @@ function ensureStamps(list) {
   }
   return list;
 }
-ensureStamps(knowledge); ensureStamps(todos); ensureStamps(memories); ensureStamps(accountMeta); ensureStamps(shortcuts);
+ensureStamps(knowledge); ensureStamps(todos); ensureStamps(memories); ensureStamps(accountMeta); ensureStamps(shortcuts); ensureStamps(schedule);
 
 // 배열마다 자기 종류만 남긴다. 예전 버전이 기억을 todos 에 넣어 둔 경우처럼
 // 잘못 들어간 항목은 화면에서 숨기는 게 아니라 제 배열로 옮겨서 실제로 분리한다.
@@ -328,7 +329,11 @@ function renderLibrary() {
   const [heading, lead] = VIEW_LEAD[pageCategory] || VIEW_LEAD['전체'];
   $('#pageHeading').textContent = term ? '검색 결과' : heading;
   $('#pageLead').textContent = term ? `“${term}” 으로 찾은 내용입니다.` : lead;
+  const onDashboard = pageCategory === '대시보드' && !term;
   $('#shortcutSection').classList.toggle('hidden', Boolean(term) || pageCategory !== '대시보드');
+  $('#dashCols').classList.toggle('hidden', !onDashboard && pageCategory !== '할 일');
+  $('#schedulePanel').classList.toggle('hidden', !onDashboard);
+  $('#knowledgeBlock').classList.toggle('hidden', onDashboard);
   $('#pageCategories').classList.toggle('hidden', Boolean(term));
   paintIcons($('#pageGrid'));
   // 카드 본문을 누르면 상세로 연다(버튼 클릭은 제외).
@@ -436,29 +441,6 @@ function renderTodos() {
   });
 }
 
-// 최근 저장한 지식에서 눈에 띄는 낱말 하나를 골라 한 줄로 알려 준다.
-const INSIGHT_STOPWORDS = new Set(['확인하기', '부탁드립니다', '감사합니다', '있습니다', '해주세요', '보내주세요']);
-function renderInsight() {
-  const box = $('#aiInsight');
-  const searching = Boolean(pageSearchCommitted.trim());
-  const recent = sortBySaved(alive(memories).concat(alive(knowledge))).slice(0, 40);
-  const counts = new Map();
-  for (const item of recent) {
-    for (const word of `${item.title || ''} ${item.text || item.answer || ''}`.split(/[^0-9A-Za-z가-힣]+/)) {
-      // 전화번호 조각이나 흔한 말은 인사이트 낱말로 쓰지 않는다.
-      if (word.length < 3 || /^\d+$/.test(word) || INSIGHT_STOPWORDS.has(word)) continue;
-      counts.set(word, (counts.get(word) || 0) + 1);
-    }
-  }
-  const top = [...counts.entries()].sort((a, b) => b[1] - a[1]).find(([, n]) => n >= 3);
-  const undone = alive(todos).filter(isTodoEntry).filter(todo => !todo.done).length;
-  const line = top
-    ? `최근 저장한 지식 중 <b>${escapeHtml(top[0])}</b> 관련 자료가 ${top[1]}건 있습니다.`
-    : (undone ? `아직 끝내지 않은 할 일이 <b>${undone}건</b> 있습니다.` : '');
-  box.classList.toggle('hidden', searching || pageCategory !== '대시보드' || !line);
-  if (line) box.innerHTML = `<span class="insight-mark">${icon('sparkle', 14)}</span><div><strong>AI 인사이트</strong><p>${line}</p></div>`;
-}
-
 function renderMemories() {
   const query = normalize($('#memorySearch').value || '');
   const filtered = sortBySaved(alive(memories).filter(memory => !query || normalize(`${memory.text} ${memory.createdAt || ''} ${savedLabel(memory)}`).includes(query)));
@@ -524,7 +506,6 @@ function highlight(text, query) {
 function escapeHtml(text) {
   return String(text).replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]));
 }
-renderAll();
 $('#memoryToggle').addEventListener('click', () => {
   $('#memoryModal').classList.remove('hidden');
   $('#memoryToggle').classList.add('active');
@@ -631,6 +612,92 @@ $('#quickTextForm').addEventListener('submit', async event => {
   await commitEntry(item, addKind === '할 일' ? 'todo' : 'memory');
 });
 
+// ── 일정 ───────────────────────────────────────────────────────
+let showPastSchedule = false;
+const dayKeyOf = (date) => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+function scheduleBadge(dateKey) {
+  const today = new Date();
+  if (dateKey === dayKeyOf(today)) return '오늘';
+  const tomorrow = new Date(today.getTime() + 86400000);
+  return dateKey === dayKeyOf(tomorrow) ? '내일' : '';
+}
+function scheduleDayLabel(dateKey) {
+  const parts = String(dateKey || '').split('-');
+  return parts.length === 3 ? `${parts[1]}.${parts[2]}` : (dateKey || '');
+}
+function renderSchedule() {
+  const today = todayKey();
+  const all = alive(schedule).slice().sort((a, b) =>
+    String(a.date).localeCompare(String(b.date)) || String(a.time || '').localeCompare(String(b.time || '')));
+  const upcoming = all.filter(item => String(item.date) >= today);
+  const past = all.filter(item => String(item.date) < today).reverse();
+  const list = showPastSchedule ? [...upcoming, ...past] : upcoming;
+
+  $('#schedulePanel').innerHTML = `
+    <div class="block-head">
+      <div><h2>일정</h2><p>${upcoming.length}건 예정</p></div>
+      <button type="button" class="ghost-btn" id="scheduleAdd">＋ 일정</button>
+    </div>
+    <div class="schedule-list">${list.length ? list.map(item => `
+      <div class="schedule-row ${String(item.date) < today ? 'past' : ''}" data-schedule="${item.id}">
+        <span class="schedule-date">${escapeHtml(scheduleDayLabel(item.date))}</span>
+        <div class="schedule-body">
+          <b>${escapeHtml(item.title)}</b>
+          ${item.time || item.memo ? `<small>${escapeHtml([item.time, item.memo].filter(Boolean).join(' · '))}</small>` : ''}
+        </div>
+        ${scheduleBadge(item.date) ? `<em class="schedule-badge">${scheduleBadge(item.date)}</em>` : ''}
+        <button type="button" class="schedule-more" title="수정·삭제">${icon('more', 14)}</button>
+      </div>`).join('') : '<div class="todo-empty">예정된 일정이 없습니다.</div>'}</div>
+    ${past.length ? `<button type="button" class="link-btn" id="schedulePast">${showPastSchedule ? '지난 일정 숨기기' : `지난 일정 보기 (${past.length})`}</button>` : ''}`;
+
+  $('#scheduleAdd').onclick = () => openScheduleModal(null);
+  const pastToggle = $('#schedulePast');
+  if (pastToggle) pastToggle.onclick = () => { showPastSchedule = !showPastSchedule; renderSchedule(); };
+  $('#schedulePanel').querySelectorAll('[data-schedule]').forEach(row => {
+    const item = schedule.find(x => x.id === row.dataset.schedule);
+    row.querySelector('.schedule-more').onclick = () => openScheduleModal(item);
+  });
+}
+
+let editingScheduleId = null;
+function openScheduleModal(item) {
+  editingScheduleId = item ? item.id : null;
+  $('#scheduleHeading').textContent = item ? '일정 수정' : '일정 추가';
+  $('#scheduleDate').value = item ? item.date : todayKey();
+  $('#scheduleTitle').value = item ? item.title : '';
+  $('#scheduleTime').value = item ? (item.time || '') : '';
+  $('#scheduleMemo').value = item ? (item.memo || '') : '';
+  $('#scheduleDelete').classList.toggle('hidden', !item);
+  $('#scheduleModal').classList.remove('hidden');
+  setTimeout(() => $('#scheduleTitle').focus(), 50);
+}
+function closeScheduleModal() { $('#scheduleModal').classList.add('hidden'); editingScheduleId = null; }
+$('#scheduleClose').addEventListener('click', closeScheduleModal);
+$('#scheduleCancel').addEventListener('click', closeScheduleModal);
+$('#scheduleModal').addEventListener('click', event => { if (event.target.id === 'scheduleModal') closeScheduleModal(); });
+$('#scheduleForm').addEventListener('submit', event => {
+  event.preventDefault();
+  const values = {
+    date: $('#scheduleDate').value,
+    title: $('#scheduleTitle').value.trim(),
+    time: $('#scheduleTime').value,
+    memo: $('#scheduleMemo').value.trim()
+  };
+  if (!values.date || !values.title) return;
+  const existing = schedule.find(x => x.id === editingScheduleId);
+  if (existing) { Object.assign(existing, values); touch(existing); }
+  else schedule.unshift(newEntry({ type: 'schedule', ...values }));
+  saveLocalState(); queueCloudSave(); renderSchedule(); closeScheduleModal();
+  showToast(existing ? '일정 수정됨' : '일정 추가됨');
+});
+$('#scheduleDelete').addEventListener('click', () => {
+  const item = schedule.find(x => x.id === editingScheduleId);
+  if (!item || !confirm(`「${item.title}」 일정을 지울까요?`)) return;
+  item.deleted = true; touch(item);
+  saveLocalState(); queueCloudSave(); renderSchedule(); closeScheduleModal();
+  showToast('일정 삭제됨');
+});
+
 // ── 자주 가는 사이트 ───────────────────────────────────────────
 function shortcutHref(url) {
   const raw = String(url || '').trim();
@@ -715,7 +782,7 @@ $('#resetModal').addEventListener('click', event => { if (event.target.id === 'r
 $('#resetConfirm').addEventListener('input', event => { $('#resetAll').disabled = event.currentTarget.value.trim() !== '삭제'; });
 
 $('#resetBackup').addEventListener('click', () => {
-  const backup = JSON.stringify({ savedAt: nowIso(), knowledge, todos, memories, accountMeta, shortcuts }, null, 2);
+  const backup = JSON.stringify({ savedAt: nowIso(), knowledge, todos, memories, accountMeta, shortcuts, schedule }, null, 2);
   const url = URL.createObjectURL(new Blob([backup], { type: 'application/json' }));
   const link = document.createElement('a');
   link.href = url;
@@ -731,7 +798,7 @@ $('#resetBackup').addEventListener('click', () => {
 $('#resetLocal').addEventListener('click', () => {
   if (!confirm('이 컴퓨터에 저장된 사본을 지웁니다.\n클라우드 자료는 그대로 남고, 다시 내려받습니다.\n진행할까요?')) return;
   ['knowledge-messenger-data', 'knowledge-todos', 'knowledge-memories', 'knowledge-account-meta',
-   'knowledge-vault-data', 'knowledge-sync-pending', 'knowledge-shortcuts'].forEach(key => localStorage.removeItem(key));
+   'knowledge-vault-data', 'knowledge-sync-pending', 'knowledge-shortcuts', 'knowledge-schedule'].forEach(key => localStorage.removeItem(key));
   location.reload();
 });
 
@@ -742,7 +809,7 @@ $('#resetAll').addEventListener('click', async () => {
   if (!confirm('지식·할 일·기억·계정을 모두 삭제합니다.\n다른 컴퓨터에서도 사라집니다.\n정말 진행할까요?')) return;
   $('#resetAll').disabled = true;
   $('#resetAll').textContent = '삭제 중…';
-  for (const list of [knowledge, todos, memories, accountMeta, shortcuts]) {
+  for (const list of [knowledge, todos, memories, accountMeta, shortcuts, schedule]) {
     for (const item of list) { item.deleted = true; touch(item); }
   }
   vaultSecrets = {};
@@ -921,7 +988,8 @@ $('#siteShortcut').addEventListener('click', () => {
 });
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
-  if (!$('#detailModal').classList.contains('hidden')) closeDetail();
+  if (!$('#scheduleModal').classList.contains('hidden')) closeScheduleModal();
+  else if (!$('#detailModal').classList.contains('hidden')) closeDetail();
   else if (!$('#shortcutModal').classList.contains('hidden')) closeShortcutModal();
   else if (!$('#addModal').classList.contains('hidden')) closeAddModal();
   else if (!$('#resetModal').classList.contains('hidden')) closeResetModal();
@@ -1140,15 +1208,16 @@ function saveLocalState() {
   localStorage.setItem('knowledge-memories', JSON.stringify(memories));
   localStorage.setItem('knowledge-account-meta', JSON.stringify(accountMeta));
   localStorage.setItem('knowledge-shortcuts', JSON.stringify(shortcuts));
+  localStorage.setItem('knowledge-schedule', JSON.stringify(schedule));
 }
 
 function renderAll() {
   renderSideNav();
   renderShortcuts();
+  renderSchedule();
   renderLibrary();
   renderTodos();
   renderMemories();
-  renderInsight();
   paintIcons();
 }
 
@@ -1409,6 +1478,7 @@ async function saveCloudState({ verifyIds = [] } = {}) {
         memories: mergeById(memories, remote.memories),
         accountMeta: mergeById(accountMeta, remote.accountMeta),
         shortcuts: mergeById(shortcuts, remote.shortcuts),
+        schedule: mergeById(schedule, remote.schedule),
         vaultSecrets: { ...(remote.vaultSecrets || {}), ...vaultSecrets }
       };
       transaction.set(stateDoc, { ...next, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
@@ -1424,7 +1494,8 @@ async function saveCloudState({ verifyIds = [] } = {}) {
       ...((saved && saved.todos) || []),
       ...((saved && saved.memories) || []),
       ...((saved && saved.accountMeta) || []),
-      ...((saved && saved.shortcuts) || [])
+      ...((saved && saved.shortcuts) || []),
+      ...((saved && saved.schedule) || [])
     ].map(entry => entry && entry.id));
     const missing = verifyIds.filter(id => !storedIds.has(id));
     resolveWaitingBubbles(storedIds);   // 뒤늦게 올라간 항목의 말풍선을 완료로 바꾼다
@@ -1454,12 +1525,14 @@ async function applyCloudState(state) {
     || hasLocalOnlyItems(todos, state.todos)
     || hasLocalOnlyItems(memories, state.memories)
     || hasLocalOnlyItems(accountMeta, state.accountMeta)
-    || hasLocalOnlyItems(shortcuts, state.shortcuts);
+    || hasLocalOnlyItems(shortcuts, state.shortcuts)
+    || hasLocalOnlyItems(schedule, state.schedule);
   knowledge = mergeById(knowledge, state.knowledge);
   todos = mergeById(todos, state.todos);
   memories = mergeById(memories, state.memories);
   accountMeta = mergeById(accountMeta, state.accountMeta);
   shortcuts = mergeById(shortcuts, state.shortcuts);
+  schedule = mergeById(schedule, state.schedule);
   sortIntoCollections();   // 병합 뒤에도 종류별로 갈라 둔다
   const remoteSecrets = state.vaultSecrets && typeof state.vaultSecrets === 'object' ? state.vaultSecrets : {};
   vaultSecrets = { ...remoteSecrets, ...vaultSecrets };
@@ -1564,4 +1637,5 @@ $('#syncForm').addEventListener('submit', async event => {
   finally { button.disabled = false; }
 });
 
+renderAll();   // 모든 정의가 끝난 뒤에 첫 화면을 그린다
 initCloudAuth();

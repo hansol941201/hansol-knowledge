@@ -80,7 +80,7 @@ svg { display: block; flex: none; }
 .ghost-btn { padding: 6px 11px; border: 1px solid var(--line); border-radius: 8px; color: var(--ink-2); font-size: 12px; transition: background var(--ease); }
 .ghost-btn:hover { background: var(--line-soft); }
 
-.main-scroll { flex: 1; overflow-y: auto; padding: 26px 32px 60px; display: grid; gap: 26px; align-content: start; }
+.main-scroll { flex: 1; overflow-y: auto; padding: 22px 32px 60px; display: grid; gap: 20px; align-content: start; }
 .block { display: grid; gap: 14px; }
 .block-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
 .block-head h2 { margin: 0; font-size: 17px; letter-spacing: -.3px; }
@@ -90,7 +90,7 @@ svg { display: block; flex: none; }
 /* ── 자주 가는 사이트 ───────────────────────────────────────── */
 .shortcut-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(136px, 1fr)); gap: 10px; }
 .shortcut {
-  position: relative; height: 92px; border: 1px solid var(--line); border-radius: 14px; background: var(--card);
+  position: relative; height: 84px; border: 1px solid var(--line); border-radius: 14px; background: var(--card);
   box-shadow: var(--shadow); transition: transform var(--ease), box-shadow var(--ease), border-color var(--ease);
 }
 .shortcut:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); border-color: var(--violet-line); }
@@ -120,20 +120,37 @@ svg { display: block; flex: none; }
   transition: background var(--ease), border-color var(--ease), color var(--ease), transform var(--ease);
 }
 .todo-item.done .todo-check { border-color: var(--violet); background: var(--violet); color: #fff; transform: scale(1.06); }
-.todo-text { flex: 1; font-size: 13.5px; }
+.todo-text { flex: 1; min-width: 0; font-size: 13.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .todo-item.done .todo-text { color: var(--ink-3); text-decoration: line-through; }
-.todo-item time { flex: none; color: var(--ink-3); font-size: 11px; }
+.todo-item time { flex: none; color: var(--ink-3); font-size: 11px; font-variant-numeric: tabular-nums; }
 .todo-item .todo-state { flex: none; padding: 3px 8px; border-radius: 999px; background: var(--violet-soft); color: var(--violet); font-size: 10.5px; font-style: normal; font-weight: 600; }
 .todo-item .todo-state.done { background: #EEF1F0; color: #79857F; }
 .todo-remove { flex: none; padding: 3px; border-radius: 6px; color: var(--ink-3); opacity: 0; transition: opacity var(--ease); }
 .todo-item:hover .todo-remove { opacity: 1; }
 .todo-empty { padding: 6px 2px; color: var(--ink-3); font-size: 12.5px; }
 
-/* ── AI 인사이트 ────────────────────────────────────────────── */
-.ai-insight { display: flex; align-items: center; gap: 11px; padding: 13px 16px; border: 1px solid var(--violet-line); border-radius: 13px; background: var(--violet-soft); }
-.insight-mark { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 8px; background: #fff; color: var(--violet); }
-.ai-insight strong { font-size: 12px; color: var(--violet); }
-.ai-insight p { margin: 1px 0 0; color: var(--ink-2); font-size: 12.5px; }
+/* ── 일정 ───────────────────────────────────────────────────── */
+.dash-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: stretch; }
+.dash-cols > .today-panel { align-content: start; }
+.schedule-list { display: grid; gap: 2px; }
+.schedule-row {
+  display: flex; align-items: center; gap: 12px; padding: 9px 10px; border-radius: var(--radius-sm);
+  transition: background var(--ease);
+}
+.schedule-row:hover { background: var(--line-soft); }
+.schedule-row.past { opacity: .55; }
+.schedule-date {
+  flex: none; min-width: 46px; padding: 4px 8px; border-radius: 8px; background: var(--violet-soft);
+  color: var(--violet); font-size: 11.5px; font-weight: 700; text-align: center; font-variant-numeric: tabular-nums;
+}
+.schedule-body { flex: 1; min-width: 0; }
+.schedule-body b { display: block; font-size: 13.5px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.schedule-body small { display: block; margin-top: 1px; color: var(--ink-3); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.schedule-badge { flex: none; padding: 3px 8px; border-radius: 999px; background: #EAF3EE; color: #2F7D51; font-size: 10.5px; font-style: normal; font-weight: 600; }
+.schedule-more { flex: none; padding: 3px; border-radius: 6px; color: var(--ink-3); opacity: 0; transition: opacity var(--ease); }
+.schedule-row:hover .schedule-more { opacity: 1; }
+.link-btn { justify-self: start; margin-top: 4px; padding: 4px 2px; color: var(--ink-3); font-size: 11.5px; }
+.link-btn:hover { color: var(--violet); }
 
 /* ── 분류 칩 ────────────────────────────────────────────────── */
 .page-categories { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -259,6 +276,9 @@ mark { padding: 0 1px; border-radius: 3px; background: #FFF3A0; color: #000; }
   .workspace { grid-template-columns: 200px minmax(0, 1fr); }
   .main-scroll { padding: 22px 22px 50px; }
   .topbar { padding: 14px 22px; }
+}
+@media (max-width: 1100px) {
+  .dash-cols { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 860px) {
   .workspace { grid-template-columns: 1fr; }

@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>한솔 지식</title>
-  <link rel="stylesheet" href="styles.css?v=17" />
+  <link rel="stylesheet" href="styles.css?v=18" />
 </head>
 <body>
   <div class="workspace">
@@ -33,18 +33,16 @@
       </header>
 
       <div class="main-scroll">
-        <section id="shortcutSection" class="block">
-          <div class="block-head">
-            <div><h2>자주 가는 사이트</h2><p>자주 사용하는 업무 사이트를 바로 열어보세요.</p></div>
-          </div>
+        <section id="shortcutSection">
           <div id="shortcutGrid" class="shortcut-grid"></div>
         </section>
 
-        <section id="todayPanel" class="today-panel"></section>
+        <div id="dashCols" class="dash-cols">
+          <section id="todayPanel" class="today-panel"></section>
+          <section id="schedulePanel" class="today-panel"></section>
+        </div>
 
-        <section id="aiInsight" class="ai-insight"></section>
-
-        <section class="block">
+        <section id="knowledgeBlock" class="block">
           <div class="block-head">
             <div><h2 id="pageHeading">내 지식</h2><p id="pageLead">기록한 업무 지식을 한눈에 확인하세요.</p></div>
             <b id="pageCount">0</b>
@@ -122,6 +120,16 @@
       </form>
     </section>
   </div>
+  <div id="scheduleModal" class="modal hidden" role="dialog" aria-modal="true" aria-label="일정">
+    <form id="scheduleForm" class="edit-box">
+      <header><strong id="scheduleHeading">일정 추가</strong><button id="scheduleClose" type="button">×</button></header>
+      <label>날짜<input id="scheduleDate" type="date" required /></label>
+      <label>일정명<input id="scheduleTitle" placeholder="예) 1차 미팅" required /></label>
+      <label>시간 (선택)<input id="scheduleTime" type="time" /></label>
+      <label>메모 (선택)<textarea id="scheduleMemo" rows="2" placeholder="예) 예보이앤씨 미팅"></textarea></label>
+      <footer><button id="scheduleDelete" type="button" class="danger-text">삭제</button><button id="scheduleCancel" type="button">취소</button><button type="submit">저장</button></footer>
+    </form>
+  </div>
   <div id="detailModal" class="modal hidden" role="dialog" aria-modal="true" aria-label="상세 보기">
     <section class="edit-box detail-box">
       <header><strong id="detailKind">상세</strong><button id="detailClose" type="button">×</button></header>
@@ -184,6 +192,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="firebase-config.js?v=2"></script>
-  <script src="app.js?v=46"></script>
+  <script src="app.js?v=47"></script>
 </body>
 </html>
