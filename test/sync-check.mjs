@@ -150,9 +150,10 @@ check('"할 일 …"(띄어쓰기)도 할 일로 저장', await popup.evaluate((
 await send(popup, '기억 기억 명령 확인');
 await popup.waitForTimeout(900);
 check('"기억 …"도 기억 저장소로 저장', await popup.evaluate(() => memories.some(m => m.text === '기억 명령 확인' && !m.deleted)));
+const memoryCountBefore = await popup.evaluate(() => memories.filter(m => !m.deleted).length);
 await send(popup, '명령어 없는 그냥 문장 하나');
 await popup.waitForTimeout(900);
-check('명령어 없는 일반 문장 → 기억 저장소 자동 저장', await popup.evaluate(() => memories.some(m => m.text === '명령어 없는 그냥 문장 하나' && !m.deleted)));
+check('명령어 없는 문장은 검색만 하고 저장하지 않음', (await popup.evaluate(() => memories.filter(m => !m.deleted).length)) === memoryCountBefore, `기억 ${memoryCountBefore}개 유지`);
 
 // 시드 지식은 새 브라우저에서 열어도 ID가 같아 중복되지 않아야 한다
 const fresh = await browser.newContext();
