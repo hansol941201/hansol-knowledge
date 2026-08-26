@@ -975,11 +975,6 @@ function handleComposerText(text) {
 
   // 명령어가 없으면 검색이다. 저장하지 않는다.
   // 기억 저장소에는 "기억 …" / "기록 …" 으로 입력했을 때만 들어간다.
-  const patentHits = findPatents(text);
-  if (patentHits.length && patentDigits(text).length >= 4) {
-    patentHits.forEach(addPatentBubble);
-    return Promise.resolve(false);
-  }
   const found = showSearchHits(text);
   if (!found) addBubble(`찾은 결과 없음\n저장하려면 “기록 ${text}” 처럼 앞에 기록을 붙이세요`, 'answer');
   return Promise.resolve(false);
