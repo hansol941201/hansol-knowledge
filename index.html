@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>한솔 지식</title>
-  <link rel="stylesheet" href="styles.css?v=24" />
+  <link rel="stylesheet" href="styles.css?v=25" />
 </head>
 <body>
   <div class="workspace">
@@ -104,15 +104,11 @@
           <div id="shortcutPreview" class="shortcut-preview"></div>
           <div class="shortcut-image-tools">
             <input id="shortcutFile" type="file" accept="image/png,image/jpeg,image/webp" />
-            <div class="fit-picker">
-              <button type="button" data-fit="cover" class="active">채우기</button>
-              <button type="button" data-fit="contain">맞추기</button>
-            </div>
             <button type="button" id="shortcutImageClear" class="hidden fit-clear">이미지 지우기</button>
           </div>
         </div>
       </label>
-      <p class="edit-help">PNG · JPG · WEBP. 카드 크기에 맞게 자동으로 줄여 저장합니다.</p>
+      <p class="edit-help">PNG · JPG · WEBP. 이미지 전체가 잘리지 않게 카드 안에 맞춰 표시됩니다.</p>
       <footer><button id="shortcutDelete" type="button" class="danger-text">삭제</button><button id="shortcutCancel" type="button">취소</button><button type="submit">저장</button></footer>
     </form>
   </div>
@@ -205,6 +201,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="firebase-config.js?v=2"></script>
-  <script src="app.js?v=53"></script>
+  <script src="app.js?v=54"></script>
 </body>
 </html>

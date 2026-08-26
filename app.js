@@ -858,7 +858,7 @@ function seedShortcuts() {
   for (const preset of DEFAULT_SHORTCUTS) {
     if (shortcuts.some(item => item.id === preset.id)) continue;          // 지운 것도 다시 만들지 않는다
     if (shortcuts.some(item => !item.deleted && item.url === preset.url)) continue;
-    shortcuts.push(newEntry({ type: 'shortcut', image: '', imageFit: 'cover', order: order++, ...preset }, '기본'));
+    shortcuts.push(newEntry({ type: 'shortcut', image: '', imageFit: SHORTCUT_FIT, order: order++, ...preset }, '기본'));
     changed = true;
   }
   if (changed) { saveLocalState(); queueCloudSave(); }
@@ -886,7 +886,7 @@ function renderShortcuts() {
     <div class="shortcut" data-shortcut="${item.id}" draggable="true">
       <a href="${escapeHtml(shortcutHref(item.url))}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(item.name)}">
         <span class="shortcut-thumb">${item.image
-          ? `<img alt="" src="${escapeHtml(item.image)}" style="object-fit:${item.imageFit === 'contain' ? 'contain' : 'cover'}" />`
+          ? `<img alt="" src="${escapeHtml(item.image)}" />`
           : `<span class="shortcut-badge">${escapeHtml(shortcutBadge(item))}</span>`}</span>
         <b>${escapeHtml(item.name)}</b>
       </a>
@@ -943,6 +943,13 @@ function moveShortcut(fromId, toId) {
 // 업로드한 이미지는 카드 크기에 맞게 줄여서 저장한다.
 // 원본을 그대로 담으면 동기화 문서(1MB 제한)가 금방 넘친다.
 const IMAGE_MAX = 420;
+function hasTransparency(context, canvas) {
+  try {
+    const { data } = context.getImageData(0, 0, canvas.width, canvas.height);
+    for (let i = 3; i < data.length; i += 4) if (data[i] < 250) return true;
+    return false;
+  } catch { return true; }   // 확인이 안 되면 안전하게 PNG 로 둔다
+}
 function readShortcutImage(file) {
   return new Promise((resolve, reject) => {
     if (!/^image\/(png|jpeg|jpg|webp)$/i.test(file.type)) return reject(new Error('PNG · JPG · WEBP 만 됩니다'));
@@ -958,8 +965,10 @@ function readShortcutImage(file) {
         canvas.height = Math.round(image.height * scale);
         const context = canvas.getContext('2d');
         context.drawImage(image, 0, 0, canvas.width, canvas.height);
-        // 투명도가 있으면 PNG, 아니면 용량이 작은 JPEG 로.
         const png = canvas.toDataURL('image/png');
+        // 투명한 부분이 있는 이미지를 JPEG 로 바꾸면 그 자리가 까맣게 굳는다.
+        // 그런 이미지는 용량이 커도 PNG 로 그대로 둔다.
+        if (hasTransparency(context, canvas)) return resolve(png);
         const jpeg = canvas.toDataURL('image/jpeg', 0.82);
         resolve(png.length <= jpeg.length * 1.1 ? png : jpeg);
       };
@@ -971,19 +980,17 @@ function readShortcutImage(file) {
 
 let editingShortcutId = null;
 let shortcutImage = '';
-let shortcutFit = 'cover';
+const SHORTCUT_FIT = 'contain';   // 모든 카드가 같은 규칙 — 이미지는 잘리지도 커지지도 않는다
 function paintShortcutPreview() {
   const preview = $('#shortcutPreview');
   preview.innerHTML = shortcutImage
-    ? `<img alt="" src="${escapeHtml(shortcutImage)}" style="object-fit:${shortcutFit}" />`
+    ? `<img alt="" src="${escapeHtml(shortcutImage)}" />`
     : `<span class="shortcut-badge">${escapeHtml(($('#shortcutName').value || '?').trim().slice(0, 4).toUpperCase())}</span>`;
   $('#shortcutImageClear').classList.toggle('hidden', !shortcutImage);
-  document.querySelectorAll('[data-fit]').forEach(button => button.classList.toggle('active', button.dataset.fit === shortcutFit));
 }
 function openShortcutModal(item) {
   editingShortcutId = item ? item.id : null;
   shortcutImage = item ? (item.image || '') : '';
-  shortcutFit = item && item.imageFit === 'contain' ? 'contain' : 'cover';
   $('#shortcutHeading').textContent = item ? '사이트 수정' : '사이트 추가';
   $('#shortcutName').value = item ? item.name : '';
   $('#shortcutUrl').value = item ? item.url : '';
@@ -999,9 +1006,6 @@ $('#shortcutCancel').addEventListener('click', closeShortcutModal);
 $('#shortcutModal').addEventListener('click', event => { if (event.target.id === 'shortcutModal') closeShortcutModal(); });
 $('#shortcutName').addEventListener('input', paintShortcutPreview);
 $('#shortcutImageClear').addEventListener('click', () => { shortcutImage = ''; $('#shortcutFile').value = ''; paintShortcutPreview(); });
-document.querySelectorAll('[data-fit]').forEach(button => {
-  button.onclick = () => { shortcutFit = button.dataset.fit; paintShortcutPreview(); };
-});
 $('#shortcutFile').addEventListener('change', async event => {
   const file = event.currentTarget.files[0];
   if (!file) return;
@@ -1014,10 +1018,10 @@ $('#shortcutForm').addEventListener('submit', event => {
   const url = $('#shortcutUrl').value.trim();
   if (!name || !url) return;
   const existing = shortcuts.find(x => x.id === editingShortcutId);
-  if (existing) { Object.assign(existing, { name, url, image: shortcutImage, imageFit: shortcutFit }); touch(existing); }
+  if (existing) { Object.assign(existing, { name, url, image: shortcutImage, imageFit: SHORTCUT_FIT }); touch(existing); }
   else {
     const last = Math.max(-1, ...sortedShortcuts().map(item => Number(item.order) || 0));
-    shortcuts.push(newEntry({ type: 'shortcut', name, url, image: shortcutImage, imageFit: shortcutFit, order: last + 1 }));
+    shortcuts.push(newEntry({ type: 'shortcut', name, url, image: shortcutImage, imageFit: SHORTCUT_FIT, order: last + 1 }));
   }
   saveLocalState(); queueCloudSave(); renderShortcuts(); closeShortcutModal();
   showToast(existing ? '사이트 수정됨' : '사이트 추가됨');

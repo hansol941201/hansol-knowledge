@@ -120,14 +120,16 @@ svg { display: block; flex: none; }
 .shortcut.dragging { opacity: .5; transform: translateY(-3px) scale(.99); }
 .shortcut.drop-target { border-color: var(--violet); box-shadow: 0 0 0 3px var(--violet-soft); }
 .shortcut a { display: block; text-decoration: none; color: inherit; cursor: pointer; }
+/* 이미지 영역: 연보라 배경 + 안쪽 여백. 정사각형 이미지도 잘리거나 커지지 않는다. */
 .shortcut-thumb {
-  display: grid; place-items: center; height: 78px; overflow: hidden;
+  display: flex; align-items: center; justify-content: center; height: 90px; padding: 10px; overflow: hidden;
   background: var(--violet-soft); border-bottom: 1px solid var(--line-soft);
 }
-.shortcut-thumb img { width: 100%; height: 100%; transition: transform var(--ease); }
-.shortcut:hover .shortcut-thumb img { transform: scale(1.02); }
+.shortcut-thumb img {
+  width: 100%; height: 100%; object-fit: contain; object-position: center; background: transparent;
+}
 .shortcut-badge { color: var(--violet); font-size: 15px; font-weight: 700; letter-spacing: .2px; }
-.shortcut a b { display: block; padding: 9px 10px; font-size: 12.5px; font-weight: 600; text-align: center;
+.shortcut a b { display: block; padding: 10px; font-size: 12.5px; font-weight: 600; text-align: center;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .shortcut-more {
   position: absolute; top: 5px; right: 5px; padding: 4px; border-radius: 7px;
@@ -136,7 +138,7 @@ svg { display: block; flex: none; }
 .shortcut:hover .shortcut-more { opacity: 1; }
 .shortcut-more:hover { background: #fff; }
 .shortcut.add {
-  display: grid; gap: 5px; place-content: center; justify-items: center; height: 117px;
+  display: grid; gap: 5px; place-content: center; justify-items: center; height: 132px;
   border-style: dashed; color: var(--ink-3); box-shadow: none; background: none;
 }
 .shortcut.add:hover { color: var(--violet); border-color: var(--violet-line); transform: translateY(-2px); }
@@ -145,15 +147,12 @@ svg { display: block; flex: none; }
 /* 이미지 등록 · 미리보기 */
 .shortcut-image-row { display: flex; gap: 12px; align-items: flex-start; margin-top: 7px; }
 .shortcut-preview {
-  flex: none; display: grid; place-items: center; width: 152px; height: 78px; overflow: hidden;
+  flex: none; display: flex; align-items: center; justify-content: center; width: 152px; height: 90px; padding: 10px; overflow: hidden;
   border: 1px solid var(--line); border-radius: 12px; background: var(--violet-soft);
 }
-.shortcut-preview img { width: 100%; height: 100%; }
+.shortcut-preview img { width: 100%; height: 100%; object-fit: contain; object-position: center; }
 .shortcut-image-tools { flex: 1; min-width: 0; display: grid; gap: 8px; }
 .shortcut-image-tools input[type="file"] { width: 100%; margin: 0; padding: 7px; border: 1px dashed var(--line); border-radius: 9px; font-size: 11px; }
-.fit-picker { display: flex; gap: 5px; }
-.fit-picker button { flex: 1; padding: 7px; border: 1px solid var(--line); border-radius: 9px; color: var(--ink-2); font-size: 11.5px; transition: background var(--ease), color var(--ease), border-color var(--ease); }
-.fit-picker button.active { border-color: var(--violet-line); background: var(--violet-soft); color: var(--violet); font-weight: 600; }
 .fit-clear { justify-self: start; padding: 4px 2px; color: var(--ink-3); font-size: 11px; }
 .fit-clear:hover { color: #C05A5A; }
 

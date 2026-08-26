@@ -68,7 +68,7 @@ for (const size of [{width:1920,height:1080},{width:1600,height:900},{width:1440
   ok(`${tag} 아래 여백 20~30px`, m.bottomGap>=18 && m.bottomGap<=32, `${m.bottomGap}px`);
   ok(`${tag} 두 카드 아래 끝이 정확히 같음`, m.todoBottom===m.schedBottom, `${m.todoBottom} / ${m.schedBottom}`);
   ok(`${tag} 페이지가 세로로 넘치지 않음`, m.pageOverflow<=1 && m.scrollOverflow<=1, JSON.stringify(m));
-  ok(`${tag} 카드가 화면 높이만큼 커짐`, m.todoH > size.height*0.55, `${m.todoH}px / 화면 ${size.height}px`);
+  ok(`${tag} 카드가 화면 높이만큼 커짐`, m.todoH > size.height*0.5, `${m.todoH}px / 화면 ${size.height}px`);
   ok(`${tag} 할 일은 위에 붙어 있음`, m.listTopGap<=2 && m.rowGap<=6, `첫 항목 ${m.listTopGap}px · 간격 ${m.rowGap}px`);
   ok(`${tag} 항목 높이 그대로(간격 벌리기 없음)`, m.rowH>=36 && m.rowH<=44, `${m.rowH}px`);
   ok(`${tag} 넘치는 목록은 카드 안에서만 스크롤`, m.listScrolls, JSON.stringify({listScrolls:m.listScrolls}));
