@@ -53,7 +53,22 @@ ok('기본 7개 · 순서대로', JSON.stringify(names)===JSON.stringify(NAMES),
 ok('옛 기본값(K-APT/Gmail/네이버) 없음', !names.some(n=>['K-APT','Gmail','네이버'].includes(n)));
 ok('+ 사이트 추가 유지', await page.isVisible('#shortcutAdd'));
 ok('도메인 텍스트 없음', !(await page.textContent('#shortcutGrid')).includes('github.io'));
-ok('이미지 없으면 placeholder', (await page.$$eval('.shortcut-badge', n=>n.map(x=>x.textContent))).includes('POUR'));
+ok('이미지 없으면 placeholder', (await page.$$eval('.shortcut-badge', n=>n.map(x=>x.textContent))).includes('HS'));
+// 기본 아이콘 4개가 자동으로 들어간다
+const icons = await page.evaluate(()=>{
+  const pick = id => {
+    const img = document.querySelector(`.shortcut[data-shortcut="${id}"] .shortcut-thumb img`);
+    if (!img) return null;
+    const r = img.getBoundingClientRect();
+    return { svg: img.src.startsWith('data:image/svg+xml'), w: Math.round(r.width), h: Math.round(r.height) };
+  };
+  return { contract: pick('shortcut-pour-contract'), lab: pick('shortcut-pour-support'),
+           calendar: pick('shortcut-team-schedule'), b2b: pick('shortcut-sales'),
+           untouched: !document.querySelector('.shortcut[data-shortcut="shortcut-knowledge"] .shortcut-thumb img') };
+});
+ok('기본 아이콘 자동 적용', ['contract','lab','calendar','b2b'].every(k=>icons[k] && icons[k].svg), JSON.stringify(icons));
+ok('아이콘도 카드 안에 맞춰 들어감', icons.contract.h<=70 && icons.contract.w<=130, JSON.stringify(icons.contract));
+ok('아이콘 없는 카드는 그대로', icons.untouched);
 const url = await page.getAttribute('.shortcut[data-shortcut="shortcut-pour-contract"] a','href');
 const target = await page.getAttribute('.shortcut[data-shortcut="shortcut-pour-contract"] a','target');
 ok('URL · 새 탭', url==='https://poursolution.github.io/pour-contract/' && target==='_blank', `${url} / ${target}`);
@@ -74,6 +89,13 @@ await page.setInputFiles('#shortcutFile', { name:'logo.png', mimeType:'image/png
 await page.waitForTimeout(500);
 ok('미리보기 표시', await page.isVisible('#shortcutPreview img'));
 ok('미리보기도 contain', (await page.$eval('#shortcutPreview img', n=>getComputedStyle(n).objectFit))==='contain');
+// 기본 아이콘 고르기
+ok('기본 아이콘 5개 제공', (await page.$$('#iconPicker [data-icon]')).length===5);
+await page.click('#iconPicker [data-icon="lounge"]'); await page.waitForTimeout(200);
+ok('아이콘을 고르면 미리보기 교체', (await page.getAttribute('#shortcutPreview img','src')).startsWith('data:image/svg+xml'));
+ok('고른 아이콘 표시', await page.evaluate(()=>document.querySelector('#iconPicker [data-icon="lounge"]').classList.contains('active')));
+await page.setInputFiles('#shortcutFile', { name:'logo.png', mimeType:'image/png', buffer: png });
+await page.waitForTimeout(500);
 ok('채우기/맞추기 선택 없음', (await page.$$('[data-fit]')).length===0);
 await page.click('#shortcutForm button[type="submit"]'); await page.waitForTimeout(400);
 ok('카드에 이미지 반영', await page.isVisible('.shortcut[data-shortcut="shortcut-card"] .shortcut-thumb img'));
