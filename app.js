@@ -212,9 +212,7 @@ function renderLibrary() {
       <dl class="patent-meta">
         ${item.gongbeop ? `<div><dt>공법</dt><dd>${mark(item.gongbeop)}</dd></div>` : ''}
         ${item.owner ? `<div><dt>특허권자</dt><dd>${mark(item.owner)}</dd></div>` : ''}
-        ${item.inventor ? `<div><dt>발명자</dt><dd>${mark(item.inventor)}</dd></div>` : ''}
-        ${item.appNum ? `<div><dt>출원</dt><dd>${mark(item.appNum)}${item.appDate ? ` (${escapeHtml(item.appDate)})` : ''}</dd></div>` : ''}
-        <div><dt>${item.regDate ? '등록' : '상태'}</dt><dd>${escapeHtml(item.regDate || item.status)}</dd></div>
+        ${patentStatusNote(item) ? `<div><dt>상태</dt><dd>${escapeHtml(patentStatusNote(item))}</dd></div>` : ''}
       </dl>
       <footer><button data-patent-copy>특허번호 복사</button><button data-patent-chat>지식창에서 보기</button></footer>
     </article>`).join('') + partnerItems.map((item, index) => `
@@ -702,14 +700,16 @@ function findPatents(query, limit = 5) {
   return patents.filter(item => normalize(patentText(item)).includes(q)).slice(0, limit);
 }
 
+// 발명자 · 출원 · 등록일은 표시하지 않는다.
+// 다만 '등록' 이 아닌 상태(출원·심사중, 소멸)는 알아야 하므로 그때만 남긴다.
+const patentStatusNote = (item) => (item && item.status && item.status !== '등록' ? item.status : '');
 function patentLines(item) {
   const lines = [`${item.kind}  ${item.num || '번호 부여 전'}`, item.name];
   if ((item.gongjong || []).length) lines.push(`공종  ${item.gongjong.join(' · ')}`);
   if (item.gongbeop) lines.push(`공법  ${item.gongbeop}`);
   if (item.owner) lines.push(`특허권자  ${item.owner}`);
-  if (item.inventor) lines.push(`발명자  ${item.inventor}`);
-  if (item.appNum) lines.push(`출원  ${item.appNum}${item.appDate ? `  (${item.appDate})` : ''}`);
-  lines.push(item.regDate ? `등록  ${item.regDate}` : `상태  ${item.status}`);
+  const note = patentStatusNote(item);
+  if (note) lines.push(`상태  ${note}`);
   return lines;
 }
 
