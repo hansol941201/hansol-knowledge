@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>한솔 지식</title>
-  <link rel="stylesheet" href="styles.css?v=18" />
+  <link rel="stylesheet" href="styles.css?v=19" />
 </head>
 <body>
   <div class="workspace">
@@ -26,6 +26,10 @@
     </aside>
 
     <main class="main">
+      <section id="shortcutSection" class="shortcut-band">
+        <div id="shortcutGrid" class="shortcut-grid"></div>
+      </section>
+
       <header class="topbar">
         <label class="page-search"><span data-icon="search"></span><input id="pageSearch" placeholder="지식, 특허번호, 업체명, 연락처를 검색하세요" /></label>
         <button id="accountAdd" class="hidden" type="button" aria-hidden="true"></button>
@@ -33,10 +37,6 @@
       </header>
 
       <div class="main-scroll">
-        <section id="shortcutSection">
-          <div id="shortcutGrid" class="shortcut-grid"></div>
-        </section>
-
         <div id="dashCols" class="dash-cols">
           <section id="todayPanel" class="today-panel"></section>
           <section id="schedulePanel" class="today-panel"></section>
@@ -192,6 +192,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="firebase-config.js?v=2"></script>
-  <script src="app.js?v=47"></script>
+  <script src="app.js?v=48"></script>
 </body>
 </html>

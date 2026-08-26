@@ -59,12 +59,15 @@ svg { display: block; flex: none; }
 
 /* ── 메인 ───────────────────────────────────────────────────── */
 .main { min-width: 0; display: flex; flex-direction: column; height: 100vh; }
+/* 바로가기는 화면 맨 위, 검색창은 그 아래 가운데 */
+.shortcut-band { padding: 18px 32px 6px; }
 .topbar {
-  display: flex; align-items: center; gap: 14px; padding: 16px 32px;
-  border-bottom: 1px solid var(--line); background: rgba(250, 250, 252, .88); backdrop-filter: blur(8px);
+  position: relative; display: flex; align-items: center; justify-content: center; gap: 14px;
+  padding: 14px 32px; border-bottom: 1px solid var(--line);
+  background: rgba(250, 250, 252, .88); backdrop-filter: blur(8px);
 }
 .page-search {
-  flex: 1; display: flex; align-items: center; gap: 9px; max-width: 620px; padding: 0 14px;
+  flex: 0 1 620px; display: flex; align-items: center; gap: 9px; max-width: 620px; padding: 0 14px;
   border: 1px solid var(--line); border-radius: 11px; background: var(--card); color: var(--ink-3);
   transition: border-color var(--ease), box-shadow var(--ease);
 }
@@ -72,11 +75,13 @@ svg { display: block; flex: none; }
 .page-search input { flex: 1; padding: 10px 0; border: 0; outline: 0; background: none; font-size: 13.5px; }
 .page-search input::placeholder { color: var(--ink-3); }
 .primary-btn {
-  display: flex; align-items: center; gap: 6px; margin-left: auto; padding: 10px 15px;
+  position: absolute; right: 32px; top: 50%; transform: translateY(-50%);
+  display: flex; align-items: center; gap: 6px; padding: 10px 15px;
   border-radius: var(--radius-sm); background: var(--violet); color: #fff; font-size: 13px; font-weight: 600;
   transition: background var(--ease), transform var(--ease);
 }
 .primary-btn:hover { background: #5c3ad0; }
+@media (max-width: 1100px) { .primary-btn { position: static; transform: none; margin-left: auto; } .topbar { justify-content: flex-start; } }
 .ghost-btn { padding: 6px 11px; border: 1px solid var(--line); border-radius: 8px; color: var(--ink-2); font-size: 12px; transition: background var(--ease); }
 .ghost-btn:hover { background: var(--line-soft); }
 
@@ -276,6 +281,7 @@ mark { padding: 0 1px; border-radius: 3px; background: #FFF3A0; color: #000; }
   .workspace { grid-template-columns: 200px minmax(0, 1fr); }
   .main-scroll { padding: 22px 22px 50px; }
   .topbar { padding: 14px 22px; }
+  .shortcut-band { padding: 16px 22px 6px; }
 }
 @media (max-width: 1100px) {
   .dash-cols { grid-template-columns: minmax(0, 1fr); }
