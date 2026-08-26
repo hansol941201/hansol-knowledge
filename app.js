@@ -330,6 +330,8 @@ function renderLibrary() {
   $('#dashCols').classList.toggle('hidden', !onDashboard && pageCategory !== '할 일');
   $('#schedulePanel').classList.toggle('hidden', !onDashboard);
   $('#knowledgeBlock').classList.toggle('hidden', onDashboard);
+  // 대시보드일 때만 두 카드가 남은 화면 높이를 채우도록 한다(레이아웃 높이 전용).
+  $('.main-scroll').classList.toggle('dash-fill', onDashboard);
   $('#pageCategories').classList.toggle('hidden', Boolean(term));
   paintIcons($('#pageGrid'));
   // 카드 본문을 누르면 상세로 연다(버튼 클릭은 제외).

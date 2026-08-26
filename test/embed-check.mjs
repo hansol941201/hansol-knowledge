@@ -44,10 +44,11 @@ const geo = await page.evaluate(()=>{
   const sched=document.querySelector('#schedulePanel').getBoundingClientRect();
   const frame=document.querySelector('#scheduleEmbed').getBoundingClientRect();
   return { todoW:Math.round(todo.width), schedW:Math.round(sched.width), schedH:Math.round(sched.height),
+           gap: Math.round(window.innerHeight - sched.bottom),
            frameH:Math.round(frame.height), fillsWidth: Math.round(frame.width) >= Math.round(sched.width) - 44 };
 });
 ok('A. 2열 · 폭 동일', Math.abs(geo.todoW-geo.schedW)<2, JSON.stringify(geo));
-ok('A. 카드 높이 480~560px', geo.schedH>=480 && geo.schedH<=560, `${geo.schedH}px`);
+ok('A. 카드가 남은 화면 높이를 채움', geo.gap>=18 && geo.gap<=32, `아래 여백 ${geo.gap}px · 높이 ${geo.schedH}px`);
 ok('A. iframe 이 카드를 채움', geo.fillsWidth && geo.frameH>=380, JSON.stringify(geo));
 ok('A. 사이드바·즐겨찾기·할 일 유지', await page.isVisible('.sidebar') && await page.isVisible('#shortcutGrid') && await page.isVisible('#todayPanel'));
 ok('A. 페이지가 세로로 길어지지 않음', await page.evaluate(()=>document.querySelector('.main-scroll').scrollHeight < 900));

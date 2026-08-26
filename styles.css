@@ -86,6 +86,22 @@ svg { display: block; flex: none; }
 .ghost-btn:hover { background: var(--line-soft); }
 
 .main-scroll { flex: 1; overflow-y: auto; padding: 22px 32px 60px; display: grid; gap: 20px; align-content: start; }
+
+/* 대시보드(2열)에서는 아래 빈 공간이 남지 않도록 두 카드가 남은 화면 높이를 모두 쓴다.
+   고정 px 이 아니라 .main 의 100vh 에서 즐겨찾기·검색 영역을 뺀 나머지를 flex 로 받는다.
+   1열로 접히는 좁은 화면(1100px 이하)에서는 이 규칙 자체를 적용하지 않고 원래대로 auto 높이로 둔다. */
+@media (min-width: 1101px) {
+  .main-scroll.dash-fill { padding-bottom: 24px; grid-template-rows: minmax(0, 1fr); align-content: stretch; }
+  .main-scroll.dash-fill .dash-cols { height: 100%; min-height: 0; }
+  .main-scroll.dash-fill .today-panel { min-height: 0; }
+  /* 할 일: 목록은 위에서부터 자연스럽게 쌓이고, 넘칠 때만 카드 안에서 스크롤한다. */
+  .main-scroll.dash-fill #todayPanel { grid-template-rows: auto minmax(0, 1fr); align-content: stretch; }
+  .main-scroll.dash-fill #todayPanel .todo-list { min-height: 0; align-content: start; overflow-y: auto; }
+  /* 일정: 달력 비율은 그대로 두고, 선택한 날 목록만 카드 안에서 스크롤한다. */
+  .main-scroll.dash-fill #schedulePanel:not(:has(.schedule-embed)) { grid-template-rows: auto auto minmax(0, 1fr); align-content: stretch; }
+  .main-scroll.dash-fill #schedulePanel .cal-day { min-height: 0; align-content: start; overflow-y: auto; }
+  .main-scroll.dash-fill .schedule-embed { min-height: 0; }
+}
 .block { display: grid; gap: 14px; }
 .block-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
 .block-head h2 { margin: 0; font-size: 17px; letter-spacing: -.3px; }
@@ -145,6 +161,7 @@ svg { display: block; flex: none; }
 .today-panel { display: grid; gap: 12px; padding: 20px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); box-shadow: var(--shadow); }
 .todo-list { display: grid; gap: 3px; }
 .todo-item {
+  position: relative;   /* 숨긴 체크박스가 카드 밖으로 빠져나가 페이지를 늘리지 않도록 */
   display: flex; align-items: center; gap: 11px; padding: 10px 11px; border-radius: var(--radius-sm);
   cursor: pointer; transition: background var(--ease);
 }
@@ -340,7 +357,7 @@ mark { padding: 0 1px; border-radius: 3px; background: #FFF3A0; color: #000; }
   .shortcut-band { padding: 16px 22px 6px; }
 }
 @media (max-width: 1100px) {
-  .dash-cols { grid-template-columns: minmax(0, 1fr); }
+  .dash-cols { grid-template-columns: minmax(0, 1fr); }   /* 1열에서는 화면 높이를 채우지 않고 내용만큼만 */
 }
 @media (max-width: 860px) {
   .workspace { grid-template-columns: 1fr; }
