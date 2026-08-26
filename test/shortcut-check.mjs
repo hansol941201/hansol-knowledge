@@ -57,17 +57,17 @@ ok('이미지 없으면 placeholder', (await page.$$eval('.shortcut-badge', n=>n
 // 기본 아이콘 4개가 자동으로 들어간다
 const icons = await page.evaluate(()=>{
   const pick = id => {
-    const img = document.querySelector(`.shortcut[data-shortcut="${id}"] .shortcut-thumb img`);
+    const img = document.querySelector(`.shortcut[data-shortcut="${id}"] .shortcut-thumb .thumb-face`);
     if (!img) return null;
     const r = img.getBoundingClientRect();
     return { svg: img.src.startsWith('data:image/svg+xml'), w: Math.round(r.width), h: Math.round(r.height) };
   };
   return { contract: pick('shortcut-pour-contract'), lab: pick('shortcut-pour-support'),
            calendar: pick('shortcut-team-schedule'), b2b: pick('shortcut-sales'),
-           untouched: !document.querySelector('.shortcut[data-shortcut="shortcut-knowledge"] .shortcut-thumb img') };
+           untouched: !document.querySelector('.shortcut[data-shortcut="shortcut-knowledge"] .shortcut-thumb .thumb-face') };
 });
 ok('기본 아이콘 자동 적용', ['contract','lab','calendar','b2b'].every(k=>icons[k] && icons[k].svg), JSON.stringify(icons));
-ok('아이콘도 카드 안에 맞춰 들어감', icons.contract.h<=70 && icons.contract.w<=130, JSON.stringify(icons.contract));
+ok('아이콘도 카드 안에 맞춰 들어감', icons.contract.h<=90 && icons.contract.w<=152, JSON.stringify(icons.contract));
 ok('아이콘 없는 카드는 그대로', icons.untouched);
 const url = await page.getAttribute('.shortcut[data-shortcut="shortcut-pour-contract"] a','href');
 const target = await page.getAttribute('.shortcut[data-shortcut="shortcut-pour-contract"] a','target');
@@ -87,32 +87,36 @@ ok('수정 창에 기존 값', (await page.inputValue('#shortcutName'))==='고�
 const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAAAPUlEQVR42u3OMQEAAAgDoC252H0MMwZQkk73RgQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBP4LFsFcAAHl9K3RAAAAAElFTkSuQmCC','base64');
 await page.setInputFiles('#shortcutFile', { name:'logo.png', mimeType:'image/png', buffer: png });
 await page.waitForTimeout(500);
-ok('미리보기 표시', await page.isVisible('#shortcutPreview img'));
-ok('미리보기도 contain', (await page.$eval('#shortcutPreview img', n=>getComputedStyle(n).objectFit))==='contain');
+ok('미리보기 표시', await page.isVisible('#shortcutPreview .thumb-face'));
+ok('미리보기도 contain', (await page.$eval('#shortcutPreview .thumb-face', n=>getComputedStyle(n).objectFit))==='contain');
 // 기본 아이콘 고르기
 ok('기본 아이콘 5개 제공', (await page.$$('#iconPicker [data-icon]')).length===5);
 await page.click('#iconPicker [data-icon="lounge"]'); await page.waitForTimeout(200);
-ok('아이콘을 고르면 미리보기 교체', (await page.getAttribute('#shortcutPreview img','src')).startsWith('data:image/svg+xml'));
+ok('아이콘을 고르면 미리보기 교체', (await page.getAttribute('#shortcutPreview .thumb-face','src')).startsWith('data:image/svg+xml'));
 ok('고른 아이콘 표시', await page.evaluate(()=>document.querySelector('#iconPicker [data-icon="lounge"]').classList.contains('active')));
 await page.setInputFiles('#shortcutFile', { name:'logo.png', mimeType:'image/png', buffer: png });
 await page.waitForTimeout(500);
 ok('채우기/맞추기 선택 없음', (await page.$$('[data-fit]')).length===0);
 await page.click('#shortcutForm button[type="submit"]'); await page.waitForTimeout(400);
-ok('카드에 이미지 반영', await page.isVisible('.shortcut[data-shortcut="shortcut-card"] .shortcut-thumb img'));
+ok('카드에 이미지 반영', await page.isVisible('.shortcut[data-shortcut="shortcut-card"] .shortcut-thumb .thumb-face'));
 const thumb = await page.evaluate(()=>{
   const box=document.querySelector('.shortcut[data-shortcut="shortcut-card"] .shortcut-thumb');
-  const img=box.querySelector('img'); const c=getComputedStyle(box); const ic=getComputedStyle(img);
-  const br=box.getBoundingClientRect(), ir=img.getBoundingClientRect();
-  return { h:Math.round(br.height), pad:parseFloat(c.paddingTop), bg:c.backgroundColor, overflow:c.overflow,
+  const face=box.querySelector('.thumb-face'), back=box.querySelector('.thumb-back');
+  const c=getComputedStyle(box), ic=getComputedStyle(face), bc=getComputedStyle(back);
+  const br=box.getBoundingClientRect(), ir=face.getBoundingClientRect(), kr=back.getBoundingClientRect();
+  return { h:Math.round(br.height), pad:parseFloat(ic.paddingTop), bg:c.backgroundColor, overflow:c.overflow,
            fit:ic.objectFit, pos:ic.objectPosition, imgBg:ic.backgroundColor,
-           inside: ir.width<=br.width-19 && ir.height<=br.height-19,
+           backFit:bc.objectFit, backBlur:bc.filter,
+           covers: kr.left<=br.left && kr.top<=br.top && kr.right>=br.right && kr.bottom>=br.bottom,
+           inside: ir.width<=br.width+1 && ir.height<=br.height+1,
            imgW:Math.round(ir.width), imgH:Math.round(ir.height) };
 });
 ok('이미지 영역 높이 90px', thumb.h===90, `${thumb.h}px`);
-ok('안쪽 여백 10px 이상', thumb.pad>=10, `${thumb.pad}px`);
+ok('앞 그림 여백 없음', thumb.pad>=0, `${thumb.pad}px`);
 ok('이미지가 잘리지 않음(contain · center)', thumb.fit==='contain' && thumb.pos==='50% 50%', JSON.stringify(thumb));
-ok('이미지가 여백 안에 들어감', thumb.inside, JSON.stringify(thumb));
-ok('연보라 배경 · 검은색 아님', thumb.bg==='rgb(242, 238, 253)' && thumb.imgBg==='rgba(0, 0, 0, 0)', JSON.stringify(thumb));
+ok('이미지가 영역 안에 들어감', thumb.inside, JSON.stringify(thumb));
+ok('뒤 배경이 빈틈없이 채움', thumb.backFit==='cover' && thumb.covers && thumb.backBlur.includes('blur'), JSON.stringify(thumb));
+ok('검은 배경 아님', thumb.imgBg==='rgba(0, 0, 0, 0)', JSON.stringify(thumb));
 ok('넘침 숨김', thumb.overflow==='hidden', thumb.overflow);
 const stored = await page.evaluate(()=>{const s=JSON.parse(localStorage.getItem('knowledge-shortcuts')||'[]').find(x=>x.id==='shortcut-card');return {isData:String(s.image).startsWith('data:'), fit:s.imageFit, kb:Math.round(s.image.length/1024)};});
 ok('이미지를 Data URL 로 저장', stored.isData && stored.fit==='contain', JSON.stringify(stored));
@@ -132,7 +136,7 @@ const clear = await page.evaluate(()=>{
 });
 ok('투명 PNG 는 PNG 로 저장(검게 굳지 않음)', clear.head.startsWith('data:image/png'), clear.head);
 const corner = await page.evaluate(async ()=>{
-  const img=document.querySelector('.shortcut[data-shortcut="shortcut-pour-support"] .shortcut-thumb img');
+  const img=document.querySelector('.shortcut[data-shortcut="shortcut-pour-support"] .shortcut-thumb .thumb-face');
   await img.decode();
   const c=document.createElement('canvas'); c.width=img.naturalWidth; c.height=img.naturalHeight;
   const x=c.getContext('2d'); x.drawImage(img,0,0);

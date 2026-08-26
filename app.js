@@ -898,6 +898,13 @@ function shortcutHost(url) {
   try { return new URL(shortcutHref(url)).hostname.replace(/^www\./, ''); }
   catch { return String(url || '').replace(/^https?:\/\//i, '').split('/')[0]; }
 }
+// 뒤에는 같은 그림을 흐리게 깔아 이미지 영역을 빈틈없이 채우고,
+// 앞에는 원본을 잘림 없이(contain) 그대로 보여 준다.
+function thumbImage(src) {
+  const url = escapeHtml(src);
+  return `<img class="thumb-back" alt="" aria-hidden="true" src="${url}" /><img class="thumb-face" alt="" src="${url}" />`;
+}
+
 function shortcutBadge(item) {
   return (item.badge || String(item.name || '').trim().slice(0, 4) || '?').toUpperCase();
 }
@@ -911,7 +918,7 @@ function renderShortcuts() {
     <div class="shortcut" data-shortcut="${item.id}" draggable="true">
       <a href="${escapeHtml(shortcutHref(item.url))}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(item.name)}">
         <span class="shortcut-thumb">${item.image
-          ? `<img alt="" src="${escapeHtml(item.image)}" />`
+          ? thumbImage(item.image)
           : `<span class="shortcut-badge">${escapeHtml(shortcutBadge(item))}</span>`}</span>
         <b>${escapeHtml(item.name)}</b>
       </a>
@@ -1009,7 +1016,7 @@ const SHORTCUT_FIT = 'contain';   // 모든 카드가 같은 규칙 — 이미�
 function paintShortcutPreview() {
   const preview = $('#shortcutPreview');
   preview.innerHTML = shortcutImage
-    ? `<img alt="" src="${escapeHtml(shortcutImage)}" />`
+    ? thumbImage(shortcutImage)
     : `<span class="shortcut-badge">${escapeHtml(($('#shortcutName').value || '?').trim().slice(0, 4).toUpperCase())}</span>`;
   $('#shortcutImageClear').classList.toggle('hidden', !shortcutImage);
   document.querySelectorAll('#iconPicker [data-icon]').forEach(button => {

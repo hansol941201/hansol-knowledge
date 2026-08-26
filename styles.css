@@ -120,13 +120,20 @@ svg { display: block; flex: none; }
 .shortcut.dragging { opacity: .5; transform: translateY(-3px) scale(.99); }
 .shortcut.drop-target { border-color: var(--violet); box-shadow: 0 0 0 3px var(--violet-soft); }
 .shortcut a { display: block; text-decoration: none; color: inherit; cursor: pointer; }
-/* 이미지 영역: 연보라 배경 + 안쪽 여백. 정사각형 이미지도 잘리거나 커지지 않는다. */
+/* 이미지 영역: 뒤에 같은 그림을 흐리게 깔아 빈틈없이 채우고,
+   앞의 그림은 잘리거나 커지지 않게 그대로 보여 준다. */
 .shortcut-thumb {
-  display: flex; align-items: center; justify-content: center; height: 90px; padding: 10px; overflow: hidden;
+  position: relative; display: flex; align-items: center; justify-content: center;
+  height: 90px; overflow: hidden;
   background: var(--violet-soft); border-bottom: 1px solid var(--line-soft);
 }
-.shortcut-thumb img {
-  width: 100%; height: 100%; object-fit: contain; object-position: center; background: transparent;
+.thumb-back {
+  position: absolute; top: -12%; left: -12%; width: 124%; height: 124%;
+  object-fit: cover; object-position: center; filter: blur(16px) saturate(1.15); transform: scale(1.08);
+}
+.thumb-face {
+  position: relative; width: 100%; height: 100%;
+  object-fit: contain; object-position: center; background: transparent;
 }
 .shortcut-badge { color: var(--violet); font-size: 15px; font-weight: 700; letter-spacing: .2px; }
 .shortcut a b { display: block; padding: 10px; font-size: 12.5px; font-weight: 600; text-align: center;
@@ -147,17 +154,17 @@ svg { display: block; flex: none; }
 /* 이미지 등록 · 미리보기 */
 .shortcut-image-row { display: flex; gap: 12px; align-items: flex-start; margin-top: 7px; }
 .shortcut-preview {
-  flex: none; display: flex; align-items: center; justify-content: center; width: 152px; height: 90px; padding: 10px; overflow: hidden;
+  position: relative; flex: none; display: flex; align-items: center; justify-content: center;
+  width: 152px; height: 90px; overflow: hidden;
   border: 1px solid var(--line); border-radius: 12px; background: var(--violet-soft);
 }
-.shortcut-preview img { width: 100%; height: 100%; object-fit: contain; object-position: center; }
 .shortcut-image-tools { flex: 1; min-width: 0; display: grid; gap: 8px; }
 .shortcut-image-tools input[type="file"] { width: 100%; margin: 0; padding: 7px; border: 1px dashed var(--line); border-radius: 9px; font-size: 11px; }
 .fit-clear { justify-self: start; padding: 4px 2px; color: var(--ink-3); font-size: 11px; }
 /* 기본 아이콘 고르기 */
 .icon-picker { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 7px; }
 .icon-picker button {
-  display: flex; align-items: center; justify-content: center; width: 52px; height: 52px; padding: 5px;
+  display: flex; align-items: center; justify-content: center; width: 68px; height: 42px; padding: 0; overflow: hidden;
   border: 1px solid var(--line); border-radius: 12px; background: var(--card);
   transition: border-color var(--ease), box-shadow var(--ease);
 }
