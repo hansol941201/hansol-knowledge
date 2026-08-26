@@ -242,21 +242,40 @@ function categoryItems(name) {
   return alive(knowledge).filter(item => item.category === name);
 }
 
+// 검색창에 화면 이름을 치고 Enter 하면 검색 대신 그 화면으로 바로 넘어간다.
+const SEARCH_VIEW_WORDS = {
+  '대시보드': '대시보드', '홈': '대시보드',
+  '내지식': '전체', '지식': '전체', '전체': '전체',
+  '할일': '할 일', 'todo': '할 일',
+  '기억': '기억', '기록': '기억',
+  '특허': '특허',
+  '협력업체': '협력업체', '업체': '협력업체',
+  '계정': '계정',
+  '연락처': '연락처',
+  '업무지식': '업무지식'
+};
+function viewForSearch(text) {
+  const key = String(text || '').replace(/\s+/g, '').toLowerCase();
+  return SEARCH_VIEW_WORDS[key] || '';
+}
+
+function goToView(name) {
+  pageCategory = name;
+  viewBeforeSearch = '';
+  showAllTodos = name === '할 일';
+  $('#pageSearch').value = '';
+  pageSearchCommitted = '';
+  renderAll();
+  $('.main-scroll').scrollTop = 0;
+}
+
 function renderSideNav() {
   $('#sideNav').innerHTML = NAV_ITEMS.map(item => {
     const target = item.category || item.name;
     return `<button type="button" class="side-item ${target === pageCategory ? 'active' : ''}" data-nav="${target}">${icon(item.icon)}<span>${item.name}</span></button>`;
   }).join('');
   $('#sideNav').querySelectorAll('[data-nav]').forEach(button => {
-    button.onclick = () => {
-      pageCategory = button.dataset.nav;
-      viewBeforeSearch = '';
-      showAllTodos = pageCategory === '할 일';
-      $('#pageSearch').value = '';
-      pageSearchCommitted = '';
-      renderAll();
-      $('.main-scroll').scrollTop = 0;
-    };
+    button.onclick = () => goToView(button.dataset.nav);
   });
 }
 
@@ -523,6 +542,8 @@ $('#pageSearch').addEventListener('input', event => {
 $('#pageSearch').addEventListener('keydown', event => {
   if (event.key !== 'Enter') return;
   event.preventDefault();
+  const view = viewForSearch(event.currentTarget.value);
+  if (view) return goToView(view);      // "할일" 처럼 화면 이름이면 그 목록으로 바로 이동
   pageSearchCommitted = event.currentTarget.value.trim();
   if (pageSearchCommitted && pageCategory === '대시보드') { viewBeforeSearch = pageCategory; pageCategory = '전체'; }
   if (!pageSearchCommitted && viewBeforeSearch) { pageCategory = viewBeforeSearch; viewBeforeSearch = ''; }
