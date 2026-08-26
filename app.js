@@ -208,7 +208,7 @@ function renderLibrary() {
       ${(item.gongjong || []).length
         ? `<div class="patent-tags">${item.gongjong.map(tag => `<span>${mark(tag)}</span>`).join('')}</div>`
         : ''}
-      <p>${mark(item.name)}</p>
+      ${item.name ? `<p>${mark(item.name)}</p>` : ''}
       <dl class="patent-meta">
         ${item.gongbeop ? `<div><dt>공법</dt><dd>${mark(item.gongbeop)}</dd></div>` : ''}
         ${item.owner ? `<div><dt>특허권자</dt><dd>${mark(item.owner)}</dd></div>` : ''}
@@ -682,7 +682,7 @@ function patentDigits(text) { return String(text || '').replace(/[^0-9]/g, ''); 
 
 function patentText(item) {
   return [item.num, item.name, item.gongbeop, item.owner, item.inventor, item.appNum,
-    ...(item.gongjong || [])].join(' ');
+    ...(item.gongjong || []), ...(item.aliases || [])].join(' ');
 }
 
 function findPatents(query, limit = 5) {
@@ -704,7 +704,8 @@ function findPatents(query, limit = 5) {
 // 다만 '등록' 이 아닌 상태(출원·심사중, 소멸)는 알아야 하므로 그때만 남긴다.
 const patentStatusNote = (item) => (item && item.status && item.status !== '등록' ? item.status : '');
 function patentLines(item) {
-  const lines = [`${item.kind}  ${item.num || '번호 부여 전'}`, item.name];
+  const lines = [`${item.kind}  ${item.num || '번호 부여 전'}`];
+  if (item.name) lines.push(item.name);
   if ((item.gongjong || []).length) lines.push(`공종  ${item.gongjong.join(' · ')}`);
   if (item.gongbeop) lines.push(`공법  ${item.gongbeop}`);
   if (item.owner) lines.push(`특허권자  ${item.owner}`);
