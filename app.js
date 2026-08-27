@@ -1320,19 +1320,108 @@ async function deleteAccount(id) {
   renderLibrary(); showToast('계정 삭제됨');
 }
 
+// ── 지식창 유지 ───────────────────────────────────────────────
+// 사용자가 직접 접기(−) 전에는 어떤 경우에도 닫히지 않는다.
+// 열림/접힘 상태와 대화 내용·입력 중이던 글을 저장해 두고 다시 열 때 그대로 되살린다.
+const WINDOW_STATE_KEY = 'knowledge-window-state';
+const WINDOW_CHAT_KEY = 'knowledge-window-chat';
+const WINDOW_CHAT_MAX = 60;
+let windowState = { open: false, draft: '' };
+let restoringChat = false;
+
+function loadWindowState() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(WINDOW_STATE_KEY) || 'null');
+    if (raw && typeof raw === 'object') windowState = { open: Boolean(raw.open), draft: String(raw.draft || '') };
+  } catch { /* 저장값이 깨져 있어도 창은 그대로 둔다 */ }
+  return windowState;
+}
+function saveWindowState(patch) {
+  windowState = { ...windowState, ...patch };
+  try { localStorage.setItem(WINDOW_STATE_KEY, JSON.stringify(windowState)); } catch { /* 저장 실패해도 창은 유지 */ }
+}
+
+function snapshotChat() {
+  if (restoringChat) return;
+  try {
+    const rows = [...messages.querySelectorAll('.row')].slice(-WINDOW_CHAT_MAX).map(row => {
+      const bubble = row.querySelector('.bubble');
+      if (!bubble) return null;
+      const copy = bubble.cloneNode(true);
+      copy.querySelectorAll('.actions').forEach(node => node.remove());   // 버튼 글자는 빼고 내용만
+      return { type: row.classList.contains('ask') ? 'ask' : 'answer', text: copy.textContent, patent: bubble.classList.contains('patent-bubble') };
+    }).filter(Boolean);
+    localStorage.setItem(WINDOW_CHAT_KEY, JSON.stringify(rows));
+  } catch { /* 저장 실패해도 창은 유지 */ }
+}
+
+function restoreChat() {
+  let rows = [];
+  try { rows = JSON.parse(localStorage.getItem(WINDOW_CHAT_KEY) || '[]'); } catch { rows = []; }
+  if (!Array.isArray(rows) || !rows.length) return;
+  restoringChat = true;
+  for (const entry of rows.slice(-WINDOW_CHAT_MAX)) {
+    if (!entry || !entry.text) continue;
+    const row = document.createElement('div');
+    row.className = `row ${entry.type === 'ask' ? 'ask' : 'answer'}`;
+    const bubble = document.createElement('div');
+    bubble.className = `bubble${entry.patent ? ' patent-bubble' : ''}`;
+    bubble.textContent = entry.text;
+    row.append(bubble);
+    messages.append(row);
+  }
+  chatEmpty.classList.add('off');
+  messages.scrollTop = messages.scrollHeight;
+  restoringChat = false;
+}
+
+// 오류·연결 끊김·바깥 클릭 등 어떤 이유로 창이 사라져도 곧바로 되돌린다.
+function keepWindowAlive() {
+  try {
+    if (!document.body.contains(app)) document.body.append(app);
+    if (!document.body.contains(orb)) document.body.append(orb);
+    if (windowState.open) {
+      app.classList.remove('hidden');
+      orb.classList.add('hidden');
+      if (getComputedStyle(app).display === 'none') app.style.display = '';
+    } else {
+      orb.classList.remove('hidden');          // 접어 두어도 열기 버튼은 항상 화면에 보인다
+      if (getComputedStyle(orb).display === 'none') orb.style.display = '';
+    }
+  } catch { /* 여기서 또 실패해도 다음 점검 때 다시 시도한다 */ }
+}
+
 function openApp() {
+  saveWindowState({ open: true });
   window.knowledgeAPI?.setExpanded(true);
   orb.classList.add('hidden');
   app.classList.remove('hidden');
   if (syncLoginPending && !syncPromptDismissed) $('#syncModal').classList.remove('hidden');
   setTimeout(() => input.focus(), 120);
 }
-function collapseApp() {
+function collapseApp() {                       // 최소화(접기). 닫는 것이 아니라 열기 버튼으로 줄어든다
+  saveWindowState({ open: false });
   if (overlayMode && syncLoginPending) $('#syncModal').classList.add('hidden');
   app.classList.add('hidden');
   orb.classList.remove('hidden');
   window.knowledgeAPI?.setExpanded(false);
 }
+
+function restoreWindow() {
+  loadWindowState();
+  restoreChat();
+  input.value = windowState.draft;
+  if (windowState.open) openApp(); else collapseApp();
+  try { new MutationObserver(snapshotChat).observe(messages, { childList: true, subtree: true, characterData: true }); } catch { /* 없어도 저장은 계속 시도 */ }
+  input.addEventListener('input', () => saveWindowState({ draft: input.value }));
+  window.addEventListener('beforeunload', () => { saveWindowState({ draft: input.value }); snapshotChat(); });
+  for (const event of ['error', 'unhandledrejection', 'online', 'offline', 'pageshow', 'focus']) {
+    window.addEventListener(event, keepWindowAlive);
+  }
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) keepWindowAlive(); });
+  setInterval(keepWindowAlive, 1000);
+}
+
 orb.addEventListener('click', openApp);
 $('#collapseBtn').addEventListener('click', collapseApp);
 $('#siteShortcut').addEventListener('click', () => {
@@ -1350,7 +1439,7 @@ document.addEventListener('keydown', (e) => {
   else if (!$('#resetModal').classList.contains('hidden')) closeResetModal();
   else if (!$('#syncModal').classList.contains('hidden')) closeSyncModal();
   else if (!$('#memoryModal').classList.contains('hidden')) closeMemoryLibrary();
-  else collapseApp();
+  else if (overlayMode) collapseApp();   // 브라우저에서는 Esc 로 창이 닫히지 않는다
 });
 
 function addBubble(text, type = 'answer', item = null) {
@@ -1663,6 +1752,7 @@ $('#composer').addEventListener('submit', (e) => {
   if (!text) return;
   addBubble(text, 'mine');
   input.value = '';
+  saveWindowState({ draft: '' });
   handleComposerText(text);
 });
 
@@ -2002,5 +2092,6 @@ $('#syncForm').addEventListener('submit', async event => {
 });
 
 seedShortcuts();   // 기본 바로가기는 없을 때만 만든다
-renderAll();   // 모든 정의가 끝난 뒤에 첫 화면을 그린다
+renderAll();       // 모든 정의가 끝난 뒤에 첫 화면을 그린다
+restoreWindow();   // 지식창은 이전 상태·내용 그대로 되살린다
 initCloudAuth();

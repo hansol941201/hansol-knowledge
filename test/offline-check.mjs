@@ -27,7 +27,7 @@ async function scenario(name, initScript) {
     await page.click('#syncLater');
     ok(`[${name}] PIN 창을 닫고 사이트를 쓸 수 있음`, true);
   }
-  await page.click('#orb');
+  if (await page.isVisible('#orb')) await page.click('#orb');   // 이미 열려 있으면 그대로 쓴다
   await page.fill('#input', `할일 ${TODO}`);
   await page.press('#input', 'Enter');
   await page.waitForTimeout(1200);

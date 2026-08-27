@@ -19,7 +19,7 @@ const page=await ctx.newPage();
 page.on('pageerror',e=>console.log('  ERROR:',e.message));
 await page.goto(base+'/index.html');
 await page.waitForFunction(()=>document.querySelector('#syncState')?.dataset.state==='live',null,{timeout:10000});
-await page.click('#orb');
+if (await page.isVisible('#orb')) await page.click('#orb');   // 이미 열려 있으면 그대로 쓴다
 const send=async t=>{await page.fill('#input',t);await page.press('#input','Enter');await page.waitForTimeout(1200);};
 const search=async q=>{await page.fill('#pageSearch',q);await page.press('#pageSearch','Enter');await page.waitForTimeout(350);};
 

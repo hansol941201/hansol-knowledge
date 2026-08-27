@@ -50,7 +50,7 @@ const page=await ctx.newPage();
 page.on('pageerror',e=>console.log('  ERROR:',e.message));
 await page.goto(base+'/index.html?overlay=1');       // 데스크톱 앱과 같은 오버레이 모드
 await page.waitForTimeout(900);
-await page.click('#orb');
+if (await page.isVisible('#orb')) await page.click('#orb');   // 이미 열려 있으면 그대로 쓴다
 await page.waitForTimeout(400);
 
 // PIN 창이 떠 있으면 "나중에 하기"로 닫아, 로그인 안 한 상태를 만든다

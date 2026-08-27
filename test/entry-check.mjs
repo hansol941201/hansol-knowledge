@@ -22,7 +22,7 @@ const live=p=>p.waitForFunction(()=>document.querySelector('#syncState')?.datase
 const site=await ctx.newPage();
 site.on('pageerror',e=>console.log('  SITE ERROR:',e.message));
 await site.goto(base+'/index.html'); await live(site);
-await site.click('#orb');
+if (await site.isVisible('#orb')) await site.click('#orb');   // 이미 열려 있으면 그대로 쓴다
 
 const send = async (page, text) => { await page.fill('#input', text); await page.press('#input','Enter'); await page.waitForTimeout(1500); };
 const lastBubble = page => page.$$eval('#messages .row.answer .bubble', n => n.at(-1)?.textContent || '');
@@ -80,7 +80,7 @@ ok('6. "기억 …" 을 붙이면 저장됨', await site.evaluate(() => memories
 
 // 5) 새로고침 후 유지
 await site.reload(); await live(site); await site.waitForTimeout(500);
-await site.click('#orb');
+if (await site.isVisible('#orb')) await site.click('#orb');   // 이미 열려 있으면 그대로 쓴다
 const afterReload = await site.evaluate(() => ({
   todo: todos.some(t => t.text === '금화기업 전화'),
   memory: memories.some(m => m.text === '우단건설 전화요청기록'),

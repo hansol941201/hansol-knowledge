@@ -42,7 +42,7 @@ const bubbles = (page) => page.$$eval('#messages .row.answer .bubble', nodes => 
 // 웹사이트 탭을 먼저 열어 두고(새로고침 없이 반영되는지 보기 위해) 팝업 탭을 연다.
 const site = await open('');
 const popup = await open('?overlay=1');
-await popup.click('#orb');
+if (await popup.isVisible('#orb')) await popup.click('#orb');   // 이미 열려 있으면 그대로 쓴다
 
 const TODO_TEXT = '천민호부사장 600. 택배 확인하기';
 const MEMO_TEXT = '자오건설 PDF 나중에 협약서 확인해보기';
@@ -131,7 +131,7 @@ const uploaded = await popup.evaluate(() => JSON.parse(localStorage.getItem('fak
 check('재연결: 밀린 항목 자동 업로드', Boolean(uploaded));
 
 // ID 기준 병합 — 양쪽에서 각각 저장해도 서로 지우지 않는다
-await site.click('#orb');
+if (await site.isVisible('#orb')) await site.click('#orb');   // 이미 열려 있으면 그대로 쓴다
 await send(site, '기록 사이트에서 저장한 기억');
 await send(popup, '기록 팝업에서 저장한 기억');
 await popup.waitForTimeout(1500);

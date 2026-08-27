@@ -18,7 +18,7 @@ const live=p=>p.waitForFunction(()=>document.querySelector('#syncState')?.datase
 const page=await ctx.newPage();
 page.on('pageerror',e=>console.log('  ERROR:',e.message));
 await page.goto(base+'/index.html'); await live(page);
-await page.click('#orb');
+if (await page.isVisible('#orb')) await page.click('#orb');   // 이미 열려 있으면 그대로 쓴다
 const send=async t=>{await page.fill('#input',t);await page.press('#input','Enter');await page.waitForTimeout(1400);};
 const lastBubble=()=>page.$$eval('#messages .row.answer .bubble', n=>n.at(-1)?.textContent||'');
 
