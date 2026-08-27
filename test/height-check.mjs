@@ -6,7 +6,6 @@ const out = process.env.SHOT_DIR || '/tmp';
 const failures = [];
 const types={'.html':'text/html','.js':'text/javascript','.css':'text/css','.png':'image/png'};
 const server=http.createServer((req,res)=>{
-  if (req.url.startsWith('/missing-team/')) { res.writeHead(404,{'Content-Type':'text/html'}); return res.end('<!doctype html><title>404 Not Found</title>'); }
   const f=path.join(root,decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/,'')||'index.html');
   if(!f.startsWith(root)||!fs.existsSync(f)||fs.statSync(f).isDirectory()){res.writeHead(404);return res.end('x');}
   res.writeHead(200,{'Content-Type':types[path.extname(f)]||'application/octet-stream'});res.end(fs.readFileSync(f));});
@@ -24,7 +23,6 @@ const seed = Array.from({length:24},(_,i)=>({
 const b=await chromium.launch({executablePath: process.env.PW_CHROME || '/opt/pw-browsers/chromium-1194/chrome-linux/chrome'});
 const ctx=await b.newContext({viewport:{width:1920,height:1080}});
 await ctx.addInitScript(stub);
-await ctx.addInitScript(u => { window.__TEAM_SCHEDULE_URL = u; }, `${base}/missing-team/`);   // 자체 달력 경로로 검사
 await ctx.addInitScript(list => { localStorage.setItem('knowledge-todos', JSON.stringify(list)); }, seed);
 await ctx.route('**gstatic.com/**',r=>r.abort());
 await ctx.route('**google.com/s2/favicons**', r=>r.fulfill({status:200,contentType:'image/svg+xml',body:'<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="64" height="64" fill="#DFD4FA"/></svg>'}));

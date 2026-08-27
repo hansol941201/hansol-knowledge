@@ -5,7 +5,6 @@ const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..')
 const failures = [];
 const types={'.html':'text/html','.js':'text/javascript','.css':'text/css','.png':'image/png'};
 const server=http.createServer((req,res)=>{
-  if(req.url.startsWith('/missing-team/')){res.writeHead(404,{'Content-Type':'text/html'});return res.end('<title>404</title>');}
   const f=path.join(root,decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/,'')||'index.html');
   if(!f.startsWith(root)||!fs.existsSync(f)||fs.statSync(f).isDirectory()){res.writeHead(404);return res.end('x');}
   res.writeHead(200,{'Content-Type':types[path.extname(f)]||'application/octet-stream'});res.end(fs.readFileSync(f));});
@@ -16,7 +15,6 @@ const ok=(n,p,d='')=>{ if(!p) failures.push(n); console.log(`${p?'PASS':'FAIL'} 
 const b=await chromium.launch({executablePath: process.env.PW_CHROME || '/opt/pw-browsers/chromium-1194/chrome-linux/chrome'});
 const ctx=await b.newContext({viewport:{width:1500,height:950}});
 await ctx.addInitScript(stub);
-await ctx.addInitScript(u=>{window.__TEAM_SCHEDULE_URL=u;},`${base}/missing-team/`);
 await ctx.route('**gstatic.com/**',r=>r.abort());
 const page=await ctx.newPage();
 const errors=[]; page.on('pageerror',e=>errors.push(e.message));

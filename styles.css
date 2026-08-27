@@ -98,9 +98,8 @@ svg { display: block; flex: none; }
   .main-scroll.dash-fill #todayPanel { grid-template-rows: auto minmax(0, 1fr); align-content: stretch; }
   .main-scroll.dash-fill #todayPanel .todo-list { min-height: 0; align-content: start; overflow-y: auto; }
   /* 일정: 달력 비율은 그대로 두고, 선택한 날 목록만 카드 안에서 스크롤한다. */
-  .main-scroll.dash-fill #schedulePanel:not(:has(.schedule-embed)) { grid-template-rows: auto auto minmax(0, 1fr); align-content: stretch; }
+  .main-scroll.dash-fill #schedulePanel { grid-template-rows: auto auto minmax(0, 1fr); align-content: stretch; }
   .main-scroll.dash-fill #schedulePanel .cal-day { min-height: 0; align-content: start; overflow-y: auto; }
-  .main-scroll.dash-fill .schedule-embed { min-height: 0; }
 }
 .block { display: grid; gap: 14px; }
 .block-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
@@ -202,9 +201,6 @@ svg { display: block; flex: none; }
 /* ── 일정 (월 달력) ─────────────────────────────────────────── */
 .dash-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: stretch; min-height: 520px; }
 .dash-cols > .today-panel { align-content: start; }
-/* 팀장 일정 사이트는 카드 안에서만 스크롤되게 한다(페이지가 길어지지 않도록). */
-#schedulePanel:has(.schedule-embed) { display: flex; flex-direction: column; }
-.schedule-embed { flex: 1; width: 100%; min-height: 420px; border: 0; border-radius: 12px; background: #fff; }
 .cal-tools { display: flex; align-items: center; gap: 5px; }
 .cal-nav {
   min-width: 26px; height: 26px; padding: 0 7px; border: 1px solid var(--line); border-radius: 8px;
