@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>한솔 지식</title>
-  <link rel="stylesheet" href="styles.css?v=30" />
+  <link rel="stylesheet" href="styles.css?v=31" />
 </head>
 <body>
   <div class="workspace">
@@ -142,6 +142,14 @@
       <footer><button id="scheduleDelete" type="button" class="danger-text">삭제</button><button id="scheduleCancel" type="button">취소</button><button type="submit">저장</button></footer>
     </form>
   </div>
+  <div id="todoModal" class="modal hidden" role="dialog" aria-modal="true" aria-label="할 일 수정">
+    <form id="todoForm" class="edit-box">
+      <header><strong>할 일 수정</strong><button id="todoModalClose" type="button">×</button></header>
+      <label>내용<input id="todoEditText" placeholder="예) 천민호 부사장님 택배 확인" required /></label>
+      <label>날짜<input id="todoEditDate" type="date" /></label>
+      <footer><button id="todoEditCancel" type="button">취소</button><button type="submit">저장</button></footer>
+    </form>
+  </div>
   <div id="detailModal" class="modal hidden" role="dialog" aria-modal="true" aria-label="상세 보기">
     <section class="edit-box detail-box">
       <header><strong id="detailKind">상세</strong><button id="detailClose" type="button">×</button></header>
@@ -205,6 +213,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="firebase-config.js?v=2"></script>
   <script src="icons.js?v=2"></script>
-  <script src="app.js?v=62"></script>
+  <script src="app.js?v=63"></script>
 </body>
 </html>

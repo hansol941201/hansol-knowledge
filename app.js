@@ -191,7 +191,8 @@ const ICONS = {
   more: 'M6 12h.01M12 12h.01M18 12h.01',
   star: 'M12 4l2.3 5 5.7.6-4.3 3.9 1.2 5.5-4.9-2.8-4.9 2.8 1.2-5.5L4 9.6 9.7 9z',
   link: 'M10 13a5 5 0 007 0l3-3a5 5 0 00-7-7l-2 2M14 11a5 5 0 00-7 0l-3 3a5 5 0 007 7l2-2',
-  clock: 'M12 4a8 8 0 100 16 8 8 0 000-16zM12 8v4l3 2'
+  clock: 'M12 4a8 8 0 100 16 8 8 0 000-16zM12 8v4l3 2',
+  pencil: 'M16.5 4.5l3 3L8 19H5v-3zM14.5 6.5l3 3'
 };
 function icon(name, size = 16) {
   const path = ICONS[name] || ICONS.grid;
@@ -391,7 +392,7 @@ function renderLibrary() {
   $('#pageGrid').querySelectorAll('[data-todo-result]').forEach(card => {
     const todo = todos.find(x => x.id === card.dataset.todoResult);
     card.querySelector('[data-todo-toggle]').onclick = () => {
-      todo.done = !todo.done; touch(todo); saveTodos(); renderTodos(); renderLibrary();
+      setTodoDone(todo, !todo.done); saveTodos(); renderTodos(); renderLibrary();
     };
   });
   $('#pageGrid').querySelectorAll('[data-memory-result]').forEach(card => {
@@ -410,6 +411,29 @@ function todayKey() {
 }
 const isTodoEntry = (item) => Boolean(item) && (!item.type || item.type === 'todo');
 const TODO_PREVIEW = 6;
+let todoTab = 'active';            // 'active' = 할 일, 'done' = 완료
+let todoUndo = null;               // 실행 취소용 직전 상태
+
+// 완료 처리는 지우는 게 아니라 '완료' 목록으로 옮기는 것이다(원본은 그대로 남는다).
+function setTodoDone(todo, done) {
+  todo.done = Boolean(done);
+  if (todo.done) todo.doneAt = nowIso();
+  else delete todo.doneAt;
+  touch(todo);
+}
+function todoDoneLabel(todo) {
+  const when = todo.doneAt || todo.updatedAt;
+  return when ? savedLabel({ createdAt: when }) : '완료일 확인';
+}
+function activeTodos() {
+  return alive(todos).filter(isTodoEntry).filter(todo => !todo.done)
+    .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')) || updatedTime(b) - updatedTime(a));
+}
+function doneTodos() {
+  return alive(todos).filter(isTodoEntry).filter(todo => todo.done)
+    .sort((a, b) => String(b.doneAt || b.updatedAt || '').localeCompare(String(a.doneAt || a.updatedAt || '')));
+}
+
 function renderTodos() {
   const panel = $('#todayPanel');
   const onTodoView = pageCategory === '할 일';
@@ -417,46 +441,126 @@ function renderTodos() {
   // 검색 중이거나 다른 화면이면 상단 할 일 카드는 접어 둔다.
   panel.classList.toggle('hidden', searching || !(pageCategory === '대시보드' || onTodoView));
 
-  const all = alive(todos).filter(isTodoEntry).slice().sort((a, b) => {
-    if (a.done !== b.done) return a.done ? 1 : -1;
-    return String(b.date || '').localeCompare(String(a.date || '')) || updatedTime(b) - updatedTime(a);
-  });
+  const active = activeTodos();
+  const done = doneTodos();
   const expanded = showAllTodos || onTodoView;
-  const list = expanded ? all : all.slice(0, TODO_PREVIEW);
-  const remain = all.filter(todo => !todo.done).length;
+  const list = todoTab === 'done' ? done : (expanded ? active : active.slice(0, TODO_PREVIEW));
 
   panel.innerHTML = `
     <div class="block-head">
-      <div><h2>오늘의 할 일</h2><p>${remain}개 남음 · 전체 ${all.length}개</p></div>
-      ${all.length > TODO_PREVIEW && !onTodoView ? `<button type="button" class="ghost-btn" id="todoToggle">${expanded ? '접기' : '전체 보기'}</button>` : ''}
+      <div>
+        <h2>오늘의 할 일</h2>
+        <div class="todo-tabs">
+          <button type="button" class="todo-tab ${todoTab === 'active' ? 'active' : ''}" data-todo-tab="active">할 일 <span>${active.length}</span></button>
+          <button type="button" class="todo-tab ${todoTab === 'done' ? 'active' : ''}" data-todo-tab="done">완료 <span>${done.length}</span></button>
+        </div>
+      </div>
+      ${todoTab === 'done'
+        ? (done.length ? `<button type="button" class="ghost-btn" id="todoClearDone">완료 목록 비우기</button>` : '')
+        : (active.length > TODO_PREVIEW && !onTodoView ? `<button type="button" class="ghost-btn" id="todoToggle">${expanded ? '접기' : '전체 보기'}</button>` : '')}
     </div>
-    <div class="todo-list">${list.length ? list.map(todo => `
-      <label class="todo-item ${todo.done ? 'done' : ''}" data-todo-id="${todo.id}">
-        <input type="checkbox" ${todo.done ? 'checked' : ''}>
+    <div class="todo-list">${list.length ? list.map(todo => todoTab === 'done' ? `
+      <div class="todo-item done" data-todo-id="${todo.id}">
+        <span class="todo-check done">${icon('check', 13)}</span>
+        <span class="todo-text">${escapeHtml(todo.text)}</span>
+        <time>${escapeHtml(todo.date || '날짜 확인')}</time>
+        <time class="todo-doneat">완료 ${escapeHtml(todoDoneLabel(todo))}</time>
+        <button type="button" class="todo-mini" data-todo-restore title="복구">복구</button>
+        <button type="button" class="todo-mini danger" data-todo-purge title="영구 삭제">삭제</button>
+      </div>` : `
+      <label class="todo-item" data-todo-id="${todo.id}">
+        <input type="checkbox">
         <span class="todo-check">${icon('check', 13)}</span>
         <span class="todo-text">${escapeHtml(todo.text)}</span>
         <time>${escapeHtml(todo.date || '날짜 확인')}</time>
-        <em class="todo-state ${todo.done ? 'done' : ''}">${todo.done ? '완료' : '진행중'}</em>
-        <button type="button" class="todo-remove" title="삭제">${icon('more', 14)}</button>
-      </label>`).join('') : '<div class="todo-empty">지식창에 “할일 내용”을 입력해보세요.</div>'}</div>`;
+        <button type="button" class="todo-mini" data-todo-edit title="수정">${icon('pencil', 13)}</button>
+        <button type="button" class="todo-remove" data-todo-delete title="삭제">${icon('more', 14)}</button>
+      </label>`).join('') : `<div class="todo-empty">${todoTab === 'done' ? '완료한 할 일이 없습니다.' : '지식창에 “할일 내용”을 입력해보세요.'}</div>`}</div>`;
 
+  panel.querySelectorAll('[data-todo-tab]').forEach(button => {
+    button.onclick = () => { todoTab = button.dataset.todoTab; renderTodos(); };
+  });
   const toggle = $('#todoToggle');
   if (toggle) toggle.onclick = () => { showAllTodos = !showAllTodos; renderTodos(); };
+  const clearDone = $('#todoClearDone');
+  if (clearDone) clearDone.onclick = () => {
+    const rows = doneTodos();
+    if (!rows.length || !confirm(`완료한 할 일 ${rows.length}개를 영구 삭제할까요? 되돌릴 수 없습니다.`)) return;
+    rows.forEach(todo => { todo.deleted = true; touch(todo); });
+    saveTodos(); renderTodos(); renderLibrary();
+    showToast('완료 목록을 비웠습니다');
+  };
+
   panel.querySelectorAll('[data-todo-id]').forEach(row => {
     const todo = todos.find(x => x.id === row.dataset.todoId);
-    row.querySelector('input').onchange = event => {
-      todo.done = event.target.checked; touch(todo);
-      row.classList.toggle('done', todo.done);
-      row.classList.add('just-changed');
-      saveTodos(); setTimeout(() => { renderTodos(); renderLibrary(); }, 220);
-    };
-    row.querySelector('.todo-remove').onclick = event => {
+    const check = row.querySelector('input');
+    if (check) check.onchange = () => completeTodo(todo, row);
+    const edit = row.querySelector('[data-todo-edit]');
+    if (edit) edit.onclick = event => { event.preventDefault(); openTodoModal(todo); };
+    const remove = row.querySelector('[data-todo-delete]');
+    if (remove) remove.onclick = event => {
       event.preventDefault();
       todo.deleted = true; touch(todo);
       saveTodos(); renderTodos(); renderLibrary();
     };
+    const restore = row.querySelector('[data-todo-restore]');
+    if (restore) restore.onclick = () => {
+      setTodoDone(todo, false);
+      saveTodos(); renderTodos(); renderLibrary();
+      showToast('할 일로 되돌렸습니다');
+    };
+    const purge = row.querySelector('[data-todo-purge]');
+    if (purge) purge.onclick = () => {
+      if (!confirm(`「${todo.text}」 을(를) 영구 삭제할까요? 되돌릴 수 없습니다.`)) return;
+      todo.deleted = true; touch(todo);
+      saveTodos(); renderTodos(); renderLibrary();
+      showToast('영구 삭제했습니다');
+    };
   });
 }
+
+// 체크하면 목록에서 바로 빠지고, 잠시 동안 되돌릴 수 있다.
+function completeTodo(todo, row) {
+  if (!todo) return;
+  setTodoDone(todo, true);
+  if (row) row.classList.add('just-changed');
+  saveTodos();
+  setTimeout(() => { renderTodos(); renderLibrary(); }, 200);
+  todoUndo = { id: todo.id };
+  showUndoToast('완료로 옮겼습니다', () => {
+    const target = todos.find(x => x.id === todoUndo.id);
+    if (!target) return;
+    setTodoDone(target, false);
+    saveTodos(); renderTodos(); renderLibrary();
+    showToast('되돌렸습니다');
+  });
+}
+
+// ── 할 일 수정 ────────────────────────────────────────────────
+let editingTodoId = null;
+function openTodoModal(todo) {
+  if (!todo) return;
+  editingTodoId = todo.id;
+  $('#todoEditText').value = todo.text || '';
+  $('#todoEditDate').value = todo.date || '';
+  $('#todoModal').classList.remove('hidden');
+  setTimeout(() => $('#todoEditText').focus(), 50);
+}
+function closeTodoModal() { $('#todoModal').classList.add('hidden'); editingTodoId = null; }
+$('#todoModalClose').addEventListener('click', closeTodoModal);
+$('#todoEditCancel').addEventListener('click', closeTodoModal);
+$('#todoModal').addEventListener('click', event => { if (event.target.id === 'todoModal') closeTodoModal(); });
+$('#todoForm').addEventListener('submit', event => {
+  event.preventDefault();
+  const todo = todos.find(x => x.id === editingTodoId);
+  const text = $('#todoEditText').value.trim();
+  if (!todo || !text) return;
+  todo.text = text;
+  todo.date = $('#todoEditDate').value || todo.date;
+  touch(todo);
+  saveTodos(); renderTodos(); renderLibrary(); closeTodoModal();
+  showToast('할 일 수정됨');
+});
 
 function renderMemories() {
   const query = normalize($('#memorySearch').value || '');
@@ -1378,6 +1482,7 @@ $('#siteShortcut').addEventListener('click', () => {
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
   if (openMenu) closeRowMenu();
+  else if (!$('#todoModal').classList.contains('hidden')) closeTodoModal();
   else if (!$('#scheduleModal').classList.contains('hidden')) closeScheduleModal();
   else if (!$('#detailModal').classList.contains('hidden')) closeDetail();
   else if (!$('#shortcutModal').classList.contains('hidden')) closeShortcutModal();
@@ -1776,8 +1881,23 @@ function removeItem(item, row = null) {
   save(); if (row) row.remove(); renderLibrary(); showToast('삭제됨');
 }
 function showToast(text) {
+  clearTimeout(showToast.timer);
+  toast.classList.remove('with-action');
   toast.textContent = text; toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 900);
+  showToast.timer = setTimeout(() => toast.classList.remove('show'), 900);
+}
+// 실수로 눌렀을 때 되돌릴 수 있게 4초 동안 버튼이 달린 안내를 띄운다.
+function showUndoToast(text, onUndo) {
+  clearTimeout(showToast.timer);
+  toast.innerHTML = `<span></span><button type="button">실행 취소</button>`;
+  toast.querySelector('span').textContent = text;
+  toast.querySelector('button').onclick = () => {
+    clearTimeout(showToast.timer);
+    toast.classList.remove('show', 'with-action');
+    onUndo();
+  };
+  toast.classList.add('show', 'with-action');
+  showToast.timer = setTimeout(() => toast.classList.remove('show', 'with-action'), 4000);
 }
 
 $('#importBtn').addEventListener('click', () => {

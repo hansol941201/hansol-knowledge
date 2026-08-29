@@ -192,10 +192,27 @@ svg { display: block; flex: none; }
 .todo-text { flex: 1; min-width: 0; font-size: 15.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .todo-item.done .todo-text { color: var(--ink-3); text-decoration: line-through; }
 .todo-item time { flex: none; color: var(--ink-3); font-size: 13px; font-variant-numeric: tabular-nums; }
-.todo-item .todo-state { flex: none; padding: 3px 8px; border-radius: 999px; background: var(--violet-soft); color: var(--violet); font-size: 12.5px; font-style: normal; font-weight: 600; }
-.todo-item .todo-state.done { background: #EEF1F0; color: #79857F; }
+.todo-doneat { flex: none; color: var(--ink-3); font-size: 12px; }
+.todo-mini {
+  flex: none; display: inline-flex; align-items: center; gap: 3px; padding: 3px 7px; border-radius: 7px;
+  border: 1px solid var(--line); background: var(--card); color: var(--ink-2); font-size: 12px; line-height: 1;
+  opacity: 0; transition: opacity var(--ease), background var(--ease), border-color var(--ease), color var(--ease);
+}
+.todo-mini:hover { background: var(--violet-soft); border-color: var(--violet-line); color: var(--violet); }
+.todo-mini.danger:hover { background: #FCF2F2; border-color: #F0D9D9; color: #A94545; }
+.todo-item:hover .todo-mini, .todo-item:focus-within .todo-mini { opacity: 1; }
 .todo-remove { flex: none; padding: 2px; border-radius: 6px; color: var(--ink-3); opacity: 0; transition: opacity var(--ease); }
-.todo-item:hover .todo-remove { opacity: 1; }
+.todo-item:hover .todo-remove, .todo-item:focus-within .todo-remove { opacity: 1; }
+/* 할 일 / 완료 탭 */
+.todo-tabs { display: flex; gap: 4px; margin-top: 6px; }
+.todo-tab {
+  padding: 4px 11px; border-radius: 999px; border: 1px solid var(--line); background: var(--card);
+  color: var(--ink-2); font-size: 12.5px; font-weight: 600; transition: background var(--ease), color var(--ease), border-color var(--ease);
+}
+.todo-tab span { margin-left: 4px; color: var(--ink-3); font-weight: 600; }
+.todo-tab:hover { background: var(--line-soft); }
+.todo-tab.active { background: var(--violet); border-color: var(--violet); color: #fff; }
+.todo-tab.active span { color: rgba(255, 255, 255, .78); }
 .todo-empty { padding: 6px 2px; color: var(--ink-3); font-size: 14.5px; }
 
 /* ── 일정 (월 달력) ─────────────────────────────────────────── */
@@ -362,6 +379,12 @@ mark { padding: 0 1px; border-radius: 3px; background: #FFF3A0; color: #000; }
   .dash-cols { grid-template-columns: minmax(0, 1fr); }   /* 1열에서는 화면 높이를 채우지 않고 내용만큼만 */
 }
 @media (max-width: 860px) {
+  /* 좁은 화면에서는 수정·삭제 버튼을 항상 보이게 두고 줄이 겹치지 않게 한다 */
+  .todo-item { flex-wrap: wrap; row-gap: 4px; }
+  .todo-item .todo-text { flex: 1 1 100%; order: 1; white-space: normal; }
+  .todo-item time, .todo-doneat { order: 2; }
+  .todo-mini, .todo-remove { order: 3; opacity: 1; margin-left: auto; }
+  .todo-mini + .todo-mini, .todo-mini + .todo-remove { margin-left: 0; }
   .workspace { grid-template-columns: 1fr; }
   .sidebar { position: static; height: auto; flex-direction: row; flex-wrap: wrap; gap: 8px; align-items: center; padding: 12px 16px; border-right: 0; border-bottom: 1px solid var(--line); }
   .side-brand { padding: 0 8px 0 0; }
@@ -468,8 +491,11 @@ html:has(> .overlay-mode) { overflow: hidden; }
 .composer input::placeholder { color: #aaa3ad; }
 .composer button { width: 29px; height: 29px; border-radius: 9px; color: white; background: #9468ed; font-size: 12px; }
 
-.toast { position: fixed; right: 28px; bottom: 30px; opacity: 0; padding: 7px 10px; border-radius: 9px; color: white; background: #28242c; font-size: 13px; pointer-events: none; transition: opacity .18s; }
+.toast { position: fixed; right: 28px; bottom: 30px; z-index: 60; opacity: 0; padding: 7px 10px; border-radius: 9px; color: white; background: #28242c; font-size: 13px; pointer-events: none; transition: opacity .18s; }
 .toast.show { opacity: 1; }
+.toast.with-action { display: flex; align-items: center; gap: 12px; padding: 8px 10px 8px 13px; pointer-events: auto; }
+.toast.with-action button { padding: 4px 10px; border-radius: 7px; background: rgba(255, 255, 255, .16); color: #fff; font-size: 12.5px; font-weight: 600; }
+.toast.with-action button:hover { background: rgba(255, 255, 255, .28); }
 .modal { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; padding: 20px; background: rgba(30,26,34,.28); backdrop-filter: blur(3px); }
 .modal.hidden { display: none; }
 .edit-box { width: min(390px, 92vw); padding: 18px; border: 1px solid #e4dfe7; border-radius: 17px; background: #fff; box-shadow: 0 25px 80px rgba(35,28,42,.24); }

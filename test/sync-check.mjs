@@ -63,7 +63,7 @@ const todoPanel = await site.textContent('#todayPanel');
 check('웹사이트(새로고침 없음): 할 일 목록에 표시', todoPanel.includes(TODO_TEXT));
 const todayKey = new Date().toISOString().slice(0, 10);
 check('웹사이트: 할 일에 날짜 표시', todoPanel.includes(todayKey), todayKey);
-check('웹사이트: 할 일에 완료 여부 표시', todoPanel.includes('진행중'));
+check('웹사이트: 할 일/완료 탭 표시', todoPanel.includes('할 일') && todoPanel.includes('완료'));
 
 await site.click('#memoryToggle');
 await site.waitForFunction(t => document.querySelector('#memoryPanel')?.textContent.includes(t), MEMO_TEXT, { timeout: 10000 }).catch(() => {});
@@ -269,8 +269,11 @@ check('복구가 무한 쓰기 루프로 번지지 않음', after - before <= 1,
 // 브라우저를 닫았다 열어도 유지되는지
 await popup.close();
 const reopened = await open('');
+// 앞에서 완료 처리했으므로 '완료' 탭에 남아 있어야 한다.
+await reopened.click('[data-todo-tab="done"]');
+await reopened.waitForTimeout(300);
 const persisted = await reopened.textContent('#todayPanel');
-check('재접속: 저장한 할 일 유지', persisted.includes(TODO_TEXT));
+check('재접속: 저장한 할 일 유지(완료 탭)', persisted.includes(TODO_TEXT), persisted.replace(/\s+/g,' ').slice(0,120));
 await reopened.click('#memoryToggle');
 await reopened.waitForTimeout(300);
 check('재접속: 저장한 기억 유지', (await reopened.textContent('#memoryPanel')).includes(MEMO_TEXT));
