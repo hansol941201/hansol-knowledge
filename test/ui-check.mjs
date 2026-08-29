@@ -88,8 +88,8 @@ const sizes = await page.evaluate(()=>{
            time:parseFloat(time.fontSize), body:parseFloat(body.fontSize) };
 });
 ok('6. 분류(할 일/기억)가 시간보다 큼', sizes.kind > sizes.time, JSON.stringify(sizes));
-ok('6. 분류 15~16px · semibold', sizes.kind>=15 && sizes.kind<=16 && sizes.kindWeight>=500, `${sizes.kind}px / ${sizes.kindWeight}`);
-ok('6. 시간 12~13px', sizes.time>=12 && sizes.time<=13, `${sizes.time}px`);
+ok('6. 분류 13~14px · semibold', sizes.kind>=13 && sizes.kind<=14 && sizes.kindWeight>=500, `${sizes.kind}px / ${sizes.kindWeight}`);
+ok('6. 시간 10~11px', sizes.time>=10 && sizes.time<=11, `${sizes.time}px`);
 ok('6. 저장 내용이 가장 잘 읽힘', sizes.body>=13 && sizes.body>=sizes.kind-1, `${sizes.body}px`);
 
 await b.close(); server.close();

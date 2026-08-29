@@ -31,9 +31,60 @@ ok('메뉴는 한 줄', await page.evaluate(()=>{
   return tops.size===1; }));
 ok('기억 저장소가 메뉴 마지막', await page.isVisible('#sideNav #memoryToggle'));
 ok('대시보드가 기본 선택', (await page.textContent('.top-item.active')).includes('대시보드'));
-ok('선택 메뉴는 보라 글자 + 아래 선', await page.evaluate(()=>{
+ok('선택 메뉴는 남색 글자 + 3px 아래 선(배경 없음)', await page.evaluate(()=>{
   const c=getComputedStyle(document.querySelector('.top-item.active'));
-  return c.color==='rgb(109, 74, 224)' && c.borderBottomColor==='rgb(109, 74, 224)' && c.backgroundColor==='rgba(0, 0, 0, 0)'; }));
+  return c.color==='rgb(31, 58, 95)' && c.borderBottomColor==='rgb(31, 58, 95)'
+    && c.borderBottomWidth==='3px' && c.backgroundColor==='rgba(0, 0, 0, 0)' && c.borderRadius==='0px'; }));
+ok('로고·별 아이콘 제거', (await page.$$('.top-brand')).length===0 && (await page.$$('.topnav .side-mark')).length===0
+  && !(await page.textContent('.topnav')).includes('한솔 지식'));
+ok('헤더 높이 64px · 양옆 24px', await page.evaluate(()=>{
+  const c=getComputedStyle(document.querySelector('.topnav'));
+  return c.height==='64px' && parseFloat(c.paddingLeft)>=24 && parseFloat(c.paddingRight)>=24; }));
+ok('메뉴가 화면 가운데', await page.evaluate(()=>{
+  const items=[...document.querySelectorAll('#sideNav .top-item')];
+  const left=items[0].getBoundingClientRect().left, right=items.at(-1).getBoundingClientRect().right;
+  return Math.abs((left + right) / 2 - window.innerWidth / 2) < 6; }));
+ok('메뉴 글자 15~16px · 두께 500 이상 · 줄바꿈 없음', await page.evaluate(()=>{
+  const items=[...document.querySelectorAll('#sideNav .top-item')];
+  return items.every(el=>{
+    const c=getComputedStyle(el);
+    return parseFloat(c.fontSize)>=15 && parseFloat(c.fontSize)<=16 && Number(c.fontWeight)>=500
+      && c.whiteSpace==='nowrap' && parseFloat(c.paddingLeft)>=14 && parseFloat(c.paddingLeft)<=18
+      && el.getBoundingClientRect().height <= 64; }); }));
+ok('메뉴 사이 간격 4px 이상', await page.evaluate(()=>{
+  const items=[...document.querySelectorAll('#sideNav .top-item')];
+  for(let i=1;i<items.length;i+=1){
+    if(items[i].getBoundingClientRect().left - items[i-1].getBoundingClientRect().right < 3.5) return false; }
+  return true; }));
+// 좁은 화면 — 햄버거 없이 메뉴 줄만 가로 스크롤, 선택 메뉴는 보이는 위치로
+await page.setViewportSize({width:390,height:844}); await page.waitForTimeout(400);
+ok('좁은 화면에서 메뉴 줄만 가로 스크롤', await page.evaluate(()=>{
+  const nav=document.querySelector('#sideNav');
+  const c=getComputedStyle(nav);
+  return c.overflowX==='auto' && nav.scrollWidth > nav.clientWidth
+    && Math.round(document.documentElement.scrollWidth - window.innerWidth) <= 1; }));
+ok('가로 스크롤바 숨김', await page.evaluate(()=>{
+  const nav=document.querySelector('#sideNav');
+  return nav.offsetHeight - nav.clientHeight <= 1; }));
+ok('좁은 화면에서도 세로 사이드바·햄버거 없음', (await page.$$('.sidebar')).length===0);
+await page.evaluate(()=>[...document.querySelectorAll('#sideNav .top-item')].find(el=>el.textContent==='업무지식').click());
+await page.waitForTimeout(400);
+ok('선택 메뉴가 보이는 위치로 이동', await page.evaluate(()=>{
+  const nav=document.querySelector('#sideNav');
+  const a=nav.querySelector('.top-item.active');
+  const nb=nav.getBoundingClientRect(), ab=a.getBoundingClientRect();
+  return ab.left >= nb.left - 1 && ab.right <= nb.right + 1; }));
+ok('긴 메뉴도 줄바꿈 없음', await page.evaluate(()=>[...document.querySelectorAll('#sideNav .top-item')]
+  .every(el=>el.getBoundingClientRect().height <= 64)));
+await page.evaluate(()=>document.querySelector('#sideNav .top-item[data-nav="대시보드"]').click());
+await page.waitForTimeout(300);
+await page.setViewportSize({width:1500,height:950}); await page.waitForTimeout(400);
+
+ok('보라색 미사용', await page.evaluate(()=>{
+  const purple=['rgb(109, 74, 224)','rgb(242, 238, 253)','rgb(223, 212, 250)'];
+  return [...document.querySelectorAll('.topnav, .topnav *')].every(el=>{
+    const c=getComputedStyle(el);
+    return !purple.includes(c.color) && !purple.includes(c.backgroundColor) && !purple.includes(c.borderBottomColor); }); }));
 ok('자주 가는 사이트 표시', await page.isVisible('#shortcutSection'));
 ok('오늘의 할 일 표시', await page.isVisible('#todayPanel'));
 ok('이모지 없음', !/[\u{1F300}-\u{1FAFF}\u{2190}-\u{21FF}\u{2600}-\u{27BF}]/u.test(await page.textContent('.workspace')));

@@ -280,6 +280,12 @@ function renderSideNav() {
     button.onclick = () => goToView(button.dataset.nav);
   });
   $('#memoryToggle').onclick = openMemoryLibrary;
+  // 좁은 화면에서 선택한 메뉴가 가려져 있으면 보이는 위치까지 메뉴 줄만 움직인다(페이지는 그대로).
+  const nav = $('#sideNav');
+  const active = nav.querySelector('.top-item.active');
+  if (active && nav.scrollWidth > nav.clientWidth) {
+    nav.scrollLeft = Math.max(0, active.offsetLeft - (nav.clientWidth - active.offsetWidth) / 2);
+  }
 }
 
 function renderLibrary() {
