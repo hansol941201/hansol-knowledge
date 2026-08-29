@@ -98,8 +98,8 @@ svg { display: block; flex: none; }
   .main-scroll.dash-fill #todayPanel { grid-template-rows: auto minmax(0, 1fr); align-content: stretch; }
   .main-scroll.dash-fill #todayPanel .todo-list { min-height: 0; align-content: start; overflow-y: auto; }
   /* 일정: 달력 비율은 그대로 두고, 선택한 날 목록만 카드 안에서 스크롤한다. */
-  .main-scroll.dash-fill #schedulePanel { grid-template-rows: auto auto minmax(0, 1fr); align-content: stretch; }
-  .main-scroll.dash-fill #schedulePanel .cal-day { min-height: 0; align-content: start; overflow-y: auto; }
+  .main-scroll.dash-fill #schedulePanel { grid-template-rows: auto minmax(0, 1fr); align-content: stretch; }
+  .main-scroll.dash-fill #schedulePanel .schedule-list { min-height: 0; align-content: start; overflow-y: auto; }
 }
 .block { display: grid; gap: 14px; }
 .block-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
@@ -203,27 +203,16 @@ svg { display: block; flex: none; }
 .dash-cols > .today-panel { align-content: start; }
 .cal-tools { display: flex; align-items: center; gap: 5px; }
 .cal-nav {
-  min-width: 26px; height: 26px; padding: 0 7px; border: 1px solid var(--line); border-radius: 8px;
-  color: var(--ink-2); font-size: 14px; line-height: 1; transition: background var(--ease), border-color var(--ease);
+  min-width: 26px; height: 26px; padding: 0 9px; border: 1px solid var(--line); border-radius: 8px;
+  color: var(--ink-2); font-size: 13px; line-height: 1; transition: background var(--ease), border-color var(--ease);
 }
 .cal-nav:hover { background: var(--line-soft); border-color: var(--violet-line); }
-.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
-.cal-week { padding: 4px 0 6px; color: var(--ink-3); font-size: 13px; font-weight: 600; text-align: center; }
-.cal-week.sun { color: #C07A7A; }
-.cal-cell {
-  position: relative; display: grid; place-items: center; height: 34px; border-radius: 9px;
-  color: var(--ink-2); font-size: 14.5px; transition: background var(--ease), color var(--ease);
-}
-.cal-cell.empty { pointer-events: none; }
-.cal-cell:not(.empty):hover { background: var(--line-soft); }
-.cal-cell.has { color: var(--ink); font-weight: 600; }
-.cal-cell.today { color: var(--violet); font-weight: 700; }
-.cal-cell.selected { background: var(--violet-soft); color: var(--violet); font-weight: 700; }
-.cal-dot { position: absolute; bottom: 5px; width: 4px; height: 4px; border-radius: 50%; background: var(--violet); }
-.cal-cell.selected .cal-dot { background: var(--violet); }
-.cal-day { margin-top: 14px; padding-top: 13px; border-top: 1px solid var(--line-soft); display: grid; gap: 2px; }
-.cal-day-head { display: flex; align-items: center; gap: 7px; margin-bottom: 5px; }
-.cal-day-head b { font-size: 14.5px; }
+/* 일정 목록 */
+.schedule-list { display: grid; gap: 14px; align-content: start; }
+.schedule-group { display: grid; gap: 2px; }
+.schedule-group-head { display: flex; align-items: center; gap: 7px; margin-bottom: 3px; padding-bottom: 5px; border-bottom: 1px solid var(--line-soft); }
+.schedule-group-head b { font-size: 14.5px; }
+.schedule-group-count { margin-left: auto; color: var(--ink-3); font-size: 12.5px; }
 .schedule-row {
   display: flex; align-items: center; gap: 11px; padding: 8px 9px; border-radius: var(--radius-sm);
   transition: background var(--ease);

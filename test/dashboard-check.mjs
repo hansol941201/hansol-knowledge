@@ -31,7 +31,7 @@ ok('바로가기 표시', await page.isVisible('#shortcutGrid'));
 ok('바로가기 제목·설명 없음', !(await page.textContent('.main-scroll')).includes('자주 사용하는 업무 사이트'));
 ok('오늘의 할 일 표시', await page.isVisible('#todayPanel'));
 ok('일정 표시', await page.isVisible('#schedulePanel'));
-await page.waitForSelector('.cal-grid', { timeout: 8000 });
+await page.waitForSelector('.schedule-list', { timeout: 8000 });
 ok('모아 보기 숨김', !(await page.isVisible('#knowledgeBlock')));
 ok('카테고리 버튼 숨김', !(await page.isVisible('#pageCategories')));
 ok('AI 인사이트 제거', (await page.$$('.ai-insight')).length===0 && !(await page.content()).includes('AI 인사이트'));
@@ -43,7 +43,7 @@ const cols = await page.evaluate(()=>{
 ok('2열 · 폭 동일', cols.sameRow && Math.abs(cols.todoW-cols.schedW)<2, JSON.stringify(cols));
 ok('카드 간격 16~20px', cols.gap>=16 && cols.gap<=20, `${cols.gap}px`);
 
-// 일정 추가 → 달력 표시
+// 일정 추가 → 목록 표시
 const iso = (offset) => { const d=new Date(); d.setDate(d.getDate()+offset); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
 const add = async (date, title, time='') => {
   await page.click('#scheduleAdd'); await page.waitForTimeout(200);
@@ -51,32 +51,35 @@ const add = async (date, title, time='') => {
   if (time) await page.fill('#scheduleTime', time);
   await page.click('#scheduleForm button[type="submit"]'); await page.waitForTimeout(350);
 };
-ok('달력 격자 표시', (await page.$$eval('.cal-week', n=>n.map(x=>x.textContent))).join('')==='일월화수목금토');
 await add(iso(0), '1차 미팅', '14:00');
 await add(iso(1), '시공사 방문');
 await add(iso(10), '공법설명회');
-await page.click('#calToday'); await page.waitForTimeout(250);   // 저장하면 그 달로 이동하므로 이번 달로 되돌린다
-ok('일정 있는 날에 점 표시', (await page.$$('.cal-cell.has .cal-dot')).length>=2);
-ok('오늘 칸 강조', await page.isVisible('.cal-cell.today'));
-await page.click(`.cal-cell[data-day="${iso(0)}"]`); await page.waitForTimeout(250);
-ok('오늘 선택 시 그 날 일정 표시', (await page.textContent('.cal-day')).includes('1차 미팅'));
-ok('시간 표시', (await page.textContent('.cal-day')).includes('14:00'));
-ok('오늘 배지', (await page.textContent('.cal-day-head')).includes('오늘'));
-await page.click(`.cal-cell[data-day="${iso(1)}"]`); await page.waitForTimeout(250);
-ok('다른 날 선택', (await page.textContent('.cal-day')).includes('시공사 방문'));
-ok('내일 배지', (await page.textContent('.cal-day-head')).includes('내일'));
-ok('시간 없으면 종일', (await page.textContent('.cal-day')).includes('종일'));
-await page.click('#calNext'); await page.waitForTimeout(250);
-const shifted = await page.textContent('#schedulePanel .block-head p');
-await page.click('#calToday'); await page.waitForTimeout(250);
-ok('달 이동 · 오늘로 복귀', shifted !== (await page.textContent('#schedulePanel .block-head p')), shifted);
+ok('목록으로 표시', (await page.$$('.schedule-list .schedule-group')).length>=3 && (await page.$$('.cal-grid')).length===0);
+ok('날짜순 정렬', await page.$$eval('.schedule-group-head b', n=>{
+  const t=n.map(x=>x.textContent); return JSON.stringify(t)===JSON.stringify([...t].sort((a,b)=>{
+    const p=v=>v.match(/(\d+)월 (\d+)일/).slice(1,3).map(Number); const [am,ad]=p(a),[bm,bd]=p(b);
+    return am-bm || ad-bd; })); }));
+const listText = () => page.textContent('.schedule-list');
+ok('오늘 일정과 시간 표시', (await listText()).includes('1차 미팅') && (await listText()).includes('14:00'));
+ok('오늘 배지', (await page.textContent('.schedule-group-head')).includes('오늘'));
+ok('내일 배지', (await page.$$eval('.schedule-group-head', n=>n.map(x=>x.textContent).join('|'))).includes('내일'));
+ok('시간 없으면 종일', (await listText()).includes('종일'));
+ok('앞으로의 일정 건수 표시', (await page.textContent('#schedulePanel .block-head p')).includes('다가오는 일정 3건'));
+
+// 지난 일정은 따로 본다
+await add(iso(-3), '지난 회의');
+ok('지난 날짜로 저장하면 지난 일정 목록을 보여 줌', (await listText()).includes('지난 회의'));
+await page.click('#schedulePast'); await page.waitForTimeout(250);
+ok('다가오는 일정으로 전환 · 지난 일정 숨김', (await listText()).includes('1차 미팅') && !(await listText()).includes('지난 회의'));
+await page.click('#schedulePast'); await page.waitForTimeout(250);
+ok('지난 일정 다시 보기', (await listText()).includes('지난 회의'));
+await page.click('#schedulePast'); await page.waitForTimeout(250);
 
 // 저장 확인
 ok('localStorage 에 저장', await page.evaluate(()=>JSON.parse(localStorage.getItem('knowledge-schedule')||'[]').some(x=>x.title==='1차 미팅')));
 ok('클라우드에도 저장', await page.evaluate(async()=>{const d=(await window.HANSOL_FIRESTORE.doc('shared/state').get()).data()||{};return (d.schedule||[]).some(x=>x.title==='1차 미팅');}));
 
 // 수정 · 삭제
-await page.click(`.cal-cell[data-day="${iso(0)}"]`); await page.waitForTimeout(200);
 await page.click('.schedule-row .schedule-more'); await page.waitForTimeout(200);
 ok('⋯ 메뉴에 수정·삭제', (await page.$$eval('.row-menu button', n=>n.map(x=>x.textContent))).join('/')==='수정/삭제');
 await page.click('.row-menu button:has-text("수정")'); await page.waitForTimeout(200);
@@ -94,8 +97,7 @@ await page.screenshot({path:out+'/dash.png'});
 await page.reload();
 await page.waitForFunction(()=>document.querySelector('#syncState')?.dataset.state==='live',null,{timeout:10000});
 await page.waitForTimeout(500);
-await page.click(`.cal-cell[data-day="${iso(1)}"]`); await page.waitForTimeout(250);
-ok('새로고침 후 일정 유지', (await page.textContent('.cal-day')).includes('시공사 방문'));
+ok('새로고침 후 일정 유지', (await page.textContent('.schedule-list')).includes('시공사 방문'));
 
 // 다른 화면은 그대로
 await page.click('.side-item[data-nav="특허"]'); await page.waitForTimeout(500);

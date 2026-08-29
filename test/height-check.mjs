@@ -30,7 +30,7 @@ const page=await ctx.newPage();
 const errors=[]; page.on('pageerror',e=>errors.push(e.message));
 await page.goto(base+'/index.html');
 await page.waitForFunction(()=>document.querySelector('#syncState')?.dataset.state==='live',null,{timeout:10000});
-await page.waitForSelector('.cal-grid',{timeout:9000});
+await page.waitForSelector('.schedule-list',{timeout:9000});
 await page.waitForTimeout(400);
 ok('자바스크립트 오류 없음', errors.length===0, errors.join(' | '));
 await page.click('#todoToggle');            // 24개 전부 펼쳐 카드보다 길게 만든다
@@ -41,8 +41,7 @@ const measure = () => page.evaluate(()=>{
   const todo=r('#todayPanel'), sched=r('#schedulePanel'), scroll=document.querySelector('.main-scroll');
   const list=document.querySelector('#todayPanel .todo-list');
   const rows=[...document.querySelectorAll('.todo-item')].map(el=>el.getBoundingClientRect());
-  const cell=document.querySelector('.cal-cell:not(.empty)').getBoundingClientRect();
-  const day=document.querySelector('.cal-day');
+  const schedList=document.querySelector('#schedulePanel .schedule-list');
   return {
     vh: window.innerHeight,
     todoBottom: Math.round(todo.bottom), schedBottom: Math.round(sched.bottom),
@@ -54,8 +53,8 @@ const measure = () => page.evaluate(()=>{
     listTopGap: Math.round(rows[0].top - list.getBoundingClientRect().top),
     rowGap: rows.length>1 ? Math.round(rows[1].top - rows[0].bottom) : 0,
     rowH: Math.round(rows[0].height),
-    cellH: Math.round(cell.height),
-    dayScrolls: day.scrollHeight > day.clientHeight ? true : 'not-needed'
+    listH: Math.round(schedList.getBoundingClientRect().height),
+    schedScrolls: schedList.scrollHeight > schedList.clientHeight ? true : 'not-needed'
   };
 });
 
@@ -70,7 +69,7 @@ for (const size of [{width:1920,height:1080},{width:1600,height:900},{width:1440
   ok(`${tag} 할 일은 위에 붙어 있음`, m.listTopGap<=2 && m.rowGap<=6, `첫 항목 ${m.listTopGap}px · 간격 ${m.rowGap}px`);
   ok(`${tag} 항목 높이 그대로(간격 벌리기 없음)`, m.rowH>=36 && m.rowH<=44, `${m.rowH}px`);
   ok(`${tag} 넘치는 목록은 카드 안에서만 스크롤`, m.listScrolls, JSON.stringify({listScrolls:m.listScrolls}));
-  ok(`${tag} 달력 칸 비율 유지`, m.cellH===34, `${m.cellH}px`);
+  ok(`${tag} 일정 목록도 카드 안에 들어감`, m.listH>0 && m.listH<=m.schedH, `${m.listH}px / ${m.schedH}px`);
 }
 await page.setViewportSize({width:1920,height:1080}); await page.waitForTimeout(300);
 await page.screenshot({path:out+'/height.png'});
