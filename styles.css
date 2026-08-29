@@ -74,12 +74,12 @@ svg { display: block; flex: none; }
   background: rgba(250, 250, 252, .88); backdrop-filter: blur(8px);
 }
 .page-search {
-  flex: 0 1 620px; display: flex; align-items: center; gap: 9px; max-width: 620px; padding: 0 14px;
-  border: 1px solid var(--line); border-radius: 11px; background: var(--card); color: var(--ink-3);
+  flex: 0 1 820px; display: flex; align-items: center; gap: 11px; max-width: 820px; padding: 0 17px;
+  border: 1px solid var(--line); border-radius: 13px; background: var(--card); color: var(--ink-3);
   transition: border-color var(--ease), box-shadow var(--ease);
 }
 .page-search:focus-within { border-color: var(--violet-line); box-shadow: 0 0 0 3px var(--violet-soft); }
-.page-search input { flex: 1; padding: 8px 0; border: 0; outline: 0; background: none; font-size: 13.5px; }
+.page-search input { flex: 1; padding: 12px 0; border: 0; outline: 0; background: none; font-size: 15px; }
 .page-search input::placeholder { color: var(--ink-3); }
 .primary-btn {
   position: absolute; right: 24px; top: 50%; transform: translateY(-50%);
