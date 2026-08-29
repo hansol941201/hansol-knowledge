@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>한솔 지식</title>
-  <link rel="stylesheet" href="styles.css?v=35" />
+  <link rel="stylesheet" href="styles.css?v=37" />
 </head>
 <body>
   <div class="workspace">
@@ -24,7 +24,10 @@
       </section>
 
       <header class="topbar">
-        <label class="page-search"><span data-icon="search" data-size="18"></span><input id="pageSearch" placeholder="지식, 특허번호, 업체명, 연락처를 검색하세요" /></label>
+        <div class="search-wrap">
+          <label class="page-search"><span data-icon="search" data-size="18"></span><input id="pageSearch" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="searchPreview" placeholder="지식, 특허번호, 업체명, 연락처를 검색하세요" /></label>
+          <div id="searchPreview" class="search-preview hidden" role="listbox" aria-label="검색 미리보기"></div>
+        </div>
         <button id="accountAdd" class="hidden" type="button" aria-hidden="true"></button>
         <button id="pageAdd" class="primary-btn" type="button"><span data-icon="plus"></span>지식 추가</button>
       </header>
@@ -219,6 +222,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="firebase-config.js?v=2"></script>
   <script src="icons.js?v=2"></script>
-  <script src="app.js?v=66"></script>
+  <script src="app.js?v=67"></script>
 </body>
 </html>

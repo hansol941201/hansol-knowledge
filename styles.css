@@ -11,7 +11,8 @@
   --violet-line: #DFD4FA;
   --nav-navy: #1F3A5F;     /* 상단 메뉴 강조색(진한 남색) */
   --nav-text: #4A5260;     /* 상단 메뉴 기본색(진한 회색) */
-  --nav-line: #EDEFF3;     /* 상단 헤더 아래 옅은 경계선 */
+  --nav-line: #EDEFF3;
+  --nav-soft: #EEF2F8;     /* 남색 계열 연한 배경(선택·라벨) */     /* 상단 헤더 아래 옅은 경계선 */
   --radius: 16px;
   --radius-sm: 10px;
   --shadow: 0 1px 2px rgba(24, 20, 38, .04), 0 6px 18px rgba(24, 20, 38, .04);
@@ -69,12 +70,13 @@ svg { display: block; flex: none; }
 /* 바로가기는 화면 맨 위, 검색창은 그 아래 가운데 */
 .shortcut-band { min-width: 0; padding: 12px 24px 4px; }
 .topbar {
-  position: relative; display: flex; align-items: center; justify-content: center; gap: 14px;
+  position: relative; z-index: 15; display: flex; align-items: center; justify-content: center; gap: 14px;
   padding: 10px 24px; border-bottom: 1px solid var(--line);
   background: rgba(250, 250, 252, .88); backdrop-filter: blur(8px);
 }
+.search-wrap { position: relative; flex: 0 1 820px; max-width: 820px; min-width: 0; }
 .page-search {
-  flex: 0 1 820px; display: flex; align-items: center; gap: 11px; max-width: 820px; padding: 0 17px;
+  width: 100%; display: flex; align-items: center; gap: 11px; padding: 0 17px;
   border: 1px solid var(--line); border-radius: 13px; background: var(--card); color: var(--ink-3);
   transition: border-color var(--ease), box-shadow var(--ease);
 }
@@ -90,9 +92,51 @@ svg { display: block; flex: none; }
 .primary-btn:hover { background: #5c3ad0; }
 @media (max-width: 1100px) {
   .primary-btn { position: static; transform: none; flex: none; margin-left: auto; white-space: nowrap; }
-  .page-search { flex: 1 1 auto; min-width: 0; }
+  .search-wrap { flex: 1 1 auto; min-width: 0; }
   .topbar { justify-content: flex-start; }
 }
+/* ── 검색 미리보기 ──────────────────────────────────────────── */
+.search-preview {
+  position: absolute; left: 0; right: 0; top: calc(100% + 7px); z-index: 40;
+  max-height: min(60vh, 460px); overflow-y: auto;
+  border: 1px solid var(--line); border-radius: 11px; background: var(--card);
+  box-shadow: 0 12px 32px rgba(24, 20, 38, .12); text-align: left;
+}
+.preview-group { padding: 6px 0; }
+.preview-group + .preview-group { border-top: 1px solid var(--line-soft); }
+.preview-head { padding: 6px 15px 4px; color: var(--ink-3); font-size: 11.5px; font-weight: 600; letter-spacing: .02em; }
+.preview-item {
+  display: flex; align-items: center; gap: 11px; width: 100%; min-height: 58px; padding: 9px 15px;
+  color: var(--ink); text-align: left; transition: background var(--ease);
+}
+.preview-item:hover, .preview-item.on { background: var(--nav-soft); }
+.preview-icon { flex: none; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 8px; background: var(--nav-soft); color: var(--nav-navy); }
+.preview-tag {
+  flex: none; min-width: 46px; padding: 3px 7px; border-radius: 6px; text-align: center;
+  background: var(--nav-soft); color: var(--nav-navy); font-size: 11px; font-weight: 600;
+}
+.preview-body { flex: 1; min-width: 0; }
+.preview-body > b { display: block; font-size: 13.5px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.preview-body small { display: block; margin-top: 2px; color: var(--ink-3); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.preview-where { flex: none; color: var(--ink-3); font-size: 11.5px; }
+.preview-hit { display: inline; color: var(--nav-navy); font-weight: 700; background: none; }
+.preview-foot {
+  display: flex; align-items: center; gap: 8px; width: 100%; padding: 11px 15px;
+  border-top: 1px solid var(--line-soft); color: var(--ink-2); font-size: 12.5px; text-align: left;
+}
+.preview-foot:hover, .preview-foot.on { background: var(--nav-soft); color: var(--nav-navy); }
+.preview-foot kbd {
+  margin-left: auto; padding: 2px 7px; border: 1px solid var(--line); border-radius: 6px;
+  color: var(--ink-3); font: inherit; font-size: 11px;
+}
+.preview-empty { padding: 18px 15px 6px; color: var(--ink-2); font-size: 13px; }
+@media (max-width: 640px) {
+  /* 좁은 화면에서는 검색창이 줄어들어도 목록은 화면 폭에 맞춰(양옆 16px) 넓게 편다 */
+  .search-preview { min-width: calc(100vw - 32px); max-height: 55vh; }
+  .preview-item { min-height: 62px; }
+  .preview-where { display: none; }
+}
+
 .ghost-btn { padding: 6px 11px; border: 1px solid var(--line); border-radius: 8px; color: var(--ink-2); font-size: 12px; transition: background var(--ease); }
 .ghost-btn:hover { background: var(--line-soft); }
 

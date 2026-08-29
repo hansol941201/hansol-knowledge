@@ -233,6 +233,10 @@ const VIEW_LEAD = {
 const categoryRules = ['전체', '기억', '특허', '협력업체', '계정', '연락처', '업무지식', '기타'];
 const virtualCategories = ['계정', '협력업체', '할 일', '기억', '특허', '대시보드'];
 let pageCategory = '대시보드';
+// 검색 미리보기 목록 — 한 번 만들고 자료가 바뀔 때만 다시 만든다.
+// saveLocalState() 가 파일 위쪽에서도 불리므로 var 로 두어 초기화 순서를 타지 않게 한다.
+var searchIndex = null;
+var searchIndexDirty = true;
 let pageSearchCommitted = '';
 let showAllTodos = false;
 let viewBeforeSearch = '';   // 검색을 지우면 보던 화면으로 되돌린다
@@ -261,6 +265,7 @@ function viewForSearch(text) {
 }
 
 function goToView(name) {
+  closeSearchPreview();
   pageCategory = name;
   viewBeforeSearch = '';
   showAllTodos = name === '할 일';
@@ -650,15 +655,321 @@ function closeMemoryLibrary() { $('#memoryModal').classList.add('hidden'); markM
 $('#memoryClose').addEventListener('click', closeMemoryLibrary);
 $('#memoryModal').addEventListener('click', event => { if (event.target.id === 'memoryModal') closeMemoryLibrary(); });
 $('#memorySearch').addEventListener('input', renderMemories);
+// ── 검색 미리보기 ─────────────────────────────────────────────
+// 입력하는 즉시 검색창 아래에 "기능 바로가기 + 저장된 자료"를 보여 준다.
+// Enter 전체 검색과 기존 검색 화면·검색 함수는 그대로 두고 위에 얹는 기능이다.
+const PREVIEW_ACTION_MAX = 5;      // 기능 바로가기 최대 개수
+const PREVIEW_KIND_MAX = 5;        // 자료 종류별 최대 개수
+const PREVIEW_DATA_MAX = 10;       // 자료 결과 전체 최대 개수
+let previewRows = [];              // 지금 화면에 보이는 미리보기 줄
+let previewIndex = -1;             // 방향키로 고른 줄
+let previewTimer = null;
+let previewComposing = false;      // 한글 조합 중인지
+
+function markSearchIndexDirty() { searchIndexDirty = true; }
+
+// 화면 안 기능 — 실제로 있는 메뉴·버튼·바로가기만 넣는다(없는 경로를 만들지 않는다).
+function actionEntries() {
+  const rows = NAV_ITEMS.map(item => {
+    const target = item.category || item.name;
+    const lead = VIEW_LEAD[target] || [];
+    return { key: `nav:${target}`, icon: item.icon, name: item.name,
+      desc: lead[1] || '', where: '메뉴', run: () => goToView(target) };
+  });
+  rows.push({ key: 'nav:memory', icon: 'bookmark', name: '기억 저장소',
+    desc: '메모처럼 남겨 둔 기록을 모아 봅니다.', where: '메뉴', run: openMemoryLibrary });
+  rows.push({ key: 'act:add', icon: 'plus', name: '지식 추가',
+    desc: '기억·할 일·업무지식·연락처·계정을 새로 저장합니다.', where: '기능', run: openAddModal });
+  rows.push({ key: 'act:schedule', icon: 'clock', name: '일정 추가',
+    desc: '날짜·시간·메모를 적어 일정을 등록합니다.', where: '기능',
+    run: () => { goToView('대시보드'); openScheduleModal(null, todayKey()); } });
+  rows.push({ key: 'act:memo', icon: 'book', name: '빠른 전화 메모',
+    desc: '전화받으며 바로 적는 메모장으로 이동합니다.', where: '기능',
+    run: () => { goToView('대시보드'); const box = $('#quickMemo'); if (box) { box.focus(); box.scrollIntoView({ block: 'nearest' }); } } });
+  rows.push({ key: 'act:memo-record', icon: 'bookmark', name: '전화 요청 기록으로 저장',
+    desc: '빠른 전화 메모를 기억(전화 요청 기록)으로 옮깁니다.', where: '기능',
+    run: () => { goToView('대시보드'); const button = $('#memoToRecord'); if (button) button.click(); } });
+  rows.push({ key: 'act:sync', icon: 'settings', name: '동기화 설정',
+    desc: '클라우드 연동 상태를 확인하고 PIN 으로 로그인합니다.', where: '설정',
+    run: () => $('#syncOpen').click() });
+  rows.push({ key: 'act:backup', icon: 'download', name: '데이터 백업',
+    desc: '지금까지 저장한 자료를 파일로 내려받습니다.', where: '설정',
+    run: () => $('#resetBackup').click() });
+  rows.push({ key: 'act:reset', icon: 'refresh', name: '초기화',
+    desc: '이 컴퓨터 사본 또는 전체 자료를 정리합니다.', where: '설정', run: openResetModal });
+  // 즐겨찾기 카드는 사용자가 등록한 실제 주소로 새 탭에서 연다.
+  for (const item of sortedShortcuts()) {
+    const href = shortcutHref(item.url);
+    if (!href) continue;
+    rows.push({ key: `shortcut:${item.id}`, icon: 'link', name: item.name,
+      desc: href.replace(/^https?:\/\//, '').replace(/\/$/, ''), where: '바로가기',
+      run: () => window.open(href, '_blank', 'noopener,noreferrer') });
+  }
+  return rows;
+}
+
+// 저장된 자료 — 기존 검색이 쓰던 배열을 그대로 재사용한다.
+function dataEntries() {
+  const rows = [];
+  const push = (kind, key, title, sub, extra, run) =>
+    rows.push({ kind, key, title: String(title || ''), sub: String(sub || ''), extra: String(extra || ''), run });
+
+  for (const item of alive(knowledge)) {
+    const kind = findCategory(item) === '업무지식' ? '업무지식' : '지식';
+    push(kind, `k:${item.id}`, item.title, item.answer, (item.aliases || []).join(' '),
+      () => showDetail(findCategory(item), item.title, item.answer,
+        [['저장', savedLabel(item)], ['검색어', (item.aliases || []).join(', ')], ['출처', item.source]]));
+  }
+  for (const item of alive(todos).filter(isTodoEntry)) {
+    push('할 일', `t:${item.id}`, item.text, `${item.date || '날짜 확인'} · ${item.done ? '완료' : '진행중'}`, '',
+      () => showDetail('할 일', '', item.text, [['날짜', item.date], ['상태', item.done ? '완료' : '진행중'], ['출처', item.source]]));
+  }
+  for (const item of alive(memories)) {
+    push('기억', `m:${item.id}`, item.text, savedLabel(item), '',
+      () => showDetail('기억', '', item.text, [['저장', savedLabel(item)], ['출처', item.source]]));
+  }
+  for (const item of alive(schedule)) {
+    push('일정', `s:${item.id}`, item.title, `${scheduleDayTitle(item.date)}${item.time ? ` · ${item.time}` : ''}`, item.memo,
+      () => showDetail('일정', item.title, item.memo || '', [['날짜', item.date], ['시간', item.time]]));
+  }
+  for (const item of alive(accountMeta)) {
+    push('계정', `a:${item.id}`, item.service, item.user, item.url,
+      () => { goToView('계정'); showToast('계정 화면에서 확인하세요'); });
+  }
+  for (const item of partners) {
+    push('업체', `p:${item.name}`, item.name, [item.phone, item.email].filter(Boolean).join(' · '), '',
+      () => showDetail('협력업체', item.name, '', [['전화', item.phone], ['이메일', item.email]]));
+  }
+  for (const item of patents) {
+    push('특허', `pt:${item.num || item.name}`, item.num || item.status || '번호 확인', item.name,
+      patentText(item), () => showDetail(item.kind, item.num || item.status, item.name,
+        [['공종', (item.gongjong || []).join(' · ')], ['공법', item.gongbeop], ['특허권자', item.owner], ['상태', patentStatusNote(item)]]));
+  }
+  return rows;
+}
+
+// 한 번 만들어 두고 자료가 바뀔 때만 다시 만든다(입력할 때마다 다시 읽지 않는다).
+function getSearchIndex() {
+  if (searchIndex && !searchIndexDirty) return searchIndex;
+  const actions = actionEntries().map(row => ({ ...row, type: 'action', nameNorm: normalize(row.name), bodyNorm: normalize(`${row.desc} ${row.where}`) }));
+  const data = dataEntries().map(row => ({ ...row, type: 'data',
+    titleNorm: normalize(row.title), bodyNorm: normalize(`${row.sub} ${row.extra}`),
+    digits: row.kind === '특허' ? patentDigits(`${row.title} ${row.extra}`) : '' }));
+  searchIndex = { actions, data };
+  searchIndexDirty = false;
+  return searchIndex;
+}
+
+// 우선순위: 기능명 완전일치 > 기능명으로 시작 > 기능명 포함 > 제목 완전일치 > 제목 포함 > 본문 포함
+function previewSearch(query) {
+  const raw = String(query || '').trim();
+  const q = normalize(raw);
+  if (!q) return { actions: [], data: [], total: 0 };
+  const index = getSearchIndex();
+  const digits = patentDigits(raw);
+
+  const actions = [];
+  for (const row of index.actions) {
+    let points = 0;
+    if (row.nameNorm === q) points = 100;
+    else if (row.nameNorm.startsWith(q)) points = 90;
+    else if (row.nameNorm.includes(q)) points = 70;
+    else if (row.bodyNorm.includes(q)) points = 40;
+    if (points) actions.push({ ...row, points });
+  }
+  actions.sort((a, b) => b.points - a.points || a.name.length - b.name.length);
+
+  const data = [];
+  for (const row of index.data) {
+    let points = 0;
+    if (row.titleNorm === q) points = 80;
+    else if (row.titleNorm.startsWith(q)) points = 65;
+    else if (row.titleNorm.includes(q)) points = 60;
+    else if (row.bodyNorm.includes(q)) points = 40;
+    else if (digits.length >= 4 && row.digits && row.digits.includes(digits)) points = 75;
+    if (points) data.push({ ...row, points });
+  }
+  data.sort((a, b) => b.points - a.points || a.title.length - b.title.length);
+
+  // 같은 자료가 여러 번 나오지 않게 한 번만 담고, 종류별로도 개수를 제한한다.
+  const seen = new Set();
+  const perKind = new Map();
+  const picked = [];
+  for (const row of data) {
+    if (seen.has(row.key)) continue;
+    const used = perKind.get(row.kind) || 0;
+    if (used >= PREVIEW_KIND_MAX) continue;
+    seen.add(row.key);
+    perKind.set(row.kind, used + 1);
+    picked.push(row);
+    if (picked.length >= PREVIEW_DATA_MAX) break;
+  }
+  const topActions = actions.slice(0, PREVIEW_ACTION_MAX);
+  return { actions: topActions, data: picked, total: topActions.length + picked.length };
+}
+
+// 검색어와 겹치는 부분만 진한 남색으로 (형광 배경은 쓰지 않는다)
+function markHit(text, query) {
+  const raw = String(text === undefined || text === null ? '' : text);
+  const needle = String(query || '').trim();
+  if (!needle) return escapeHtml(raw);
+  const haystack = raw.toLowerCase();
+  const target = needle.toLowerCase();
+  let out = '';
+  let from = 0;
+  for (;;) {
+    const at = haystack.indexOf(target, from);
+    if (at === -1) break;
+    out += escapeHtml(raw.slice(from, at)) + `<b class="preview-hit">${escapeHtml(raw.slice(at, at + needle.length))}</b>`;
+    from = at + needle.length;
+  }
+  return out + escapeHtml(raw.slice(from));
+}
+
+function closeSearchPreview() {
+  clearTimeout(previewTimer);
+  previewRows = [];
+  previewIndex = -1;
+  const box = $('#searchPreview');
+  if (box) { box.classList.add('hidden'); box.innerHTML = ''; }
+  $('#pageSearch').setAttribute('aria-expanded', 'false');
+}
+
+function renderSearchPreview(query) {
+  const box = $('#searchPreview');
+  const raw = String(query || '').trim();
+  if (!raw) return closeSearchPreview();
+
+  const { actions, data } = previewSearch(raw);
+  previewRows = [];
+  let html = '';
+
+  if (actions.length) {
+    html += `<div class="preview-group"><div class="preview-head">기능 바로가기</div>`;
+    for (const row of actions) {
+      html += `<button type="button" class="preview-item" data-preview="${previewRows.length}">
+        <span class="preview-icon">${icon(row.icon, 15)}</span>
+        <span class="preview-body"><b>${markHit(row.name, raw)}</b>${row.desc ? `<small>${markHit(row.desc, raw)}</small>` : ''}</span>
+        <span class="preview-where">${escapeHtml(row.where)}</span>
+      </button>`;
+      previewRows.push(row);
+    }
+    html += `</div>`;
+  }
+  if (data.length) {
+    html += `<div class="preview-group"><div class="preview-head">검색 결과</div>`;
+    for (const row of data) {
+      html += `<button type="button" class="preview-item" data-preview="${previewRows.length}">
+        <span class="preview-tag">${escapeHtml(row.kind)}</span>
+        <span class="preview-body"><b>${markHit(row.title, raw)}</b>${row.sub ? `<small>${markHit(row.sub, raw)}</small>` : ''}</span>
+      </button>`;
+      previewRows.push(row);
+    }
+    html += `</div>`;
+  }
+  if (!previewRows.length) {
+    html += `<div class="preview-empty">‘${escapeHtml(raw)}’와 일치하는 기능이나 자료가 없습니다.</div>`;
+    html += `<button type="button" class="preview-foot" data-preview="${previewRows.length}">＋ 새 지식 추가</button>`;
+    previewRows.push({ type: 'action', name: '지식 추가', run: openAddModal });
+  }
+  html += `<button type="button" class="preview-foot" data-preview="${previewRows.length}">
+    ‘${escapeHtml(raw)}’ 전체 결과 보기<kbd>Enter</kbd></button>`;
+  previewRows.push({ type: 'search', name: '전체 결과 보기', run: () => runFullSearch(raw) });
+
+  box.innerHTML = html;
+  box.classList.remove('hidden');
+  $('#pageSearch').setAttribute('aria-expanded', 'true');
+  previewIndex = -1;
+  box.querySelectorAll('[data-preview]').forEach(node => {
+    node.onmousedown = event => event.preventDefault();   // 눌러도 검색창 포커스를 잃지 않는다
+    node.onclick = () => runPreviewRow(Number(node.dataset.preview));
+  });
+}
+
+function paintPreviewCursor() {
+  const box = $('#searchPreview');
+  if (!box) return;
+  box.querySelectorAll('[data-preview]').forEach(node => {
+    const on = Number(node.dataset.preview) === previewIndex;
+    node.classList.toggle('on', on);
+    if (on) node.scrollIntoView({ block: 'nearest' });
+  });
+}
+
+function movePreview(step) {
+  const total = previewRows.length;
+  if (!total) return;
+  if (previewIndex === -1) previewIndex = step > 0 ? 0 : total - 1;
+  else {
+    previewIndex += step;
+    if (previewIndex >= total) previewIndex = -1;   // 끝에서 한 번 더 누르면 선택 해제(입력창으로)
+    else if (previewIndex < -1) previewIndex = total - 1;
+  }
+  paintPreviewCursor();
+}
+
+function runPreviewRow(at) {
+  const row = previewRows[at];
+  if (!row) return;
+  closeSearchPreview();
+  if (row.type !== 'search') { $('#pageSearch').value = ''; pageSearchCommitted = ''; }
+  row.run();
+}
+
+// 기존 전체 검색(엔터) — 이 동작은 그대로 둔다.
+function runFullSearch(text) {
+  const typed = String(text === undefined ? $('#pageSearch').value : text);
+  $('#pageSearch').value = typed;
+  const view = viewForSearch(typed);
+  if (view) return goToView(view);
+  const entry = entryFromCommand(typed, '사이트 검색창');
+  if (entry) {
+    goToView(entry.view);
+    commitEntry(entry.item, entry.kind);
+    return;
+  }
+  pageSearchCommitted = typed.trim();
+  if (pageSearchCommitted && pageCategory === '대시보드') { viewBeforeSearch = pageCategory; pageCategory = '전체'; }
+  if (!pageSearchCommitted && viewBeforeSearch) { pageCategory = viewBeforeSearch; viewBeforeSearch = ''; }
+  renderAll();
+}
+
+$('#pageSearch').addEventListener('compositionstart', () => { previewComposing = true; });
+$('#pageSearch').addEventListener('compositionend', () => {
+  previewComposing = false;
+  clearTimeout(previewTimer);
+  previewTimer = setTimeout(() => renderSearchPreview($('#pageSearch').value), 180);
+});
+$('#pageSearch').addEventListener('focus', () => {
+  if ($('#pageSearch').value.trim()) renderSearchPreview($('#pageSearch').value);
+});
+// 바깥을 누르면 닫는다(드롭다운 안쪽은 mousedown 을 막아 두어 먼저 닫히지 않는다).
+document.addEventListener('click', event => {
+  const node = event.target;
+  if (!node || typeof node.closest !== 'function' || !node.closest('.search-wrap')) closeSearchPreview();
+});
+
 $('#pageSearch').addEventListener('input', event => {
-  if (event.currentTarget.value.trim() || !pageSearchCommitted) return;
+  const typed = event.currentTarget.value;
+  clearTimeout(previewTimer);
+  if (!typed.trim()) closeSearchPreview();
+  else if (!previewComposing) previewTimer = setTimeout(() => renderSearchPreview(typed), 180);
+  if (typed.trim() || !pageSearchCommitted) return;
   pageSearchCommitted = '';   // 검색어를 지우면 바로 원래 화면으로 돌아간다
   if (viewBeforeSearch) { pageCategory = viewBeforeSearch; viewBeforeSearch = ''; }
   renderAll();
 });
 $('#pageSearch').addEventListener('keydown', event => {
+  const open = !$('#searchPreview').classList.contains('hidden');
+  if (event.key === 'Escape') { if (open) { event.preventDefault(); closeSearchPreview(); } return; }
+  if (event.key === 'ArrowDown' && open) { event.preventDefault(); return movePreview(1); }
+  if (event.key === 'ArrowUp' && open) { event.preventDefault(); return movePreview(-1); }
   if (event.key !== 'Enter') return;
+  // 한글 조합 중 Enter 는 글자를 확정하는 것이라 검색을 실행하지 않는다.
+  if (event.isComposing || previewComposing || event.keyCode === 229) return;
   event.preventDefault();
+  if (open && previewIndex >= 0) return runPreviewRow(previewIndex);   // 고른 항목 실행
+  closeSearchPreview();
   const typed = event.currentTarget.value;
   const view = viewForSearch(typed);
   if (view) return goToView(view);      // "할일" 처럼 화면 이름이면 그 목록으로 바로 이동
@@ -1876,6 +2187,7 @@ function createKnowledge(title, answer, options = {}) {
 }
 
 function saveLocalState() {
+  markSearchIndexDirty();   // 자료가 바뀌면 검색 목록도 다시 만든다
   sortIntoCollections();
   localStorage.setItem('knowledge-messenger-data', JSON.stringify(knowledge));
   localStorage.setItem('knowledge-todos', JSON.stringify(todos));
