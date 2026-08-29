@@ -293,22 +293,37 @@ function renderSideNav() {
   }
 }
 
+// 통합검색용 — 유사 표현·붙여쓰기·조사 차이를 함께 본다(search-rules.js).
+// 점수가 높은 자료가 위로 오고, 검색어가 없으면 원래 순서를 그대로 둔다.
+function searchFilter(list, term, fields) {
+  if (!term) return list;
+  const parsed = buildSearchQuery(term);
+  return list
+    .map(item => ({ item, found: matchSearchDoc(buildSearchDoc(fields(item)), parsed) }))
+    .filter(row => row.found)
+    .sort((a, b) => b.found.points - a.found.points)
+    .map(row => row.item);
+}
+
 function renderLibrary() {
-  const query = normalize(pageSearchCommitted);
-  const items = categoryItems(pageCategory).filter(item => !query || normalize([item.title, item.answer, ...(item.aliases || [])].join(' ')).includes(query));
+  const query = pageSearchCommitted.trim();
+  const items = searchFilter(categoryItems(pageCategory), query,
+    item => ({ title: item.title, body: item.answer, keywords: (item.aliases || []).join(' '), extra: item.category || '' }));
   const accounts = (pageCategory === '전체' || pageCategory === '계정')
-    ? alive(accountMeta).filter(item => !query || normalize(`${item.service} ${item.user} ${item.url || ''}`).includes(query)) : [];
+    ? searchFilter(alive(accountMeta), query, item => ({ title: item.service, body: item.user, extra: item.url || '' })) : [];
   const partnerItems = (pageCategory === '전체' || pageCategory === '협력업체')
-    ? partners.filter(item => !query || normalize(`${item.name} ${item.phone} ${item.email}`).includes(query)) : [];
+    ? searchFilter(partners, query, item => ({ title: item.name, body: `${item.phone || ''} ${item.email || ''}` })) : [];
   const searchAll = pageCategory === '전체';
   const patentTerm = pageSearchCommitted.trim();
   const patentItems = pageCategory === '특허'
     ? (patentTerm ? findPatents(patentTerm, patents.length) : patents)
     : (query ? findPatents(patentTerm, 5) : []);
   const todoItems = (searchAll ? Boolean(query) : pageCategory === '할 일')
-    ? sortBySaved(alive(todos).filter(todo => !query || normalize(`${todo.text} ${todo.date || ''} ${savedLabel(todo)} ${todo.done ? '완료' : '미완료진행중'}`).includes(query))) : [];
+    ? searchFilter(sortBySaved(alive(todos)), query,
+        todo => ({ title: todo.text, body: `${todo.date || ''} ${savedLabel(todo)} ${todo.done ? '완료' : '미완료 진행중'}` })) : [];
   const memoryItems = (searchAll ? Boolean(query) : pageCategory === '기억')
-    ? sortBySaved(alive(memories).filter(memory => !query || normalize(`${memory.text} ${memory.createdAt || ''} ${savedLabel(memory)}`).includes(query))) : [];
+    ? searchFilter(sortBySaved(alive(memories)), query,
+        memory => ({ title: memory.text, body: `${memory.createdAt || ''} ${savedLabel(memory)}` })) : [];
   $('#pageCount').textContent = `${alive(knowledge).length + alive(todos).length + alive(memories).length + alive(accountMeta).length + partners.length + patents.length}개`;
   $('#pageCategories').innerHTML = categoryRules.filter(name => name !== '기타' || categoryItems('기타').length).map(name => `<button class="${name === pageCategory ? 'active' : ''}" data-category="${name}">${name}</button>`).join('');
   const term = pageSearchCommitted.trim();
@@ -753,7 +768,7 @@ function getSearchIndex() {
   if (searchIndex && !searchIndexDirty) return searchIndex;
   const actions = actionEntries().map(row => ({ ...row, type: 'action', nameNorm: normalize(row.name), bodyNorm: normalize(`${row.desc} ${row.where}`) }));
   const data = dataEntries().map(row => ({ ...row, type: 'data',
-    titleNorm: normalize(row.title), bodyNorm: normalize(`${row.sub} ${row.extra}`),
+    doc: buildSearchDoc({ title: row.title, body: row.sub, extra: row.extra, keywords: row.keywords || '' }),
     digits: row.kind === '특허' ? patentDigits(`${row.title} ${row.extra}`) : '' }));
   searchIndex = { actions, data };
   searchIndexDirty = false;
@@ -768,6 +783,7 @@ function previewSearch(query) {
   const index = getSearchIndex();
   const digits = patentDigits(raw);
 
+  const parsed = buildSearchQuery(raw);
   const actions = [];
   for (const row of index.actions) {
     let points = 0;
@@ -779,15 +795,15 @@ function previewSearch(query) {
   }
   actions.sort((a, b) => b.points - a.points || a.name.length - b.name.length);
 
+  // 저장된 자료는 유사 표현·붙여쓰기·조사 차이까지 함께 본다(search-rules.js).
   const data = [];
   for (const row of index.data) {
-    let points = 0;
-    if (row.titleNorm === q) points = 80;
-    else if (row.titleNorm.startsWith(q)) points = 65;
-    else if (row.titleNorm.includes(q)) points = 60;
-    else if (row.bodyNorm.includes(q)) points = 40;
-    else if (digits.length >= 4 && row.digits && row.digits.includes(digits)) points = 75;
-    if (points) data.push({ ...row, points });
+    if (digits.length >= 4 && row.digits && row.digits.includes(digits)) {
+      data.push({ ...row, points: 850, reason: '번호가 일치' });
+      continue;
+    }
+    const found = matchSearchDoc(row.doc, parsed);
+    if (found) data.push({ ...row, points: found.points, reason: found.reason });
   }
   data.sort((a, b) => b.points - a.points || a.title.length - b.title.length);
 
@@ -862,6 +878,7 @@ function renderSearchPreview(query) {
       html += `<button type="button" class="preview-item" data-preview="${previewRows.length}">
         <span class="preview-tag">${escapeHtml(row.kind)}</span>
         <span class="preview-body"><b>${markHit(row.title, raw)}</b>${row.sub ? `<small>${markHit(row.sub, raw)}</small>` : ''}</span>
+        ${row.reason ? `<span class="preview-where">${escapeHtml(row.reason)}</span>` : ''}
       </button>`;
       previewRows.push(row);
     }
@@ -2012,7 +2029,15 @@ function score(item, query) {
   return terms.reduce((best, term) => term.includes(q) || q.includes(term) ? Math.max(best, Math.min(q.length, term.length)) : best, 0);
 }
 function findKnowledge(query) {
-  return alive(knowledge).map(item => ({ item, points: score(item, query) })).filter(x => x.points > 0).sort((a, b) => b.points - a.points).slice(0, 3).map(x => x.item);
+  const parsed = buildSearchQuery(query);
+  const rows = alive(knowledge)
+    .map(item => ({ item, found: matchSearchDoc(buildSearchDoc({ title: item.title, body: item.answer, keywords: (item.aliases || []).join(' ') }), parsed) }))
+    .filter(row => row.found)
+    .sort((a, b) => b.found.points - a.found.points);
+  if (rows.length) return rows.slice(0, 3).map(row => row.item);
+  // 예전 방식(부분 일치)도 남겨 둔다 — 짧은 검색어에서 놓치지 않도록.
+  return alive(knowledge).map(item => ({ item, points: score(item, query) })).filter(x => x.points > 0)
+    .sort((a, b) => b.points - a.points).slice(0, 3).map(x => x.item);
 }
 
 function findAccounts(query) {
@@ -2077,7 +2102,13 @@ function addPatentBubble(item) {
 function findPartners(query) {
   const q = normalize(query).replace(/(업체|전화|전화번호|번호|메일|이메일|연락처|담당)/g, '');
   if (q.length < 2) return [];
-  return partners.filter(item => normalize(item.name).includes(q) || q.includes(normalize(item.name))).slice(0, 5);
+  const direct = partners.filter(item => normalize(item.name).includes(q) || q.includes(normalize(item.name)));
+  if (direct.length) return direct.slice(0, 5);
+  // 못 찾으면 유사 표현·오타까지 넓혀서 한 번 더 본다.
+  const parsed = buildSearchQuery(query);
+  return partners
+    .map(item => ({ item, found: matchSearchDoc(buildSearchDoc({ title: item.name, body: `${item.phone || ''} ${item.email || ''}` }), parsed) }))
+    .filter(row => row.found).sort((a, b) => b.found.points - a.found.points).slice(0, 5).map(row => row.item);
 }
 
 function addPartnerBubble(item) {
