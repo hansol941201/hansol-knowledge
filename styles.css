@@ -27,43 +27,43 @@ input, textarea, select { font: inherit; color: inherit; }
 svg { display: block; flex: none; }
 .hidden { display: none !important; }
 
-/* ── 2단 구조 ───────────────────────────────────────────────── */
-.workspace { display: grid; grid-template-columns: 232px minmax(0, 1fr); min-height: 100vh; }
+/* ── 상단 가로 메뉴 구조 ────────────────────────────────────── */
+.workspace { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); height: 100vh; }
 
-.sidebar {
-  position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column;
-  padding: 22px 14px 16px; border-right: 1px solid var(--line); background: var(--card);
+.topnav {
+  position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 20px;
+  height: 54px; padding: 0 24px; border-bottom: 1px solid var(--line);
+  background: rgba(255, 255, 255, .95); backdrop-filter: blur(8px);
 }
-.side-brand { display: flex; align-items: center; gap: 10px; padding: 0 8px 20px; }
-.side-mark { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 9px; background: var(--violet-soft); color: var(--violet); }
-.side-brand strong { display: block; font-size: 16.5px; letter-spacing: -.2px; }
-.side-brand small { color: var(--ink-3); font-size: 13px; }
-.side-nav { display: grid; gap: 2px; }
-.side-item {
-  display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 10px;
-  border-radius: var(--radius-sm); color: var(--ink-2); font-size: 15.5px; text-align: left;
-  transition: background var(--ease), color var(--ease);
-}
-.side-item:hover { background: var(--line-soft); color: var(--ink); }
-.side-item.active { background: var(--violet-soft); color: var(--violet); font-weight: 600; }
-/* 기억 저장소는 메뉴 바로 아래에 붙인다(가는 구분선 하나만 둔다). */
-.side-extra { margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--line-soft); }
+.top-brand { flex: none; display: flex; align-items: center; gap: 9px; }
+.top-brand strong { font-size: 16px; letter-spacing: -.2px; white-space: nowrap; }
+.side-mark { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 9px; background: var(--violet-soft); color: var(--violet); }
 
-/* 설정·백업·초기화는 보조 기능이라 한 단계 작게 */
-.side-foot { margin-top: auto; display: grid; gap: 0; padding-top: 10px; border-top: 1px solid var(--line); }
-.side-mini {
-  display: flex; align-items: center; gap: 8px; padding: 5px 10px; border-radius: 8px;
-  color: var(--ink-3); font-size: 13.5px; text-align: left; transition: background var(--ease), color var(--ease);
+/* 메뉴는 한 줄을 유지하고, 좁으면 이 줄만 옆으로 밀어서 본다 */
+.top-nav { flex: 1; min-width: 0; display: flex; align-items: stretch; gap: 2px; height: 100%; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; }
+.top-nav::-webkit-scrollbar { display: none; }
+.top-item {
+  flex: none; padding: 0 12px; border-bottom: 2px solid transparent;
+  color: var(--ink-2); font-size: 15px; white-space: nowrap;
+  transition: color var(--ease), border-color var(--ease);
 }
-.side-mini:hover { background: var(--line-soft); color: var(--ink-2); }
+.top-item:hover { color: var(--ink); }
+.top-item.active { color: var(--violet); font-weight: 600; border-bottom-color: var(--violet); }
+
+.top-tools { flex: none; margin-left: auto; display: flex; align-items: center; gap: 4px; }
+.top-mini {
+  display: grid; place-items: center; width: 32px; height: 32px; border-radius: 9px;
+  color: var(--ink-3); transition: background var(--ease), color var(--ease);
+}
+.top-mini:hover { background: var(--line-soft); color: var(--ink-2); }
 
 /* ── 메인 ───────────────────────────────────────────────────── */
-.main { min-width: 0; display: flex; flex-direction: column; height: 100vh; }
+.main { min-width: 0; min-height: 0; display: flex; flex-direction: column; height: 100%; }
 /* 바로가기는 화면 맨 위, 검색창은 그 아래 가운데 */
-.shortcut-band { padding: 18px 32px 6px; }
+.shortcut-band { min-width: 0; padding: 12px 24px 4px; }
 .topbar {
   position: relative; display: flex; align-items: center; justify-content: center; gap: 14px;
-  padding: 14px 32px; border-bottom: 1px solid var(--line);
+  padding: 10px 24px; border-bottom: 1px solid var(--line);
   background: rgba(250, 250, 252, .88); backdrop-filter: blur(8px);
 }
 .page-search {
@@ -75,17 +75,21 @@ svg { display: block; flex: none; }
 .page-search input { flex: 1; padding: 8px 0; border: 0; outline: 0; background: none; font-size: 15.5px; }
 .page-search input::placeholder { color: var(--ink-3); }
 .primary-btn {
-  position: absolute; right: 32px; top: 50%; transform: translateY(-50%);
+  position: absolute; right: 24px; top: 50%; transform: translateY(-50%);
   display: flex; align-items: center; gap: 6px; padding: 10px 15px;
   border-radius: var(--radius-sm); background: var(--violet); color: #fff; font-size: 15px; font-weight: 600;
   transition: background var(--ease), transform var(--ease);
 }
 .primary-btn:hover { background: #5c3ad0; }
-@media (max-width: 1100px) { .primary-btn { position: static; transform: none; margin-left: auto; } .topbar { justify-content: flex-start; } }
+@media (max-width: 1100px) {
+  .primary-btn { position: static; transform: none; flex: none; margin-left: auto; white-space: nowrap; }
+  .page-search { flex: 1 1 auto; min-width: 0; }
+  .topbar { justify-content: flex-start; }
+}
 .ghost-btn { padding: 6px 11px; border: 1px solid var(--line); border-radius: 8px; color: var(--ink-2); font-size: 14px; transition: background var(--ease); }
 .ghost-btn:hover { background: var(--line-soft); }
 
-.main-scroll { flex: 1; overflow-y: auto; padding: 22px 32px 60px; display: grid; gap: 20px; align-content: start; }
+.main-scroll { flex: 1; overflow-y: auto; padding: 16px 24px 48px; display: grid; gap: 16px; align-content: start; }
 
 /* 대시보드(2열)에서는 아래 빈 공간이 남지 않도록 두 카드가 남은 화면 높이를 모두 쓴다.
    고정 px 이 아니라 .main 의 100vh 에서 즐겨찾기·검색 영역을 뺀 나머지를 flex 로 받는다.
@@ -109,9 +113,15 @@ svg { display: block; flex: none; }
 
 /* ── 자주 가는 사이트 ───────────────────────────────────────── */
 /* ── 즐겨찾기(앱 런처) ─────────────────────────────────────── */
-.shortcut-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+/* 즐겨찾기는 항상 한 줄. 폭이 모자라면 이 줄만 좌우로 스크롤한다. */
+.shortcut-grid {
+  display: flex; flex-wrap: nowrap; gap: 8px; padding-bottom: 4px;
+  overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; scrollbar-width: thin;
+}
+.shortcut-grid::-webkit-scrollbar { height: 6px; }
+.shortcut-grid::-webkit-scrollbar-thumb { border-radius: 999px; background: var(--line); }
 .shortcut {
-  position: relative; width: 152px; border: 1px solid var(--line); border-radius: 15px;
+  position: relative; flex: none; width: 96px; border: 1px solid var(--line); border-radius: 13px;
   background: var(--card); box-shadow: var(--shadow); overflow: hidden;
   transition: transform var(--ease), box-shadow var(--ease), border-color var(--ease), opacity var(--ease);
 }
@@ -123,7 +133,7 @@ svg { display: block; flex: none; }
    앞의 그림은 잘리거나 커지지 않게 그대로 보여 준다. */
 .shortcut-thumb {
   position: relative; display: flex; align-items: center; justify-content: center;
-  height: 90px; overflow: hidden;
+  height: 58px; overflow: hidden;
   background: var(--violet-soft); border-bottom: 1px solid var(--line-soft);
 }
 .thumb-back {
@@ -134,21 +144,21 @@ svg { display: block; flex: none; }
   position: relative; width: 100%; height: 100%;
   object-fit: contain; object-position: center; background: transparent;
 }
-.shortcut-badge { color: var(--violet); font-size: 17px; font-weight: 700; letter-spacing: .2px; }
-.shortcut a b { display: block; padding: 9px 10px; font-size: 14.5px; font-weight: 600; text-align: center;
+.shortcut-badge { color: var(--violet); font-size: 13.5px; font-weight: 700; letter-spacing: .2px; }
+.shortcut a b { display: block; padding: 6px 7px; font-size: 12px; font-weight: 600; text-align: center;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .shortcut-more {
-  position: absolute; top: 5px; right: 5px; padding: 4px; border-radius: 7px;
+  position: absolute; top: 3px; right: 3px; padding: 3px; border-radius: 6px;
   color: var(--ink-2); background: rgba(255, 255, 255, .86); opacity: .6; transition: opacity var(--ease);
 }
 .shortcut:hover .shortcut-more { opacity: 1; }
 .shortcut-more:hover { background: #fff; }
 .shortcut.add {
-  display: grid; gap: 5px; place-content: center; justify-items: center; height: 132px;
+  display: grid; gap: 5px; place-content: center; justify-items: center; height: 88px;
   border-style: dashed; color: var(--ink-3); box-shadow: none; background: none;
 }
 .shortcut.add:hover { color: var(--violet); border-color: var(--violet-line); transform: translateY(-2px); }
-.shortcut.add b { font-size: 14.5px; font-weight: 600; }
+.shortcut.add b { font-size: 12px; font-weight: 600; }
 
 /* 이미지 등록 · 미리보기 */
 .shortcut-image-row { display: flex; gap: 12px; align-items: flex-start; margin-top: 7px; }
@@ -349,7 +359,7 @@ mark { padding: 0 1px; border-radius: 3px; background: #FFF3A0; color: #000; }
 .memory-item button { padding: 1px 4px; color: var(--ink-3); }
 
 /* ── 초기화 · 동기화 ────────────────────────────────────────── */
-.sync-state { margin-top: 8px; padding: 6px 10px; border-radius: 8px; background: var(--line-soft); color: var(--ink-3); font-size: 12.5px; text-align: left; }
+.sync-state { padding: 5px 10px; border-radius: 999px; background: var(--line-soft); color: var(--ink-3); font-size: 12.5px; white-space: nowrap; }
 .sync-state[data-state="live"] { background: #E6F4EC; color: #2F7D51; cursor: default; }
 .sync-state[data-state="syncing"] { background: #EAEEFB; color: #4A5AA8; }
 .sync-state[data-state="pending"] { background: #FDF3E2; color: #96650F; }
@@ -370,26 +380,26 @@ mark { padding: 0 1px; border-radius: 3px; background: #FFF3A0; color: #000; }
 
 /* ── 좁은 화면 ──────────────────────────────────────────────── */
 @media (max-width: 1180px) {
-  .workspace { grid-template-columns: 200px minmax(0, 1fr); }
-  .main-scroll { padding: 22px 22px 50px; }
-  .topbar { padding: 14px 22px; }
-  .shortcut-band { padding: 16px 22px 6px; }
+  .main-scroll { padding: 16px 16px 42px; }
+  .topbar { padding: 10px 16px; }
+  .primary-btn { right: 16px; }
+  .shortcut-band { padding: 12px 16px 4px; }
 }
 @media (max-width: 1100px) {
   .dash-cols { grid-template-columns: minmax(0, 1fr); }   /* 1열에서는 화면 높이를 채우지 않고 내용만큼만 */
 }
 @media (max-width: 860px) {
-  /* 좁은 화면에서는 수정·삭제 버튼을 항상 보이게 두고 줄이 겹치지 않게 한다 */
-  .todo-item { flex-wrap: wrap; row-gap: 4px; }
-  .todo-item .todo-text { flex: 1 1 100%; order: 1; white-space: normal; }
-  .todo-item time, .todo-doneat { order: 2; }
-  .todo-mini, .todo-remove { order: 3; opacity: 1; margin-left: auto; }
-  .todo-mini + .todo-mini, .todo-mini + .todo-remove { margin-left: 0; }
-  .workspace { grid-template-columns: 1fr; }
-  .sidebar { position: static; height: auto; flex-direction: row; flex-wrap: wrap; gap: 8px; align-items: center; padding: 12px 16px; border-right: 0; border-bottom: 1px solid var(--line); }
-  .side-brand { padding: 0 8px 0 0; }
-  .side-nav { display: flex; flex-wrap: wrap; gap: 4px; }
-  .side-foot { margin: 0 0 0 auto; display: flex; flex-wrap: wrap; padding: 0; border: 0; }
+  /* 좁은 화면: 첫 줄에 체크+내용, 둘째 줄에 날짜와 버튼 — 서로 겹치지 않게 한다 */
+  .todo-item { flex-wrap: wrap; row-gap: 2px; padding: 8px 9px; }
+  .todo-item .todo-text { flex: 1 1 auto; white-space: normal; }
+  .todo-item::after { content: ""; flex-basis: 100%; height: 0; order: 1; }
+  .todo-item time, .todo-doneat { order: 2; margin-left: 26px; }
+  .todo-mini { order: 3; opacity: 1; margin-left: auto; }
+  .todo-remove { order: 4; opacity: 1; }
+  .topnav { gap: 10px; padding: 0 14px; }
+  .top-brand strong { display: none; }          /* 좁으면 로고만 남기고 메뉴 자리를 넓힌다 */
+  .sync-state { display: none; }
+  .workspace { height: auto; min-height: 100vh; }
   .main { height: auto; }
   .main-scroll { overflow: visible; }
   .edit-box.memory-library-box { width: 95vw; height: 85vh; max-height: 85vh; padding: 16px; }

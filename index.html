@@ -4,26 +4,23 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>한솔 지식</title>
-  <link rel="stylesheet" href="styles.css?v=31" />
+  <link rel="stylesheet" href="styles.css?v=32" />
 </head>
 <body>
   <div class="workspace">
-    <aside class="sidebar">
-      <div class="side-brand">
+    <header class="topnav">
+      <div class="top-brand">
         <span class="side-mark" data-icon="sparkle"></span>
-        <div><strong>한솔 지식</strong><small>나만의 지식 비서</small></div>
+        <strong>한솔 지식</strong>
       </div>
-      <nav id="sideNav" class="side-nav"></nav>
-      <div class="side-extra">
-        <button id="memoryToggle" class="side-item" type="button"><span data-icon="bookmark"></span><span>기억 저장소</span></button>
-      </div>
-      <div class="side-foot">
-        <button id="syncOpen" class="side-mini" type="button"><span data-icon="settings" data-size="13"></span>동기화 설정</button>
-        <button id="resetBackupSide" class="side-mini" type="button"><span data-icon="download" data-size="13"></span>데이터 백업</button>
-        <button id="resetOpen" class="side-mini" type="button"><span data-icon="refresh" data-size="13"></span>초기화</button>
+      <nav id="sideNav" class="top-nav"></nav>
+      <div class="top-tools">
         <button id="syncState" class="sync-state" type="button" data-state="offline">오프라인 저장 모드</button>
+        <button id="syncOpen" class="top-mini" type="button" title="동기화 설정" aria-label="동기화 설정"><span data-icon="settings" data-size="15"></span></button>
+        <button id="resetBackupSide" class="top-mini" type="button" title="데이터 백업" aria-label="데이터 백업"><span data-icon="download" data-size="15"></span></button>
+        <button id="resetOpen" class="top-mini" type="button" title="초기화" aria-label="초기화"><span data-icon="refresh" data-size="15"></span></button>
       </div>
-    </aside>
+    </header>
 
     <main class="main">
       <section id="shortcutSection" class="shortcut-band">
@@ -213,6 +210,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="firebase-config.js?v=2"></script>
   <script src="icons.js?v=2"></script>
-  <script src="app.js?v=63"></script>
+  <script src="app.js?v=64"></script>
 </body>
 </html>

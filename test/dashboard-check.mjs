@@ -100,12 +100,12 @@ await page.waitForTimeout(500);
 ok('새로고침 후 일정 유지', (await page.textContent('.schedule-list')).includes('시공사 방문'));
 
 // 다른 화면은 그대로
-await page.click('.side-item[data-nav="특허"]'); await page.waitForTimeout(500);
+await page.click('.top-item[data-nav="특허"]'); await page.waitForTimeout(500);
 ok('특허 화면은 목록 표시', await page.isVisible('#knowledgeBlock') && (await page.$$eval('#pageGrid .patent-card', n=>n.length))>100);
 ok('특허 화면에서는 대시보드 카드 숨김', !(await page.isVisible('#schedulePanel')));
-await page.click('.side-item[data-nav="할 일"]'); await page.waitForTimeout(400);
+await page.click('.top-item[data-nav="할 일"]'); await page.waitForTimeout(400);
 ok('할 일 화면은 할 일 카드 표시', await page.isVisible('#todayPanel') && !(await page.isVisible('#schedulePanel')));
-await page.click('.side-item[data-nav="대시보드"]'); await page.waitForTimeout(400);
+await page.click('.top-item[data-nav="대시보드"]'); await page.waitForTimeout(400);
 ok('대시보드 복귀', await page.isVisible('#schedulePanel') && !(await page.isVisible('#knowledgeBlock')));
 
 for (const w of [1440, 1366]) {

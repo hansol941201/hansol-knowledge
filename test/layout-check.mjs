@@ -22,10 +22,18 @@ await page.goto(base+'/index.html');
 await page.waitForFunction(()=>document.querySelector('#syncState')?.dataset.state==='live',null,{timeout:10000});
 await page.waitForTimeout(600);
 ok('자바스크립트 오류 없음', errors.length===0, errors.join(' | '));
-ok('사이드바 표시', await page.isVisible('.sidebar'));
-ok('사이드바 메뉴 9개', (await page.$$eval('.side-nav .side-item', n=>n.length))===9);
-ok('기억 저장소가 메뉴 아래에 있음', await page.isVisible('.side-extra #memoryToggle'));
-ok('대시보드가 기본 선택', (await page.textContent('.side-item.active')).includes('대시보드'));
+ok('세로 사이드바 없음', (await page.$$('.sidebar')).length===0);
+ok('상단 가로 메뉴 표시', await page.isVisible('.topnav') && await page.isVisible('#sideNav.top-nav'));
+ok('메뉴 순서', (await page.$$eval('#sideNav .top-item', n=>n.map(x=>x.textContent))).join('/')
+  ==='대시보드/내 지식/할 일/기억/특허/협력업체/계정/연락처/업무지식/기억 저장소');
+ok('메뉴는 한 줄', await page.evaluate(()=>{
+  const tops=new Set([...document.querySelectorAll('#sideNav .top-item')].map(n=>Math.round(n.getBoundingClientRect().top)));
+  return tops.size===1; }));
+ok('기억 저장소가 메뉴 마지막', await page.isVisible('#sideNav #memoryToggle'));
+ok('대시보드가 기본 선택', (await page.textContent('.top-item.active')).includes('대시보드'));
+ok('선택 메뉴는 보라 글자 + 아래 선', await page.evaluate(()=>{
+  const c=getComputedStyle(document.querySelector('.top-item.active'));
+  return c.color==='rgb(109, 74, 224)' && c.borderBottomColor==='rgb(109, 74, 224)' && c.backgroundColor==='rgba(0, 0, 0, 0)'; }));
 ok('자주 가는 사이트 표시', await page.isVisible('#shortcutSection'));
 ok('오늘의 할 일 표시', await page.isVisible('#todayPanel'));
 ok('이모지 없음', !/[\u{1F300}-\u{1FAFF}\u{2190}-\u{21FF}\u{2600}-\u{27BF}]/u.test(await page.textContent('.workspace')));
@@ -63,7 +71,7 @@ ok('검색어 형광펜', (await page.$$eval('#pageGrid mark', n=>n.map(x=>x.tex
 await page.fill('#pageSearch',''); await page.waitForTimeout(400);
 ok('검색어 지우면 할 일 다시 표시', await page.isVisible('#todayPanel'));
 
-// 사이드바 이동 + 상세 보기
+// 상단 메뉴 이동 + 상세 보기
 await page.click('[data-nav="특허"]'); await page.waitForTimeout(600);
 ok('특허 화면 이동', (await page.textContent('#pageHeading'))==='특허');
 ok('특허 카드 렌더', (await page.$$eval('#pageGrid .patent-card', n=>n.length))>100);

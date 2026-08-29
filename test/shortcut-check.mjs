@@ -65,7 +65,7 @@ const icons = await page.evaluate(()=>{
 });
 ok('카드마다 대표 아이콘', icons.rows.every(r=>r.src.startsWith('data:image/svg+xml')), JSON.stringify(icons.rows.map(r=>r.name)));
 ok('7개 카드 색·그림이 전부 다름', icons.unique===icons.rows.length, `${icons.unique}/${icons.rows.length}`);
-ok('아이콘도 카드 안에 맞춰 들어감', icons.rows.every(r=>r.h<=90 && r.w<=152), JSON.stringify(icons.rows[0]));
+ok('아이콘도 카드 안에 맞춰 들어감', icons.rows.every(r=>r.h<=58 && r.w<=96), JSON.stringify(icons.rows[0]));
 ok('이름 없는 새 카드는 placeholder', await page.evaluate(()=>{
   const el = document.createElement('div');   // 렌더 규칙만 확인
   return typeof iconForShortcut === 'function' && iconForShortcut({ name: '무관한사이트', id: 'x' }) === '';
@@ -74,10 +74,14 @@ const url = await page.getAttribute('.shortcut[data-shortcut="shortcut-pour-cont
 const target = await page.getAttribute('.shortcut[data-shortcut="shortcut-pour-contract"] a','target');
 ok('URL · 새 탭', url==='https://poursolution.github.io/pour-contract/' && target==='_blank', `${url} / ${target}`);
 const box = await page.evaluate(()=>{const r=document.querySelector('.shortcut').getBoundingClientRect();return {w:Math.round(r.width),h:Math.round(r.height)};});
-ok('카드 크기 145~160 × 120~140', box.w>=145&&box.w<=160&&box.h>=120&&box.h<=140, JSON.stringify(box));
-ok('7개 + 추가가 한 줄', await page.evaluate(()=>{
+ok('카드 크기 90~110 × 82~100 (한 줄용 축소)', box.w>=90&&box.w<=110&&box.h>=82&&box.h<=100, JSON.stringify(box));
+ok('전체가 한 줄', await page.evaluate(()=>{
   const rows=new Set([...document.querySelectorAll('#shortcutGrid > *')].map(n=>Math.round(n.getBoundingClientRect().top)));
   return rows.size===1; }));
+ok('넘치면 즐겨찾기 줄만 가로 스크롤', await page.evaluate(()=>{
+  const g=document.querySelector('#shortcutGrid');
+  return getComputedStyle(g).overflowX==='auto' && getComputedStyle(g).flexWrap==='nowrap'
+    && Math.round(document.documentElement.scrollWidth - window.innerWidth) <= 1; }));
 
 // 이미지 업로드 → 미리보기 → 저장
 await page.click('.shortcut[data-shortcut="shortcut-card"] [data-shortcut-edit]');
@@ -112,7 +116,7 @@ const thumb = await page.evaluate(()=>{
            inside: ir.width<=br.width+1 && ir.height<=br.height+1,
            imgW:Math.round(ir.width), imgH:Math.round(ir.height) };
 });
-ok('이미지 영역 높이 90px', thumb.h===90, `${thumb.h}px`);
+ok('이미지 영역 높이 58px', thumb.h===58, `${thumb.h}px`);
 ok('앞 그림 여백 없음', thumb.pad>=0, `${thumb.pad}px`);
 ok('이미지가 잘리지 않음(contain · center)', thumb.fit==='contain' && thumb.pos==='50% 50%', JSON.stringify(thumb));
 ok('이미지가 영역 안에 들어감', thumb.inside, JSON.stringify(thumb));

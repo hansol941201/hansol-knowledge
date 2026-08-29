@@ -271,13 +271,15 @@ function goToView(name) {
 }
 
 function renderSideNav() {
+  // 상단 가로 메뉴 — 마지막에 기억 저장소(모달)를 함께 둔다.
   $('#sideNav').innerHTML = NAV_ITEMS.map(item => {
     const target = item.category || item.name;
-    return `<button type="button" class="side-item ${target === pageCategory ? 'active' : ''}" data-nav="${target}">${icon(item.icon)}<span>${item.name}</span></button>`;
-  }).join('');
+    return `<button type="button" class="top-item ${target === pageCategory ? 'active' : ''}" data-nav="${target}">${escapeHtml(item.name)}</button>`;
+  }).join('') + `<button type="button" class="top-item" id="memoryToggle">기억 저장소</button>`;
   $('#sideNav').querySelectorAll('[data-nav]').forEach(button => {
     button.onclick = () => goToView(button.dataset.nav);
   });
+  $('#memoryToggle').onclick = openMemoryLibrary;
 }
 
 function renderLibrary() {
@@ -399,7 +401,7 @@ function renderLibrary() {
     card.querySelector('[data-memory-open]').onclick = () => {
       $('#memorySearch').value = pageSearchCommitted;
       $('#memoryModal').classList.remove('hidden');
-      $('#memoryToggle').classList.add('active');
+      markMemoryOpen(true);
       renderMemories();
     };
   });
@@ -627,13 +629,17 @@ function highlight(text, query) {
 function escapeHtml(text) {
   return String(text).replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]));
 }
-$('#memoryToggle').addEventListener('click', () => {
+function markMemoryOpen(open) {
+  const button = $('#memoryToggle');          // 상단 메뉴가 그려진 뒤에만 있다
+  if (button) button.classList.toggle('active', open);
+}
+function openMemoryLibrary() {
   $('#memoryModal').classList.remove('hidden');
-  $('#memoryToggle').classList.add('active');
+  markMemoryOpen(true);
   renderMemories();
   setTimeout(() => $('#memorySearch').focus(), 50);
-});
-function closeMemoryLibrary() { $('#memoryModal').classList.add('hidden'); $('#memoryToggle').classList.remove('active'); }
+}
+function closeMemoryLibrary() { $('#memoryModal').classList.add('hidden'); markMemoryOpen(false); }
 $('#memoryClose').addEventListener('click', closeMemoryLibrary);
 $('#memoryModal').addEventListener('click', event => { if (event.target.id === 'memoryModal') closeMemoryLibrary(); });
 $('#memorySearch').addEventListener('input', renderMemories);
@@ -989,6 +995,18 @@ function shortcutBadge(item) {
 function sortedShortcuts() {
   return alive(shortcuts).slice().sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
 }
+
+// 즐겨찾기 줄은 세로 휠·트랙패드로도 좌우로 움직인다.
+(() => {
+  const band = $('#shortcutGrid');
+  if (!band) return;
+  band.addEventListener('wheel', event => {
+    if (event.deltaX !== 0) return;                       // 트랙패드 가로 스크롤은 그대로 둔다
+    if (band.scrollWidth <= band.clientWidth) return;      // 넘칠 때만 가로로 바꾼다
+    event.preventDefault();
+    band.scrollLeft += event.deltaY;
+  }, { passive: false });
+})();
 
 function renderShortcuts() {
   const list = sortedShortcuts();

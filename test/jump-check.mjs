@@ -31,7 +31,7 @@ const jump = async (text) => {
   await page.keyboard.press('Enter');
   await page.waitForTimeout(300);
   return page.evaluate(()=>({
-    view: document.querySelector('#sideNav .side-item.active span')?.textContent,
+    view: document.querySelector('#sideNav .top-item.active')?.textContent,
     heading: document.querySelector('#pageHeading')?.textContent,
     box: document.querySelector('#pageSearch').value,
     todos: [...document.querySelectorAll('.todo-item .todo-text')].map(n=>n.textContent) }));
@@ -68,7 +68,7 @@ await page.fill('#pageSearch','할일 한솔');
 await page.keyboard.press('Enter');
 await page.waitForTimeout(1200);
 const saved = await page.evaluate(()=>({
-  view: document.querySelector('#sideNav .side-item.active span')?.textContent,
+  view: document.querySelector('#sideNav .top-item.active')?.textContent,
   box: document.querySelector('#pageSearch').value,
   shown: [...document.querySelectorAll('.todo-item .todo-text')].map(n=>n.textContent),
   todos: todos.filter(t=>!t.deleted).map(t=>({text:t.text, type:t.type, source:t.source})),
@@ -87,7 +87,7 @@ await page.fill('#pageSearch','기록 자오건설 PDF 확인');
 await page.keyboard.press('Enter');
 await page.waitForTimeout(1200);
 const mem = await page.evaluate(()=>({
-  view: document.querySelector('#sideNav .side-item.active span')?.textContent,
+  view: document.querySelector('#sideNav .top-item.active')?.textContent,
   memories: memories.filter(m=>!m.deleted).map(m=>({text:m.text, type:m.type})),
   todos: todos.filter(t=>!t.deleted).length }));
 ok('"기록 …" → 기억으로 저장', mem.memories.some(m=>m.text==='자오건설 PDF 확인' && m.type==='memory'), JSON.stringify(mem.memories));
