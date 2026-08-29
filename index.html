@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>한솔 지식</title>
-  <link rel="stylesheet" href="styles.css?v=32" />
+  <link rel="stylesheet" href="styles.css?v=33" />
 </head>
 <body>
   <div class="workspace">
@@ -37,6 +37,19 @@
         <div id="dashCols" class="dash-cols">
           <section id="todayPanel" class="today-panel"></section>
           <section id="schedulePanel" class="today-panel"></section>
+          <section id="memoPanel" class="today-panel memo-panel">
+            <div class="block-head">
+              <div><h2>빠른 전화 메모</h2><p id="memoStatus" class="memo-status">전화받으며 바로 적으세요</p></div>
+            </div>
+            <textarea id="quickMemo" class="memo-input" spellcheck="false"
+              placeholder="전화받은 내용을 바로 메모하세요. 입력 내용은 자동 저장됩니다."></textarea>
+            <div class="memo-foot">
+              <span id="memoCount" class="memo-count">0자</span>
+              <button type="button" class="ghost-btn" id="memoToRecord">전화 요청 기록으로 저장</button>
+              <button type="button" class="ghost-btn" id="memoCopy">복사</button>
+              <button type="button" class="ghost-btn memo-danger" id="memoClear">전체 삭제</button>
+            </div>
+          </section>
         </div>
 
         <section id="knowledgeBlock" class="block">
@@ -210,6 +223,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="firebase-config.js?v=2"></script>
   <script src="icons.js?v=2"></script>
-  <script src="app.js?v=64"></script>
+  <script src="app.js?v=65"></script>
 </body>
 </html>

@@ -104,6 +104,8 @@ svg { display: block; flex: none; }
   /* 일정: 달력 비율은 그대로 두고, 선택한 날 목록만 카드 안에서 스크롤한다. */
   .main-scroll.dash-fill #schedulePanel { grid-template-rows: auto minmax(0, 1fr); align-content: stretch; }
   .main-scroll.dash-fill #schedulePanel .schedule-list { min-height: 0; align-content: start; overflow-y: auto; }
+  .main-scroll.dash-fill #memoPanel { grid-template-rows: auto minmax(0, 1fr) auto; align-content: stretch; }
+  .main-scroll.dash-fill #memoPanel .memo-input { min-height: 0; height: 100%; resize: none; }
 }
 .block { display: grid; gap: 14px; }
 .block-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
@@ -225,8 +227,24 @@ svg { display: block; flex: none; }
 .todo-tab.active span { color: rgba(255, 255, 255, .78); }
 .todo-empty { padding: 6px 2px; color: var(--ink-3); font-size: 14.5px; }
 
+/* ── 빠른 전화 메모 ─────────────────────────────────────────── */
+.memo-panel { grid-template-rows: auto minmax(0, 1fr) auto; align-content: stretch; }
+.memo-status { color: var(--ink-3); font-size: 12.5px; }
+.memo-status.saved { color: #2F7D51; }
+.memo-input {
+  width: 100%; min-height: 220px; padding: 12px 13px; border: 1px solid var(--line); border-radius: 12px;
+  background: var(--bg); color: var(--ink); font: inherit; font-size: 14.5px; line-height: 1.7;
+  outline: 0; resize: vertical; transition: border-color var(--ease), box-shadow var(--ease);
+}
+.memo-input::placeholder { color: var(--ink-3); }
+.memo-input:focus { border-color: var(--violet-line); background: var(--card); box-shadow: 0 0 0 3px var(--violet-soft); }
+.memo-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.memo-count { margin-right: auto; color: var(--ink-3); font-size: 12.5px; font-variant-numeric: tabular-nums; }
+.memo-danger { color: #C05A5A; }
+.memo-danger:hover { background: #FCF2F2; }
+
 /* ── 일정 (월 달력) ─────────────────────────────────────────── */
-.dash-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: stretch; min-height: 520px; }
+.dash-cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: stretch; min-height: 520px; }
 .dash-cols > .today-panel { align-content: start; }
 .cal-tools { display: flex; align-items: center; gap: 5px; }
 .cal-nav {
@@ -384,6 +402,9 @@ mark { padding: 0 1px; border-radius: 3px; background: #FFF3A0; color: #000; }
   .topbar { padding: 10px 16px; }
   .primary-btn { right: 16px; }
   .shortcut-band { padding: 12px 16px 4px; }
+}
+@media (max-width: 1360px) {
+  .dash-cols { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 1100px) {
   .dash-cols { grid-template-columns: minmax(0, 1fr); }   /* 1열에서는 화면 높이를 채우지 않고 내용만큼만 */
