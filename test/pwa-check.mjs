@@ -75,10 +75,43 @@ ok('검색 미리보기 동작', await (async()=>{
   await page.waitForTimeout(400);
   return page.evaluate(()=>!document.querySelector('#searchPreview').classList.contains('hidden')); })());
 
-// 아이콘 파일 안내 (아직 없으면 알려만 준다)
-const need = ['icon-192.png','icon-512.png','icon-maskable-512.png']
-  .filter(name => !fs.existsSync(path.join(root,'icons',name)));
-if (need.length) console.log(`\n[안내] icons/ 에 아직 없는 파일: ${need.join(', ')} — PNG 를 넣으면 홈 화면 아이콘이 적용됩니다.`);
+// 아이콘 파일 — 실제 파일이 있고 규격이 맞는지
+const pngSize = file => { const b = fs.readFileSync(file); return [b.readUInt32BE(16), b.readUInt32BE(20)]; };
+for (const [name, want] of [['icon-192.png',192],['icon-512.png',512],['icon-maskable-512.png',512]]) {
+  const file = path.join(root,'icons',name);
+  const exists = fs.existsSync(file);
+  ok(`icons/${name} 존재`, exists);
+  if (!exists) continue;
+  const [w,h] = pngSize(file);
+  ok(`icons/${name} 크기 ${want}×${want}`, w===want && h===want, `${w}×${h}`);
+}
+
+const iconCheck = await page.evaluate(async () => {
+  const load = async src => { const img=new Image(); img.src=src; await img.decode();
+    const c=document.createElement('canvas'); c.width=img.naturalWidth; c.height=img.naturalHeight;
+    c.getContext('2d').drawImage(img,0,0);
+    return {w:img.naturalWidth,h:img.naturalHeight,d:c.getContext('2d').getImageData(0,0,c.width,c.height).data}; };
+
+  const any = await load('icons/icon-512.png');
+  const px = (o,x,y)=>{const i=(y*o.w+x)*4;return [o.d[i],o.d[i+1],o.d[i+2],o.d[i+3]];};
+  const anyEdge = px(any,0,256);
+
+  const m = await load('icons/icon-maskable-512.png');
+  // 바깥 12% 테두리가 전부 불투명한 배경색인지 (갤럭시가 동그랗게 잘라도 잘릴 그림이 없음)
+  const pad = Math.round(m.w*0.12);
+  const base = px(m,0,0);
+  let bleed = 0;
+  for (let y=0;y<m.h;y++) for (let x=0;x<m.w;x++) {
+    if (x>=pad && x<m.w-pad && y>=pad && y<m.h-pad) continue;
+    const p = px(m,x,y);
+    if (p[3]<255 || Math.abs(p[0]-base[0])>12 || Math.abs(p[1]-base[1])>12 || Math.abs(p[2]-base[2])>12) bleed++;
+  }
+  return { anyLoaded: any.w===512, anyEdge, maskBase: base, bleed };
+});
+ok('아이콘이 브라우저에서 실제로 열림', iconCheck.anyLoaded);
+ok('아이콘 테두리에 흰 여백 없음', iconCheck.anyEdge[3]===255 && iconCheck.anyEdge[2] > iconCheck.anyEdge[0], iconCheck.anyEdge.join(','));
+ok('maskable 은 배경이 꽉 차 있음(투명·흰 여백 없음)', iconCheck.maskBase[3]===255, iconCheck.maskBase.join(','));
+ok('maskable 안전 여백 확보(바깥 12% 안에 그림 없음)', iconCheck.bleed===0, `침범 ${iconCheck.bleed}px`);
 
 ok('끝까지 오류 없음', errors.length===0, errors.join(' | '));
 await b.close(); server.close();
