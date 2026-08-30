@@ -1,0 +1,20 @@
+{
+  "name": "한솔 Knowledge",
+  "short_name": "한솔 Knowledge",
+  "description": "업무 지식·할 일·일정·전화 메모를 한곳에서 보는 개인 업무 비서",
+  "lang": "ko",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "id": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#FFFFFF",
+  "theme_color": "#1F3A5F",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

@@ -4,6 +4,20 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>한솔 지식</title>
+
+  <!-- 홈 화면에 추가했을 때 앱처럼 보이게 하는 설정(PWA). 화면·기능·데이터에는 영향이 없다. -->
+  <link rel="manifest" href="manifest.json?v=1" />
+  <meta name="theme-color" content="#1F3A5F" />
+  <meta name="application-name" content="한솔 Knowledge" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="한솔 Knowledge" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png?v=1" />
+  <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png?v=1" />
+  <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png?v=1" />
+  <link rel="shortcut icon" type="image/png" href="icons/icon-192.png?v=1" />
+
   <link rel="stylesheet" href="styles.css?v=37" />
 </head>
 <body>
@@ -225,5 +239,15 @@
   <script src="search-rules.js?v=1"></script>
   <script src="icons.js?v=2"></script>
   <script src="app.js?v=68"></script>
+  <script>
+    // 홈 화면 앱(주소창 없는 standalone)으로 열리게 하는 등록. 저장은 하지 않는 워커라
+    // 사이트를 고치면 항상 최신 파일을 받는다. 실패해도 사이트 동작에는 영향이 없다.
+    if ('serviceWorker' in navigator && location.protocol === 'https:'
+        && new URLSearchParams(location.search).get('overlay') !== '1') {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(error => console.warn('홈 화면 앱 설정 등록 실패', error));
+      });
+    }
+  </script>
 </body>
 </html>
