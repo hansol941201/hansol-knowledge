@@ -243,7 +243,6 @@ var searchIndex = null;
 var searchIndexDirty = true;
 let detailItemId = null;   // 상세 창에 띄운 지식(수정·삭제 대상)
 let pageSearchCommitted = '';
-let showAllTodos = false;
 let viewBeforeSearch = '';   // 검색을 지우면 보던 화면으로 되돌린다
 
 function categoryItems(name) {
@@ -273,7 +272,6 @@ function goToView(name) {
   closeSearchPreview();
   pageCategory = name;
   viewBeforeSearch = '';
-  showAllTodos = name === '할 일';
   $('#pageSearch').value = '';
   pageSearchCommitted = '';
   renderAll();
@@ -385,8 +383,6 @@ function renderLibrary() {
   $('#dashCols').classList.toggle('hidden', !onDashboard && pageCategory !== '할 일');
   $('#schedulePanel').classList.toggle('hidden', !onDashboard);
   $('#knowledgeBlock').classList.toggle('hidden', onDashboard);
-  // 대시보드일 때만 두 카드가 남은 화면 높이를 채우도록 한다(레이아웃 높이 전용).
-  $('.main-scroll').classList.toggle('dash-fill', onDashboard);
   $('#pageCategories').classList.toggle('hidden', Boolean(term));
   paintIcons($('#pageGrid'));
   // 카드 본문을 누르면 상세로 연다(버튼 클릭은 제외).
@@ -445,7 +441,6 @@ function todayKey() {
   return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
 }
 const isTodoEntry = (item) => Boolean(item) && (!item.type || item.type === 'todo');
-const TODO_PREVIEW = 6;
 let todoTab = 'active';            // 'active' = 할 일, 'done' = 완료
 let todoUndo = null;               // 실행 취소용 직전 상태
 
@@ -460,9 +455,25 @@ function todoDoneLabel(todo) {
   const when = todo.doneAt || todo.updatedAt;
   return when ? savedLabel({ createdAt: when }) : '완료일 확인';
 }
+// 마감일이 빠른 순. 날짜가 없는 항목은 가장 아래에 둔다.
 function activeTodos() {
   return alive(todos).filter(isTodoEntry).filter(todo => !todo.done)
-    .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')) || updatedTime(b) - updatedTime(a));
+    .sort((a, b) => {
+      const left = String(a.date || '').trim();
+      const right = String(b.date || '').trim();
+      if (left && !right) return -1;
+      if (!left && right) return 1;
+      if (left && right && left !== right) return left.localeCompare(right);
+      return updatedTime(b) - updatedTime(a);
+    });
+}
+// 오늘 / 지연 / 앞으로 / 날짜 없음 — 배지와 색을 고르는 기준
+function todoDateState(todo) {
+  const date = String(todo.date || '').trim();
+  if (!date) return 'none';
+  const today = todayKey();
+  if (date === today) return 'today';
+  return date < today ? 'late' : 'future';
 }
 function doneTodos() {
   return alive(todos).filter(isTodoEntry).filter(todo => todo.done)
@@ -478,8 +489,7 @@ function renderTodos() {
 
   const active = activeTodos();
   const done = doneTodos();
-  const expanded = showAllTodos || onTodoView;
-  const list = todoTab === 'done' ? done : (expanded ? active : active.slice(0, TODO_PREVIEW));
+  const list = todoTab === 'done' ? done : active;   // 접지 않고 항상 전부 보여 준다
 
   panel.innerHTML = `
     <div class="block-head">
@@ -490,33 +500,43 @@ function renderTodos() {
           <button type="button" class="todo-tab ${todoTab === 'done' ? 'active' : ''}" data-todo-tab="done">완료 <span>${done.length}</span></button>
         </div>
       </div>
-      ${todoTab === 'done'
-        ? (done.length ? `<button type="button" class="ghost-btn" id="todoClearDone">완료 목록 비우기</button>` : '')
-        : (active.length > TODO_PREVIEW && !onTodoView ? `<button type="button" class="ghost-btn" id="todoToggle">${expanded ? '접기' : '전체 보기'}</button>` : '')}
+      ${todoTab === 'done' && done.length ? `<button type="button" class="ghost-btn" id="todoClearDone">완료 목록 비우기</button>` : ''}
     </div>
-    <div class="todo-list">${list.length ? list.map(todo => todoTab === 'done' ? `
+    <div class="todo-list">${list.length ? list.map(todo => {
+      const state = todoDateState(todo);
+      const when = escapeHtml(todo.date || '날짜 확인');
+      return todoTab === 'done' ? `
       <div class="todo-item done" data-todo-id="${todo.id}">
         <span class="todo-check done">${icon('check', 13)}</span>
         <span class="todo-text">${escapeHtml(todo.text)}</span>
-        <time>${escapeHtml(todo.date || '날짜 확인')}</time>
-        <time class="todo-doneat">완료 ${escapeHtml(todoDoneLabel(todo))}</time>
-        <button type="button" class="todo-mini" data-todo-restore title="복구">복구</button>
-        <button type="button" class="todo-mini danger" data-todo-purge title="영구 삭제">삭제</button>
+        <span class="todo-meta">
+          <time>${when}</time>
+          <time class="todo-doneat">완료 ${escapeHtml(todoDoneLabel(todo))}</time>
+        </span>
+        <span class="todo-tools">
+          <button type="button" class="todo-mini" data-todo-restore title="복구">복구</button>
+          <button type="button" class="todo-mini danger" data-todo-purge title="영구 삭제">삭제</button>
+        </span>
       </div>` : `
-      <label class="todo-item" data-todo-id="${todo.id}">
+      <label class="todo-item ${state === 'late' ? 'late' : ''}" data-todo-id="${todo.id}">
         <input type="checkbox">
         <span class="todo-check">${icon('check', 13)}</span>
         <span class="todo-text">${escapeHtml(todo.text)}</span>
-        <time>${escapeHtml(todo.date || '날짜 확인')}</time>
-        <button type="button" class="todo-mini" data-todo-edit title="수정">${icon('pencil', 13)}</button>
-        <button type="button" class="todo-remove" data-todo-delete title="삭제">${icon('more', 14)}</button>
-      </label>`).join('') : `<div class="todo-empty">${todoTab === 'done' ? '완료한 할 일이 없습니다.' : '지식창에 “할일 내용”을 입력해보세요.'}</div>`}</div>`;
+        <span class="todo-meta">
+          ${state === 'today' ? '<b class="todo-badge today">오늘</b>' : ''}
+          ${state === 'late' ? '<b class="todo-badge late">지연</b>' : ''}
+          <time class="${state}">${when}</time>
+        </span>
+        <span class="todo-tools">
+          <button type="button" class="todo-mini" data-todo-edit title="수정">${icon('pencil', 13)}</button>
+          <button type="button" class="todo-remove" data-todo-delete title="삭제">${icon('more', 14)}</button>
+        </span>
+      </label>`;
+    }).join('') : `<div class="todo-empty">${todoTab === 'done' ? '완료한 할 일이 없습니다.' : '지식창에 “할일 내용”을 입력해보세요.'}</div>`}</div>`;
 
   panel.querySelectorAll('[data-todo-tab]').forEach(button => {
     button.onclick = () => { todoTab = button.dataset.todoTab; renderTodos(); };
   });
-  const toggle = $('#todoToggle');
-  if (toggle) toggle.onclick = () => { showAllTodos = !showAllTodos; renderTodos(); };
   const clearDone = $('#todoClearDone');
   if (clearDone) clearDone.onclick = () => {
     const rows = doneTodos();

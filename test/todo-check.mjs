@@ -35,7 +35,7 @@ const panelText = () => page.textContent('#todayPanel');
 // 1. 상태 배지 제거 · 날짜 유지
 ok('진행중 배지 없음', (await page.$$('#todayPanel .todo-state')).length===0 && !(await panelText()).includes('진행중'));
 ok('날짜는 오른쪽에 유지', (await page.$eval('#todayPanel .todo-item time', n=>n.textContent))==='2026-08-26');
-const order = await page.$eval('#todayPanel .todo-item', n=>[...n.children].map(c=>c.tagName+'.'+(c.className||'')).join('|'));
+const order = await page.$eval('#todayPanel .todo-item', n=>[...n.querySelectorAll('*')].map(c=>c.tagName+'.'+(typeof c.className==='string'?c.className:'')).join('|'));
 ok('체크 → 내용 → 날짜 → 수정 → 삭제 순', /todo-check.*todo-text.*TIME.*todo-mini.*todo-remove/.test(order), order);
 
 // 2. 수정
