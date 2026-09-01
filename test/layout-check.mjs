@@ -25,7 +25,7 @@ ok('자바스크립트 오류 없음', errors.length===0, errors.join(' | '));
 ok('세로 사이드바 없음', (await page.$$('.sidebar')).length===0);
 ok('상단 가로 메뉴 표시', await page.isVisible('.topnav') && await page.isVisible('#sideNav.top-nav'));
 ok('메뉴 순서', (await page.$$eval('#sideNav .top-item', n=>n.map(x=>x.textContent))).join('/')
-  ==='대시보드/내 지식/할 일/기억/특허/협력업체/계정/연락처/업무지식/기억 저장소');
+  ==='대시보드/내 지식/할 일/기억/특허/협력업체/계정/연락처/업무지식/메일함/기억 저장소');
 ok('메뉴는 한 줄', await page.evaluate(()=>{
   const tops=new Set([...document.querySelectorAll('#sideNav .top-item')].map(n=>Math.round(n.getBoundingClientRect().top)));
   return tops.size===1; }));

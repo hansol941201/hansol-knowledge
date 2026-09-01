@@ -50,6 +50,9 @@ let todos = JSON.parse(localStorage.getItem('knowledge-todos') || '[]');
 let memories = JSON.parse(localStorage.getItem('knowledge-memories') || '[]');
 let accountMeta = JSON.parse(localStorage.getItem('knowledge-account-meta') || '[]');
 let schedule = JSON.parse(localStorage.getItem('knowledge-schedule') || '[]');
+let mailTemplates = JSON.parse(localStorage.getItem('knowledge-mail-templates') || '[]');   // 메일 문구
+let mailLog = JSON.parse(localStorage.getItem('knowledge-mail-log') || '[]');               // 보낸 기록
+let mailConfig = readMailConfig();                                                          // 발송 설정
 let shortcuts = JSON.parse(localStorage.getItem('knowledge-shortcuts') || '[]');
 const partners = Array.isArray(window.PARTNERS) ? window.PARTNERS : [];
 const patents = Array.isArray(window.PATENTS) ? window.PATENTS : [];
@@ -91,6 +94,7 @@ function ensureStamps(list) {
   return list;
 }
 ensureStamps(knowledge); ensureStamps(todos); ensureStamps(memories); ensureStamps(accountMeta); ensureStamps(shortcuts); ensureStamps(schedule);
+ensureStamps(mailTemplates); ensureStamps(mailLog);
 
 // 배열마다 자기 종류만 남긴다. 예전 버전이 기억을 todos 에 넣어 둔 경우처럼
 // 잘못 들어간 항목은 화면에서 숨기는 게 아니라 제 배열로 옮겨서 실제로 분리한다.
@@ -281,10 +285,12 @@ function renderSideNav() {
   $('#sideNav').innerHTML = NAV_ITEMS.map(item => {
     const target = item.category || item.name;
     return `<button type="button" class="top-item ${target === pageCategory ? 'active' : ''}" data-nav="${target}">${escapeHtml(item.name)}</button>`;
-  }).join('') + `<button type="button" class="top-item" id="memoryToggle">기억 저장소</button>`;
+  }).join('') + `<button type="button" class="top-item" id="mailToggle">메일함</button>`
+    + `<button type="button" class="top-item" id="memoryToggle">기억 저장소</button>`;
   $('#sideNav').querySelectorAll('[data-nav]').forEach(button => {
     button.onclick = () => goToView(button.dataset.nav);
   });
+  $('#mailToggle').onclick = openMailbox;
   $('#memoryToggle').onclick = openMemoryLibrary;
   // 좁은 화면에서 선택한 메뉴가 가려져 있으면 보이는 위치까지 메뉴 줄만 움직인다(페이지는 그대로).
   const nav = $('#sideNav');
@@ -691,6 +697,8 @@ function actionEntries() {
     return { key: `nav:${target}`, icon: item.icon, name: item.name,
       desc: lead[1] || '', where: '메뉴', run: () => goToView(target) };
   });
+  rows.push({ key: 'nav:mail', icon: 'link', name: '메일함',
+    desc: '협력업체에 한 곳씩 따로 메일을 보냅니다.', where: '메뉴', run: openMailbox });
   rows.push({ key: 'nav:memory', icon: 'bookmark', name: '기억 저장소',
     desc: '메모처럼 남겨 둔 기록을 모아 봅니다.', where: '메뉴', run: openMemoryLibrary });
   rows.push({ key: 'act:add', icon: 'plus', name: '지식 추가',
@@ -1132,6 +1140,436 @@ const QUICK_MEMO_FIELD = 'quickPhoneMemoDraft';       // Firebase 문서 필드
 function keepQuickMemoField(remote) {
   const kept = remote && remote[QUICK_MEMO_FIELD];
   return kept === undefined ? {} : { [QUICK_MEMO_FIELD]: kept };
+}
+
+
+// ── 메일함 ───────────────────────────────────────────────────
+// 협력업체에 한 곳씩 따로 메일을 보낸다. 문구(제목·내용)는 저장해 두고 골라 쓴다.
+// 이 사이트는 서버가 없어서 실제 발송은 사용자가 연결한 발송 서비스를 거친다.
+const MAIL_TOKENS = ['{{업체명}}', '{{이메일}}', '{{전화}}', '{{오늘}}'];
+const MAIL_GAS_CODE = `function doPost(e) {
+  var body = JSON.parse(e.postData.contents);
+  if (body.token !== '여기에-암호말') {
+    return ContentService.createTextOutput(JSON.stringify({ ok: false, error: '암호말이 다릅니다' }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  try {
+    MailApp.sendEmail({
+      to: body.to,
+      subject: body.subject,
+      body: body.body,
+      name: body.fromName || undefined,
+      replyTo: body.replyTo || undefined
+    });
+    return ContentService.createTextOutput(JSON.stringify({ ok: true }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ ok: false, error: String(err) }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}`;
+
+let mailTab = 'write';
+let mailPicked = new Set();          // 선택한 협력업체 이메일
+let mailSending = false;
+let mailStopRequested = false;
+let mailEditingTemplateId = null;
+let mailLogFailedOnly = false;
+
+function readMailConfig() {
+  const empty = { provider: 'emailjs', serviceId: '', templateId: '', publicKey: '',
+                  gasUrl: '', gasToken: '', fromName: '', replyTo: '', updatedAt: '' };
+  try {
+    const raw = JSON.parse(localStorage.getItem('knowledge-mail-config') || 'null');
+    if (raw && typeof raw === 'object') return { ...empty, ...raw };
+  } catch { /* 값이 깨져 있어도 설정을 지우지는 않는다 */ }
+  return empty;
+}
+function writeMailConfig(next) {
+  mailConfig = { ...mailConfig, ...next, updatedAt: nowIso() };
+  try { localStorage.setItem('knowledge-mail-config', JSON.stringify(mailConfig)); } catch { /* noop */ }
+}
+// 설정도 다른 기기와 맞춘다 — updatedAt 이 더 최근인 쪽을 남긴다.
+function newerMailConfig(mine, theirs) {
+  if (!theirs || typeof theirs !== 'object') return mine;
+  if (!mine.updatedAt) return theirs.updatedAt ? { ...mine, ...theirs } : mine;
+  if (!theirs.updatedAt) return mine;
+  return String(theirs.updatedAt) > String(mine.updatedAt) ? { ...mine, ...theirs } : mine;
+}
+function mailConfigReady() {
+  if (mailConfig.provider === 'gas') return Boolean(mailConfig.gasUrl.trim());
+  return Boolean(mailConfig.serviceId.trim() && mailConfig.templateId.trim() && mailConfig.publicKey.trim());
+}
+
+// 협력업체 중 메일 주소가 있는 곳만 대상으로 한다.
+function mailPartners() {
+  return partners.filter(item => String(item.email || '').includes('@'));
+}
+function mailFill(text, partner) {
+  const today = new Date();
+  const day = `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일`;
+  return String(text || '')
+    .replaceAll('{{업체명}}', String(partner?.name || ''))
+    .replaceAll('{{이메일}}', String(partner?.email || ''))
+    .replaceAll('{{전화}}', String(partner?.phone || ''))
+    .replaceAll('{{오늘}}', day);
+}
+
+// ── 실제 발송 ────────────────────────────────────────────────
+// 한 통 보내고 성공/실패를 그대로 돌려준다. 실패해도 다음 곳으로 넘어간다.
+async function sendOneMail(to, subject, body) {
+  const config = mailConfig;
+  if (config.provider === 'gas') {
+    const response = await fetch(config.gasUrl.trim(), {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },   // Apps Script 는 이 형식이어야 통과한다
+      body: JSON.stringify({ token: config.gasToken, to, subject, body,
+        fromName: config.fromName || '', replyTo: config.replyTo || '' })
+    });
+    const text = await response.text();
+    let data = null;
+    try { data = JSON.parse(text); } catch { /* 응답이 JSON 이 아니면 아래에서 그대로 알린다 */ }
+    if (!response.ok) throw new Error(`발송 서버 응답 ${response.status}`);
+    if (!data) throw new Error('발송 서버 응답을 읽지 못했습니다 (배포 설정을 확인해 주세요)');
+    if (!data.ok) throw new Error(data.error || '발송 실패');
+    return true;
+  }
+  const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      service_id: config.serviceId.trim(),
+      template_id: config.templateId.trim(),
+      user_id: config.publicKey.trim(),
+      template_params: {
+        to_email: to, subject, message: body,
+        from_name: config.fromName || '', reply_to: config.replyTo || ''
+      }
+    })
+  });
+  if (!response.ok) {
+    const detail = (await response.text().catch(() => '')).slice(0, 120);
+    throw new Error(detail || `발송 서비스 응답 ${response.status}`);
+  }
+  return true;
+}
+
+function addMailLog(partner, subject, ok, error) {
+  mailLog.unshift(newEntry({
+    type: 'mailLog', to: partner.email, name: partner.name || '',
+    subject, ok: Boolean(ok), error: error ? String(error).slice(0, 200) : ''
+  }, '메일함'));
+  if (mailLog.length > 400) mailLog.length = 400;    // 기록이 끝없이 늘지 않게
+}
+
+async function runMailSend() {
+  if (mailSending) return;
+  if (!mailConfigReady()) {
+    showToast('먼저 발송 설정에서 메일 보내는 방법을 연결해 주세요', 3000);
+    return switchMailTab('setup');
+  }
+  const subject = $('#mailSubject').value.trim();
+  const body = $('#mailBody').value;
+  if (!subject) return showToast('제목을 적어 주세요');
+  if (!body.trim()) return showToast('내용을 적어 주세요');
+  const targets = mailPartners().filter(item => mailPicked.has(item.email));
+  if (!targets.length) return showToast('보낼 곳을 한 곳 이상 선택해 주세요');
+  if (!confirm(`${targets.length}곳에 한 곳씩 따로 보냅니다.\n보내고 나면 되돌릴 수 없습니다.\n진행할까요?`)) return;
+
+  mailSending = true;
+  mailStopRequested = false;
+  $('#mailSend').disabled = true;
+  $('#mailStop').classList.remove('hidden');
+  $('#mailProgress').classList.remove('hidden');
+  $('#mailProgress').innerHTML = '';
+
+  let done = 0, failed = 0;
+  for (const partner of targets) {
+    if (mailStopRequested) break;
+    const row = document.createElement('div');
+    row.className = 'mail-progress-row';
+    row.innerHTML = `<span class="mail-dot sending"></span><b></b><small>보내는 중…</small>`;
+    row.querySelector('b').textContent = partner.name || partner.email;
+    $('#mailProgress').prepend(row);
+    try {
+      await sendOneMail(partner.email, mailFill(subject, partner), mailFill(body, partner));
+      done += 1;
+      row.querySelector('.mail-dot').className = 'mail-dot ok';
+      row.querySelector('small').textContent = '보냄';
+      addMailLog(partner, mailFill(subject, partner), true, '');
+    } catch (error) {
+      failed += 1;
+      row.querySelector('.mail-dot').className = 'mail-dot bad';
+      row.querySelector('small').textContent = String(error.message || error);
+      addMailLog(partner, mailFill(subject, partner), false, error.message || error);
+    }
+    $('#mailStatus').textContent = `${done + failed} / ${targets.length}곳 · 보냄 ${done} · 실패 ${failed}`;
+    saveLocalState();
+    if (done + failed < targets.length) await new Promise(resolve => setTimeout(resolve, 400));
+  }
+
+  mailSending = false;
+  $('#mailSend').disabled = false;
+  $('#mailStop').classList.add('hidden');
+  queueCloudSave();
+  renderMailLog();
+  const stopped = mailStopRequested ? ' (중단됨)' : '';
+  $('#mailStatus').textContent = `보냄 ${done}곳 · 실패 ${failed}곳${stopped}`;
+  showToast(failed ? `보냄 ${done}곳 · 실패 ${failed}곳 — 보낸 기록에서 다시 보낼 수 있습니다` : `${done}곳에 보냈습니다`, 3000);
+}
+
+// ── 화면 그리기 ──────────────────────────────────────────────
+function renderMailPartners() {
+  const query = normalize($('#mailSearch').value || '');
+  const list = mailPartners().filter(item => !query || normalize(`${item.name} ${item.email}`).includes(query));
+  $('#mailPickedCount').textContent = `${mailPicked.size}곳 선택`;
+  $('#mailPartners').innerHTML = list.length ? list.map(item => `
+    <label class="mail-partner">
+      <input type="checkbox" data-mail-pick="${escapeHtml(item.email)}" ${mailPicked.has(item.email) ? 'checked' : ''} />
+      <span><b>${escapeHtml(item.name || '이름 없음')}</b><small>${escapeHtml(item.email)}</small></span>
+    </label>`).join('') : '<p class="mail-empty">찾는 업체가 없습니다.</p>';
+  $('#mailPartners').querySelectorAll('[data-mail-pick]').forEach(box => {
+    box.onchange = () => {
+      if (box.checked) mailPicked.add(box.dataset.mailPick); else mailPicked.delete(box.dataset.mailPick);
+      $('#mailPickedCount').textContent = `${mailPicked.size}곳 선택`;
+    };
+  });
+}
+
+function renderMailTemplatePick() {
+  const list = alive(mailTemplates);
+  $('#mailTemplatePick').innerHTML = `<option value="">직접 쓰기</option>`
+    + list.map(item => `<option value="${item.id}">${escapeHtml(item.name)}</option>`).join('');
+}
+
+function renderMailTemplates() {
+  const list = alive(mailTemplates);
+  $('#mailTemplateList').innerHTML = list.length ? list.map(item => `
+    <article class="mail-template" data-mail-template="${item.id}">
+      <h4>${escapeHtml(item.name)}</h4>
+      <p class="mail-template-subject">${escapeHtml(item.subject || '(제목 없음)')}</p>
+      <pre>${escapeHtml(item.body || '')}</pre>
+      <footer>
+        <button type="button" class="ghost-btn" data-mail-use>메일 쓰기에 넣기</button>
+        <button type="button" class="ghost-btn" data-mail-edit>수정</button>
+        <button type="button" class="ghost-btn memo-danger" data-mail-del>삭제</button>
+      </footer>
+    </article>`).join('') : '<p class="mail-empty">저장해 둔 문구가 없습니다. 메일 쓰기에서 “이 문구 저장”을 누르면 여기에 쌓입니다.</p>';
+
+  $('#mailTemplateList').querySelectorAll('[data-mail-template]').forEach(card => {
+    const item = mailTemplates.find(x => x.id === card.dataset.mailTemplate);
+    card.querySelector('[data-mail-use]').onclick = () => { applyMailTemplate(item); switchMailTab('write'); };
+    card.querySelector('[data-mail-edit]').onclick = () => editMailTemplate(item);
+    card.querySelector('[data-mail-del]').onclick = () => {
+      if (!confirm(`「${item.name}」 문구를 삭제할까요?`)) return;
+      item.deleted = true; touch(item);
+      saveLocalState(); queueCloudSave(); renderMailTemplates(); renderMailTemplatePick();
+      showUndoToast('문구 삭제됨', () => {
+        item.deleted = false; touch(item);
+        saveLocalState(); queueCloudSave(); renderMailTemplates(); renderMailTemplatePick();
+      });
+    };
+  });
+}
+
+function applyMailTemplate(item) {
+  if (!item) return;
+  $('#mailTemplateName').value = item.name || '';
+  $('#mailSubject').value = item.subject || '';
+  $('#mailBody').value = item.body || '';
+  $('#mailTemplatePick').value = item.id;
+}
+// 문구 관리에서 "수정"을 누르면 메일 쓰기 화면에 그대로 불러와 고친다.
+function editMailTemplate(item) {
+  applyMailTemplate(item);
+  switchMailTab('write');
+  setTimeout(() => $('#mailTemplateName').focus(), 50);
+}
+// asNew 가 true 면 고르고 있던 문구는 그대로 두고 새 문구로 하나 더 만든다.
+function saveCurrentMailTemplate(asNew) {
+  const subject = $('#mailSubject').value.trim();
+  const body = $('#mailBody').value;
+  if (!subject && !body.trim()) return showToast('저장할 내용이 없습니다');
+  const name = $('#mailTemplateName').value.trim() || subject.slice(0, 30);
+  if (!name) return showToast('문구 이름을 적어 주세요');
+
+  const chosen = $('#mailTemplatePick').value;
+  const existing = asNew ? null : (chosen ? mailTemplates.find(x => x.id === chosen && !x.deleted) : null);
+  if (existing) {
+    Object.assign(existing, { name, subject, body }); touch(existing);
+    saveLocalState(); queueCloudSave(); renderMailTemplates(); renderMailTemplatePick();
+    $('#mailTemplatePick').value = existing.id;
+    return showToast('문구를 고쳤습니다');
+  }
+  const item = newEntry({ type: 'mailTemplate', name, subject, body }, '메일함');
+  mailTemplates.unshift(item);
+  saveLocalState(); queueCloudSave(); renderMailTemplates(); renderMailTemplatePick();
+  $('#mailTemplatePick').value = item.id;
+  $('#mailTemplateName').value = name;
+  showToast('문구를 저장했습니다');
+}
+
+function renderMailLog() {
+  const list = alive(mailLog).filter(item => !mailLogFailedOnly || !item.ok);
+  $('#mailLogList').innerHTML = list.length ? list.map(item => `
+    <div class="mail-log-row ${item.ok ? '' : 'bad'}">
+      <span class="mail-dot ${item.ok ? 'ok' : 'bad'}"></span>
+      <div>
+        <b>${escapeHtml(item.name || item.to)}</b>
+        <small>${escapeHtml(item.to)} · ${escapeHtml(savedLabel(item))}</small>
+        <p>${escapeHtml(item.subject || '')}</p>
+        ${item.ok ? '' : `<em>${escapeHtml(item.error || '실패')}</em>`}
+      </div>
+    </div>`).join('') : '<p class="mail-empty">보낸 기록이 없습니다.</p>';
+}
+
+function switchMailTab(name) {
+  mailTab = name;
+  $('#mailModal').querySelectorAll('.mail-tab').forEach(tab => tab.classList.toggle('active', tab.dataset.mailTab === name));
+  $('#mailWrite').classList.toggle('hidden', name !== 'write');
+  $('#mailTemplatePanel').classList.toggle('hidden', name !== 'template');
+  $('#mailLogPanel').classList.toggle('hidden', name !== 'log');
+  $('#mailSetupPanel').classList.toggle('hidden', name !== 'setup');
+  if (name === 'template') renderMailTemplates();
+  if (name === 'log') renderMailLog();
+  if (name === 'setup') paintMailSetup();
+}
+
+function paintMailSetup() {
+  $('#mailProvider').value = mailConfig.provider || 'emailjs';
+  $('#mailServiceId').value = mailConfig.serviceId || '';
+  $('#mailTemplateId').value = mailConfig.templateId || '';
+  $('#mailPublicKey').value = mailConfig.publicKey || '';
+  $('#mailGasUrl').value = mailConfig.gasUrl || '';
+  $('#mailGasToken').value = mailConfig.gasToken || '';
+  $('#mailFromName').value = mailConfig.fromName || '';
+  $('#mailReplyTo').value = mailConfig.replyTo || '';
+  $('#mailGasCode').textContent = MAIL_GAS_CODE;
+  const gas = ($('#mailProvider').value === 'gas');
+  $('#mailSetupGas').classList.toggle('hidden', !gas);
+  $('#mailSetupEmailjs').classList.toggle('hidden', gas);
+  $('#mailSetupState').textContent = mailConfigReady()
+    ? '연결됨 — 이제 메일 쓰기에서 바로 보낼 수 있습니다.'
+    : '아직 연결되지 않았습니다. 위 칸을 채우고 저장해 주세요.';
+  $('#mailHint').textContent = mailConfigReady()
+    ? '협력업체에 한 곳씩 따로 보냅니다'
+    : '발송 설정을 먼저 연결해 주세요';
+}
+
+function openMailbox() {
+  $('#mailModal').classList.remove('hidden');
+  renderMailPartners();
+  renderMailTemplatePick();
+  paintMailSetup();
+  switchMailTab(mailConfigReady() ? 'write' : 'setup');
+  setTimeout(() => $('#mailSearch').focus(), 50);
+}
+function closeMailbox() {
+  if (mailSending && !confirm('보내는 중입니다. 창을 닫아도 발송은 계속됩니다.\n닫을까요?')) return;
+  $('#mailModal').classList.add('hidden');
+}
+
+function setupMailbox() {
+  $('#mailClose').onclick = closeMailbox;
+  $('#mailModal').addEventListener('click', event => { if (event.target.id === 'mailModal') closeMailbox(); });
+  $('#mailModal').querySelectorAll('.mail-tab').forEach(tab => { tab.onclick = () => switchMailTab(tab.dataset.mailTab); });
+
+  $('#mailSearch').addEventListener('input', renderMailPartners);
+  $('#mailPickAll').onclick = () => {
+    $('#mailPartners').querySelectorAll('[data-mail-pick]').forEach(box => mailPicked.add(box.dataset.mailPick));
+    renderMailPartners();
+  };
+  $('#mailPickNone').onclick = () => { mailPicked.clear(); renderMailPartners(); };
+
+  $('#mailTemplatePick').onchange = () => {
+    const item = mailTemplates.find(x => x.id === $('#mailTemplatePick').value && !x.deleted);
+    if (item) applyMailTemplate(item);
+    else { $('#mailTemplateName').value = ''; }
+  };
+  $('#mailModal').querySelectorAll('[data-token]').forEach(chip => {
+    chip.onclick = () => {
+      const box = $('#mailBody');
+      const at = box.selectionStart ?? box.value.length;
+      box.value = box.value.slice(0, at) + chip.dataset.token + box.value.slice(box.selectionEnd ?? at);
+      box.focus();
+      box.selectionStart = box.selectionEnd = at + chip.dataset.token.length;
+    };
+  });
+  $('#mailSaveTemplate').onclick = () => saveCurrentMailTemplate(false);
+  $('#mailSaveTemplateNew').onclick = () => saveCurrentMailTemplate(true);
+  $('#mailPreviewBtn').onclick = () => {
+    const first = mailPartners().find(item => mailPicked.has(item.email)) || mailPartners()[0];
+    const panel = $('#mailPreview');
+    if (!first) { panel.textContent = '미리 볼 업체가 없습니다.'; panel.classList.remove('hidden'); return; }
+    panel.innerHTML = `<b></b><i></i><pre></pre>`;
+    panel.querySelector('b').textContent = `받는 곳: ${first.name} <${first.email}>`;
+    panel.querySelector('i').textContent = mailFill($('#mailSubject').value, first);
+    panel.querySelector('pre').textContent = mailFill($('#mailBody').value, first);
+    panel.classList.remove('hidden');
+  };
+  $('#mailSend').onclick = runMailSend;
+  $('#mailStop').onclick = () => { mailStopRequested = true; $('#mailStatus').textContent = '중단하는 중…'; };
+
+  $('#mailTemplateNew').onclick = () => {
+    $('#mailTemplatePick').value = '';
+    $('#mailTemplateName').value = '';
+    $('#mailSubject').value = '';
+    $('#mailBody').value = '';
+    switchMailTab('write');
+    $('#mailTemplateName').focus();
+  };
+
+  $('#mailLogFailedOnly').onchange = () => { mailLogFailedOnly = $('#mailLogFailedOnly').checked; renderMailLog(); };
+  $('#mailLogRetry').onclick = () => {
+    const failedAddresses = alive(mailLog).filter(item => !item.ok).map(item => item.to);
+    if (!failedAddresses.length) return showToast('실패한 곳이 없습니다');
+    mailPicked = new Set(failedAddresses.filter(address => mailPartners().some(item => item.email === address)));
+    renderMailPartners();
+    switchMailTab('write');
+    showToast(`실패한 ${mailPicked.size}곳을 골라 뒀습니다`, 2000);
+  };
+  $('#mailLogClear').onclick = () => {
+    if (!alive(mailLog).length) return;
+    if (!confirm('보낸 기록을 모두 지울까요?\n이미 보낸 메일은 취소되지 않습니다.')) return;
+    for (const item of mailLog) { item.deleted = true; touch(item); }
+    saveLocalState(); queueCloudSave(); renderMailLog();
+    showToast('기록을 비웠습니다');
+  };
+
+  $('#mailProvider').onchange = () => {
+    const gas = $('#mailProvider').value === 'gas';
+    $('#mailSetupGas').classList.toggle('hidden', !gas);
+    $('#mailSetupEmailjs').classList.toggle('hidden', gas);
+  };
+  $('#mailGasCopy').onclick = () => copyText(MAIL_GAS_CODE);
+  $('#mailSetupSave').onclick = () => {
+    writeMailConfig({
+      provider: $('#mailProvider').value,
+      serviceId: $('#mailServiceId').value.trim(),
+      templateId: $('#mailTemplateId').value.trim(),
+      publicKey: $('#mailPublicKey').value.trim(),
+      gasUrl: $('#mailGasUrl').value.trim(),
+      gasToken: $('#mailGasToken').value.trim(),
+      fromName: $('#mailFromName').value.trim(),
+      replyTo: $('#mailReplyTo').value.trim()
+    });
+    queueCloudSave();
+    paintMailSetup();
+    showToast(mailConfigReady() ? '발송 설정을 저장했습니다' : '저장했지만 아직 빈 칸이 있습니다', 2000);
+  };
+  $('#mailTestSend').onclick = async () => {
+    const to = $('#mailTestTo').value.trim();
+    if (!to.includes('@')) return showToast('시험 삼아 보낼 내 메일 주소를 적어 주세요');
+    $('#mailSetupState').textContent = '보내는 중…';
+    try {
+      await sendOneMail(to, '[한솔 지식] 메일함 시험 발송', '이 메일이 도착했다면 메일함 연결이 끝난 것입니다.');
+      $('#mailSetupState').textContent = `${to} 로 보냈습니다. 받은편지함을 확인해 주세요.`;
+      showToast('시험 발송 완료');
+    } catch (error) {
+      $('#mailSetupState').textContent = `실패: ${error.message || error}`;
+      showToast('시험 발송 실패 — 아래 문구를 확인해 주세요', 3000);
+    }
+  };
 }
 
 // ── 일정 (목록) ──────────────────────────────────────────────
@@ -1625,7 +2063,8 @@ $('#resetBackup').addEventListener('click', () => {
 $('#resetLocal').addEventListener('click', () => {
   if (!confirm('이 컴퓨터에 저장된 사본을 지웁니다.\n클라우드 자료는 그대로 남고, 다시 내려받습니다.\n진행할까요?')) return;
   ['knowledge-messenger-data', 'knowledge-todos', 'knowledge-memories', 'knowledge-account-meta',
-   'knowledge-vault-data', 'knowledge-sync-pending', 'knowledge-shortcuts', 'knowledge-schedule'].forEach(key => localStorage.removeItem(key));
+   'knowledge-vault-data', 'knowledge-sync-pending', 'knowledge-shortcuts', 'knowledge-schedule',
+   'knowledge-mail-templates', 'knowledge-mail-log'].forEach(key => localStorage.removeItem(key));
   location.reload();
 });
 
@@ -1636,7 +2075,7 @@ $('#resetAll').addEventListener('click', async () => {
   if (!confirm('지식·할 일·기억·계정을 모두 삭제합니다.\n다른 컴퓨터에서도 사라집니다.\n정말 진행할까요?')) return;
   $('#resetAll').disabled = true;
   $('#resetAll').textContent = '삭제 중…';
-  for (const list of [knowledge, todos, memories, accountMeta, shortcuts, schedule]) {
+  for (const list of [knowledge, todos, memories, accountMeta, shortcuts, schedule, mailTemplates, mailLog]) {
     for (const item of list) { item.deleted = true; touch(item); }
   }
   vaultSecrets = {};
@@ -2142,6 +2581,8 @@ function saveLocalState() {
   localStorage.setItem('knowledge-account-meta', JSON.stringify(accountMeta));
   localStorage.setItem('knowledge-shortcuts', JSON.stringify(shortcuts));
   localStorage.setItem('knowledge-schedule', JSON.stringify(schedule));
+  localStorage.setItem('knowledge-mail-templates', JSON.stringify(mailTemplates));
+  localStorage.setItem('knowledge-mail-log', JSON.stringify(mailLog));
 }
 
 function renderAll() {
@@ -2443,6 +2884,9 @@ async function saveCloudState({ verifyIds = [] } = {}) {
         accountMeta: mergeById(accountMeta, remote.accountMeta),
         shortcuts: mergeById(shortcuts, remote.shortcuts),
         schedule: mergeById(schedule, remote.schedule),
+        mailTemplates: mergeById(mailTemplates, remote.mailTemplates),
+        mailLog: mergeById(mailLog, remote.mailLog),
+        mailConfig: newerMailConfig(mailConfig, remote.mailConfig),
         vaultSecrets: { ...(remote.vaultSecrets || {}), ...vaultSecrets },
         ...keepQuickMemoField(remote)   // 화면에서 뺀 빠른 메모 값은 건드리지 않고 그대로 둔다
       };
@@ -2491,13 +2935,18 @@ async function applyCloudState(state) {
     || hasLocalOnlyItems(memories, state.memories)
     || hasLocalOnlyItems(accountMeta, state.accountMeta)
     || hasLocalOnlyItems(shortcuts, state.shortcuts)
-    || hasLocalOnlyItems(schedule, state.schedule);
+    || hasLocalOnlyItems(schedule, state.schedule)
+    || hasLocalOnlyItems(mailTemplates, state.mailTemplates);
   knowledge = mergeById(knowledge, state.knowledge);
   todos = mergeById(todos, state.todos);
   memories = mergeById(memories, state.memories);
   accountMeta = mergeById(accountMeta, state.accountMeta);
   shortcuts = mergeById(shortcuts, state.shortcuts);
   schedule = mergeById(schedule, state.schedule);
+  mailTemplates = mergeById(mailTemplates, state.mailTemplates);
+  mailLog = mergeById(mailLog, state.mailLog);
+  mailConfig = newerMailConfig(mailConfig, state.mailConfig);
+  try { localStorage.setItem('knowledge-mail-config', JSON.stringify(mailConfig)); } catch { /* noop */ }
   sortIntoCollections();   // 병합 뒤에도 종류별로 갈라 둔다
 
   const remoteSecrets = state.vaultSecrets && typeof state.vaultSecrets === 'object' ? state.vaultSecrets : {};
@@ -2605,5 +3054,6 @@ $('#syncForm').addEventListener('submit', async event => {
 
 seedShortcuts();   // 기본 바로가기는 없을 때만 만든다
 renderAll();       // 모든 정의가 끝난 뒤에 첫 화면을 그린다
+setupMailbox();    // 메일함 창의 버튼을 한 번만 연결한다
 restoreWindow();   // 지식창은 이전 상태·내용 그대로 되살린다
 initCloudAuth();
