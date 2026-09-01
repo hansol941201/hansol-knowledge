@@ -7,7 +7,7 @@
   "scripts": {
     "start": "electron .",
     "pack": "electron-builder --win portable",
-    "test": "node test/entry-check.mjs && node test/ui-check.mjs && node test/layout-check.mjs && node test/dashboard-check.mjs && node test/shortcut-check.mjs && node test/reset-check.mjs && node test/sync-check.mjs && node test/offline-check.mjs && node test/login-check.mjs && node test/height-check.mjs && node test/jump-check.mjs && node test/window-check.mjs && node test/todo-check.mjs && node test/memo-check.mjs && node test/preview-check.mjs && node test/fuzzy-check.mjs && node test/edit-check.mjs && node test/pwa-check.mjs"
+    "test": "node test/entry-check.mjs && node test/ui-check.mjs && node test/layout-check.mjs && node test/dashboard-check.mjs && node test/shortcut-check.mjs && node test/reset-check.mjs && node test/sync-check.mjs && node test/offline-check.mjs && node test/login-check.mjs && node test/height-check.mjs && node test/jump-check.mjs && node test/window-check.mjs && node test/todo-check.mjs && node test/preview-check.mjs && node test/fuzzy-check.mjs && node test/edit-check.mjs && node test/no-memo-check.mjs && node test/pwa-check.mjs"
   },
   "devDependencies": {
     "electron": "latest",

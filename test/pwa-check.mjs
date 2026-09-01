@@ -69,7 +69,7 @@ ok('overlay(데스크톱 팝업)에서는 등록하지 않음', (await page.cont
 // 기존 화면·기능이 그대로인지
 ok('상단 메뉴 유지', (await page.$$eval('#sideNav .top-item', n=>n.map(x=>x.textContent))).length===10);
 ok('즐겨찾기 유지', await page.isVisible('#shortcutGrid'));
-ok('카드 3개 유지', (await page.$$('#dashCols > section:not(.hidden)')).length===3);
+ok('대시보드 카드 2개 유지', (await page.$$('#dashCols > section:not(.hidden)')).length===2);
 ok('검색 미리보기 동작', await (async()=>{
   await page.click('#pageSearch'); await page.type('#pageSearch','특허',{delay:8});
   await page.waitForTimeout(400);

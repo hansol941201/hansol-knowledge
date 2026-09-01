@@ -378,7 +378,6 @@ function renderLibrary() {
   $('#shortcutSection').classList.toggle('hidden', Boolean(term) || pageCategory !== '대시보드');
   $('#dashCols').classList.toggle('hidden', !onDashboard && pageCategory !== '할 일');
   $('#schedulePanel').classList.toggle('hidden', !onDashboard);
-  $('#memoPanel').classList.toggle('hidden', !onDashboard);
   $('#knowledgeBlock').classList.toggle('hidden', onDashboard);
   // 대시보드일 때만 두 카드가 남은 화면 높이를 채우도록 한다(레이아웃 높이 전용).
   $('.main-scroll').classList.toggle('dash-fill', onDashboard);
@@ -699,12 +698,6 @@ function actionEntries() {
   rows.push({ key: 'act:schedule', icon: 'clock', name: '일정 추가',
     desc: '날짜·시간·메모를 적어 일정을 등록합니다.', where: '기능',
     run: () => { goToView('대시보드'); openScheduleModal(null, todayKey()); } });
-  rows.push({ key: 'act:memo', icon: 'book', name: '빠른 전화 메모',
-    desc: '전화받으며 바로 적는 메모장으로 이동합니다.', where: '기능',
-    run: () => { goToView('대시보드'); const box = $('#quickMemo'); if (box) { box.focus(); box.scrollIntoView({ block: 'nearest' }); } } });
-  rows.push({ key: 'act:memo-record', icon: 'bookmark', name: '전화 요청 기록으로 저장',
-    desc: '빠른 전화 메모를 기억(전화 요청 기록)으로 옮깁니다.', where: '기능',
-    run: () => { goToView('대시보드'); const button = $('#memoToRecord'); if (button) button.click(); } });
   rows.push({ key: 'act:sync', icon: 'settings', name: '동기화 설정',
     desc: '클라우드 연동 상태를 확인하고 PIN 으로 로그인합니다.', where: '설정',
     run: () => $('#syncOpen').click() });
@@ -1132,149 +1125,13 @@ function deleteSchedule(item) {
   showToast('일정 삭제됨');
 }
 
-// ── 빠른 전화 메모 ────────────────────────────────────────────
-// 할 일·일정·기억과 완전히 다른 키/경로를 쓴다. 사용자가 직접 지우기 전에는 사라지지 않는다.
-const QUICK_MEMO_KEY = 'quick_phone_memo_draft';      // localStorage
+// ── 빠른 전화 메모 (화면에서 제거됨) ────────────────────────
+// 카드는 대시보드에서 뺐지만, 이미 저장돼 있던 메모 내용은 지우지 않는다.
+// 클라우드 문서는 통째로 덮어쓰므로 저장돼 있던 값을 읽은 그대로 되돌려 둔다.
 const QUICK_MEMO_FIELD = 'quickPhoneMemoDraft';       // Firebase 문서 필드
-let quickMemo = readQuickMemo();
-let quickMemoCloudTimer = null;
-let quickMemoPending = false;
-
-function readQuickMemo() {
-  try {
-    const raw = JSON.parse(localStorage.getItem(QUICK_MEMO_KEY) || 'null');
-    if (raw && typeof raw === 'object') return { text: String(raw.text || ''), updatedAt: String(raw.updatedAt || '') };
-  } catch { /* 값이 깨져 있어도 메모를 지우지는 않는다 */ }
-  return { text: '', updatedAt: '' };
-}
-function writeQuickMemoLocal(text) {
-  quickMemo = { text: String(text), updatedAt: nowIso() };
-  try { localStorage.setItem(QUICK_MEMO_KEY, JSON.stringify(quickMemo)); } catch { /* 저장 실패해도 화면 값은 유지 */ }
-}
-function setMemoStatus(text, saved) {
-  const el = $('#memoStatus');
-  if (!el) return;
-  el.textContent = text;
-  el.classList.toggle('saved', Boolean(saved));
-}
-function paintQuickMemoCount() {
-  const el = $('#memoCount');
-  if (el) el.textContent = `${quickMemo.text.length}자`;
-}
-
-// 화면 값 갱신 — 입력 중(포커스)일 때는 커서가 튀지 않도록 건드리지 않는다.
-function paintQuickMemo(force) {
-  const box = $('#quickMemo');
-  if (!box) return;
-  if (force || document.activeElement !== box) box.value = quickMemo.text;
-  paintQuickMemoCount();
-}
-
-function queueQuickMemoCloud() {
-  clearTimeout(quickMemoCloudTimer);
-  quickMemoCloudTimer = setTimeout(saveQuickMemoCloud, 400);   // 입력이 멈추면 400ms 뒤 동기화
-}
-
-async function saveQuickMemoCloud() {
-  clearTimeout(quickMemoCloudTimer);
-  if (!cloudReady || !window.HANSOL_FIRESTORE) {
-    quickMemoPending = true;
-    setMemoStatus('오프라인 저장됨 · 연결 시 동기화', false);
-    return false;
-  }
-  const sending = { ...quickMemo };
-  try {
-    const stateDoc = window.HANSOL_FIRESTORE.doc('shared/state');
-    await window.HANSOL_FIRESTORE.runTransaction(async (transaction) => {
-      const snapshot = await transaction.get(stateDoc);
-      const remote = snapshot.exists ? (snapshot.data() || {}) : {};
-      // 더 최근 값만 남긴다 — 늦게 도착한 예전 값이 새 메모를 덮지 않는다.
-      const next = newerQuickMemo(sending, remote[QUICK_MEMO_FIELD]);
-      // 다른 자료는 읽은 그대로 되돌려 두고 메모 필드만 바꾼다(다른 항목을 건드리지 않는다).
-      transaction.set(stateDoc, { ...remote, [QUICK_MEMO_FIELD]: next });
-    });
-    quickMemoPending = false;
-    if (quickMemo.updatedAt === sending.updatedAt) setMemoStatus('자동 저장됨', true);
-    return true;
-  } catch (error) {
-    console.error('빠른 전화 메모 클라우드 저장 실패', error);
-    quickMemoPending = true;                       // 로컬 값은 그대로 두고 다시 시도한다
-    setMemoStatus('기기에 저장됨 · 연동 대기 중', false);
-    return false;
-  }
-}
-
-// updatedAt 이 더 최근인 쪽을 남긴다(둘 다 없으면 로컬 유지).
-function newerQuickMemo(mine, theirs) {
-  const other = theirs && typeof theirs === 'object'
-    ? { text: String(theirs.text || ''), updatedAt: String(theirs.updatedAt || '') } : null;
-  if (!other) return mine;
-  if (!mine.updatedAt) return other.updatedAt ? other : mine;
-  if (!other.updatedAt) return mine;
-  return other.updatedAt > mine.updatedAt ? other : mine;
-}
-
-// 서버에서 내려온 값 반영 — 비어 있는 원격 값이 작성 중인 메모를 덮지 않는다.
-function applyQuickMemo(remote) {
-  const box = $('#quickMemo');
-  const typing = box && document.activeElement === box;
-  const next = newerQuickMemo(quickMemo, remote);
-  if (next.updatedAt === quickMemo.updatedAt && next.text === quickMemo.text) {
-    if (!remote || String(remote.updatedAt || '') < quickMemo.updatedAt) queueQuickMemoCloud();  // 서버가 뒤처졌으면 올린다
-    return;
-  }
-  if (typing) { queueQuickMemoCloud(); return; }   // 입력 중이면 화면을 건드리지 않고 내 값을 올린다
-  quickMemo = next;
-  try { localStorage.setItem(QUICK_MEMO_KEY, JSON.stringify(quickMemo)); } catch { /* noop */ }
-  paintQuickMemo(true);
-  setMemoStatus('자동 저장됨', true);
-}
-
-function setupQuickMemo() {
-  const box = $('#quickMemo');
-  if (!box) return;
-  paintQuickMemo(true);
-  setMemoStatus(quickMemo.text ? '자동 저장됨' : '전화받으며 바로 적으세요', Boolean(quickMemo.text));
-
-  box.addEventListener('input', () => {
-    writeQuickMemoLocal(box.value);      // 한 글자마다 즉시 로컬 저장
-    paintQuickMemoCount();
-    setMemoStatus('저장 중…', false);
-    setTimeout(() => { if (quickMemo.text === box.value) setMemoStatus('기기에 저장됨', false); }, 120);
-    queueQuickMemoCloud();
-  });
-  // 창을 닫거나 다른 곳으로 이동하기 직전에 한 번 더 저장한다.
-  const flush = () => { if ($('#quickMemo')) writeQuickMemoLocal($('#quickMemo').value); };
-  window.addEventListener('beforeunload', flush);
-  window.addEventListener('pagehide', flush);
-  document.addEventListener('visibilitychange', () => { if (document.hidden) flush(); });
-  window.addEventListener('online', () => { if (quickMemoPending) queueQuickMemoCloud(); });
-
-  $('#memoCopy').onclick = () => {
-    if (!quickMemo.text.trim()) return showToast('메모가 비어 있습니다');
-    copyText(quickMemo.text);
-  };
-  $('#memoClear').onclick = () => {
-    if (!quickMemo.text.trim()) return;
-    if (!confirm('빠른 전화 메모를 모두 지울까요?\n되돌릴 수 없습니다.')) return;
-    writeQuickMemoLocal('');
-    paintQuickMemo(true);
-    setMemoStatus('지웠습니다', false);
-    queueQuickMemoCloud();
-  };
-  $('#memoToRecord').onclick = async () => {
-    const text = quickMemo.text.trim();
-    if (!text) return showToast('메모가 비어 있습니다');
-    const item = createMemory(text, '빠른 전화 메모');
-    if (!item) return;
-    const verified = await commitEntry(item, 'memory');     // 실제 저장이 끝난 뒤에만 물어본다
-    if (!verified) return showToast('로컬 저장 완료 · 연동 대기 중 (메모는 그대로 둡니다)');
-    if (!confirm('전화 요청 기록으로 저장했습니다.\n빠른 메모를 비울까요?')) return;
-    writeQuickMemoLocal('');
-    paintQuickMemo(true);
-    setMemoStatus('기록으로 옮겼습니다', true);
-    queueQuickMemoCloud();
-  };
+function keepQuickMemoField(remote) {
+  const kept = remote && remote[QUICK_MEMO_FIELD];
+  return kept === undefined ? {} : { [QUICK_MEMO_FIELD]: kept };
 }
 
 // ── 일정 (목록) ──────────────────────────────────────────────
@@ -1716,10 +1573,6 @@ $('#resetLocal').addEventListener('click', () => {
   if (!confirm('이 컴퓨터에 저장된 사본을 지웁니다.\n클라우드 자료는 그대로 남고, 다시 내려받습니다.\n진행할까요?')) return;
   ['knowledge-messenger-data', 'knowledge-todos', 'knowledge-memories', 'knowledge-account-meta',
    'knowledge-vault-data', 'knowledge-sync-pending', 'knowledge-shortcuts', 'knowledge-schedule'].forEach(key => localStorage.removeItem(key));
-  // 빠른 전화 메모는 별도 자료라 따로 물어본 뒤에만 지운다.
-  if (quickMemo.text.trim() && confirm('빠른 전화 메모도 함께 지울까요?\n[취소]를 누르면 메모는 그대로 남습니다.')) {
-    localStorage.removeItem(QUICK_MEMO_KEY);
-  }
   location.reload();
 });
 
@@ -1734,11 +1587,6 @@ $('#resetAll').addEventListener('click', async () => {
     for (const item of list) { item.deleted = true; touch(item); }
   }
   vaultSecrets = {};
-  // 빠른 전화 메모는 별도 자료라 따로 물어본 뒤에만 지운다.
-  if (quickMemo.text.trim() && confirm('빠른 전화 메모도 함께 지울까요?\n[취소]를 누르면 메모는 그대로 남습니다.')) {
-    writeQuickMemoLocal('');
-    paintQuickMemo(true);
-  }
   saveLocalState();
   renderAll();
   const result = await saveCloudState();
@@ -2543,7 +2391,7 @@ async function saveCloudState({ verifyIds = [] } = {}) {
         shortcuts: mergeById(shortcuts, remote.shortcuts),
         schedule: mergeById(schedule, remote.schedule),
         vaultSecrets: { ...(remote.vaultSecrets || {}), ...vaultSecrets },
-        [QUICK_MEMO_FIELD]: newerQuickMemo(quickMemo, remote[QUICK_MEMO_FIELD])   // 빠른 메모는 따로 보관
+        ...keepQuickMemoField(remote)   // 화면에서 뺀 빠른 메모 값은 건드리지 않고 그대로 둔다
       };
       transaction.set(stateDoc, { ...next, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
       return next;
@@ -2598,7 +2446,7 @@ async function applyCloudState(state) {
   shortcuts = mergeById(shortcuts, state.shortcuts);
   schedule = mergeById(schedule, state.schedule);
   sortIntoCollections();   // 병합 뒤에도 종류별로 갈라 둔다
-  applyQuickMemo(state[QUICK_MEMO_FIELD]);   // 빠른 메모는 별도 규칙으로 맞춘다
+
   const remoteSecrets = state.vaultSecrets && typeof state.vaultSecrets === 'object' ? state.vaultSecrets : {};
   vaultSecrets = { ...remoteSecrets, ...vaultSecrets };
   for (const account of accountMeta) if (account.deleted) delete vaultSecrets[account.id];
@@ -2704,6 +2552,5 @@ $('#syncForm').addEventListener('submit', async event => {
 
 seedShortcuts();   // 기본 바로가기는 없을 때만 만든다
 renderAll();       // 모든 정의가 끝난 뒤에 첫 화면을 그린다
-setupQuickMemo();  // 빠른 전화 메모는 한 번만 붙이고 다시 그리지 않는다(입력 내용 보호)
 restoreWindow();   // 지식창은 이전 상태·내용 그대로 되살린다
 initCloudAuth();
