@@ -706,13 +706,13 @@ function actionEntries() {
     run: () => $('#resetBackup').click() });
   rows.push({ key: 'act:reset', icon: 'refresh', name: '초기화',
     desc: '이 컴퓨터 사본 또는 전체 자료를 정리합니다.', where: '설정', run: openResetModal });
-  // 즐겨찾기 카드는 사용자가 등록한 실제 주소로 새 탭에서 연다.
+  // 즐겨찾기는 카드와 똑같이 화면 오른쪽 절반 창으로 연다.
   for (const item of sortedShortcuts()) {
     const href = shortcutHref(item.url);
     if (!href) continue;
     rows.push({ key: `shortcut:${item.id}`, icon: 'link', name: item.name,
       desc: href.replace(/^https?:\/\//, '').replace(/\/$/, ''), where: '바로가기',
-      run: () => window.open(href, '_blank', 'noopener,noreferrer') });
+      run: () => openShortcutSite(item) });
   }
   return rows;
 }
@@ -1341,6 +1341,53 @@ function thumbImage(src) {
   return `<img class="thumb-back" alt="" aria-hidden="true" src="${url}" /><img class="thumb-face" alt="" src="${url}" />`;
 }
 
+// ── 즐겨찾기 열기 ───────────────────────────────────────────
+// 카드를 누르면 화면 오른쪽 절반 크기의 창으로 연다(대시보드 창은 그대로 둔다).
+// 즐겨찾기마다 창 이름을 다르게 줘서 각각 따로 열리고, 같은 카드를 다시 누르면
+// 이미 열린 창을 앞으로 가져온다.
+const shortcutPopups = new Map();          // 즐겨찾기 id → 열어 둔 창
+const popupWindowName = (id) => `favorite-${String(id).replace(/[^A-Za-z0-9_-]/g, '')}`;
+
+// 모바일·좁은 화면·데스크톱 오버레이에서는 팝업 대신 새 탭으로 연다.
+function canOpenSidePopup() {
+  if (overlayMode || !window.screen) return false;
+  const coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+  const width = window.screen.availWidth || window.innerWidth || 0;
+  return !coarse && width >= 900;
+}
+
+function openShortcutSite(item) {
+  const url = shortcutHref(item && item.url);
+  if (!url) return;
+  if (!canOpenSidePopup()) { window.open(url, '_blank', 'noopener,noreferrer'); return; }
+
+  // 이미 열어 둔 창이 있으면 새로 띄우지 않고 앞으로 가져온다.
+  const opened = shortcutPopups.get(item.id);
+  if (opened && !opened.closed) {
+    try { opened.focus(); return; } catch { /* 창을 잃었으면 아래에서 다시 연다 */ }
+  }
+
+  const view = window.screen;
+  const availWidth = view.availWidth || window.innerWidth;
+  const availHeight = view.availHeight || window.innerHeight;   // 작업표시줄을 뺀 높이
+  const availLeft = Number.isFinite(view.availLeft) ? view.availLeft : 0;
+  const availTop = Number.isFinite(view.availTop) ? view.availTop : 0;
+  const width = Math.floor(availWidth / 2);
+  const height = availHeight;
+  const left = availLeft + availWidth - width;                  // 오른쪽 끝에 붙인다
+  const top = availTop;
+
+  const popup = window.open(url, popupWindowName(item.id),
+    `popup=yes,width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`);
+
+  if (!popup || popup.closed) {
+    showToast('브라우저 설정에서 이 사이트의 팝업을 허용해주세요', 4000);
+    return;
+  }
+  shortcutPopups.set(item.id, popup);
+  try { popup.focus(); } catch { /* 포커스는 실패해도 창은 열려 있다 */ }
+}
+
 function shortcutBadge(item) {
   return (item.badge || String(item.name || '').trim().slice(0, 4) || '?').toUpperCase();
 }
@@ -1375,6 +1422,12 @@ function renderShortcuts() {
     <button type="button" class="shortcut add" id="shortcutAdd">${icon('plus', 18)}<b>사이트 추가</b></button>`;
 
   $('#shortcutGrid').querySelectorAll('[data-shortcut]').forEach(node => {
+    // 팝업 차단을 피하려면 클릭 이벤트 안에서 바로 window.open 을 불러야 한다.
+    node.querySelector('a').addEventListener('click', event => {
+      if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;  // Ctrl+클릭 등은 그대로 새 탭
+      event.preventDefault();
+      openShortcutSite(shortcuts.find(x => x.id === node.dataset.shortcut));
+    });
     const menuButton = node.querySelector('[data-shortcut-edit]');
     menuButton.onclick = (event) => {
       event.preventDefault();
@@ -2271,11 +2324,11 @@ function removeItem(item, row = null) {
   });
   return true;
 }
-function showToast(text) {
+function showToast(text, ms = 900) {
   clearTimeout(showToast.timer);
   toast.classList.remove('with-action');
   toast.textContent = text; toast.classList.add('show');
-  showToast.timer = setTimeout(() => toast.classList.remove('show'), 900);
+  showToast.timer = setTimeout(() => toast.classList.remove('show'), ms);
 }
 // 실수로 눌렀을 때 되돌릴 수 있게 4초 동안 버튼이 달린 안내를 띄운다.
 function showUndoToast(text, onUndo) {
