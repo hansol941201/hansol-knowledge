@@ -237,6 +237,7 @@ let pageCategory = '대시보드';
 // saveLocalState() 가 파일 위쪽에서도 불리므로 var 로 두어 초기화 순서를 타지 않게 한다.
 var searchIndex = null;
 var searchIndexDirty = true;
+let detailItemId = null;   // 상세 창에 띄운 지식(수정·삭제 대상)
 let pageSearchCommitted = '';
 let showAllTodos = false;
 let viewBeforeSearch = '';   // 검색을 지우면 보던 화면으로 되돌린다
@@ -367,7 +368,7 @@ function renderLibrary() {
     + items.map(item => shell(findCategory(item), findCategory(item) === '연락처' ? 'phone' : 'book', '',
       `data-id="${item.id}"`,
       `<h3>${mark(item.title)}</h3><p>${mark(item.answer)}</p>${savedDateOf(item) ? `<time class="card-time">${escapeHtml(savedLabel(item))}</time>` : ''}`,
-      '<button data-copy>복사</button><button data-edit>수정</button><button data-chat>지식창에서 보기</button><button data-delete>삭제</button>')).join('');
+      '<button data-copy>복사</button><button class="card-act" data-edit>수정</button><button data-chat>지식창에서 보기</button><button class="card-act card-del" data-delete>삭제</button>')).join('');
 
   // 화면별 제목과 영역 표시
   const [heading, lead] = VIEW_LEAD[pageCategory] || VIEW_LEAD['전체'];
@@ -1006,7 +1007,11 @@ $('#pageSearch').addEventListener('keydown', event => {
 
 // ── 카드 상세 보기 ─────────────────────────────────────────────
 let detailText = '';
-function showDetail(kind, title, body, meta) {
+function showDetail(kind, title, body, meta, item = null) {
+  // 지식(업무지식·연락처·기타)일 때만 상세 창에서 바로 수정·삭제할 수 있다.
+  detailItemId = item && item.id ? item.id : null;
+  $('#detailEdit').classList.toggle('hidden', !detailItemId);
+  $('#detailDelete').classList.toggle('hidden', !detailItemId);
   detailText = [title, body].filter(Boolean).join('\n');
   $('#detailKind').textContent = kind;
   $('#detailTitle').textContent = title || '';
@@ -1019,13 +1024,23 @@ function closeDetail() { $('#detailModal').classList.add('hidden'); }
 $('#detailClose').addEventListener('click', closeDetail);
 $('#detailModal').addEventListener('click', event => { if (event.target.id === 'detailModal') closeDetail(); });
 $('#detailCopy').addEventListener('click', () => copyText(detailText));
+$('#detailEdit').addEventListener('click', () => {
+  const item = knowledge.find(x => x.id === detailItemId);
+  if (!item) return;
+  closeDetail();
+  openEditor(item);
+});
+$('#detailDelete').addEventListener('click', () => {
+  const item = knowledge.find(x => x.id === detailItemId);
+  if (item && removeItem(item)) closeDetail();
+});
 
 function openDetailFromCard(card) {
   const data = card.dataset;
   if (data.id) {
     const item = knowledge.find(x => x.id === data.id);
     if (item) showDetail(findCategory(item), item.title, item.answer,
-      [['저장', savedLabel(item)], ['검색어', (item.aliases || []).join(', ')], ['출처', item.source]]);
+      [['저장', savedLabel(item)], ['검색어', (item.aliases || []).join(', ')], ['출처', item.source]], item);
   } else if (data.memoryResult) {
     const item = memories.find(x => x.id === data.memoryResult);
     if (item) showDetail('기억', '', item.text, [['저장', savedLabel(item)], ['출처', item.source]]);
@@ -2398,9 +2413,15 @@ function addAlias(item) {
   showToast('검색어 추가됨');
 }
 function removeItem(item, row = null) {
-  if (!confirm(`「${item.title}」 삭제?`)) return;
+  if (!confirm(`「${item.title}」 을(를) 삭제할까요?`)) return false;
   item.deleted = true; touch(item);
-  save(); if (row) row.remove(); renderLibrary(); showToast('삭제됨');
+  save(); if (row) row.remove(); renderLibrary();
+  // 실수로 지웠을 때 4초 안에 되돌릴 수 있다(내용은 지우지 않고 표시만 해 둔다).
+  showUndoToast('삭제됨', () => {
+    item.deleted = false; touch(item);
+    save(); renderAll(); showToast('되돌렸습니다');
+  });
+  return true;
 }
 function showToast(text) {
   clearTimeout(showToast.timer);
