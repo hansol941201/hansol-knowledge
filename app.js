@@ -2461,12 +2461,16 @@ function setCloudStatus(status) {
     live: '실시간 연동 중',
     syncing: '연동 중…',
     pending: '오프라인 보관 · 재연결 시 자동 업로드',
-    offline: '오프라인 저장 모드'
+    offline: '이 기기에만 저장 중 · 눌러서 동기화'
   };
   cloudStatus = status;
   const label = labels[status] || labels.offline;
   const badge = $('#syncState');
-  if (badge) { badge.textContent = label; badge.dataset.state = status; }
+  if (badge) {
+    badge.textContent = label;
+    badge.dataset.state = status;
+    badge.title = status === 'live' ? label : `${label} · 눌러서 동기화 로그인`;
+  }
   // 팝업(오버레이)에서는 사이트 헤더가 안 보이므로 작은 점으로 같은 상태를 보여 준다.
   const dot = $('#syncDot');
   if (dot) {
@@ -2642,7 +2646,8 @@ async function initCloudAuth() {
     catch { localStorage.removeItem('knowledge-sync-pin'); }
   }
   syncLoginPending = true;
-  if (!syncPromptDismissed && (!overlayMode || !app.classList.contains('hidden'))) $('#syncModal').classList.remove('hidden');
+  // PIN 창을 저절로 띄우지 않는다. 오른쪽 위 연동 표시를 눌렀을 때만 열린다.
+  // 그동안 저장한 내용은 이 기기에 남아 있다가, 나중에 로그인하면 함께 올라간다.
 }
 
 // PIN 창이 화면을 막아 아무것도 못 누르는 일이 없도록 언제든 닫을 수 있게 한다.
