@@ -84,12 +84,19 @@ const row = await page.$eval('#todayPanel .todo-item', n=>{
   return { border:parseFloat(s.borderTopWidth), radius:parseFloat(s.borderTopLeftRadius),
            padTop:parseFloat(s.paddingTop), padBottom:parseFloat(s.paddingBottom), bg:s.backgroundColor };
 });
-ok('행마다 테두리·둥근 모서리', row.border>0 && row.radius>=8, JSON.stringify(row));
-ok('조밀하지만 답답하지 않은 여백', row.padTop>=6 && row.padTop<=10, `${row.padTop}/${row.padBottom}`);
-const rowH = await page.$eval('#todayPanel .todo-item', n=>Math.round(n.getBoundingClientRect().height));
-ok('한 항목 높이 38~44px', rowH>=38 && rowH<=44, `${rowH}px`);
-const heights = await page.$$eval('#todayPanel .todo-item', n=>[...new Set(n.map(x=>Math.round(x.getBoundingClientRect().height)))]);
-ok('긴 제목이 있어도 높이가 들쭉날쭉하지 않음', heights.length===1, heights.join(' / '));
+ok('행마다 테두리·둥근 모서리', row.border>0 && row.radius>=5, JSON.stringify(row));
+ok('카드 안쪽 여백 9~12px', row.padTop>=9 && row.padTop<=12, `${row.padTop}/${row.padBottom}`);
+const card = await page.$eval('#todayPanel .todo-item', n=>{
+  const s=getComputedStyle(n);
+  return { w:Math.round(n.getBoundingClientRect().width), minH:parseFloat(s.minHeight),
+           radius:parseFloat(s.borderTopLeftRadius), pad:parseFloat(s.paddingTop),
+           bg:s.backgroundColor, shadow:s.boxShadow };
+});
+ok('카드 너비 190~230px', card.w>=190 && card.w<=230, `${card.w}px`);
+ok('카드 최소 높이 58~68px', card.minH>=58 && card.minH<=68, `${card.minH}px`);
+ok('모서리는 덜 둥글게(6px 안팎)', card.radius>=5 && card.radius<=8, `${card.radius}px`);
+ok('카드 배경은 흰색', card.bg==='rgb(255, 255, 255)', card.bg);
+ok('그림자는 아주 약하게', card.shadow!=='none' && !/rgba\(0, 0, 0, 0\.[3-9]/.test(card.shadow), card.shadow);
 const gap = await page.$eval('.todo-group-list', n=>parseFloat(getComputedStyle(n).rowGap));
 ok('항목 사이 간격', gap>=5, `${gap}px`);
 await page.hover('#todayPanel .todo-item.future');
@@ -100,18 +107,24 @@ ok('마우스를 올리면 배경이 진해짐', hoverBg!==plainBg, `${plainBg} 
 // 5. 제목 한 줄 · 날짜 오른쪽
 const textStyle = await page.$eval('#todayPanel .todo-text', n=>{
   const s=getComputedStyle(n);
-  return { wrap:s.whiteSpace, ellipsis:s.textOverflow, tooltip:n.getAttribute('title'), text:n.textContent };
+  return { clamp:s.webkitLineClamp, overflow:s.overflow, size:parseFloat(s.fontSize), tooltip:n.getAttribute('title'), text:n.textContent };
 });
-ok('제목은 한 줄 말줄임', textStyle.wrap==='nowrap' && textStyle.ellipsis==='ellipsis', JSON.stringify(textStyle));
+ok('제목은 두 줄까지 · 넘치면 말줄임', textStyle.clamp==='2' && textStyle.overflow==='hidden', JSON.stringify(textStyle));
+ok('제목 글씨 13~14px', textStyle.size>=13 && textStyle.size<=14, `${textStyle.size}px`);
 ok('마우스를 올리면 전체 제목이 뜸', textStyle.tooltip===textStyle.text, textStyle.tooltip);
 
 const sides = await page.evaluate(()=>{
   const item=document.querySelector('#todayPanel .todo-item');
+  const check=item.querySelector('.todo-check').getBoundingClientRect();
   const text=item.querySelector('.todo-text').getBoundingClientRect();
   const meta=item.querySelector('.todo-meta').getBoundingClientRect();
-  return { textLeft:Math.round(text.left), metaLeft:Math.round(meta.left), sameRow:Math.abs(text.top-meta.top)<10 };
+  return { checkLeft:Math.round(check.left), textLeft:Math.round(text.left),
+           checkFirst: check.right <= text.left + 1, metaBelow: meta.top >= text.bottom - 2,
+           checkW: Math.round(check.width) };
 });
-ok('제목은 왼쪽 · 날짜는 오른쪽', sides.metaLeft > sides.textLeft && sides.sameRow, JSON.stringify(sides));
+ok('왼쪽 위 체크박스 · 그 오른쪽에 제목', sides.checkFirst && sides.textLeft > sides.checkLeft, JSON.stringify(sides));
+ok('상태와 날짜는 카드 아래쪽', sides.metaBelow, JSON.stringify(sides));
+ok('체크박스는 작게', sides.checkW<=18, `${sides.checkW}px`);
 
 // 6. 카드 안에서는 스크롤하지 않는다 — 전부 펼쳐 두고 페이지가 스크롤된다
 const box = await page.evaluate(()=>{
@@ -137,17 +150,35 @@ ok('지연·오늘·예정 구역으로 나뉨', groups.length===3 && groups[0].
 const counts = groups.map(g=>Number(g.replace(/[^0-9]/g,'')));
 ok('구역 개수 합계 = 미완료 개수', counts.reduce((a,c)=>a+c,0)===activeCount, `${counts.join('+')} = ${activeCount}`);
 
-// 데스크톱 2열
-const cols = await page.evaluate(()=>new Set([...document.querySelectorAll('.todo-group.future .todo-item')].map(r=>Math.round(r.getBoundingClientRect().left))).size);
-ok('넓은 화면에서 3열', cols===3, `${cols}열`);
+// 왼쪽부터 채워지고, 남는 자리를 늘려 채우지 않는다
+const flow = await page.evaluate(()=>{
+  const list=document.querySelector('.todo-group.future .todo-group-list');
+  const style=getComputedStyle(list);
+  const cards=[...list.querySelectorAll('.todo-item')].map(c=>c.getBoundingClientRect());
+  const listBox=list.getBoundingClientRect();
+  const firstRow=cards.filter(c=>Math.abs(c.top-cards[0].top)<2);
+  const secondRow=cards.filter(c=>c.top>cards[0].top+2);
+  return { display:style.display, wrap:style.flexWrap, align:style.alignItems, gap:Math.round(parseFloat(style.gap)),
+           leftAligned: Math.round(cards[0].left)===Math.round(listBox.left),
+           perRow:firstRow.length, wrapped: secondRow.length>0,
+           widths:[...new Set(cards.map(c=>Math.round(c.width)))] };
+});
+ok('flex-wrap 으로 왼쪽부터 쌓임', flow.display==='flex' && flow.wrap==='wrap' && flow.align==='flex-start', JSON.stringify(flow));
+ok('카드 사이 간격 8px', flow.gap===8, `${flow.gap}px`);
+ok('맨 왼쪽부터 정렬', flow.leftAligned);
+ok('모든 카드 너비가 같고 늘어나지 않음', flow.widths.length===1, flow.widths.join(', '));
+ok('자리가 모자라면 다음 줄로 내려감', flow.wrapped, `첫 줄 ${flow.perRow}장`);
 
-// 중간 화면(태블릿)에서는 2열
-await page.setViewportSize({ width: 1100, height: 950 });
-await page.waitForTimeout(300);
-const midCols = await page.evaluate(()=>new Set([...document.querySelectorAll('.todo-group.future .todo-item')].map(r=>Math.round(r.getBoundingClientRect().left))).size);
-ok('중간 화면에서 2열', midCols===2, `${midCols}열`);
-await page.setViewportSize({ width: 1500, height: 950 });
-await page.waitForTimeout(300);
+// 카드가 몇 장 없는 구역은 그만큼만 쓰고 오른쪽은 비워 둔다
+const twoOnly = await page.evaluate(()=>{
+  const list=document.querySelector('.todo-group.late .todo-group-list');
+  const cards=[...list.querySelectorAll('.todo-item')];
+  const listBox=list.getBoundingClientRect();
+  return { count:cards.length,
+           filled: Math.round(cards[cards.length-1].getBoundingClientRect().right - listBox.left),
+           listW: Math.round(listBox.width) };
+});
+ok('카드 수만큼만 자리를 쓰고 오른쪽은 비워 둠', twoOnly.filled < twoOnly.listW - 100, JSON.stringify(twoOnly));
 
 // 7. 완료 탭도 전부 표시
 await page.evaluate(()=>document.querySelector('[data-todo-tab="done"]').click());
@@ -156,6 +187,15 @@ ok('완료 탭도 전부 표시', (await page.$$('#todayPanel .todo-item.done'))
    `${(await page.$$('#todayPanel .todo-item.done')).length}개`);
 const doneStyle = await page.$eval('#todayPanel .todo-item.done .todo-text', n=>getComputedStyle(n).textDecorationLine);
 ok('완료 항목은 취소선', doneStyle.includes('line-through'), doneStyle);
+const doneCard = await page.evaluate(()=>{
+  const el=document.querySelector('#todayPanel .todo-item.done');
+  const s=getComputedStyle(el);
+  const rgb=v=>(v.match(/\d+/g)||[]).map(Number);
+  const c=rgb(s.borderLeftColor);
+  return { bg:s.backgroundColor, bar:s.borderLeftColor, gray: Math.max(...c)-Math.min(...c)<=25 };
+});
+ok('완료 카드는 아주 연한 회색 배경', doneCard.bg!=='rgb(255, 255, 255)', doneCard.bg);
+ok('완료는 회색 포인트', doneCard.gray, doneCard.bar);
 
 // 8. 체크 기능 그대로
 await page.evaluate(()=>document.querySelector('[data-todo-tab="active"]').click());
@@ -174,18 +214,26 @@ await m.waitForFunction(()=>document.querySelector('#syncState')?.dataset.state=
 await m.waitForTimeout(600);
 const mobile = await m.evaluate(()=>{
   const item=document.querySelector('#todayPanel .todo-item');
+  const box=item.getBoundingClientRect();
+  const list=item.parentElement.getBoundingClientRect();
   const text=item.querySelector('.todo-text').getBoundingClientRect();
-  const meta=item.querySelector('.todo-meta').getBoundingClientRect();
-  return { oneLine: Math.abs(meta.top-text.top) < 12, metaRight: meta.left > text.right - 2,
+  return { insideCard: box.right <= list.right + 1 && text.right <= box.right,
            overflowX: document.documentElement.scrollWidth-document.documentElement.clientWidth,
            rows: document.querySelectorAll('#todayPanel .todo-item').length,
-           height: Math.round(item.getBoundingClientRect().height) };
+           width: Math.round(box.width), listW: Math.round(list.width) };
 });
-ok('모바일에서도 한 줄 · 배지와 날짜는 오른쪽', mobile.oneLine && mobile.metaRight, JSON.stringify(mobile));
+ok('모바일에서 글자가 카드 밖으로 나가지 않음', mobile.insideCard, JSON.stringify(mobile));
 ok('모바일 가로 스크롤 없음', mobile.overflowX===0, `${mobile.overflowX}px`);
 ok('모바일에서도 전부 표시', mobile.rows===activeCount-1, `${mobile.rows}개`);
 const mobileCols = await m.evaluate(()=>new Set([...document.querySelectorAll('#todayPanel .todo-item')].map(r=>Math.round(r.getBoundingClientRect().left))).size);
-ok('모바일은 반드시 1열', mobileCols===1, `${mobileCols}열`);
+ok('아주 좁은 화면(390px)은 한 줄에 한 장', mobileCols===1, `${mobileCols}열`);
+await m.setViewportSize({ width: 640, height: 900 });
+await m.waitForTimeout(350);
+const midMobile = await m.evaluate(()=>{
+  const cards=[...document.querySelectorAll('.todo-group.future .todo-item')].map(c=>c.getBoundingClientRect());
+  return cards.filter(c=>Math.abs(c.top-cards[0].top)<2).length;
+});
+ok('좁은 화면(640px)은 한 줄에 두 장', midMobile===2, `${midMobile}장`);
 
 ok('끝까지 오류 없음', errors.length===0, errors.join(' | '));
 await b.close(); server.close();

@@ -452,6 +452,14 @@ function setTodoDone(todo, done) {
   else delete todo.doneAt;
   touch(todo);
 }
+// 작은 카드에 들어갈 짧은 완료일 — 자세한 시각은 마우스를 올리면 뜬다.
+function todoDoneShort(todo) {
+  const when = timeOf(todo.doneAt || todo.updatedAt);
+  if (!when) return '확인';
+  const date = new Date(when);
+  const year = date.getFullYear() === new Date().getFullYear() ? '' : `${date.getFullYear()}.`;
+  return `${year}${date.getMonth() + 1}.${date.getDate()}`;
+}
 function todoDoneLabel(todo) {
   const when = todo.doneAt || todo.updatedAt;
   return when ? savedLabel({ createdAt: when }) : '완료일 확인';
@@ -500,37 +508,46 @@ function todoGroupSections(list) {
     </section>`).join('');
   return `<div class="todo-groups">${sections}</div>`;
 }
+// 작은 메모 카드 한 장 — 위: 체크 + 제목, 아래: 상태·날짜와 수정·삭제
 function todoActiveRow(todo) {
   const state = todoDateState(todo);
   const when = escapeHtml(todo.date || '날짜 없음');
   return `
     <label class="todo-item ${state}" data-todo-id="${todo.id}">
       <input type="checkbox">
-      <span class="todo-check">${icon('check', 13)}</span>
-      <span class="todo-text" title="${escapeHtml(todo.text)}">${escapeHtml(todo.text)}</span>
-      <span class="todo-meta">
-        ${state === 'today' ? '<b class="todo-badge today">오늘</b>' : ''}
-        ${state === 'late' ? '<b class="todo-badge late">지연</b>' : ''}
-        <time class="${state}">${when}</time>
+      <span class="todo-head">
+        <span class="todo-check">${icon('check', 12)}</span>
+        <span class="todo-text" title="${escapeHtml(todo.text)}">${escapeHtml(todo.text)}</span>
       </span>
-      <span class="todo-tools">
-        <button type="button" class="todo-mini" data-todo-edit title="수정">${icon('pencil', 13)}</button>
-        <button type="button" class="todo-remove" data-todo-delete title="삭제">${icon('more', 14)}</button>
+      <span class="todo-foot">
+        <span class="todo-meta">
+          ${state === 'today' ? '<b class="todo-badge today">오늘</b>' : ''}
+          ${state === 'late' ? '<b class="todo-badge late">지연</b>' : ''}
+          <time class="${state}">${when}</time>
+        </span>
+        <span class="todo-tools">
+          <button type="button" class="todo-mini" data-todo-edit title="수정">${icon('pencil', 12)}</button>
+          <button type="button" class="todo-remove" data-todo-delete title="삭제">${icon('more', 13)}</button>
+        </span>
       </span>
     </label>`;
 }
 function todoDoneRow(todo) {
   return `
     <div class="todo-item done" data-todo-id="${todo.id}">
-      <span class="todo-check done">${icon('check', 13)}</span>
-      <span class="todo-text" title="${escapeHtml(todo.text)}">${escapeHtml(todo.text)}</span>
-      <span class="todo-meta">
-        <time>${escapeHtml(todo.date || '날짜 없음')}</time>
-        <time class="todo-doneat">완료 ${escapeHtml(todoDoneLabel(todo))}</time>
+      <span class="todo-head">
+        <span class="todo-check done">${icon('check', 12)}</span>
+        <span class="todo-text" title="${escapeHtml(todo.text)}">${escapeHtml(todo.text)}</span>
       </span>
-      <span class="todo-tools">
-        <button type="button" class="todo-mini" data-todo-restore title="복구">복구</button>
-        <button type="button" class="todo-mini danger" data-todo-purge title="영구 삭제">삭제</button>
+      <span class="todo-foot">
+        <span class="todo-meta">
+          <time>${escapeHtml(todo.date || '날짜 없음')}</time>
+          <time class="todo-doneat" title="완료 ${escapeHtml(todoDoneLabel(todo))}">완료 ${escapeHtml(todoDoneShort(todo))}</time>
+        </span>
+        <span class="todo-tools">
+          <button type="button" class="todo-mini" data-todo-restore title="복구">복구</button>
+          <button type="button" class="todo-mini danger" data-todo-purge title="영구 삭제">삭제</button>
+        </span>
       </span>
     </div>`;
 }
