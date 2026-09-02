@@ -217,7 +217,8 @@ const NAV_ITEMS = [
   { name: '계정', icon: 'lock' },
   { name: '연락처', icon: 'phone' },
   { name: '업무지식', icon: 'book' },
-  { name: '대본', icon: 'book' }
+  { name: '대본', icon: 'book' },
+  { name: '기획', icon: 'sparkle' }
 ];
 const VIEW_LEAD = {
   '대시보드': ['모아 보기', '오늘 챙길 것과 최근 지식을 한눈에.'],
@@ -230,9 +231,10 @@ const VIEW_LEAD = {
   '연락처': ['연락처', '자주 찾는 담당자 연락처입니다.'],
   '업무지식': ['업무지식', '업무에 필요한 지식 모음입니다.'],
   '대본': ['대본', '상황별로 그대로 읽을 수 있는 안내 대본입니다.'],
+  '기획': ['기획', '나중에 해 볼 일과 아이디어를 적어 두는 곳입니다.'],
   '기타': ['기타', '분류하지 않은 지식입니다.']
 };
-const categoryRules = ['전체', '기억', '특허', '협력업체', '계정', '연락처', '업무지식', '대본', '기타'];
+const categoryRules = ['전체', '기억', '특허', '협력업체', '계정', '연락처', '업무지식', '대본', '기획', '기타'];
 const virtualCategories = ['계정', '협력업체', '할 일', '기억', '특허', '대시보드'];
 let pageCategory = '대시보드';
 // 검색 미리보기 목록 — 한 번 만들고 자료가 바뀔 때만 다시 만든다.
@@ -260,7 +262,8 @@ const SEARCH_VIEW_WORDS = {
   '계정': '계정',
   '연락처': '연락처',
   '업무지식': '업무지식',
-  '대본': '대본', '스크립트': '대본', '멘트': '대본'
+  '대본': '대본', '스크립트': '대본', '멘트': '대본',
+  '기획': '기획', '아이디어': '기획', '계획': '기획', '나중에': '기획'
 };
 function viewForSearch(text) {
   const key = String(text || '').replace(/\s+/g, '').toLowerCase();
@@ -367,7 +370,7 @@ function renderLibrary() {
       `<p class="card-body">${mark(memory.text)}</p><time class="card-time">${escapeHtml(savedLabel(memory))}</time>`,
       '<button data-memory-open>기억 저장소에서 보기</button>')).join('')
     + items.map(item => shell(findCategory(item), findCategory(item) === '연락처' ? 'phone' : 'book',
-      findCategory(item) === '대본' ? 'script-card' : '',
+      findCategory(item) === '대본' ? 'script-card' : (findCategory(item) === '기획' ? 'plan-card' : ''),
       `data-id="${item.id}"`,
       `<h3>${mark(item.title)}</h3><p>${mark(item.answer)}</p>${savedDateOf(item) ? `<time class="card-time">${escapeHtml(savedLabel(item))}</time>` : ''}`,
       '<button data-copy>복사</button><button class="card-act" data-edit>수정</button><button data-chat>지식창에서 보기</button><button class="card-act card-del" data-delete>삭제</button>')).join('');
@@ -1104,7 +1107,7 @@ document.querySelectorAll('[data-add]').forEach(button => {
       return;
     }
     closeAddModal();
-    openNewEditor(addKind);   // 업무지식 · 대본 · 연락처는 기존 지식 편집기로
+    openNewEditor(addKind);   // 업무지식 · 대본 · 기획 · 연락처는 기존 지식 편집기로
   };
 });
 $('#quickTextForm').addEventListener('submit', async event => {
@@ -1686,9 +1689,9 @@ $('#resetAll').addEventListener('click', async () => {
 });
 
 let editingId = null;
-// 대본은 길어서 입력칸을 넉넉하게 준다(다른 분류는 원래 높이 그대로).
+// 대본·기획은 길어서 입력칸을 넉넉하게 준다(다른 분류는 원래 높이 그대로).
 function sizeEditorFor(category) {
-  $('#editAnswer').rows = category === '대본' ? 14 : 6;
+  $('#editAnswer').rows = (category === '대본' || category === '기획') ? 14 : 6;
 }
 function openEditor(item) {
   editingId = item.id;
@@ -1709,7 +1712,7 @@ function openNewEditor(category = '기타') {
   $('#editSubmit').textContent = '지식 저장';
   $('#editTitle').value = '';
   $('#editAnswer').value = '';
-  $('#editCategory').value = ['업무지식', '대본', '연락처', '기타'].includes(category) ? category : '기타';
+  $('#editCategory').value = ['업무지식', '대본', '기획', '연락처', '기타'].includes(category) ? category : '기타';
   $('#editAliases').value = '';
   $('#editModal').classList.remove('hidden');
   setTimeout(() => $('#editTitle').focus(), 50);
