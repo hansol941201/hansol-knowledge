@@ -465,7 +465,7 @@ function activeTodos() {
       if (left && !right) return -1;
       if (!left && right) return 1;
       if (left && right && left !== right) return left.localeCompare(right);
-      return updatedTime(b) - updatedTime(a);
+      return savedMillis(a) - savedMillis(b);     // 같은 날짜면 먼저 적은 것부터
     });
 }
 // 오늘 / 지연 / 앞으로 / 날짜 없음 — 배지와 색을 고르는 기준
@@ -479,6 +479,60 @@ function todoDateState(todo) {
 function doneTodos() {
   return alive(todos).filter(isTodoEntry).filter(todo => todo.done)
     .sort((a, b) => String(b.doneAt || b.updatedAt || '').localeCompare(String(a.doneAt || a.updatedAt || '')));
+}
+
+// 지연 · 오늘 · 예정 세 구역으로 나눠 보여 준다(모두 펼친 상태).
+const TODO_GROUPS = [
+  { key: 'late', name: '지연' },
+  { key: 'today', name: '오늘' },
+  { key: 'future', name: '예정' }
+];
+function todoGroupSections(list) {
+  const buckets = { late: [], today: [], future: [] };
+  for (const todo of list) {
+    const state = todoDateState(todo);
+    buckets[state === 'none' ? 'future' : state].push(todo);   // 날짜 없는 항목은 예정 맨 뒤
+  }
+  const sections = TODO_GROUPS.filter(group => buckets[group.key].length).map(group => `
+    <section class="todo-group ${group.key}">
+      <h3 class="todo-group-head">${group.name}<span>${buckets[group.key].length}</span></h3>
+      <div class="todo-grid">${buckets[group.key].map(todoActiveRow).join('')}</div>
+    </section>`).join('');
+  return `<div class="todo-groups">${sections}</div>`;
+}
+function todoActiveRow(todo) {
+  const state = todoDateState(todo);
+  const when = escapeHtml(todo.date || '날짜 없음');
+  return `
+    <label class="todo-item ${state}" data-todo-id="${todo.id}">
+      <input type="checkbox">
+      <span class="todo-check">${icon('check', 13)}</span>
+      <span class="todo-text">${escapeHtml(todo.text)}</span>
+      <span class="todo-meta">
+        ${state === 'today' ? '<b class="todo-badge today">오늘</b>' : ''}
+        ${state === 'late' ? '<b class="todo-badge late">지연</b>' : ''}
+        <time class="${state}">${when}</time>
+      </span>
+      <span class="todo-tools">
+        <button type="button" class="todo-mini" data-todo-edit title="수정">${icon('pencil', 13)}</button>
+        <button type="button" class="todo-remove" data-todo-delete title="삭제">${icon('more', 14)}</button>
+      </span>
+    </label>`;
+}
+function todoDoneRow(todo) {
+  return `
+    <div class="todo-item done" data-todo-id="${todo.id}">
+      <span class="todo-check done">${icon('check', 13)}</span>
+      <span class="todo-text">${escapeHtml(todo.text)}</span>
+      <span class="todo-meta">
+        <time>${escapeHtml(todo.date || '날짜 없음')}</time>
+        <time class="todo-doneat">완료 ${escapeHtml(todoDoneLabel(todo))}</time>
+      </span>
+      <span class="todo-tools">
+        <button type="button" class="todo-mini" data-todo-restore title="복구">복구</button>
+        <button type="button" class="todo-mini danger" data-todo-purge title="영구 삭제">삭제</button>
+      </span>
+    </div>`;
 }
 
 function renderTodos() {
@@ -503,37 +557,11 @@ function renderTodos() {
       </div>
       ${todoTab === 'done' && done.length ? `<button type="button" class="ghost-btn" id="todoClearDone">완료 목록 비우기</button>` : ''}
     </div>
-    <div class="todo-list">${list.length ? list.map(todo => {
-      const state = todoDateState(todo);
-      const when = escapeHtml(todo.date || '날짜 확인');
-      return todoTab === 'done' ? `
-      <div class="todo-item done" data-todo-id="${todo.id}">
-        <span class="todo-check done">${icon('check', 13)}</span>
-        <span class="todo-text">${escapeHtml(todo.text)}</span>
-        <span class="todo-meta">
-          <time>${when}</time>
-          <time class="todo-doneat">완료 ${escapeHtml(todoDoneLabel(todo))}</time>
-        </span>
-        <span class="todo-tools">
-          <button type="button" class="todo-mini" data-todo-restore title="복구">복구</button>
-          <button type="button" class="todo-mini danger" data-todo-purge title="영구 삭제">삭제</button>
-        </span>
-      </div>` : `
-      <label class="todo-item ${state === 'late' ? 'late' : ''}" data-todo-id="${todo.id}">
-        <input type="checkbox">
-        <span class="todo-check">${icon('check', 13)}</span>
-        <span class="todo-text">${escapeHtml(todo.text)}</span>
-        <span class="todo-meta">
-          ${state === 'today' ? '<b class="todo-badge today">오늘</b>' : ''}
-          ${state === 'late' ? '<b class="todo-badge late">지연</b>' : ''}
-          <time class="${state}">${when}</time>
-        </span>
-        <span class="todo-tools">
-          <button type="button" class="todo-mini" data-todo-edit title="수정">${icon('pencil', 13)}</button>
-          <button type="button" class="todo-remove" data-todo-delete title="삭제">${icon('more', 14)}</button>
-        </span>
-      </label>`;
-    }).join('') : `<div class="todo-empty">${todoTab === 'done' ? '완료한 할 일이 없습니다.' : '지식창에 “할일 내용”을 입력해보세요.'}</div>`}</div>`;
+    ${list.length
+      ? (todoTab === 'done'
+          ? `<div class="todo-grid">${list.map(todoDoneRow).join('')}</div>`
+          : todoGroupSections(list))
+      : `<div class="todo-empty">${todoTab === 'done' ? '완료한 할 일이 없습니다.' : '지식창에 “할일 내용”을 입력해보세요.'}</div>`}`;
 
   panel.querySelectorAll('[data-todo-tab]').forEach(button => {
     button.onclick = () => { todoTab = button.dataset.todoTab; renderTodos(); };

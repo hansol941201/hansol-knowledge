@@ -38,9 +38,13 @@ ok('AI 인사이트 제거', (await page.$$('.ai-insight')).length===0 && !(awai
 const cols = await page.evaluate(()=>{
   const a=document.querySelector('#todayPanel').getBoundingClientRect();
   const s=document.querySelector('#schedulePanel').getBoundingClientRect();
-  return { todoW:Math.round(a.width), schedW:Math.round(s.width), gap:Math.round(s.left-a.right), sameRow:Math.abs(a.top-s.top)<2 };
+  const scroll=document.querySelector('.main-scroll').getBoundingClientRect();
+  const pad=parseFloat(getComputedStyle(document.querySelector('.main-scroll')).paddingLeft);
+  return { todoW:Math.round(a.width), schedW:Math.round(s.width), gap:Math.round(a.top-s.bottom),
+           stacked: a.top >= s.bottom - 2, fullWidth: Math.round(scroll.width - pad*2) };
 });
-ok('2열 · 폭 동일', cols.sameRow && Math.abs(cols.todoW-cols.schedW)<2, JSON.stringify(cols));
+ok('일정이 위 · 할 일이 아래로 세로 배치', cols.stacked, JSON.stringify(cols));
+ok('두 카드 모두 전체 너비', cols.todoW===cols.fullWidth && cols.schedW===cols.fullWidth, JSON.stringify(cols));
 ok('카드 간격 16~20px', cols.gap>=16 && cols.gap<=20, `${cols.gap}px`);
 
 // 일정 추가 → 목록 표시
