@@ -18,7 +18,7 @@
   <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png?v=1" />
   <link rel="shortcut icon" type="image/png" href="icons/icon-192.png?v=1" />
 
-  <link rel="stylesheet" href="styles.css?v=41" />
+  <link rel="stylesheet" href="styles.css?v=42" />
 </head>
 <body>
   <div class="workspace">
@@ -82,7 +82,7 @@
       <div class="quick-title"><strong>빠른 지식 추가</strong><button id="quickClose" type="button">×</button></div>
       <input id="quickTitle" placeholder="제목  예) 시방서 문의" required />
       <textarea id="quickAnswer" placeholder="답변" rows="4" required></textarea>
-      <div><select id="quickCategory"><option>업무지식</option><option>연락처</option><option>기타</option></select><button type="submit">저장</button></div>
+      <div><select id="quickCategory"><option>업무지식</option><option>대본</option><option>연락처</option><option>기타</option></select><button type="submit">저장</button></div>
     </form>
 
     <section id="messages" class="messages" aria-live="polite">
@@ -250,6 +250,7 @@
         <button type="button" data-add="기억"><span data-icon="bookmark"></span><b>기억</b><small>메모처럼 남기기</small></button>
         <button type="button" data-add="할 일"><span data-icon="check"></span><b>할 일</b><small>오늘 할 일 추가</small></button>
         <button type="button" data-add="업무지식"><span data-icon="book"></span><b>업무지식</b><small>제목과 내용</small></button>
+        <button type="button" data-add="대본"><span data-icon="book"></span><b>대본</b><small>상황별 안내 멘트</small></button>
         <button type="button" data-add="연락처"><span data-icon="phone"></span><b>연락처</b><small>이름과 번호</small></button>
         <button type="button" data-add="계정"><span data-icon="lock"></span><b>계정</b><small>암호화 보관</small></button>
       </div>
@@ -315,7 +316,7 @@
       <header><strong id="editHeading">지식 수정</strong><button id="editClose" type="button">×</button></header>
       <label>제목<input id="editTitle" required /></label>
       <label>답변<textarea id="editAnswer" rows="6" required></textarea></label>
-      <label>분류<select id="editCategory"><option>업무지식</option><option>연락처</option><option>기타</option></select></label>
+      <label>분류<select id="editCategory"><option>업무지식</option><option>대본</option><option>연락처</option><option>기타</option></select></label>
       <label>검색어<span class="edit-help">쉼표로 구분</span><input id="editAliases" /></label>
       <footer><button id="editCancel" type="button">취소</button><button id="editSubmit" type="submit">저장</button></footer>
     </form>
@@ -347,7 +348,7 @@
   <!-- 검색 규칙(정규화·유사어 사전) — 여기만 고치면 통합검색과 미리보기에 함께 적용된다. -->
   <script src="search-rules.js?v=1"></script>
   <script src="icons.js?v=2"></script>
-  <script src="app.js?v=73"></script>
+  <script src="app.js?v=74"></script>
   <script>
     // 홈 화면 앱(주소창 없는 standalone)으로 열리게 하는 등록. 저장은 하지 않는 워커라
     // 사이트를 고치면 항상 최신 파일을 받는다. 실패해도 사이트 동작에는 영향이 없다.

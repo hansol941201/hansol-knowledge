@@ -333,6 +333,8 @@ svg { display: block; flex: none; }
 .page-card h3 { margin: 0 0 7px; font-size: 14.5px; line-height: 1.45; letter-spacing: -.2px; }
 .page-card p { flex: 1; margin: 0; color: var(--ink-2); font-size: 12.5px; line-height: 1.65; white-space: pre-line; overflow-wrap: anywhere; }
 .page-card .card-body { color: var(--ink); font-size: 13px; }
+/* 대본은 길어서 카드에서는 8줄까지만 보여 주고, 카드를 누르면 전체를 본다 */
+.page-card.script-card p { display: -webkit-box; -webkit-line-clamp: 8; -webkit-box-orient: vertical; overflow: hidden; }
 .page-card .card-time { margin-top: 10px; color: var(--ink-3); font-size: 10.5px; }
 .page-card footer { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 7px; margin-top: 13px; padding-top: 11px; border-top: 1px solid var(--line-soft); }
 .page-card footer button { color: var(--ink-3); font-size: 11px; transition: color var(--ease); }
