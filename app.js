@@ -496,7 +496,7 @@ function todoGroupSections(list) {
   const sections = TODO_GROUPS.filter(group => buckets[group.key].length).map(group => `
     <section class="todo-group ${group.key}">
       <h3 class="todo-group-head">${group.name}<span>${buckets[group.key].length}</span></h3>
-      <div class="todo-grid">${buckets[group.key].map(todoActiveRow).join('')}</div>
+      <div class="todo-group-list">${buckets[group.key].map(todoActiveRow).join('')}</div>
     </section>`).join('');
   return `<div class="todo-groups">${sections}</div>`;
 }
@@ -507,7 +507,7 @@ function todoActiveRow(todo) {
     <label class="todo-item ${state}" data-todo-id="${todo.id}">
       <input type="checkbox">
       <span class="todo-check">${icon('check', 13)}</span>
-      <span class="todo-text">${escapeHtml(todo.text)}</span>
+      <span class="todo-text" title="${escapeHtml(todo.text)}">${escapeHtml(todo.text)}</span>
       <span class="todo-meta">
         ${state === 'today' ? '<b class="todo-badge today">오늘</b>' : ''}
         ${state === 'late' ? '<b class="todo-badge late">지연</b>' : ''}
@@ -523,7 +523,7 @@ function todoDoneRow(todo) {
   return `
     <div class="todo-item done" data-todo-id="${todo.id}">
       <span class="todo-check done">${icon('check', 13)}</span>
-      <span class="todo-text">${escapeHtml(todo.text)}</span>
+      <span class="todo-text" title="${escapeHtml(todo.text)}">${escapeHtml(todo.text)}</span>
       <span class="todo-meta">
         <time>${escapeHtml(todo.date || '날짜 없음')}</time>
         <time class="todo-doneat">완료 ${escapeHtml(todoDoneLabel(todo))}</time>
@@ -559,7 +559,7 @@ function renderTodos() {
     </div>
     ${list.length
       ? (todoTab === 'done'
-          ? `<div class="todo-grid">${list.map(todoDoneRow).join('')}</div>`
+          ? `<div class="todo-group-list">${list.map(todoDoneRow).join('')}</div>`
           : todoGroupSections(list))
       : `<div class="todo-empty">${todoTab === 'done' ? '완료한 할 일이 없습니다.' : '지식창에 “할일 내용”을 입력해보세요.'}</div>`}`;
 

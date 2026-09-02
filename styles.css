@@ -90,10 +90,6 @@ svg { display: block; flex: none; }
   transition: background var(--ease), transform var(--ease);
 }
 .primary-btn:hover { background: #5c3ad0; }
-/* 화면이 좁아지면 할 일도 1열로 */
-@media (max-width: 1120px) {
-  .todo-grid { grid-template-columns: minmax(0, 1fr); }
-}
 @media (max-width: 1100px) {
   .primary-btn { position: static; transform: none; flex: none; margin-left: auto; white-space: nowrap; }
   .search-wrap { flex: 1 1 auto; min-width: 0; }
@@ -150,6 +146,9 @@ svg { display: block; flex: none; }
 .block-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
 .block-head h2 { margin: 0; font-size: 17px; letter-spacing: -.3px; }
 .block-head p { margin: 3px 0 0; color: var(--ink-3); font-size: 12.5px; }
+/* 오늘의 할 일 카드는 여백을 조금 줄여 한 화면에 더 담는다 */
+#todayPanel { gap: 9px; padding: 14px 16px 16px; }
+#todayPanel .block-head { align-items: center; }
 #pageCount { padding: 5px 11px; border-radius: 999px; background: var(--violet-soft); color: var(--violet); font-size: 12px; font-weight: 600; }
 
 /* ── 자주 가는 사이트 ───────────────────────────────────────── */
@@ -226,21 +225,26 @@ svg { display: block; flex: none; }
 /* ── 오늘의 할 일 ───────────────────────────────────────────── */
 .today-panel { display: grid; gap: 12px; padding: 20px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); box-shadow: var(--shadow); }
 /* 카드 안에서 스크롤하지 않는다 — 전부 펼쳐 두고 필요하면 페이지가 스크롤된다 */
-.todo-groups { display: grid; gap: 16px; }
-.todo-group { display: grid; gap: 8px; }
-.todo-group-head { display: flex; align-items: center; gap: 7px; margin: 0; font-size: 12.5px; font-weight: 600; color: var(--ink-2); }
+.todo-groups { display: grid; gap: 12px; }
+.todo-group { display: grid; gap: 6px; }
+.todo-group-head { display: flex; align-items: center; gap: 7px; margin: 0; font-size: 12px; font-weight: 600; color: var(--ink-2); }
 .todo-group-head::before { content: ""; width: 3px; height: 13px; border-radius: 2px; background: var(--ink-3); }
 .todo-group.late .todo-group-head::before { background: #C0433D; }
 .todo-group.today .todo-group-head::before { background: #2F7D51; }
 .todo-group.future .todo-group-head::before { background: var(--violet); }
 .todo-group-head span { padding: 1px 7px; border-radius: 999px; background: var(--line-soft); color: var(--ink-2); font-size: 11px; font-weight: 700; }
-/* 데스크톱 2열 — 좁아지면 1열 */
-.todo-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; align-content: start; }
+/* 넓은 화면 3열 — 중간 2열 — 모바일 1열 */
+.todo-group-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; align-content: start; }
+@media (max-width: 1200px) {
+  .todo-group-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 700px) {
+  .todo-group-list { grid-template-columns: minmax(0, 1fr); }
+}
 .todo-item {
   position: relative;   /* 숨긴 체크박스가 카드 밖으로 빠져나가 페이지를 늘리지 않도록 */
   min-width: 0;         /* 글씨가 커져도 줄이 카드 밖으로 밀려나지 않게 */
-  display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto;
-  align-items: center; gap: 9px; padding: 7px 11px 7px 12px;
+  display: flex; align-items: center; gap: 8px; padding: 9px 10px 9px 11px;
   border: 1px solid var(--line); border-left: 3px solid var(--line);
   border-radius: 9px; background: #FCFCFD;
   cursor: pointer; transition: background var(--ease), border-color var(--ease);
@@ -258,11 +262,11 @@ svg { display: block; flex: none; }
   transition: background var(--ease), border-color var(--ease), color var(--ease), transform var(--ease);
 }
 .todo-item.done .todo-check { border-color: var(--violet); background: var(--violet); color: #fff; transform: scale(1.06); }
-/* 긴 제목은 두 줄까지 보여 주고 그 뒤부터 말줄임 */
-.todo-text { min-width: 0; font-size: 13px; line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+/* 제목이 남은 자리를 다 쓰고, 길면 한 줄 말줄임(마우스를 올리면 전체가 뜬다) */
+.todo-text { flex: 1 1 auto; min-width: 0; font-size: 13px; line-height: 1.45; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .todo-item.done .todo-text { color: var(--ink-3); text-decoration: line-through; }
-.todo-meta { display: flex; align-items: center; gap: 6px; }
-.todo-tools { display: flex; align-items: center; gap: 4px; }
+.todo-meta { flex: none; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.todo-tools { flex: none; display: flex; align-items: center; gap: 4px; }
 .todo-item time { flex: none; color: var(--ink-3); font-size: 11px; font-variant-numeric: tabular-nums; }
 .todo-item time.today { color: #2F7D51; font-weight: 600; }
 .todo-item time.late { color: #C0433D; font-weight: 600; }
@@ -472,12 +476,8 @@ mark { padding: 0 1px; border-radius: 3px; background: #FFF3A0; color: #000; }
 }
 @media (max-width: 860px) {
   /* 좁은 화면: 첫 줄에 체크+내용, 둘째 줄에 날짜와 버튼 — 서로 겹치지 않게 한다 */
-  .todo-grid { grid-template-columns: minmax(0, 1fr); }   /* 모바일은 반드시 1열 */
-  /* 좁은 화면: 첫 줄에 체크+제목+버튼, 둘째 줄에 날짜를 제목 아래로 */
-  .todo-item { grid-template-columns: auto minmax(0, 1fr) auto; row-gap: 5px; padding: 8px 10px 8px 11px; align-items: start; }
-  .todo-item .todo-text { grid-column: 2; grid-row: 1; }
-  .todo-item .todo-meta { grid-column: 2; grid-row: 2; flex-wrap: wrap; }
-  .todo-item .todo-tools { grid-column: 3; grid-row: 1; }
+  /* 좁은 화면에서도 한 줄로 — 제목만 줄이고 배지·날짜는 오른쪽에 붙인다 */
+  .todo-item { gap: 6px; padding: 9px 8px 9px 10px; }
   .todo-mini, .todo-remove { opacity: 1; }
   .topnav { padding: 0 24px; }                  /* 좁아져도 양옆 여백은 24px 유지 */
   .sync-state { display: none; }

@@ -86,16 +86,25 @@ const row = await page.$eval('#todayPanel .todo-item', n=>{
 });
 ok('행마다 테두리·둥근 모서리', row.border>0 && row.radius>=8, JSON.stringify(row));
 ok('조밀하지만 답답하지 않은 여백', row.padTop>=6 && row.padTop<=10, `${row.padTop}/${row.padBottom}`);
-const gap = await page.$eval('.todo-grid', n=>parseFloat(getComputedStyle(n).rowGap));
+const rowH = await page.$eval('#todayPanel .todo-item', n=>Math.round(n.getBoundingClientRect().height));
+ok('한 항목 높이 38~44px', rowH>=38 && rowH<=44, `${rowH}px`);
+const heights = await page.$$eval('#todayPanel .todo-item', n=>[...new Set(n.map(x=>Math.round(x.getBoundingClientRect().height)))]);
+ok('긴 제목이 있어도 높이가 들쭉날쭉하지 않음', heights.length===1, heights.join(' / '));
+const gap = await page.$eval('.todo-group-list', n=>parseFloat(getComputedStyle(n).rowGap));
 ok('항목 사이 간격', gap>=5, `${gap}px`);
 await page.hover('#todayPanel .todo-item.future');
 await page.waitForTimeout(250);
 const hoverBg = await page.$eval('#todayPanel .todo-item.future', n=>getComputedStyle(n).backgroundColor);
 ok('마우스를 올리면 배경이 진해짐', hoverBg!==plainBg, `${plainBg} → ${hoverBg}`);
 
-// 5. 제목 2줄 · 날짜 오른쪽
-const clamp = await page.$eval('#todayPanel .todo-text', n=>getComputedStyle(n).webkitLineClamp);
-ok('제목은 최대 2줄', clamp==='2', clamp);
+// 5. 제목 한 줄 · 날짜 오른쪽
+const textStyle = await page.$eval('#todayPanel .todo-text', n=>{
+  const s=getComputedStyle(n);
+  return { wrap:s.whiteSpace, ellipsis:s.textOverflow, tooltip:n.getAttribute('title'), text:n.textContent };
+});
+ok('제목은 한 줄 말줄임', textStyle.wrap==='nowrap' && textStyle.ellipsis==='ellipsis', JSON.stringify(textStyle));
+ok('마우스를 올리면 전체 제목이 뜸', textStyle.tooltip===textStyle.text, textStyle.tooltip);
+
 const sides = await page.evaluate(()=>{
   const item=document.querySelector('#todayPanel .todo-item');
   const text=item.querySelector('.todo-text').getBoundingClientRect();
@@ -107,7 +116,7 @@ ok('제목은 왼쪽 · 날짜는 오른쪽', sides.metaLeft > sides.textLeft &&
 // 6. 카드 안에서는 스크롤하지 않는다 — 전부 펼쳐 두고 페이지가 스크롤된다
 const box = await page.evaluate(()=>{
   const groups=document.querySelector('.todo-groups');
-  const grids=[...document.querySelectorAll('.todo-grid')];
+  const grids=[...document.querySelectorAll('.todo-group-list')];
   const panel=document.querySelector('#todayPanel').getBoundingClientRect();
   const sched=document.querySelector('#schedulePanel').getBoundingClientRect();
   const styles=[groups, ...grids].map(el=>getComputedStyle(el));
@@ -129,8 +138,16 @@ const counts = groups.map(g=>Number(g.replace(/[^0-9]/g,'')));
 ok('구역 개수 합계 = 미완료 개수', counts.reduce((a,c)=>a+c,0)===activeCount, `${counts.join('+')} = ${activeCount}`);
 
 // 데스크톱 2열
-const cols = await page.evaluate(()=>new Set([...document.querySelectorAll('.todo-group.late .todo-item')].map(r=>Math.round(r.getBoundingClientRect().left))).size);
-ok('데스크톱에서 2열', cols===2, `${cols}열`);
+const cols = await page.evaluate(()=>new Set([...document.querySelectorAll('.todo-group.future .todo-item')].map(r=>Math.round(r.getBoundingClientRect().left))).size);
+ok('넓은 화면에서 3열', cols===3, `${cols}열`);
+
+// 중간 화면(태블릿)에서는 2열
+await page.setViewportSize({ width: 1100, height: 950 });
+await page.waitForTimeout(300);
+const midCols = await page.evaluate(()=>new Set([...document.querySelectorAll('.todo-group.future .todo-item')].map(r=>Math.round(r.getBoundingClientRect().left))).size);
+ok('중간 화면에서 2열', midCols===2, `${midCols}열`);
+await page.setViewportSize({ width: 1500, height: 950 });
+await page.waitForTimeout(300);
 
 // 7. 완료 탭도 전부 표시
 await page.evaluate(()=>document.querySelector('[data-todo-tab="done"]').click());
@@ -159,11 +176,12 @@ const mobile = await m.evaluate(()=>{
   const item=document.querySelector('#todayPanel .todo-item');
   const text=item.querySelector('.todo-text').getBoundingClientRect();
   const meta=item.querySelector('.todo-meta').getBoundingClientRect();
-  return { below: meta.top >= text.bottom - 2, aligned: Math.abs(meta.left-text.left)<2,
+  return { oneLine: Math.abs(meta.top-text.top) < 12, metaRight: meta.left > text.right - 2,
            overflowX: document.documentElement.scrollWidth-document.documentElement.clientWidth,
-           rows: document.querySelectorAll('#todayPanel .todo-item').length };
+           rows: document.querySelectorAll('#todayPanel .todo-item').length,
+           height: Math.round(item.getBoundingClientRect().height) };
 });
-ok('모바일에서 날짜가 제목 아래', mobile.below && mobile.aligned, JSON.stringify(mobile));
+ok('모바일에서도 한 줄 · 배지와 날짜는 오른쪽', mobile.oneLine && mobile.metaRight, JSON.stringify(mobile));
 ok('모바일 가로 스크롤 없음', mobile.overflowX===0, `${mobile.overflowX}px`);
 ok('모바일에서도 전부 표시', mobile.rows===activeCount-1, `${mobile.rows}개`);
 const mobileCols = await m.evaluate(()=>new Set([...document.querySelectorAll('#todayPanel .todo-item')].map(r=>Math.round(r.getBoundingClientRect().left))).size);
