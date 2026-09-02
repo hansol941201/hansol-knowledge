@@ -71,10 +71,11 @@ const clamp = await page.$eval('#pageGrid .page-card.script-card p', n=>getCompu
 ok('긴 대본은 카드에서 8줄까지', clamp==='8', clamp);
 await page.evaluate(()=>document.querySelector('#pageGrid .page-card[data-id] h3').click());
 await page.waitForTimeout(300);
-const detail = await page.textContent('#detailBody');
-ok('카드를 누르면 전체 대본이 보임', detail.includes('질의응답') && detail.includes('한솔테크 김한솔'), detail.slice(0,30));
-ok('상세 창에 수정·삭제 있음', await page.isVisible('#detailEdit') && await page.isVisible('#detailDelete'));
-await page.click('#detailClose'); await page.waitForTimeout(200);
+const detail = await page.textContent('#scriptBody');
+ok('카드를 누르면 대본 전용 화면이 열림', await page.isVisible('#scriptModal') && !(await page.isVisible('#detailModal')));
+ok('대본 내용이 한 줄씩 표시됨', detail.includes('질의응답') && detail.includes('한솔테크 김한솔'), detail.replace(/\s+/g,' ').slice(0,40));
+ok('멘트마다 수정 버튼', (await page.$$('#scriptBody .script-line [data-script-edit]')).length>0);
+await page.click('#scriptClose'); await page.waitForTimeout(200);
 
 // 4. 수정
 await page.evaluate(()=>document.querySelector('#pageGrid .page-card[data-id] [data-edit]').click());

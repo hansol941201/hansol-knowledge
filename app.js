@@ -1108,6 +1108,7 @@ function openDetailFromCard(card) {
   const data = card.dataset;
   if (data.id) {
     const item = knowledge.find(x => x.id === data.id);
+    if (item && findCategory(item) === '대본') return openScriptView(item);   // 대본은 전용 화면으로
     if (item) showDetail(findCategory(item), item.title, item.answer,
       [['저장', savedLabel(item)], ['검색어', (item.aliases || []).join(', ')], ['출처', item.source]], item);
   } else if (data.memoryResult) {
@@ -1227,6 +1228,248 @@ function keepMailFields(remote) {
   }
   return kept;
 }
+
+
+// ── 대본 상세 (전화하면서 그대로 읽는 화면) ────────────────────
+// 저장은 지금까지처럼 지식 항목의 answer 한 덩어리에 그대로 둔다.
+// 머리글(🚨 / 💬)로 구역을 나눠 두고, 열 때 읽어서 나누고 고칠 때 다시 합친다.
+// 그래서 예전에 적어 둔 대본도 그대로 뜨고, 검색·백업도 지금 방식 그대로 쓴다.
+const SCRIPT_CAUTION_HEAD = '🚨 통화 시 주의';
+const SCRIPT_QNA_HEAD = '💬 예상 질문·답변';
+const SCRIPT_BULLET = /^[\u{1F4DE}\u{26A0}\u{2757}\u{1F6A8}️•\-*]+\s*/u;
+
+let scriptItemId = null;
+let scriptEditing = null;   // { kind: 'line' | 'caution' | 'qna', index }
+let scriptAdding = null;    // 'line' | 'caution' | 'qna'
+
+// 저장돼 있던 글을 멘트 · 주의사항 · 질문답변으로 나눈다.
+function parseScript(text) {
+  const out = { lines: [], cautions: [], qna: [] };
+  let mode = 'line';
+  let pendingQuestion = null;
+  for (const raw of String(text || '').split('\n')) {
+    const line = raw.trim();
+    if (!line) continue;
+    if (/^[\u{1F6A8}\u{2757}️]*\s*(통화 시 주의|꼭 주의)/u.test(line)) { mode = 'caution'; continue; }
+    if (/^[\u{1F4AC}️]*\s*예상 질문/u.test(line)) { mode = 'qna'; continue; }
+    if (mode === 'qna') {
+      const question = line.match(/^Q\s*[.:．]\s*(.*)$/);
+      const answer = line.match(/^A\s*[.:．]\s*(.*)$/);
+      if (question) {
+        if (pendingQuestion !== null) out.qna.push({ question: pendingQuestion, answer: '' });
+        pendingQuestion = question[1].trim();
+        continue;
+      }
+      if (answer) { out.qna.push({ question: pendingQuestion || '', answer: answer[1].trim() }); pendingQuestion = null; continue; }
+      if (out.qna.length) out.qna[out.qna.length - 1].answer += `\n${line}`;   // 이어지는 줄은 답변에 붙인다
+      continue;
+    }
+    const body = line.replace(SCRIPT_BULLET, '').trim();
+    if (!body) continue;
+    if (mode === 'caution') out.cautions.push(body);
+    else out.lines.push(body);
+  }
+  if (pendingQuestion !== null) out.qna.push({ question: pendingQuestion, answer: '' });
+  return out;
+}
+
+// 화면에서 고친 내용을 다시 한 덩어리 글로 만든다.
+function serializeScript(data) {
+  const parts = data.lines.map(text => `📞 ${text}`);
+  if (data.cautions.length) {
+    parts.push('', SCRIPT_CAUTION_HEAD, ...data.cautions.map(text => `⚠️ ${text}`));
+  }
+  if (data.qna.length) {
+    parts.push('', SCRIPT_QNA_HEAD, ...data.qna.map(row => `Q. ${row.question}\nA. ${row.answer}`));
+  }
+  return parts.join('\n');
+}
+
+function scriptItem() { return knowledge.find(x => x.id === scriptItemId && !x.deleted) || null; }
+function scriptData() { return parseScript(scriptItem() ? scriptItem().answer : ''); }
+
+function saveScriptData(data, toast) {
+  const item = scriptItem();
+  if (!item) return;
+  // 나누기 전 원본을 딱 한 번 남겨 둔다(내용이 사라지지 않도록).
+  if (item.legacyAnswer === undefined) item.legacyAnswer = item.answer;
+  item.answer = serializeScript(data);
+  touch(item);
+  save();
+  scriptEditing = null;
+  scriptAdding = null;
+  renderScriptView();
+  renderLibrary();
+  if (toast) showToast(toast);
+}
+
+const scriptOneLine = (text) => String(text || '').replace(/\s*\n\s*/g, ' ').trim();
+
+function scriptEditBox(value, rows = 2) {
+  return `<div class="script-edit">
+      <textarea class="script-input" rows="${rows}">${escapeHtml(value)}</textarea>
+      <div class="script-edit-foot">
+        <button type="button" class="ghost-btn" data-script-cancel>취소</button>
+        <button type="button" class="script-save" data-script-save>저장</button>
+      </div>
+    </div>`;
+}
+function scriptQnaEditBox(question, answer) {
+  return `<div class="script-edit">
+      <label class="script-field">예상 질문<input class="script-question" value="${escapeHtml(question)}" /></label>
+      <label class="script-field">내가 말할 답변<textarea class="script-answer" rows="3">${escapeHtml(answer)}</textarea></label>
+      <div class="script-edit-foot">
+        <button type="button" class="ghost-btn" data-script-cancel>취소</button>
+        <button type="button" class="script-save" data-script-save>저장</button>
+      </div>
+    </div>`;
+}
+const scriptTools = (kind, index) => `
+  <span class="script-tools">
+    <button type="button" class="script-mini" data-script-edit="${kind}" data-index="${index}">${icon('pencil', 11)}수정</button>
+    <button type="button" class="script-mini" data-script-menu="${kind}" data-index="${index}" title="삭제·순서 바꾸기">${icon('more', 13)}</button>
+  </span>`;
+
+function renderScriptView() {
+  const item = scriptItem();
+  if (!item) return;
+  const data = scriptData();
+  $('#scriptHeading').textContent = `📞 ${item.title}`;
+
+  const lineCards = data.lines.map((text, index) => (
+    scriptEditing && scriptEditing.kind === 'line' && scriptEditing.index === index
+      ? `<article class="script-line editing">${scriptEditBox(text)}</article>`
+      : `<article class="script-line">
+           <span class="script-mark">📞</span>
+           <p>${escapeHtml(text)}</p>
+           ${scriptTools('line', index)}
+         </article>`)).join('');
+
+  const cautionCards = data.cautions.map((text, index) => (
+    scriptEditing && scriptEditing.kind === 'caution' && scriptEditing.index === index
+      ? `<article class="script-caution editing">${scriptEditBox(text)}</article>`
+      : `<article class="script-caution">
+           <span class="script-mark">⚠️</span>
+           <p>${escapeHtml(text)}</p>
+           ${scriptTools('caution', index)}
+         </article>`)).join('');
+
+  const qnaCards = data.qna.map((row, index) => (
+    scriptEditing && scriptEditing.kind === 'qna' && scriptEditing.index === index
+      ? `<article class="script-qna editing">${scriptQnaEditBox(row.question, row.answer)}</article>`
+      : `<article class="script-qna">
+           <p class="script-q"><b>Q.</b>${escapeHtml(row.question)}</p>
+           <p class="script-a"><b>A.</b>${escapeHtml(row.answer)}</p>
+           ${scriptTools('qna', index)}
+         </article>`)).join('');
+
+  $('#scriptBody').innerHTML = `
+    <section class="script-section">
+      <div class="script-head">
+        <h3>통화 멘트</h3>
+        <button type="button" class="ghost-btn" data-script-add="line">＋ 멘트 추가</button>
+      </div>
+      <div class="script-list">${lineCards || '<p class="script-empty">아직 적어 둔 멘트가 없습니다. ＋ 멘트 추가로 넣어 주세요.</p>'}
+        ${scriptAdding === 'line' ? `<article class="script-line editing">${scriptEditBox('')}</article>` : ''}</div>
+    </section>
+
+    <section class="script-section script-danger">
+      <div class="script-head">
+        <h3>🚨 통화 시 주의</h3>
+        <button type="button" class="ghost-btn" data-script-add="caution">＋ 주의사항 추가</button>
+      </div>
+      <div class="script-list">${cautionCards || '<p class="script-empty">적어 둔 주의사항이 없습니다.</p>'}
+        ${scriptAdding === 'caution' ? `<article class="script-caution editing">${scriptEditBox('')}</article>` : ''}</div>
+    </section>
+
+    <section class="script-section">
+      <div class="script-head">
+        <h3>💬 예상 질문·답변</h3>
+        <button type="button" class="ghost-btn" data-script-add="qna">＋ 질문·답변 추가</button>
+      </div>
+      <div class="script-list">${qnaCards || '<p class="script-empty">적어 둔 질문·답변이 없습니다.</p>'}
+        ${scriptAdding === 'qna' ? `<article class="script-qna editing">${scriptQnaEditBox('', '')}</article>` : ''}</div>
+    </section>`;
+
+  bindScriptView(data);
+}
+
+function bindScriptView(data) {
+  const body = $('#scriptBody');
+  body.querySelectorAll('[data-script-add]').forEach(button => {
+    button.onclick = () => { scriptEditing = null; scriptAdding = button.dataset.scriptAdd; renderScriptView(); };
+  });
+  body.querySelectorAll('[data-script-edit]').forEach(button => {
+    button.onclick = () => {
+      scriptAdding = null;
+      scriptEditing = { kind: button.dataset.scriptEdit, index: Number(button.dataset.index) };
+      renderScriptView();
+    };
+  });
+  body.querySelectorAll('[data-script-menu]').forEach(button => {
+    const kind = button.dataset.scriptMenu;
+    const index = Number(button.dataset.index);
+    const list = kind === 'line' ? data.lines : kind === 'caution' ? data.cautions : data.qna;
+    button.onclick = () => openRowMenu(button, [
+      { label: '위로', run: () => moveScriptRow(data, kind, index, -1) },
+      { label: '아래로', run: () => moveScriptRow(data, kind, index, 1) },
+      { label: '삭제', danger: true, run: () => {
+          if (!confirm('이 줄을 삭제할까요?')) return;
+          list.splice(index, 1);
+          saveScriptData(data, '삭제됨');
+        } }
+    ]);
+  });
+  body.querySelectorAll('[data-script-cancel]').forEach(button => {
+    button.onclick = () => { scriptEditing = null; scriptAdding = null; renderScriptView(); };
+  });
+  body.querySelectorAll('[data-script-save]').forEach(button => {
+    button.onclick = () => {
+      const card = button.closest('article');
+      const kind = card.classList.contains('script-caution') ? 'caution'
+        : card.classList.contains('script-qna') ? 'qna' : 'line';
+      const adding = scriptAdding === kind;
+      const index = scriptEditing ? scriptEditing.index : -1;
+      if (kind === 'qna') {
+        const question = scriptOneLine(card.querySelector('.script-question').value);
+        const answer = card.querySelector('.script-answer').value.trim();
+        if (!question && !answer) return showToast('내용을 적어 주세요');
+        if (adding) data.qna.push({ question, answer });
+        else data.qna[index] = { question, answer };
+      } else {
+        const text = scriptOneLine(card.querySelector('.script-input').value);
+        if (!text) return showToast('내용을 적어 주세요');
+        const list = kind === 'caution' ? data.cautions : data.lines;
+        if (adding) list.push(text);
+        else list[index] = text;
+      }
+      saveScriptData(data, adding ? '추가됨' : '수정됨');
+    };
+  });
+  const focusTarget = body.querySelector('.editing .script-input, .editing .script-question');
+  if (focusTarget) setTimeout(() => focusTarget.focus(), 30);
+}
+
+function moveScriptRow(data, kind, index, step) {
+  const list = kind === 'line' ? data.lines : kind === 'caution' ? data.cautions : data.qna;
+  const next = index + step;
+  if (next < 0 || next >= list.length) return;
+  const [moved] = list.splice(index, 1);
+  list.splice(next, 0, moved);
+  saveScriptData(data, '순서 바꿈');
+}
+
+function openScriptView(item) {
+  if (!item) return;
+  scriptItemId = item.id;
+  scriptEditing = null;
+  scriptAdding = null;
+  $('#scriptModal').classList.remove('hidden');
+  renderScriptView();
+}
+function closeScriptView() { $('#scriptModal').classList.add('hidden'); scriptItemId = null; }
+$('#scriptClose').addEventListener('click', closeScriptView);
+$('#scriptModal').addEventListener('click', event => { if (event.target.id === 'scriptModal') closeScriptView(); });
 
 // ── 일정 (목록) ──────────────────────────────────────────────
 const dayKeyOf = (date) => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
