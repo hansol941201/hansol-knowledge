@@ -40,11 +40,12 @@ const cols = await page.evaluate(()=>{
   const s=document.querySelector('#schedulePanel').getBoundingClientRect();
   const scroll=document.querySelector('.main-scroll').getBoundingClientRect();
   const pad=parseFloat(getComputedStyle(document.querySelector('.main-scroll')).paddingLeft);
-  return { todoW:Math.round(a.width), schedW:Math.round(s.width), gap:Math.round(a.top-s.bottom),
-           stacked: a.top >= s.bottom - 2, fullWidth: Math.round(scroll.width - pad*2) };
+  return { todoW:Math.round(a.width), schedW:Math.round(s.width), gap:Math.round(s.left-a.right),
+           sideBySide: Math.abs(a.top-s.top)<2 && a.left < s.left,
+           ratio: Math.round(a.width/(a.width+s.width)*100), fullWidth: Math.round(scroll.width - pad*2) };
 });
-ok('일정이 위 · 할 일이 아래로 세로 배치', cols.stacked, JSON.stringify(cols));
-ok('두 카드 모두 전체 너비', cols.todoW===cols.fullWidth && cols.schedW===cols.fullWidth, JSON.stringify(cols));
+ok('할 일 왼쪽 · 일정 오른쪽 두 단', cols.sideBySide, JSON.stringify(cols));
+ok('왼쪽 70% : 오른쪽 30%', cols.ratio>=68 && cols.ratio<=72, `${cols.ratio}%`);
 ok('카드 간격 16~20px', cols.gap>=16 && cols.gap<=20, `${cols.gap}px`);
 
 // 일정 추가 → 목록 표시

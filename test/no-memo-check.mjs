@@ -41,10 +41,10 @@ ok('대시보드 카드는 할 일 · 일정 2개', (await page.$$('#dashCols > 
 const cols = await page.evaluate(()=>{
   const a=document.querySelector('#todayPanel').getBoundingClientRect();
   const s=document.querySelector('#schedulePanel').getBoundingClientRect();
-  return { stacked: a.top >= s.bottom - 2, sameWidth: Math.abs(a.width-s.width)<2,
-           gap: Math.round(a.top-s.bottom), overflowX: document.documentElement.scrollWidth-document.documentElement.clientWidth };
+  return { sideBySide: Math.abs(a.top-s.top)<2 && a.left < s.left,
+           gap: Math.round(s.left-a.right), overflowX: document.documentElement.scrollWidth-document.documentElement.clientWidth };
 });
-ok('일정 위 · 할 일 아래 · 폭 동일', cols.stacked && cols.sameWidth, JSON.stringify(cols));
+ok('할 일 왼쪽 · 일정 오른쪽', cols.sideBySide, JSON.stringify(cols));
 ok('가로 스크롤 생기지 않음', cols.overflowX===0, `${cols.overflowX}px`);
 
 // 검색 미리보기에서도 빠졌는지

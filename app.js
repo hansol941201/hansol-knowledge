@@ -476,7 +476,15 @@ function activeTodos() {
       return savedMillis(a) - savedMillis(b);     // 같은 날짜면 먼저 적은 것부터
     });
 }
-// 오늘 / 지연 / 앞으로 / 날짜 없음 — 배지와 색을 고르는 기준
+// 업무 구분 — 사용자가 고른 값이 있으면 그 값, 없으면 마감일로 자동 분류한다.
+//   마감일이 오늘이거나 지났으면 급함, 미래이거나 없으면 여유.
+function todoUrgency(todo) {
+  if (todo && (todo.urgency === 'urgent' || todo.urgency === 'easy')) return todo.urgency;
+  const date = String((todo && todo.date) || '').trim();
+  if (!date) return 'easy';
+  return date <= todayKey() ? 'urgent' : 'easy';
+}
+// 오늘 / 지연 / 앞으로 / 날짜 없음 — 날짜 글씨 색을 고르는 기준
 function todoDateState(todo) {
   const date = String(todo.date || '').trim();
   if (!date) return 'none';
@@ -489,18 +497,14 @@ function doneTodos() {
     .sort((a, b) => String(b.doneAt || b.updatedAt || '').localeCompare(String(a.doneAt || a.updatedAt || '')));
 }
 
-// 지연 · 오늘 · 예정 세 구역으로 나눠 보여 준다(모두 펼친 상태).
+// 급한 일 · 여유 있는 일 두 구역으로 나눠 보여 준다(모두 펼친 상태).
 const TODO_GROUPS = [
-  { key: 'late', name: '지연' },
-  { key: 'today', name: '오늘' },
-  { key: 'future', name: '예정' }
+  { key: 'urgent', name: '오늘 당장 급한 일' },
+  { key: 'easy', name: '여유 있게 해야 할 일' }
 ];
 function todoGroupSections(list) {
-  const buckets = { late: [], today: [], future: [] };
-  for (const todo of list) {
-    const state = todoDateState(todo);
-    buckets[state === 'none' ? 'future' : state].push(todo);   // 날짜 없는 항목은 예정 맨 뒤
-  }
+  const buckets = { urgent: [], easy: [] };
+  for (const todo of list) buckets[todoUrgency(todo)].push(todo);
   const sections = TODO_GROUPS.filter(group => buckets[group.key].length).map(group => `
     <section class="todo-group ${group.key}">
       <h3 class="todo-group-head">${group.name}<span>${buckets[group.key].length}</span></h3>
@@ -511,20 +515,18 @@ function todoGroupSections(list) {
 // 작은 메모 카드 한 장 — 위: 체크 + 제목, 아래: 상태·날짜와 수정·삭제
 function todoActiveRow(todo) {
   const state = todoDateState(todo);
+  const kind = todoUrgency(todo);
   const when = escapeHtml(todo.date || '날짜 없음');
   return `
-    <label class="todo-item ${state}" data-todo-id="${todo.id}">
+    <label class="todo-item ${kind} ${state}" data-todo-id="${todo.id}">
       <input type="checkbox">
       <span class="todo-head">
         <span class="todo-check">${icon('check', 12)}</span>
         <span class="todo-text" title="${escapeHtml(todo.text)}">${escapeHtml(todo.text)}</span>
       </span>
       <span class="todo-foot">
-        <span class="todo-meta">
-          ${state === 'today' ? '<b class="todo-badge today">오늘</b>' : ''}
-          ${state === 'late' ? '<b class="todo-badge late">지연</b>' : ''}
-          <time class="${state}">${when}</time>
-        </span>
+        <b class="todo-badge ${kind}">${kind === 'urgent' ? '급함' : '여유'}</b>
+        <time class="${state}">${when}</time>
         <span class="todo-tools">
           <button type="button" class="todo-mini" data-todo-edit title="수정">${icon('pencil', 12)}</button>
           <button type="button" class="todo-remove" data-todo-delete title="삭제">${icon('more', 13)}</button>
@@ -540,10 +542,8 @@ function todoDoneRow(todo) {
         <span class="todo-text" title="${escapeHtml(todo.text)}">${escapeHtml(todo.text)}</span>
       </span>
       <span class="todo-foot">
-        <span class="todo-meta">
-          <time>${escapeHtml(todo.date || '날짜 없음')}</time>
-          <time class="todo-doneat" title="완료 ${escapeHtml(todoDoneLabel(todo))}">완료 ${escapeHtml(todoDoneShort(todo))}</time>
-        </span>
+        <b class="todo-badge done" title="완료 ${escapeHtml(todoDoneLabel(todo))}">완료 ${escapeHtml(todoDoneShort(todo))}</b>
+        <time>${escapeHtml(todo.date || '날짜 없음')}</time>
         <span class="todo-tools">
           <button type="button" class="todo-mini" data-todo-restore title="복구">복구</button>
           <button type="button" class="todo-mini danger" data-todo-purge title="영구 삭제">삭제</button>
@@ -644,6 +644,8 @@ function openTodoModal(todo) {
   editingTodoId = todo.id;
   $('#todoEditText').value = todo.text || '';
   $('#todoEditDate').value = todo.date || '';
+  const kind = todoUrgency(todo);
+  $('#todoModal').querySelectorAll('[name="todoUrgency"]').forEach(box => { box.checked = box.value === kind; });
   $('#todoModal').classList.remove('hidden');
   setTimeout(() => $('#todoEditText').focus(), 50);
 }
@@ -658,6 +660,8 @@ $('#todoForm').addEventListener('submit', event => {
   if (!todo || !text) return;
   todo.text = text;
   todo.date = $('#todoEditDate').value || todo.date;
+  const picked = $('#todoModal').querySelector('[name="todoUrgency"]:checked');
+  if (picked) todo.urgency = picked.value;      // 직접 고른 값은 자동 분류보다 우선한다
   touch(todo);
   saveTodos(); renderTodos(); renderLibrary(); closeTodoModal();
   showToast('할 일 수정됨');
@@ -1147,6 +1151,7 @@ document.querySelectorAll('[data-add]').forEach(button => {
       $('.add-kinds').classList.add('hidden');
       $('#quickTextLabel').textContent = addKind === '기억' ? '기억할 내용' : '할 일 내용';
       $('#quickTextInput').value = '';
+      $('#quickUrgency').classList.toggle('hidden', addKind !== '할 일');
       $('#quickTextForm').classList.remove('hidden');
       setTimeout(() => $('#quickTextInput').focus(), 50);
       return;
@@ -1161,6 +1166,10 @@ $('#quickTextForm').addEventListener('submit', async event => {
   if (!text) return;
   const item = addKind === '할 일' ? createTodo(text, '사이트') : createMemory(text, '사이트');
   if (!item) return;
+  if (addKind === '할 일') {
+    const picked = $('#quickUrgency').querySelector('[name="quickTodoUrgency"]:checked');
+    if (picked) item.urgency = picked.value;
+  }
   closeAddModal();
   await commitEntry(item, addKind === '할 일' ? 'todo' : 'memory');
 });

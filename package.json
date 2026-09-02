@@ -7,7 +7,7 @@
   "scripts": {
     "start": "electron .",
     "pack": "electron-builder --win portable",
-    "test": "node test/entry-check.mjs && node test/ui-check.mjs && node test/layout-check.mjs && node test/dashboard-check.mjs && node test/shortcut-check.mjs && node test/reset-check.mjs && node test/sync-check.mjs && node test/offline-check.mjs && node test/login-check.mjs && node test/no-pin-popup-check.mjs && node test/jump-check.mjs && node test/window-check.mjs && node test/todo-check.mjs && node test/todo-list-check.mjs && node test/preview-check.mjs && node test/fuzzy-check.mjs && node test/edit-check.mjs && node test/script-check.mjs && node test/plan-check.mjs && node test/no-memo-check.mjs && node test/no-mail-check.mjs && node test/popup-check.mjs && node test/pwa-check.mjs",
+    "test": "node test/entry-check.mjs && node test/ui-check.mjs && node test/layout-check.mjs && node test/dashboard-check.mjs && node test/shortcut-check.mjs && node test/reset-check.mjs && node test/sync-check.mjs && node test/offline-check.mjs && node test/login-check.mjs && node test/no-pin-popup-check.mjs && node test/jump-check.mjs && node test/window-check.mjs && node test/todo-check.mjs && node test/todo-list-check.mjs && node test/work-area-check.mjs && node test/preview-check.mjs && node test/fuzzy-check.mjs && node test/edit-check.mjs && node test/script-check.mjs && node test/plan-check.mjs && node test/no-memo-check.mjs && node test/no-mail-check.mjs && node test/popup-check.mjs && node test/pwa-check.mjs",
     "test:popup-geometry": "node test/popup-geometry-check.mjs"
   },
   "devDependencies": {

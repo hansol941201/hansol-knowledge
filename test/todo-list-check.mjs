@@ -52,28 +52,25 @@ ok('탭 개수도 전체 개수', (await page.$eval('[data-todo-tab="active"] sp
 const dates = await page.$$eval('#todayPanel .todo-item .todo-meta time', n=>n.map(x=>x.textContent));
 const dated = dates.filter(d=>/^\d{4}-/.test(d));
 ok('마감일이 빠른 순', dated.join('|')===[...dated].sort().join('|'), dated.slice(0,4).join(' → '));
-ok('날짜 없는 항목이 가장 아래', dates.at(-1)==='날짜 없음', dates.at(-1));
+ok('날짜 없는 항목은 여유 구역에', await page.evaluate(()=>
+  [...document.querySelectorAll('.todo-group.easy .todo-item')].some(c=>c.textContent.includes('날짜 없음'))));
 
 // 3. 상태 배지
 const first = await page.$eval('#todayPanel .todo-item', n=>({ cls:n.className, text:n.textContent.replace(/\s+/g,' ').trim() }));
-ok('지연 항목에 지연 배지', first.cls.includes('late') && first.text.includes('지연'), first.text.slice(0,30));
+ok('급한 일 카드에 급함 배지', first.cls.includes('urgent') && first.text.includes('급함'), first.text.slice(0,30));
 const rgb = s => (s.match(/\d+/g)||[0,0,0]).map(Number);
-const lateBg = await page.$eval('#todayPanel .todo-item.late', n=>getComputedStyle(n).backgroundColor);
-const plainBg = await page.$eval('#todayPanel .todo-item.future', n=>getComputedStyle(n).backgroundColor);
-ok('지연 항목 배경은 빨갛지 않음(흰 배경)', rgb(lateBg)[0]===rgb(lateBg)[1] && rgb(lateBg)[1]===rgb(lateBg)[2], lateBg);
+const lateBg = await page.$eval('#todayPanel .todo-item.urgent', n=>getComputedStyle(n).backgroundColor);
+const plainBg = await page.$eval('#todayPanel .todo-item.easy', n=>getComputedStyle(n).backgroundColor);
+ok('급한 카드 배경은 빨갛지 않음(흰 배경)', rgb(lateBg)[0]===rgb(lateBg)[1] && rgb(lateBg)[1]===rgb(lateBg)[2], lateBg);
 const bars = await page.evaluate(()=>({
-  late: getComputedStyle(document.querySelector('#todayPanel .todo-item.late')).borderLeftColor,
-  today: getComputedStyle(document.querySelector('#todayPanel .todo-item.today')).borderLeftColor,
-  future: getComputedStyle(document.querySelector('#todayPanel .todo-item.future')).borderLeftColor,
-  width: getComputedStyle(document.querySelector('#todayPanel .todo-item.late')).borderLeftWidth }));
-ok('지연은 왼쪽 빨간 선', rgb(bars.late)[0] > rgb(bars.late)[1] + 40, bars.late);
-ok('오늘은 왼쪽 초록 선', rgb(bars.today)[1] > rgb(bars.today)[0] + 40, bars.today);
-ok('예정은 왼쪽 보라·회색 선', bars.future !== bars.late && bars.future !== bars.today, bars.future);
+  urgent: getComputedStyle(document.querySelector('#todayPanel .todo-item.urgent')).borderLeftColor,
+  easy: getComputedStyle(document.querySelector('#todayPanel .todo-item.easy')).borderLeftColor,
+  width: getComputedStyle(document.querySelector('#todayPanel .todo-item.urgent')).borderLeftWidth }));
+ok('급함은 왼쪽 빨간 선', rgb(bars.urgent)[0] > rgb(bars.urgent)[1] + 40, bars.urgent);
+ok('여유는 왼쪽 남색 선', rgb(bars.easy)[2] > rgb(bars.easy)[0] + 20, bars.easy);
 ok('왼쪽 선은 얇게', parseFloat(bars.width) <= 4, bars.width);
-ok('오늘 항목에 초록 오늘 배지', (await page.$$('#todayPanel .todo-badge.today')).length===2,
-   `${(await page.$$('#todayPanel .todo-badge.today')).length}개`);
-const todayColor = await page.$eval('#todayPanel .todo-badge.today', n=>getComputedStyle(n).color);
-ok('오늘 배지는 초록', rgb(todayColor)[1] > rgb(todayColor)[0] && rgb(todayColor)[1] > rgb(todayColor)[2], todayColor);
+const easyColor = await page.$eval('#todayPanel .todo-badge.easy', n=>getComputedStyle(n).color);
+ok('여유 배지는 남색 계열', rgb(easyColor)[2] > rgb(easyColor)[0], easyColor);
 const futureColor = await page.$eval('#todayPanel .todo-item time.future', n=>getComputedStyle(n).color);
 const fc = rgb(futureColor);
 ok('앞으로 예정된 날짜는 회색(채도 낮음)', Math.max(...fc)-Math.min(...fc) <= 25, futureColor);
@@ -88,20 +85,23 @@ ok('행마다 테두리·둥근 모서리', row.border>0 && row.radius>=5, JSON.
 ok('카드 안쪽 여백 9~12px', row.padTop>=9 && row.padTop<=12, `${row.padTop}/${row.padBottom}`);
 const card = await page.$eval('#todayPanel .todo-item', n=>{
   const s=getComputedStyle(n);
-  return { w:Math.round(n.getBoundingClientRect().width), minH:parseFloat(s.minHeight),
+  return { h:parseFloat(s.height), minH:parseFloat(s.minHeight), maxH:parseFloat(s.maxHeight),
            radius:parseFloat(s.borderTopLeftRadius), pad:parseFloat(s.paddingTop),
            bg:s.backgroundColor, shadow:s.boxShadow };
 });
-ok('카드 너비 190~230px', card.w>=190 && card.w<=230, `${card.w}px`);
-ok('카드 최소 높이 58~68px', card.minH>=58 && card.minH<=68, `${card.minH}px`);
+ok('카드 높이 88px 고정', card.h===88 && card.minH===88 && card.maxH===88, JSON.stringify(card));
+const sizes = await page.$$eval('#todayPanel .todo-item', n=>({
+  h:[...new Set(n.map(x=>Math.round(x.getBoundingClientRect().height)))],
+  w:[...new Set(n.map(x=>Math.round(x.getBoundingClientRect().width)))] }));
+ok('제목 길이와 상관없이 모든 카드 크기가 같음', sizes.h.length===1 && sizes.w.length===1, JSON.stringify(sizes));
 ok('모서리는 덜 둥글게(6px 안팎)', card.radius>=5 && card.radius<=8, `${card.radius}px`);
 ok('카드 배경은 흰색', card.bg==='rgb(255, 255, 255)', card.bg);
 ok('그림자는 아주 약하게', card.shadow!=='none' && !/rgba\(0, 0, 0, 0\.[3-9]/.test(card.shadow), card.shadow);
 const gap = await page.$eval('.todo-group-list', n=>parseFloat(getComputedStyle(n).rowGap));
 ok('항목 사이 간격', gap>=5, `${gap}px`);
-await page.hover('#todayPanel .todo-item.future');
+await page.hover('#todayPanel .todo-item.easy');
 await page.waitForTimeout(250);
-const hoverBg = await page.$eval('#todayPanel .todo-item.future', n=>getComputedStyle(n).backgroundColor);
+const hoverBg = await page.$eval('#todayPanel .todo-item.easy', n=>getComputedStyle(n).backgroundColor);
 ok('마우스를 올리면 배경이 진해짐', hoverBg!==plainBg, `${plainBg} → ${hoverBg}`);
 
 // 5. 제목 한 줄 · 날짜 오른쪽
@@ -117,12 +117,19 @@ const sides = await page.evaluate(()=>{
   const item=document.querySelector('#todayPanel .todo-item');
   const check=item.querySelector('.todo-check').getBoundingClientRect();
   const text=item.querySelector('.todo-text').getBoundingClientRect();
-  const meta=item.querySelector('.todo-meta').getBoundingClientRect();
+  const meta=item.querySelector('.todo-badge').getBoundingClientRect();
   return { checkLeft:Math.round(check.left), textLeft:Math.round(text.left),
            checkFirst: check.right <= text.left + 1, metaBelow: meta.top >= text.bottom - 2,
            checkW: Math.round(check.width) };
 });
 ok('왼쪽 위 체크박스 · 그 오른쪽에 제목', sides.checkFirst && sides.textLeft > sides.checkLeft, JSON.stringify(sides));
+const foot = await page.evaluate(()=>{
+  const item=document.querySelector('#todayPanel .todo-item');
+  const badge=item.querySelector('.todo-badge').getBoundingClientRect();
+  const time=item.querySelector('time').getBoundingClientRect();
+  return { badgeFirst: badge.right <= time.left, sameLine: Math.abs(badge.top-time.top)<10 };
+});
+ok('왼쪽 하단 급함/여유 · 오른쪽 하단 마감일', foot.badgeFirst && foot.sameLine, JSON.stringify(foot));
 ok('상태와 날짜는 카드 아래쪽', sides.metaBelow, JSON.stringify(sides));
 ok('체크박스는 작게', sides.checkW<=18, `${sides.checkW}px`);
 
@@ -140,45 +147,50 @@ const box = await page.evaluate(()=>{
 });
 ok('카드 안에서 스크롤하지 않음', !box.innerScroll, JSON.stringify(box));
 ok('최대 높이·overflow 설정이 없음', !box.fixedHeight);
-ok('일정이 위, 할 일이 아래로 배치됨', box.stacked, `일정 아래끝보다 할 일 위쪽이 아래에 있음`);
-ok('두 카드 높이를 억지로 맞추지 않음', box.schedH !== box.panelH, `할 일 ${box.panelH} · 일정 ${box.schedH}`);
+ok('두 영역 바깥 높이가 같음', Math.abs(box.schedH - box.panelH) < 2, `할 일 ${box.panelH} · 일정 ${box.schedH}`);
 ok('높이 강제 클래스 제거됨', await page.evaluate(()=>!document.querySelector('.main-scroll').classList.contains('dash-fill')));
 
 // 지연 · 오늘 · 예정 구역과 개수
 const groups = await page.$$eval('.todo-group-head', n=>n.map(h=>h.textContent));
-ok('지연·오늘·예정 구역으로 나뉨', groups.length===3 && groups[0].startsWith('지연') && groups[1].startsWith('오늘') && groups[2].startsWith('예정'), groups.join(' / '));
+ok('급한 일 · 여유 있는 일 두 구역', groups.length===2 && groups[0].startsWith('오늘 당장 급한 일') && groups[1].startsWith('여유 있게 해야 할 일'), groups.join(' / '));
 const counts = groups.map(g=>Number(g.replace(/[^0-9]/g,'')));
 ok('구역 개수 합계 = 미완료 개수', counts.reduce((a,c)=>a+c,0)===activeCount, `${counts.join('+')} = ${activeCount}`);
 
 // 왼쪽부터 채워지고, 남는 자리를 늘려 채우지 않는다
 const flow = await page.evaluate(()=>{
-  const list=document.querySelector('.todo-group.future .todo-group-list');
+  const list=document.querySelector('.todo-group.easy .todo-group-list');
   const style=getComputedStyle(list);
   const cards=[...list.querySelectorAll('.todo-item')].map(c=>c.getBoundingClientRect());
   const listBox=list.getBoundingClientRect();
   const firstRow=cards.filter(c=>Math.abs(c.top-cards[0].top)<2);
   const secondRow=cards.filter(c=>c.top>cards[0].top+2);
-  return { display:style.display, wrap:style.flexWrap, align:style.alignItems, gap:Math.round(parseFloat(style.gap)),
+  return { display:style.display, cols:style.gridTemplateColumns.split(' ').length, gap:Math.round(parseFloat(style.gap)),
            leftAligned: Math.round(cards[0].left)===Math.round(listBox.left),
            perRow:firstRow.length, wrapped: secondRow.length>0,
            widths:[...new Set(cards.map(c=>Math.round(c.width)))] };
 });
-ok('flex-wrap 으로 왼쪽부터 쌓임', flow.display==='flex' && flow.wrap==='wrap' && flow.align==='flex-start', JSON.stringify(flow));
-ok('카드 사이 간격 8px', flow.gap===8, `${flow.gap}px`);
+ok('한 줄에 세 장', flow.display==='grid' && flow.cols===3 && flow.perRow===3, JSON.stringify(flow));
+ok('카드 사이 간격 10px', flow.gap===10, `${flow.gap}px`);
 ok('맨 왼쪽부터 정렬', flow.leftAligned);
 ok('모든 카드 너비가 같고 늘어나지 않음', flow.widths.length===1, flow.widths.join(', '));
 ok('자리가 모자라면 다음 줄로 내려감', flow.wrapped, `첫 줄 ${flow.perRow}장`);
 
-// 카드가 몇 장 없는 구역은 그만큼만 쓰고 오른쪽은 비워 둔다
-const twoOnly = await page.evaluate(()=>{
-  const list=document.querySelector('.todo-group.late .todo-group-list');
-  const cards=[...list.querySelectorAll('.todo-item')];
-  const listBox=list.getBoundingClientRect();
-  return { count:cards.length,
-           filled: Math.round(cards[cards.length-1].getBoundingClientRect().right - listBox.left),
-           listW: Math.round(listBox.width) };
+// 왼쪽 70% 할 일 · 오른쪽 30% 일정
+const split = await page.evaluate(()=>{
+  const todo=document.querySelector('#todayPanel').getBoundingClientRect();
+  const sched=document.querySelector('#schedulePanel').getBoundingClientRect();
+  return { ratio: Math.round(todo.width/(todo.width+sched.width)*100), gap: Math.round(sched.left-todo.right),
+           sameTop: Math.abs(todo.top-sched.top)<2, todoFirst: todo.left < sched.left,
+           scheduleInTodo: document.querySelectorAll('#todayPanel [data-schedule]').length,
+           todoInSchedule: document.querySelectorAll('#schedulePanel [data-todo-id]').length };
 });
-ok('카드 수만큼만 자리를 쓰고 오른쪽은 비워 둠', twoOnly.filled < twoOnly.listW - 100, JSON.stringify(twoOnly));
+ok('왼쪽 70% : 오른쪽 30%', split.ratio>=68 && split.ratio<=72, `${split.ratio}%`);
+ok('두 영역 사이 간격 16px', split.gap===16, `${split.gap}px`);
+ok('시작 위치가 같음', split.sameTop, JSON.stringify(split));
+ok('할 일이 왼쪽 · 일정이 오른쪽', split.todoFirst);
+ok('왼쪽에 일정이 없음', split.scheduleInTodo===0, `${split.scheduleInTodo}건`);
+ok('오른쪽에 할 일이 없음', split.todoInSchedule===0, `${split.todoInSchedule}건`);
+ok('화면 위쪽에 따로 남은 일정 영역 없음', (await page.$$('#dashCols > section')).length===2);
 
 // 7. 완료 탭도 전부 표시
 await page.evaluate(()=>document.querySelector('[data-todo-tab="done"]').click());
@@ -230,7 +242,7 @@ ok('아주 좁은 화면(390px)은 한 줄에 한 장', mobileCols===1, `${mobil
 await m.setViewportSize({ width: 640, height: 900 });
 await m.waitForTimeout(350);
 const midMobile = await m.evaluate(()=>{
-  const cards=[...document.querySelectorAll('.todo-group.future .todo-item')].map(c=>c.getBoundingClientRect());
+  const cards=[...document.querySelectorAll('.todo-group.easy .todo-item')].map(c=>c.getBoundingClientRect());
   return cards.filter(c=>Math.abs(c.top-cards[0].top)<2).length;
 });
 ok('좁은 화면(640px)은 한 줄에 두 장', midMobile===2, `${midMobile}장`);
