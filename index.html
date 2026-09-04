@@ -18,7 +18,7 @@
   <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png?v=1" />
   <link rel="shortcut icon" type="image/png" href="icons/icon-192.png?v=1" />
 
-  <link rel="stylesheet" href="styles.css?v=49" />
+  <link rel="stylesheet" href="styles.css?v=50" />
 </head>
 <body>
   <div class="workspace">
@@ -162,13 +162,14 @@
   <div id="todoModal" class="modal hidden" role="dialog" aria-modal="true" aria-label="할 일 수정">
     <form id="todoForm" class="edit-box">
       <header><strong>할 일 수정</strong><button id="todoModalClose" type="button">×</button></header>
-      <label>내용<input id="todoEditText" placeholder="예) 천민호 부사장님 택배 확인" required /></label>
+      <label>내용<textarea id="todoEditText" rows="4" placeholder="예) 천민호 부사장님 택배 확인" required></textarea></label>
       <label>날짜<input id="todoEditDate" type="date" /></label>
       <fieldset class="urgency-pick">
         <legend>업무 구분</legend>
         <label><input type="radio" name="todoUrgency" value="urgent" /><span>오늘 당장 급한 일</span></label>
         <label><input type="radio" name="todoUrgency" value="easy" /><span>여유 있게 해야 할 일</span></label>
       </fieldset>
+      <p id="todoEditError" class="sync-error"></p>
       <footer><button id="todoEditCancel" type="button">취소</button><button type="submit">저장</button></footer>
     </form>
   </div>
@@ -250,7 +251,7 @@
   <!-- 검색 규칙(정규화·유사어 사전) — 여기만 고치면 통합검색과 미리보기에 함께 적용된다. -->
   <script src="search-rules.js?v=1"></script>
   <script src="icons.js?v=2"></script>
-  <script src="app.js?v=82"></script>
+  <script src="app.js?v=83"></script>
   <script>
     // 홈 화면 앱(주소창 없는 standalone)으로 열리게 하는 등록. 저장은 하지 않는 워커라
     // 사이트를 고치면 항상 최신 파일을 받는다. 실패해도 사이트 동작에는 영향이 없다.

@@ -252,6 +252,10 @@ svg { display: block; flex: none; }
 .todo-foot time { margin-left: auto; }
 .todo-item.done .todo-foot time { margin-left: auto; }
 .todo-item input { position: absolute; opacity: 0; pointer-events: none; }
+/* 체크박스만 감싸는 영역 — 여기만 눌러야 완료 상태가 바뀐다 */
+.todo-check-box { display: inline-flex; flex: none; padding: 2px; margin: -2px; border-radius: 6px; cursor: pointer; }
+.todo-check-box:hover { background: var(--line-soft); }
+.todo-item input { position: absolute; opacity: 0; pointer-events: none; }
 .todo-check {
   display: grid; place-items: center; width: 15px; height: 15px; flex: none; margin-top: 1px;
   border: 1.5px solid #D8D4E2; border-radius: 4px; color: transparent;

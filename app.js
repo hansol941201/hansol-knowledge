@@ -517,11 +517,12 @@ function todoActiveRow(todo) {
   const state = todoDateState(todo);
   const kind = todoUrgency(todo);
   const when = escapeHtml(todo.date || '날짜 없음');
+  // 카드 전체를 label 로 감싸지 않는다. 체크박스만 자기 label 안에 두어
+  // 카드를 눌렀을 때 완료 처리되지 않고 수정 창이 열리게 한다.
   return `
-    <label class="todo-item ${kind} ${state}" data-todo-id="${todo.id}">
-      <input type="checkbox">
+    <div class="todo-item ${kind} ${state}" data-todo-id="${todo.id}">
       <span class="todo-head">
-        <span class="todo-check">${icon('check', 12)}</span>
+        <label class="todo-check-box" title="완료 표시"><input type="checkbox"><span class="todo-check">${icon('check', 12)}</span></label>
         <span class="todo-text" title="${escapeHtml(todo.text)}">${escapeHtml(todo.text)}</span>
       </span>
       <span class="todo-foot">
@@ -532,13 +533,13 @@ function todoActiveRow(todo) {
           <button type="button" class="todo-remove" data-todo-delete title="삭제">${icon('more', 13)}</button>
         </span>
       </span>
-    </label>`;
+    </div>`;
 }
 function todoDoneRow(todo) {
   return `
     <div class="todo-item done" data-todo-id="${todo.id}">
       <span class="todo-head">
-        <span class="todo-check done">${icon('check', 12)}</span>
+        <label class="todo-check-box" title="완료 취소"><input type="checkbox" checked><span class="todo-check done">${icon('check', 12)}</span></label>
         <span class="todo-text" title="${escapeHtml(todo.text)}">${escapeHtml(todo.text)}</span>
       </span>
       <span class="todo-foot">
@@ -594,8 +595,21 @@ function renderTodos() {
 
   panel.querySelectorAll('[data-todo-id]').forEach(row => {
     const todo = todos.find(x => x.id === row.dataset.todoId);
+    // 체크박스: 완료 상태만 바꾼다(카드 클릭으로 번지지 않게 막는다).
+    const checkBox = row.querySelector('.todo-check-box');
+    if (checkBox) checkBox.addEventListener('click', event => event.stopPropagation());
     const check = row.querySelector('input');
-    if (check) check.onchange = () => completeTodo(todo, row);
+    if (check) check.onchange = () => {
+      if (check.checked) return completeTodo(todo, row);
+      setTodoDone(todo, false);
+      saveTodos(); renderTodos(); renderLibrary();
+      showToast('할 일로 되돌렸습니다');
+    };
+    // 카드 본문·제목·날짜·배지·빈 공간을 누르면 수정 창을 연다(완료 처리하지 않는다).
+    row.addEventListener('click', event => {
+      if (event.target.closest('button') || event.target.closest('.todo-check-box')) return;
+      openTodoModal(todo);
+    });
     const edit = row.querySelector('[data-todo-edit]');
     if (edit) edit.onclick = event => { event.preventDefault(); openTodoModal(todo); };
     const remove = row.querySelector('[data-todo-delete]');
@@ -646,6 +660,7 @@ function openTodoModal(todo) {
   $('#todoEditDate').value = todo.date || '';
   const kind = todoUrgency(todo);
   $('#todoModal').querySelectorAll('[name="todoUrgency"]').forEach(box => { box.checked = box.value === kind; });
+  $('#todoEditError').textContent = '';
   $('#todoModal').classList.remove('hidden');
   setTimeout(() => $('#todoEditText').focus(), 50);
 }
@@ -657,13 +672,25 @@ $('#todoForm').addEventListener('submit', event => {
   event.preventDefault();
   const todo = todos.find(x => x.id === editingTodoId);
   const text = $('#todoEditText').value.trim();
-  if (!todo || !text) return;
-  todo.text = text;
-  todo.date = $('#todoEditDate').value || todo.date;
-  const picked = $('#todoModal').querySelector('[name="todoUrgency"]:checked');
-  if (picked) todo.urgency = picked.value;      // 직접 고른 값은 자동 분류보다 우선한다
-  touch(todo);
-  saveTodos(); renderTodos(); renderLibrary(); closeTodoModal();
+  $('#todoEditError').textContent = '';
+  if (!todo) return;
+  if (!text) { $('#todoEditError').textContent = '내용을 적어 주세요.'; return; }
+  // 완료 상태(done · doneAt)는 건드리지 않는다 — 내용만 고친다.
+  const before = { text: todo.text, date: todo.date, urgency: todo.urgency };
+  try {
+    todo.text = text;
+    todo.date = $('#todoEditDate').value || todo.date;
+    const picked = $('#todoModal').querySelector('[name="todoUrgency"]:checked');
+    if (picked) todo.urgency = picked.value;      // 직접 고른 값은 자동 분류보다 우선한다
+    touch(todo);
+    saveTodos();
+  } catch (error) {
+    Object.assign(todo, before);                  // 저장이 안 되면 원래대로 되돌린다
+    console.error('할 일 저장 실패', error);
+    $('#todoEditError').textContent = '저장하지 못했습니다. 잠시 뒤 다시 눌러 주세요.';
+    return;                                        // 창은 그대로 두어 쓰던 내용을 지키지 않는다
+  }
+  renderTodos(); renderLibrary(); closeTodoModal();
   showToast('할 일 수정됨');
 });
 
