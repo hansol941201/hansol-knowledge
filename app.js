@@ -1771,7 +1771,27 @@ function sortedShortcuts() {
   }, { passive: false });
 })();
 
+// 즐겨찾기는 이 기기(localStorage)에 저장하고, 동기화 로그인을 하면 클라우드로도 오간다.
+// 로그인 전에는 다른 컴퓨터에서 넣은 즐겨찾기가 보이지 않으므로 그 사실을 알려 준다.
+function paintShortcutNotice() {
+  const box = $('#shortcutNotice');
+  if (!box) return;
+  if (cloudStatus === 'live') { box.classList.add('hidden'); box.textContent = ''; return; }
+  box.classList.remove('hidden');
+  if (cloudStatus === 'syncing') {
+    box.innerHTML = '<span class="shortcut-notice-dot"></span>즐겨찾기를 불러오는 중…';
+    return;
+  }
+  const reason = cloudStatus === 'pending'
+    ? '연결이 끊겨 이 기기에만 저장 중입니다.'
+    : '이 기기에만 저장 중입니다. 다른 컴퓨터에서 넣은 즐겨찾기는 아직 보이지 않습니다.';
+  box.innerHTML = `<span>${reason}</span><button type="button" id="shortcutConnect">동기화 연결</button>`;
+  const button = $('#shortcutConnect');
+  if (button) button.onclick = () => openSyncModal();
+}
+
 function renderShortcuts() {
+  paintShortcutNotice();
   const list = sortedShortcuts();
   $('#shortcutGrid').innerHTML = list.map(item => `
     <div class="shortcut" data-shortcut="${item.id}" draggable="true">
@@ -2761,6 +2781,7 @@ function setCloudStatus(status) {
   };
   cloudStatus = status;
   const label = labels[status] || labels.offline;
+  paintShortcutNotice();
   const badge = $('#syncState');
   if (badge) {
     badge.textContent = label;
