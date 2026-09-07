@@ -25,18 +25,14 @@
     return `
     <div class="memo-head">
       <h2>📞 통화 &amp; 빠른 메모</h2>
-      <small>엔터(Enter)를 누르면 왼쪽 할 일 목록에 자동 추가됩니다</small>
+      <small>엔터(Enter)는 왼쪽 할 일 목록으로 · Shift+Enter는 줄바꿈</small>
     </div>
-    <div class="memo-add">
-      <input id="memoQuick" type="text" autocomplete="off" placeholder="통화 내용이나 할 일을 입력 후 엔터를 누르세요..." />
-      <button type="button" id="memoQuickAdd" class="memo-add-btn">추가</button>
-    </div>
+    <textarea id="memoNote" rows="9"
+      placeholder="통화 내용이나 할 일을 적으세요...&#10;엔터를 누르면 왼쪽 할 일 목록에 들어갑니다.&#10;길게 적은 뒤 [추가]를 누르면 기억 저장소에 담깁니다."></textarea>
     <div class="memo-tools">
       <label class="memo-file">📷 사진/파일 첨부<input id="memoFile" type="file" accept="image/*" hidden /></label>
-      <small>Tip: Shift + Enter로 줄바꿈</small>
-    </div>
-    <label class="memo-label" for="memoNote">상세 메모 / 통화 기록</label>
-    <textarea id="memoNote" rows="10" placeholder="전화 통화 중 상세 내용을 메모해두세요..."></textarea>`;
+      <button type="button" id="memoQuickAdd" class="memo-add-btn">추가 → 기억 저장소</button>
+    </div>`;
   }
 
   // 오른쪽 위: 할 일 목록 — 체크 + 제목 한 줄, 오른쪽 끝에 지우기(✕)

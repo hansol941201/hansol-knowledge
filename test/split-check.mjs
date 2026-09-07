@@ -41,7 +41,7 @@ ok('shortcuts.js 에는 디자인(색·픽셀)이 없음',
    !/#[0-9A-Fa-f]{6}|px\b|grid-template|border-radius/.test(svc.replace(/\/\/.*$/gm,'')));
 ok('app.js 는 즐겨찾기를 직접 읽고 쓰지 않음',
    !/localStorage\.(get|set)Item\('knowledge-shortcuts'/.test(app.replace(/const SHORTCUT_STORE[\s\S]*?\n};\n/,'')));
-ok('레이아웃·색은 styles.css 에 있음', /\.todo-list\s*{/.test(css) && /\.todo-line\s*{/.test(css) && /\.memo-add\s*{/.test(css));
+ok("레이아웃·색은 styles.css 에 있음", /\.todo-list\s*{/.test(css) && /\.todo-line\s*{/.test(css) && /\.memo-tools\s*{/.test(css));
 ok('index.html 이 네 파일을 app.js 보다 먼저 읽음', (()=>{
   const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
   const at = html.indexOf('app.js?v=');

@@ -1225,41 +1225,50 @@ function renderMemoPanel() {
   if (panel.querySelector('#memoNote')) return;
 
   panel.innerHTML = VIEWS.memoPanel();
-  const quick = $('#memoQuick');
   const note = $('#memoNote');
   note.value = readMemoNote();
+  const saveDraft = () => writeMemoNote(note.value);
 
-  // 한 줄 입력 → 할 일. 엔터도 추가 단추도 같은 일을 한다.
-  const addFromQuick = () => {
-    const text = quick.value.trim();
-    if (!text) { quick.focus(); return; }
-    createTodo(text, '통화 메모');
-    quick.value = '';
-    saveTodos(); renderTodos(); renderLibrary();
-    showToast('할 일에 넣었습니다');
-    quick.focus();
-  };
-  quick.addEventListener('keydown', event => {
+  // 엔터 한 번 → 그 줄을 왼쪽 할 일 목록으로 보낸다. Shift+Enter 는 줄바꿈.
+  note.addEventListener('keydown', event => {
     if (event.key !== 'Enter' || event.shiftKey || event.isComposing) return;   // 한글 조합 중에는 넘기지 않는다
     event.preventDefault();
-    addFromQuick();
+    const text = note.value.trim();
+    if (!text) return;
+    createTodo(text, '통화 메모');
+    note.value = '';
+    saveDraft();
+    saveTodos(); renderTodos(); renderLibrary();
+    showToast('할 일에 넣었습니다');
+    note.focus();
   });
-  $('#memoQuickAdd').onclick = addFromQuick;
 
-  // 상세 메모는 적는 대로 이 기기에 남는다(엔터로 할 일이 되지 않는다).
+  // 추가 단추 → 적어 둔 내용을 기억으로 저장하고 기억 저장소를 연다.
+  $('#memoQuickAdd').onclick = () => {
+    const text = note.value.trim();
+    if (!text) { note.focus(); return; }
+    createMemory(text, '통화 메모');
+    note.value = '';
+    saveDraft();
+    saveMemories(); renderLibrary();
+    showToast('기억 저장소에 담았습니다');
+    openMemoryLibrary();
+  };
+
+  // 적는 대로 이 기기에 초안으로 남는다(다시 열어도 그대로).
   let noteTimer = null;
   note.addEventListener('input', () => {
     clearTimeout(noteTimer);
-    noteTimer = setTimeout(() => writeMemoNote(note.value), 400);
+    noteTimer = setTimeout(saveDraft, 400);
   });
-  note.addEventListener('blur', () => writeMemoNote(note.value));
+  note.addEventListener('blur', saveDraft);
 
-  // 첨부한 사진은 상세 메모에 파일 이름만 적어 둔다(자료를 통째로 넣지 않는다).
+  // 첨부한 사진은 파일 이름만 적어 둔다(자료를 통째로 넣지 않는다).
   $('#memoFile').addEventListener('change', event => {
     const file = event.target.files && event.target.files[0];
     if (!file) return;
     note.value = `${note.value}${note.value ? '\n' : ''}📷 ${file.name}`;
-    writeMemoNote(note.value);
+    saveDraft();
     event.target.value = '';
     showToast('사진 이름을 메모에 적었습니다');
   });

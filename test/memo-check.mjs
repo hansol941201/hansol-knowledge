@@ -28,10 +28,13 @@ await page.waitForTimeout(600);
 ok('자바스크립트 오류 없음', errors.length===0, errors.join(' | '));
 
 // 1. 화면 구성
-ok('통화 & 빠른 메모 칸이 있음', await page.isVisible('#memoPanel #memoQuick') && await page.isVisible('#memoNote'));
-ok('안내 문구', (await page.textContent('#memoPanel')).includes('엔터(Enter)를 누르면 왼쪽 할 일 목록에 자동 추가됩니다'));
-ok('사진/파일 첨부 · 줄바꿈 안내', (await page.textContent('#memoPanel')).includes('사진/파일 첨부')
-  && (await page.textContent('#memoPanel')).includes('Shift + Enter'));
+ok('입력칸이 하나로 합쳐짐', await page.isVisible('#memoNote')
+  && (await page.$$('#memoPanel textarea')).length===1
+  && (await page.$$('#memoPanel input[type="text"]')).length===0);
+ok('안내 문구', (await page.textContent('#memoPanel')).includes('엔터(Enter)는 왼쪽 할 일 목록으로'));
+ok('사진/파일 첨부 · 줄바꿈 안내 · 기억 저장소 단추', (await page.textContent('#memoPanel')).includes('사진/파일 첨부')
+  && (await page.textContent('#memoPanel')).includes('Shift+Enter')
+  && (await page.textContent('#memoQuickAdd')).includes('기억 저장소'));
 ok('오른쪽에 할 일 목록 · 개수 배지', (await page.textContent('#todayPanel')).includes('할 일 목록')
   && (await page.textContent('.todo-count'))==='1개');
 const side = await page.evaluate(()=>{
@@ -59,71 +62,97 @@ ok('헤더에 이름표와 프로필', (await page.textContent('.brand-mark')).i
 // 오른쪽 칸에 맞춘 메모 칸 모양
 const memoShape = await page.evaluate(()=>{
   const head=getComputedStyle(document.querySelector('.memo-head'));
-  const add=getComputedStyle(document.querySelector('.memo-add'));
-  const input=document.querySelector('#memoQuick').getBoundingClientRect();
+  const tools=document.querySelector('.memo-tools').getBoundingClientRect();
   const btn=document.querySelector('#memoQuickAdd').getBoundingClientRect();
-  const row=document.querySelector('.memo-add').getBoundingClientRect();
-  return { 머리말세로: head.flexDirection==='column', 입력칸방향: add.flexDirection,
-           단추오른쪽끝: Math.abs(btn.right - (row.right - parseFloat(add.paddingRight))) < 3,
-           입력칸이남은너비: input.width > row.width * 0.5,
-           메모높이: Math.round(document.querySelector('#memoNote').getBoundingClientRect().height) };
+  const note=document.querySelector('#memoNote').getBoundingClientRect();
+  const panel=document.querySelector('#memoPanel').getBoundingClientRect();
+  return { 머리말세로: head.flexDirection==='column',
+           단추오른쪽끝: Math.abs(btn.right - tools.right) < 3,
+           칸이너비를씀: note.width > panel.width * 0.8,
+           메모높이: Math.round(note.height) };
 });
 ok('제목 아래에 안내 문구(겹치지 않음)', memoShape.머리말세로, JSON.stringify(memoShape));
-ok('입력칸은 남은 너비 · 추가 단추는 오른쪽 고정',
-   memoShape.입력칸방향==='row' && memoShape.단추오른쪽끝 && memoShape.입력칸이남은너비, JSON.stringify(memoShape));
-ok('상세 메모 높이 180~240px', memoShape.메모높이>=180 && memoShape.메모높이<=240, `${memoShape.메모높이}px`);
+ok('합친 칸이 너비를 다 쓰고 추가 단추는 오른쪽 고정',
+   memoShape.칸이너비를씀 && memoShape.단추오른쪽끝, JSON.stringify(memoShape));
+ok('메모 칸 높이 180~240px', memoShape.메모높이>=180 && memoShape.메모높이<=240, `${memoShape.메모높이}px`);
 
-// 2. 엔터로 할 일 등록
-await page.fill('#memoQuick','엔터로 넣은 할 일');
-await page.press('#memoQuick','Enter');
+// 2. 엔터 → 왼쪽 할 일 목록
+await page.fill('#memoNote','엔터로 넣은 할 일');
+await page.press('#memoNote','Enter');
 await page.waitForTimeout(400);
 ok('엔터를 누르면 할 일로 들어감', (await page.textContent('#todayPanel')).includes('엔터로 넣은 할 일'));
-ok('입력칸이 비워짐', (await page.inputValue('#memoQuick'))==='');
+ok('보낸 뒤 칸이 비워짐', (await page.inputValue('#memoNote'))==='');
 ok('개수 배지도 늘어남', (await page.textContent('.todo-count'))==='2개');
 ok('원래 있던 할 일은 그대로', (await page.textContent('#todayPanel')).includes('미리 있던 할 일'));
 
-// 추가 단추도 같은 일을 한다
-await page.fill('#memoQuick','단추로 넣은 할 일');
-await page.click('#memoQuickAdd');
-await page.waitForTimeout(400);
-ok('추가 단추로도 들어감', (await page.textContent('#todayPanel')).includes('단추로 넣은 할 일'));
-
-// 3. 상세 메모는 남는다 (엔터로 할 일이 되지 않는다)
-const beforeCount = (await page.$$('#todayPanel .todo-line')).length;
+// Shift+Enter 는 줄바꿈 — 할 일이 되지 않는다
+const beforeShift = (await page.$$('#todayPanel .todo-line')).length;
 await page.fill('#memoNote','통화 내용 첫 줄');
-await page.press('#memoNote','Enter');
+await page.press('#memoNote','Shift+Enter');
 await page.type('#memoNote','둘째 줄');
 await page.waitForTimeout(700);
-ok('상세 메모에서 엔터는 줄바꿈(할 일이 되지 않음)', (await page.$$('#todayPanel .todo-line')).length===beforeCount,
-   `${(await page.$$('#todayPanel .todo-line')).length} / ${beforeCount}`);
+ok('Shift+Enter 는 줄바꿈(할 일이 되지 않음)', (await page.$$('#todayPanel .todo-line')).length===beforeShift,
+   `${(await page.$$('#todayPanel .todo-line')).length} / ${beforeShift}`);
+ok('두 줄이 한 칸에 남음', (await page.inputValue('#memoNote')).includes('\n'));
+
+// 3. 추가 단추 → 기억으로 저장하고 기억 저장소를 연다
+const memoText = await page.inputValue('#memoNote');
+await page.click('#memoQuickAdd');
+await page.waitForTimeout(600);
+ok('추가를 누르면 기억 저장소가 열림', await page.isVisible('#memoryModal'));
+ok('적은 내용이 기억으로 저장됨', (await page.textContent('#memoryPanel')).includes('통화 내용 첫 줄'));
+ok('기억으로 갔지 할 일로 가지 않음',
+   (await page.$$('#todayPanel .todo-line')).length===beforeShift
+   && !(await page.textContent('#todayPanel')).includes('통화 내용 첫 줄'));
+ok('보낸 뒤 칸이 비워짐(추가)', (await page.inputValue('#memoNote'))==='');
+ok('자료에도 기억으로 들어감', await page.evaluate(()=>
+  JSON.parse(localStorage.getItem('knowledge-memories')||'[]')
+    .some(m=>m.type==='memory' && String(m.text).includes('통화 내용 첫 줄'))));
+await page.click('#memoryClose'); await page.waitForTimeout(300);
+
+// 빈 칸에서 추가를 눌러도 아무 일이 없다
+const memBefore = await page.evaluate(()=>JSON.parse(localStorage.getItem('knowledge-memories')||'[]').length);
+await page.click('#memoQuickAdd'); await page.waitForTimeout(400);
+ok('빈 칸이면 저장하지 않음',
+   (await page.evaluate(()=>JSON.parse(localStorage.getItem('knowledge-memories')||'[]').length))===memBefore
+   && !(await page.isVisible('#memoryModal')));
+
+// 적다 만 글은 새로고침해도 남는다
+await page.fill('#memoNote','적다 만 통화 기록');
+await page.waitForTimeout(700);
 await page.reload();
 await page.waitForFunction(()=>document.querySelector('#syncState')?.dataset.state==='live',null,{timeout:10000});
 await page.waitForTimeout(600);
-ok('새로고침해도 상세 메모가 남음', (await page.inputValue('#memoNote')).includes('통화 내용 첫 줄'));
+ok('새로고침해도 적다 만 글이 남음', (await page.inputValue('#memoNote')).includes('적다 만 통화 기록'));
 ok('새로고침해도 할 일이 남음', (await page.textContent('#todayPanel')).includes('엔터로 넣은 할 일'));
+await page.fill('#memoNote',''); await page.waitForTimeout(500);
 
 // 4. 목록 동작 — 체크박스만 완료, 줄 클릭은 수정, ✕ 는 삭제
+// 완료용·삭제용으로 서로 다른 항목이 필요하니 하나 더 넣는다
+await page.fill('#memoNote','지울 할 일');
+await page.press('#memoNote','Enter');
+await page.waitForTimeout(400);
 const activeBefore = (await page.$$('#todayPanel .todo-line')).length;
 await page.evaluate(()=>[...document.querySelectorAll('#todayPanel .todo-line')]
-  .find(n=>n.textContent.includes('단추로 넣은 할 일')).querySelector('.todo-line-text').click());
+  .find(n=>n.textContent.includes('엔터로 넣은 할 일')).querySelector('.todo-line-text').click());
 await page.waitForTimeout(300);
 ok('줄을 누르면 수정 창이 열림', await page.isVisible('#todoModal')
-  && (await page.inputValue('#todoEditText'))==='단추로 넣은 할 일');
+  && (await page.inputValue('#todoEditText'))==='엔터로 넣은 할 일');
 await page.click('#todoEditCancel'); await page.waitForTimeout(250);
 ok('수정 창을 닫아도 개수 그대로', (await page.$$('#todayPanel .todo-line')).length===activeBefore);
 
 await page.evaluate(()=>[...document.querySelectorAll('#todayPanel .todo-line')]
-  .find(n=>n.textContent.includes('단추로 넣은 할 일')).querySelector('.todo-line-check').click());
+  .find(n=>n.textContent.includes('엔터로 넣은 할 일')).querySelector('.todo-line-check').click());
 await page.waitForTimeout(600);
 ok('체크박스로만 완료 처리', (await page.$$('#todayPanel .todo-line')).length===activeBefore-1);
 await page.click('[data-todo-tab="done"]'); await page.waitForTimeout(300);
-ok('완료 탭에 들어가 있음', (await page.textContent('#todayPanel')).includes('단추로 넣은 할 일'));
+ok('완료 탭에 들어가 있음', (await page.textContent('#todayPanel')).includes('엔터로 넣은 할 일'));
 await page.click('[data-todo-tab="active"]'); await page.waitForTimeout(300);
 
 await page.evaluate(()=>[...document.querySelectorAll('#todayPanel .todo-line')]
-  .find(n=>n.textContent.includes('엔터로 넣은 할 일')).querySelector('[data-todo-delete]').click());
+  .find(n=>n.textContent.includes('지울 할 일')).querySelector('[data-todo-delete]').click());
 await page.waitForTimeout(400);
-ok('✕ 로 지워짐', !(await page.textContent('#todayPanel')).includes('엔터로 넣은 할 일'));
+ok('✕ 로 지워짐', !(await page.textContent('#todayPanel')).includes('지울 할 일'));
 ok('다른 할 일은 그대로', (await page.textContent('#todayPanel')).includes('미리 있던 할 일'));
 // 좁은 화면: 한 단으로 쌓이고 차례는 메모 → 할 일 → 일정, 입력칸은 위아래
 await page.setViewportSize({width:390,height:844});
@@ -135,14 +164,14 @@ const narrow = await page.evaluate(()=>{
   const time=document.querySelector('.todo-line time');
   return { 한단: Math.abs(m.left-t.left)<2 && Math.abs(t.left-s.left)<2,
            차례: m.top < t.top && t.top < s.top,
-           입력칸방향: getComputedStyle(document.querySelector('.memo-add')).flexDirection,
+           단추방향: getComputedStyle(document.querySelector('.memo-tools')).flexDirection,
            제목날짜겹침: time ? title.getBoundingClientRect().right > time.getBoundingClientRect().left + 1 : false,
            가로스크롤: Math.round(document.documentElement.scrollWidth - window.innerWidth),
            메모높이: Math.round(document.querySelector('#memoNote').getBoundingClientRect().height) };
 });
 ok('모바일은 한 단', narrow.한단, JSON.stringify(narrow));
 ok('모바일 차례: 메모 → 할 일 → 일정', narrow.차례, JSON.stringify(narrow));
-ok('모바일에서는 입력칸과 추가 단추가 위아래', narrow.입력칸방향==='column', narrow.입력칸방향);
+ok('모바일에서는 첨부·추가 단추가 위아래', narrow.단추방향==='column', narrow.단추방향);
 ok('모바일에서 제목과 날짜가 겹치지 않음', !narrow.제목날짜겹침);
 ok('모바일 가로 스크롤 없음', narrow.가로스크롤<=0, `${narrow.가로스크롤}px`);
 ok('모바일 상세 메모도 180~240px', narrow.메모높이>=180 && narrow.메모높이<=240, `${narrow.메모높이}px`);

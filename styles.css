@@ -280,20 +280,14 @@ svg { display: block; flex: none; }
 .memo-head { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; }
 .memo-head h2 { margin: 0; font-size: 16px; font-weight: 700; }
 .memo-head small { color: var(--ink-3); font-size: 12px; }
-.memo-add { display: flex; align-items: center; gap: 8px; padding: 6px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
-.memo-add input {
-  flex: 1 1 auto; min-width: 0; padding: 9px 10px; border: 0; border-radius: 8px;
-  background: transparent; font: inherit; font-size: 14px; color: var(--ink-1);
-}
-.memo-add input:focus { outline: none; }
-.memo-add:focus-within { border-color: var(--violet-line); background: var(--card); box-shadow: 0 0 0 3px var(--violet-soft); }
 .memo-add-btn {
   flex: none; padding: 9px 18px; border: 0; border-radius: 8px;
   background: var(--violet); color: #fff; font-size: 13px; font-weight: 700; cursor: pointer;
   transition: background var(--ease);
 }
 .memo-add-btn:hover { background: #5B3AD0; }
-.memo-tools { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+/* 첨부 단추는 왼쪽, 추가 단추는 오른쪽 끝에 고정 */
+.memo-tools { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .memo-tools small { color: var(--ink-3); font-size: 11px; }
 .memo-file {
   display: inline-flex; align-items: center; gap: 5px; padding: 7px 12px; border-radius: 8px;
@@ -301,7 +295,6 @@ svg { display: block; flex: none; }
   transition: background var(--ease);
 }
 .memo-file:hover { background: var(--violet-soft); color: var(--violet); }
-.memo-label { font-size: 12px; font-weight: 600; color: var(--ink-2); }
 #memoNote {
   /* 요청한 180~240px 안에 들어오도록 높이를 정해 둔다(끌어서 늘릴 수는 있다) */
   width: 100%; height: 210px; min-height: 180px; padding: 14px; resize: vertical;
@@ -358,9 +351,10 @@ svg { display: block; flex: none; }
   .dash-cols { grid-template-columns: minmax(0, 1fr); grid-template-areas: none; }
   .dash-cols > #memoPanel, .dash-cols > #todayPanel, .dash-cols > #schedulePanel { grid-area: auto; }
   #memoNote { height: 190px; min-height: 180px; }
-  /* 좁으면 입력칸과 추가 단추를 위아래로 */
-  .memo-add { flex-direction: column; align-items: stretch; }
-  .memo-add-btn { width: 100%; padding: 10px; }
+  /* 좁으면 첨부·추가 단추를 위아래로 늘려 손가락으로 누르기 쉽게 */
+  .memo-tools { flex-direction: column; align-items: stretch; }
+  .memo-file { justify-content: center; padding: 10px; }
+  .memo-add-btn { width: 100%; padding: 11px; }
   .schedule-list { max-height: 360px; }
 }
 .cal-tools { display: flex; align-items: center; gap: 5px; }
