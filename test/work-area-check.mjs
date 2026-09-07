@@ -1,4 +1,4 @@
-// 대시보드 업무 영역 — 할 일 70% / 일정 30% 두 단, 업무 구분(급함·여유), 기존 기능 유지
+// 대시보드 업무 영역 — 오른쪽 할 일 목록과 일정, 기존 기능 유지
 import { chromium } from 'playwright';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
@@ -41,58 +41,51 @@ await page.waitForFunction(()=>document.querySelector('#syncState')?.dataset.sta
 await page.waitForTimeout(600);
 ok('자바스크립트 오류 없음', errors.length===0, errors.join(' | '));
 
-const groupOf = (text) => page.evaluate(t=>{
-  const card=[...document.querySelectorAll('#todayPanel .todo-item')].find(c=>c.textContent.includes(t));
-  return card ? card.closest('.todo-group').className.replace('todo-group ','') : 'none';
+// 시안대로 구역 없이 한 줄 목록 하나로 보여 준다.
+const rowOf = (text) => page.evaluate(t=>{
+  const row=[...document.querySelectorAll('#todayPanel .todo-line')].find(c=>c.textContent.includes(t));
+  return Boolean(row);
 }, text);
+ok('급함·여유 구역 없이 한 목록', (await page.$$('#todayPanel .todo-group')).length===0
+  && (await page.$$('#todayPanel .todo-list')).length===1);
+ok('마감일이 지난 업무도 목록에', await rowOf('지난 마감 업무'));
+ok('마감일이 오늘인 업무도 목록에', await rowOf('오늘 마감 업무'));
+ok('마감일이 미래인 업무도 목록에', await rowOf('모레 마감 업무'));
+ok('마감일이 없는 업무도 목록에', await rowOf('날짜 없는 업무'));
+ok('죽은 업무 구분 선택란 없음', (await page.$$('.urgency-pick')).length===0);
 
-// 자동 분류
-ok('마감일이 지난 업무 → 급함', await groupOf('지난 마감 업무')==='urgent');
-ok('마감일이 오늘인 업무 → 급함', await groupOf('오늘 마감 업무')==='urgent');
-ok('마감일이 미래인 업무 → 여유', await groupOf('모레 마감 업무')==='easy');
-ok('마감일이 없는 업무 → 여유', await groupOf('날짜 없는 업무')==='easy');
-
-// 업무 구분을 직접 바꾸면 자동 분류보다 우선
-await page.evaluate(()=>{
-  const card=[...document.querySelectorAll('#todayPanel .todo-item')].find(c=>c.textContent.includes('모레 마감 업무'));
-  card.querySelector('[data-todo-edit]').click();
-});
+// 수정 창은 내용과 날짜만
+await page.evaluate(()=>[...document.querySelectorAll('#todayPanel .todo-line')]
+  .find(c=>c.textContent.includes('모레 마감 업무')).querySelector('.todo-line-text').click());
 await page.waitForTimeout(300);
-ok('수정 창에 업무 구분 선택란', await page.isVisible('#todoModal .urgency-pick'));
-ok('현재 구분이 미리 선택돼 있음', (await page.evaluate(()=>document.querySelector('[name="todoUrgency"]:checked')?.value))==='easy');
-await page.check('[name="todoUrgency"][value="urgent"]');
+ok('수정 창이 열림', await page.isVisible('#todoModal') && (await page.inputValue('#todoEditText'))==='모레 마감 업무');
+await page.fill('#todoEditText','이름 고친 업무');
 await page.click('#todoForm button[type="submit"]');
 await page.waitForTimeout(500);
-ok('직접 고른 구분이 자동 분류보다 우선', await groupOf('모레 마감 업무')==='urgent');
-ok('고른 값이 저장됨', await page.evaluate(()=>
-  JSON.parse(localStorage.getItem('knowledge-todos')).some(t=>t.text==='모레 마감 업무' && t.urgency==='urgent')));
+ok('수정 내용이 저장됨', await rowOf('이름 고친 업무'));
 
-// 새로 등록할 때도 고를 수 있다
+// 새로 등록
 await page.click('#pageAdd'); await page.waitForTimeout(250);
 await page.evaluate(()=>[...document.querySelectorAll('[data-add]')].find(b=>b.dataset.add==='할 일').click());
 await page.waitForTimeout(250);
-ok('등록 창에도 업무 구분', await page.isVisible('#quickUrgency'));
-await page.fill('#quickTextInput','새로 만든 급한 업무');
-await page.check('[name="quickTodoUrgency"][value="urgent"]');
+await page.fill('#quickTextInput','새로 만든 업무');
 await page.click('#quickTextForm button[type="submit"]');
 await page.waitForTimeout(700);
-ok('새 업무가 고른 구역으로 들어감', await groupOf('새로 만든 급한 업무')==='urgent');
+ok('새 업무가 목록에 들어감', await rowOf('새로 만든 업무'));
 
 // 완료 체크 · 탭
-const beforeActive = (await page.$$('#todayPanel .todo-item')).length;
-await page.evaluate(()=>{
-  const card=[...document.querySelectorAll('#todayPanel .todo-item')].find(c=>c.textContent.includes('날짜 없는 업무'));
-  card.querySelector('input[type="checkbox"]').click();
-});
+const beforeActive = (await page.$$('#todayPanel .todo-line')).length;
+await page.evaluate(()=>[...document.querySelectorAll('#todayPanel .todo-line')]
+  .find(c=>c.textContent.includes('날짜 없는 업무')).querySelector('input[type="checkbox"]').click());
 await page.waitForTimeout(600);
-ok('체크하면 할 일 목록에서 빠짐', (await page.$$('#todayPanel .todo-item')).length===beforeActive-1);
+ok('체크하면 할 일 목록에서 빠짐', (await page.$$('#todayPanel .todo-line')).length===beforeActive-1);
 await page.evaluate(()=>document.querySelector('[data-todo-tab="done"]').click());
 await page.waitForTimeout(400);
 ok('완료 탭에 들어옴', (await page.textContent('#todayPanel')).includes('날짜 없는 업무'));
 ok('완료 탭에는 일정이 없음', (await page.$$('#todayPanel [data-schedule]')).length===0);
 await page.evaluate(()=>document.querySelector('[data-todo-tab="active"]').click());
 await page.waitForTimeout(400);
-ok('할 일 탭으로 되돌아옴', await page.isVisible('.todo-group.urgent'));
+ok('할 일 탭으로 되돌아옴', await page.isVisible('#todayPanel .todo-list'));
 
 // 일정 — 오른쪽 영역에서만
 ok('일정이 오른쪽 영역에만 있음', (await page.$$('#schedulePanel [data-schedule]')).length===2 && (await page.$$('#todayPanel [data-schedule]')).length===0);
@@ -147,7 +140,7 @@ await m.waitForTimeout(600);
 const mobile = await m.evaluate(()=>{
   const todo=document.querySelector('#todayPanel').getBoundingClientRect();
   const sched=document.querySelector('#schedulePanel').getBoundingClientRect();
-  const cards=[...document.querySelectorAll('#todayPanel .todo-item')].map(c=>c.getBoundingClientRect());
+  const cards=[...document.querySelectorAll('#todayPanel .todo-line')].map(c=>c.getBoundingClientRect());
   return { stacked: sched.top >= todo.bottom - 2, sameWidth: Math.abs(todo.width-sched.width)<2,
            perRow: cards.filter(c=>Math.abs(c.top-cards[0].top)<2).length,
            overflowX: document.documentElement.scrollWidth-document.documentElement.clientWidth };
@@ -160,14 +153,16 @@ ok('모바일 가로 스크롤 없음', mobile.overflowX===0, `${mobile.overflow
 await m.setViewportSize({ width: 1100, height: 900 });
 await m.waitForTimeout(400);
 const tablet = await m.evaluate(()=>{
-  const todo=document.querySelector('#todayPanel').getBoundingClientRect();
-  const sched=document.querySelector('#schedulePanel').getBoundingClientRect();
-  const cards=[...document.querySelectorAll('#todayPanel .todo-item')].map(c=>c.getBoundingClientRect());
-  return { ratio: Math.round(todo.width/(todo.width+sched.width)*100),
-           perRow: cards.filter(c=>Math.abs(c.top-cards[0].top)<2).length };
+  const memo=document.querySelector('#memoPanel').getBoundingClientRect();
+  const side=document.querySelector('.dash-side').getBoundingClientRect();
+  const rows=[...document.querySelectorAll('#todayPanel .todo-line')].map(c=>c.getBoundingClientRect());
+  return { ratio: Math.round(memo.width/(memo.width+side.width)*100),
+           sideBySide: Math.abs(memo.top-side.top)<2 && memo.left < side.left,
+           perRow: rows.filter(c=>Math.abs(c.top-rows[0].top)<2).length };
 });
-ok('태블릿 65 : 35', tablet.ratio>=62 && tablet.ratio<=68, `${tablet.ratio}%`);
-ok('태블릿 카드 한 줄에 두 장', tablet.perRow===2, `${tablet.perRow}장`);
+ok('태블릿에서도 두 단 유지', tablet.sideBySide, JSON.stringify(tablet));
+ok('태블릿 메모 쪽이 조금 더 넓다(52~58%)', tablet.ratio>=52 && tablet.ratio<=58, `${tablet.ratio}%`);
+ok('할 일은 한 줄에 하나', tablet.perRow===1, `${tablet.perRow}장`);
 
 ok('끝까지 오류 없음', errors.length===0, errors.join(' | '));
 await b.close(); server.close();

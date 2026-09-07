@@ -36,18 +36,18 @@ await page.waitForFunction(()=>document.querySelector('#syncState')?.dataset.sta
 await page.waitForTimeout(600);
 ok('자바스크립트 오류 없음', errors.length===0, errors.join(' | '));
 
-const activeCount = () => page.$$eval('#todayPanel .todo-item:not(.done)', n=>n.length);
+const activeCount = () => page.$$eval('#todayPanel .todo-line:not(.done)', n=>n.length);
 const doneCount = () => page.evaluate(()=>Number(document.querySelector('[data-todo-tab="done"] span').textContent));
-const cardOf = (text) => page.evaluateHandle(t=>[...document.querySelectorAll('#todayPanel .todo-item')].find(c=>c.textContent.includes(t)), text);
+const cardOf = (text) => page.evaluateHandle(t=>[...document.querySelectorAll('#todayPanel .todo-line')].find(c=>c.textContent.includes(t)), text);
 
 // 카드 전체를 label 로 감싸지 않는다
-ok('카드가 label 이 아님', await page.$eval('#todayPanel .todo-item', n=>n.tagName)==='DIV');
+ok('줄이 label 이 아님', await page.$eval('#todayPanel .todo-line', n=>n.tagName)==='LI');
 ok('체크박스는 자기 label 안에만 있음', await page.evaluate(()=>
-  [...document.querySelectorAll('#todayPanel .todo-item input')].every(i=>i.closest('label')?.classList.contains('todo-check-box'))));
+  [...document.querySelectorAll('#todayPanel .todo-line input')].every(i=>i.closest('label')?.classList.contains('todo-line-check'))));
 
 // 1. 제목을 눌러도 완료되지 않고 수정창이 열린다
 const before = await activeCount();
-await page.evaluate(()=>[...document.querySelectorAll('#todayPanel .todo-item')].find(c=>c.textContent.includes('첫 번째 할 일')).querySelector('.todo-text').click());
+await page.evaluate(()=>[...document.querySelectorAll('#todayPanel .todo-line')].find(c=>c.textContent.includes('첫 번째 할 일')).querySelector('.todo-line-text').click());
 await page.waitForTimeout(350);
 ok('제목 클릭 → 수정창 열림', await page.isVisible('#todoModal'));
 ok('제목 클릭으로 완료되지 않음', await activeCount()===before && await doneCount()===1);
@@ -63,8 +63,8 @@ ok('취소하면 원본 그대로', (await page.textContent('#todayPanel')).incl
 ok('취소해도 완료 상태 그대로', await activeCount()===before && await doneCount()===1);
 
 // 2. 날짜·배지·빈 공간을 눌러도 완료되지 않는다
-for (const [sel, name] of [['time','날짜'], ['.todo-badge','배지'], ['.todo-foot','빈 공간']]) {
-  await page.evaluate(([s])=>[...document.querySelectorAll('#todayPanel .todo-item')].find(c=>c.textContent.includes('세 번째 할 일')).querySelector(s).click(), [sel]);
+for (const [sel, name] of [['time','날짜'], ['.todo-line-text','제목']]) {
+  await page.evaluate(([s])=>[...document.querySelectorAll('#todayPanel .todo-line')].find(c=>c.textContent.includes('세 번째 할 일')).querySelector(s).click(), [sel]);
   await page.waitForTimeout(250);
   ok(`${name} 클릭으로 완료되지 않음`, await activeCount()===before && await doneCount()===1);
   ok(`${name} 클릭도 수정창을 염`, await page.isVisible('#todoModal') && (await page.inputValue('#todoEditText'))==='세 번째 할 일');
@@ -72,7 +72,7 @@ for (const [sel, name] of [['time','날짜'], ['.todo-badge','배지'], ['.todo-
 }
 
 // 3. 긴 내용도 입력칸에서 전체가 보인다
-await page.evaluate(()=>[...document.querySelectorAll('#todayPanel .todo-item')].find(c=>c.textContent.includes('아쿠아')).querySelector('.todo-text').click());
+await page.evaluate(()=>[...document.querySelectorAll('#todayPanel .todo-line')].find(c=>c.textContent.includes('아쿠아')).querySelector('.todo-line-text').click());
 await page.waitForTimeout(300);
 ok('긴 내용이 잘리지 않고 전부 들어옴', (await page.inputValue('#todoEditText')).length > 60 && (await page.inputValue('#todoEditText')).includes('다음 주 월요일까지'));
 await page.fill('#todoEditText','아쿠아 질문서 회신 완료 후 자료 발송');
@@ -86,7 +86,7 @@ ok('새 항목이 생기지 않고 같은 ID 로 저장', await page.evaluate(()
   return list.length===4 && list.some(t=>t.id==='a2' && t.text==='아쿠아 질문서 회신 완료 후 자료 발송'); }));
 
 // 4. 체크박스는 완료 상태만 바꾸고 수정창을 열지 않는다
-await page.evaluate(()=>[...document.querySelectorAll('#todayPanel .todo-item')].find(c=>c.textContent.includes('첫 번째 할 일')).querySelector('.todo-check-box').click());
+await page.evaluate(()=>[...document.querySelectorAll('#todayPanel .todo-line')].find(c=>c.textContent.includes('첫 번째 할 일')).querySelector('.todo-line-check').click());
 await page.waitForTimeout(500);
 ok('체크박스 클릭 → 완료로 이동', await activeCount()===before-1 && await doneCount()===2);
 ok('체크박스 클릭 시 수정창이 열리지 않음', !(await page.isVisible('#todoModal')));
@@ -94,7 +94,7 @@ ok('체크박스 클릭 시 수정창이 열리지 않음', !(await page.isVisib
 // 5. 완료 탭에서도 카드 클릭은 수정, 체크박스는 상태 변경
 await page.evaluate(()=>document.querySelector('[data-todo-tab="done"]').click());
 await page.waitForTimeout(400);
-await page.evaluate(()=>[...document.querySelectorAll('#todayPanel .todo-item.done')].find(c=>c.textContent.includes('끝낸 할 일')).querySelector('.todo-text').click());
+await page.evaluate(()=>[...document.querySelectorAll('#todayPanel .todo-line.done')].find(c=>c.textContent.includes('끝낸 할 일')).querySelector('.todo-line-text').click());
 await page.waitForTimeout(350);
 ok('완료 탭에서도 카드 클릭 → 수정창', await page.isVisible('#todoModal') && (await page.inputValue('#todoEditText'))==='끝낸 할 일');
 await page.fill('#todoEditText','끝낸 할 일(내용 수정)');
@@ -103,7 +103,7 @@ await page.waitForTimeout(500);
 ok('완료 항목 수정해도 완료 상태 유지', await doneCount()===2 && (await page.textContent('#todayPanel')).includes('끝낸 할 일(내용 수정)'));
 ok('완료 상태값이 그대로', await page.evaluate(()=>
   JSON.parse(localStorage.getItem('knowledge-todos')).some(t=>t.id==='d1' && t.done===true && t.doneAt)));
-await page.evaluate(()=>[...document.querySelectorAll('#todayPanel .todo-item.done')].find(c=>c.textContent.includes('끝낸 할 일')).querySelector('.todo-check-box').click());
+await page.evaluate(()=>[...document.querySelectorAll('#todayPanel .todo-line.done')].find(c=>c.textContent.includes('끝낸 할 일')).querySelector('.todo-line-check').click());
 await page.waitForTimeout(500);
 ok('완료 탭 체크박스 → 할 일로 되돌림', await doneCount()===1);
 ok('되돌릴 때 수정창이 열리지 않음', !(await page.isVisible('#todoModal')));
@@ -119,13 +119,13 @@ ok('클라우드에도 저장됨', await page.evaluate(async()=>{
 
 // 7. 디자인은 그대로
 const design = await page.evaluate(()=>{
-  const list=document.querySelector('.todo-group-list');
-  const card=document.querySelector('#todayPanel .todo-item');
+  const list=document.querySelector('#todayPanel .todo-list');
+  const card=document.querySelector('#todayPanel .todo-line');
   return { cols:getComputedStyle(list).gridTemplateColumns.split(' ').length,
            h:parseFloat(getComputedStyle(card).height),
            tabs:[...document.querySelectorAll('.todo-tab span')].map(x=>x.textContent) };
 });
-ok('3열 배치·조밀한 카드 높이 유지', design.cols===3 && design.h<=80, JSON.stringify(design));
+ok('한 줄에 하나 · 조밀한 높이 유지', design.cols===1 && design.h<=52, JSON.stringify(design));
 ok('할 일·완료 개수 표시 유지', design.tabs.length===2, design.tabs.join(' / '));
 
 ok('끝까지 오류 없음', errors.length===0, errors.join(' | '));

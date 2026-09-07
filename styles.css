@@ -38,14 +38,14 @@ svg { display: block; flex: none; }
    가운데 칸(메뉴)은 좌우 1fr 이 같아서 화면 정가운데에 놓인다. */
 .topnav {
   position: sticky; top: 0; z-index: 20;
-  display: grid; grid-template-columns: 1fr minmax(0, auto) 1fr; align-items: stretch;
+  /* 이름표·도구는 내용만큼, 메뉴는 남는 자리를 전부 — 좁아져도 메뉴가 눌리지 않는다 */
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: stretch;
   height: 64px; padding: 0 24px; background: #fff; border-bottom: 1px solid var(--nav-line);
 }
 /* 메뉴는 한 줄을 유지하고, 좁으면 이 줄만 옆으로 밀어서 본다(스크롤바는 숨긴다) */
 .top-nav {
   grid-column: 2; min-width: 0; display: flex; align-items: stretch; gap: 4px;
-  justify-content: center;
-  justify-content: safe center;   /* 넘칠 때는 왼쪽부터 — 앞쪽 메뉴가 잘려 나가지 않는다 */
+  justify-content: flex-start;   /* 시안대로 이름표 바로 옆에서 시작한다 */
   overflow-x: auto; overflow-y: hidden; scrollbar-width: none; -ms-overflow-style: none;
 }
 .top-nav::-webkit-scrollbar { width: 0; height: 0; display: none; }
@@ -59,6 +59,18 @@ svg { display: block; flex: none; }
 .top-item.active { color: var(--nav-navy); font-weight: 600; border-bottom-color: var(--nav-navy); }
 
 .top-tools { grid-column: 3; justify-self: end; display: flex; align-items: center; gap: 4px; }
+/* 왼쪽 이름표 — HS 배지 + 한솔 지식 */
+.brand-mark { grid-column: 1; justify-self: start; display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700; color: var(--ink-1); }
+.brand-badge { display: inline-grid; place-items: center; padding: 3px 7px; border-radius: 6px; background: var(--nav-navy); color: #fff; font-size: 11px; font-weight: 700; letter-spacing: .02em; }
+.brand-avatar { display: grid; place-items: center; width: 30px; height: 30px; margin-left: 6px; border-radius: 999px; background: var(--nav-navy); color: #fff; font-size: 12px; font-weight: 700; }
+/* 좁은 화면에서는 이름표 글씨를 접고 배지만 남긴다 */
+@media (max-width: 1100px) {
+  .brand-mark b { display: none; }
+}
+/* 더 좁으면 프로필과 돋보기까지 접어 메뉴 자리를 넓힌다 */
+@media (max-width: 760px) {
+  .brand-avatar, #searchOpen { display: none; }
+}
 .top-mini {
   display: grid; place-items: center; width: 32px; height: 32px; border-radius: 7px;
   color: var(--ink-3); transition: background var(--ease), color var(--ease);
@@ -318,18 +330,93 @@ svg { display: block; flex: none; }
 
 /* ── 일정 (월 달력) ─────────────────────────────────────────── */
 /* 왼쪽 70% 할 일 · 오른쪽 30% 일정 */
-/* align-items: start — 두 칸이 서로 키를 맞추지 않는다.
-   맞추게 두면 일정이 2건뿐이어도 할 일 높이만큼 늘어나 아래가 텅 빈다. */
-.dash-cols { display: grid; grid-template-columns: minmax(0, 7fr) minmax(300px, 3fr); gap: 16px; align-items: start; }
-.dash-cols > .today-panel { align-content: start; }
+/* 왼쪽 통화·메모 칸 / 오른쪽 할 일 + 일정.
+   align-items: start — 두 칸이 서로 키를 맞추지 않는다(아래가 텅 비지 않게). */
+.dash-cols { display: grid; grid-template-columns: minmax(0, 7fr) minmax(320px, 5fr); gap: 20px; align-items: start; }
+.dash-cols > .today-panel, .dash-side > .today-panel { align-content: start; }
+.dash-side { display: grid; gap: 16px; align-content: start; min-width: 0; }
+
+/* ── 통화 & 빠른 메모 (왼쪽) ─────────────────────────────── */
+.memo-panel { gap: 12px; }
+.memo-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.memo-head h2 { margin: 0; font-size: 16px; font-weight: 700; }
+.memo-head small { color: var(--ink-3); font-size: 12px; }
+.memo-add { display: flex; align-items: center; gap: 8px; padding: 6px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
+.memo-add input {
+  flex: 1 1 auto; min-width: 0; padding: 9px 10px; border: 0; border-radius: 8px;
+  background: transparent; font: inherit; font-size: 14px; color: var(--ink-1);
+}
+.memo-add input:focus { outline: none; }
+.memo-add:focus-within { border-color: var(--violet-line); background: var(--card); box-shadow: 0 0 0 3px var(--violet-soft); }
+.memo-add-btn {
+  flex: none; padding: 9px 18px; border: 0; border-radius: 8px;
+  background: var(--violet); color: #fff; font-size: 13px; font-weight: 700; cursor: pointer;
+  transition: background var(--ease);
+}
+.memo-add-btn:hover { background: #5B3AD0; }
+.memo-tools { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.memo-tools small { color: var(--ink-3); font-size: 11px; }
+.memo-file {
+  display: inline-flex; align-items: center; gap: 5px; padding: 7px 12px; border-radius: 8px;
+  background: var(--line-soft); color: var(--ink-2); font-size: 12px; cursor: pointer;
+  transition: background var(--ease);
+}
+.memo-file:hover { background: var(--violet-soft); color: var(--violet); }
+.memo-label { font-size: 12px; font-weight: 600; color: var(--ink-2); }
+#memoNote {
+  width: 100%; min-height: 220px; padding: 14px; resize: vertical;
+  border: 1px solid var(--line); border-radius: 10px; background: var(--bg);
+  font: inherit; font-size: 13px; line-height: 1.7; color: var(--ink-1);
+}
+#memoNote:focus { outline: none; border-color: var(--violet-line); background: var(--card); box-shadow: 0 0 0 3px var(--violet-soft); }
+
+/* ── 할 일 목록 (오른쪽 위) ───────────────────────────────── */
+.todo-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.todo-head h2 { margin: 0; font-size: 15px; font-weight: 700; }
+.todo-count { flex: none; padding: 2px 10px; border-radius: 999px; background: var(--violet-soft); color: var(--violet); font-size: 12px; font-weight: 700; }
+.todo-list { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
+.todo-line {
+  display: flex; align-items: center; gap: 10px; min-width: 0;
+  padding: 11px 2px; border-top: 1px solid var(--line-soft); cursor: pointer;
+}
+.todo-line:first-child { border-top: 0; }
+.todo-line:hover { background: #FAFAFC; }
+.todo-line input { position: absolute; opacity: 0; pointer-events: none; }
+.todo-line-check { display: inline-flex; flex: none; padding: 3px; margin: -3px; border-radius: 6px; cursor: pointer; }
+.todo-box {
+  display: grid; place-items: center; width: 17px; height: 17px; flex: none;
+  border: 1.5px solid #D8D4E2; border-radius: 5px; background: var(--card);
+  transition: background var(--ease), border-color var(--ease);
+}
+.todo-box::after { content: ""; width: 9px; height: 5px; border-left: 2px solid #fff; border-bottom: 2px solid #fff; transform: rotate(-45deg) translate(1px, -1px); opacity: 0; }
+.todo-box.done, .todo-line-check:hover .todo-box { border-color: var(--violet); }
+.todo-box.done { background: var(--violet); }
+.todo-box.done::after { opacity: 1; }
+.todo-line-text { flex: 1 1 auto; min-width: 0; font-size: 14px; color: var(--ink-1); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.todo-line.done .todo-line-text { color: var(--ink-3); text-decoration: line-through; }
+.todo-line time { flex: none; color: var(--ink-3); font-size: 11px; font-variant-numeric: tabular-nums; }
+.todo-line time.late { color: #C0433D; font-weight: 600; }
+.todo-line time.today { color: #2F7D51; font-weight: 600; }
+.todo-line time.muted { color: var(--ink-3); font-weight: 400; }
+.todo-x {
+  flex: none; width: 24px; height: 24px; display: grid; place-items: center;
+  border: 0; border-radius: 6px; background: none; color: var(--ink-3);
+  font-size: 13px; line-height: 1; cursor: pointer; opacity: 0;
+  transition: opacity var(--ease), background var(--ease), color var(--ease);
+}
+.todo-line:hover .todo-x, .todo-line:focus-within .todo-x { opacity: 1; }
+.todo-x:hover { background: #FCF2F2; color: #C0433D; }
+/* 마우스가 없는 기기(터치)에서는 늘 보여 준다 */
+@media (hover: none) { .todo-x { opacity: 1; } }
 /* 태블릿: 할 일 65% · 일정 35%, 카드는 한 줄에 두 장 */
 @media (max-width: 1280px) {
-  .dash-cols { grid-template-columns: minmax(0, 65fr) minmax(280px, 35fr); }
+  .dash-cols { grid-template-columns: minmax(0, 6fr) minmax(300px, 5fr); gap: 16px; }
   .todo-group-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 /* 모바일: 두 단을 풀고 할 일 위 · 일정 아래 */
 @media (max-width: 900px) {
   .dash-cols { grid-template-columns: minmax(0, 1fr); }
+  #memoNote { min-height: 160px; }
   .schedule-list { max-height: 360px; }
 }
 .cal-tools { display: flex; align-items: center; gap: 5px; }
@@ -580,7 +667,7 @@ mark { padding: 0 1px; border-radius: 3px; background: #FFF3A0; color: #000; }
   /* 좁은 화면: 한 줄에 두 장 */
   .todo-group-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
   .todo-item { padding: 8px 10px; }
-  .todo-mini, .todo-remove { opacity: 1; }
+  .todo-mini, .todo-remove, .todo-x { opacity: 1; }   /* 손가락에는 마우스 올리기가 없다 */
   .topnav { padding: 0 24px; }                  /* 좁아져도 양옆 여백은 24px 유지 */
   .sync-state { display: none; }
   .workspace { height: auto; min-height: 100vh; }

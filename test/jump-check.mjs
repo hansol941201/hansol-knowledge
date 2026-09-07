@@ -34,7 +34,7 @@ const jump = async (text) => {
     view: document.querySelector('#sideNav .top-item.active')?.textContent,
     heading: document.querySelector('#pageHeading')?.textContent,
     box: document.querySelector('#pageSearch').value,
-    todos: [...document.querySelectorAll('.todo-item .todo-text')].map(n=>n.textContent) }));
+    todos: [...document.querySelectorAll('.todo-line .todo-line-text')].map(n=>n.textContent) }));
 };
 
 let r = await jump('할일');
@@ -70,7 +70,7 @@ await page.waitForTimeout(1200);
 const saved = await page.evaluate(()=>({
   view: document.querySelector('#sideNav .top-item.active')?.textContent,
   box: document.querySelector('#pageSearch').value,
-  shown: [...document.querySelectorAll('.todo-item .todo-text')].map(n=>n.textContent),
+  shown: [...document.querySelectorAll('.todo-line .todo-line-text')].map(n=>n.textContent),
   todos: todos.filter(t=>!t.deleted).map(t=>({text:t.text, type:t.type, source:t.source})),
   memories: memories.filter(m=>!m.deleted).length,
   stored: JSON.parse(localStorage.getItem('knowledge-todos')||'[]').filter(t=>!t.deleted).map(t=>t.text) }));

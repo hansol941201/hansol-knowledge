@@ -83,6 +83,46 @@
     </div>`;
   }
 
+  // 왼쪽: 통화 & 빠른 메모 — 한 줄 입력으로 할 일을 넣고, 아래에 긴 통화 기록을 적는다.
+  function memoPanel() {
+    return `
+    <div class="memo-head">
+      <h2>📞 통화 &amp; 빠른 메모</h2>
+      <small>엔터(Enter)를 누르면 오른쪽 할 일로 자동 추가됩니다</small>
+    </div>
+    <div class="memo-add">
+      <input id="memoQuick" type="text" autocomplete="off" placeholder="통화 내용이나 할 일을 입력 후 엔터를 누르세요..." />
+      <button type="button" id="memoQuickAdd" class="memo-add-btn">추가</button>
+    </div>
+    <div class="memo-tools">
+      <label class="memo-file">📷 사진/파일 첨부<input id="memoFile" type="file" accept="image/*" hidden /></label>
+      <small>Tip: Shift + Enter로 줄바꿈</small>
+    </div>
+    <label class="memo-label" for="memoNote">상세 메모 / 통화 기록</label>
+    <textarea id="memoNote" rows="10" placeholder="전화 통화 중 상세 내용을 메모해두세요..."></textarea>`;
+  }
+
+  // 오른쪽 위: 할 일 목록 — 체크 + 제목 한 줄, 오른쪽 끝에 지우기(✕)
+  function todoSimpleList(list) {
+    return `<ul class="todo-list">${list.map(todo => `
+      <li class="todo-line" data-todo-id="${todo.id}">
+        <label class="todo-line-check" title="완료 표시"><input type="checkbox" /><span class="todo-box"></span></label>
+        <span class="todo-line-text" title="${helper.escapeHtml(todo.text)}">${helper.escapeHtml(todo.text)}</span>
+        ${todo.date ? `<time class="${helper.todoDateState(todo)}">${helper.escapeHtml(todo.date)}</time>` : ''}
+        <button type="button" class="todo-x" data-todo-delete title="지우기">✕</button>
+      </li>`).join('')}</ul>`;
+  }
+  function todoDoneSimpleList(list) {
+    return `<ul class="todo-list">${list.map(todo => `
+      <li class="todo-line done" data-todo-id="${todo.id}">
+        <label class="todo-line-check" title="완료 취소"><input type="checkbox" checked /><span class="todo-box done"></span></label>
+        <span class="todo-line-text" title="${helper.escapeHtml(todo.text)}">${helper.escapeHtml(todo.text)}</span>
+        ${todo.date ? `<time class="muted">${helper.escapeHtml(todo.date)}</time>` : ''}
+        <time title="완료 ${helper.escapeHtml(helper.todoDoneLabel(todo))}">완료 ${helper.escapeHtml(helper.todoDoneShort(todo))}</time>
+        <button type="button" class="todo-x" data-todo-purge title="영구 삭제">✕</button>
+      </li>`).join('')}</ul>`;
+  }
+
   function todoDoneList(list) {
     return `<div class="todo-group-list">${list.map(todoDoneRow).join('')}</div>`;
   }
@@ -133,6 +173,7 @@
   global.HANSOL_VIEWS = {
     setup, TODO_GROUPS, TODO_STATE_NAMES,
     todoGroupSections, todoActiveRow, todoDoneRow, todoDoneList,
+    memoPanel, todoSimpleList, todoDoneSimpleList,
     scheduleGroups, shortcutGrid
   };
 })(window);

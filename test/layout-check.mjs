@@ -35,15 +35,18 @@ ok('선택 메뉴는 남색 글자 + 3px 아래 선(배경 없음)', await page.
   const c=getComputedStyle(document.querySelector('.top-item.active'));
   return c.color==='rgb(31, 58, 95)' && c.borderBottomColor==='rgb(31, 58, 95)'
     && c.borderBottomWidth==='3px' && c.backgroundColor==='rgba(0, 0, 0, 0)' && c.borderRadius==='0px'; }));
-ok('로고·별 아이콘 제거', (await page.$$('.top-brand')).length===0 && (await page.$$('.topnav .side-mark')).length===0
-  && !(await page.textContent('.topnav')).includes('한솔 지식'));
+// 시안대로 왼쪽에 HS 배지 + 이름, 오른쪽 끝에 프로필 동그라미
+ok('헤더에 이름표와 프로필', (await page.textContent('.brand-badge'))==='HS'
+  && (await page.textContent('.brand-mark')).includes('한솔 지식')
+  && (await page.textContent('.brand-avatar'))==='H'
+  && (await page.$$('.top-brand')).length===0);
 ok('헤더 높이 64px · 양옆 24px', await page.evaluate(()=>{
   const c=getComputedStyle(document.querySelector('.topnav'));
   return c.height==='64px' && parseFloat(c.paddingLeft)>=24 && parseFloat(c.paddingRight)>=24; }));
-ok('메뉴가 화면 가운데', await page.evaluate(()=>{
-  const items=[...document.querySelectorAll('#sideNav .top-item')];
-  const left=items[0].getBoundingClientRect().left, right=items.at(-1).getBoundingClientRect().right;
-  return Math.abs((left + right) / 2 - window.innerWidth / 2) < 6; }));
+ok('메뉴가 이름표 바로 옆에서 시작', await page.evaluate(()=>{
+  const first=document.querySelector('#sideNav .top-item').getBoundingClientRect();
+  const brand=document.querySelector('.brand-mark').getBoundingClientRect();
+  return first.left >= brand.right - 1 && first.left - brand.right < 60; }));
 ok('메뉴 글자 15~16px · 두께 500 이상 · 줄바꿈 없음', await page.evaluate(()=>{
   const items=[...document.querySelectorAll('#sideNav .top-item')];
   return items.every(el=>{
@@ -87,7 +90,11 @@ ok('보라색 미사용', await page.evaluate(()=>{
     return !purple.includes(c.color) && !purple.includes(c.backgroundColor) && !purple.includes(c.borderBottomColor); }); }));
 ok('자주 가는 사이트 표시', await page.isVisible('#shortcutSection'));
 ok('오늘의 할 일 표시', await page.isVisible('#todayPanel'));
-ok('이모지 없음', !/[\u{1F300}-\u{1FAFF}\u{2190}-\u{21FF}\u{2600}-\u{27BF}]/u.test(await page.textContent('.workspace')));
+// 시안이 쓰는 칸 제목 이모지(📞 ✅ 📷)만 허용하고, 메뉴와 즐겨찾기 줄에는 없어야 한다
+ok('메뉴·즐겨찾기 줄에 이모지 없음', await page.evaluate(()=>{
+  const re=/[\u{1F300}-\u{1FAFF}\u{2190}-\u{21FF}\u{2600}-\u{27BF}]/u;
+  return !re.test(document.querySelector('#sideNav').textContent)
+      && !re.test(document.querySelector('#shortcutGrid').textContent); }));
 ok('통계·최근활동 영역 없음', !(await page.content()).includes('최근 활동') && !(await page.content()).includes('총 지식 수'));
 
 // 사이트 바로가기 추가

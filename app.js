@@ -517,8 +517,8 @@ function activeTodos() {
       return savedMillis(a) - savedMillis(b);     // 같은 날짜면 먼저 적은 것부터
     });
 }
-// 업무 구분 — 사용자가 고른 값이 있으면 그 값, 없으면 마감일로 자동 분류한다.
-//   마감일이 오늘이거나 지났으면 급함, 미래이거나 없으면 여유.
+// 업무 구분 — 지금 화면에는 급함·여유 구역이 없다(시안대로 한 줄 목록).
+// 예전에 저장해 둔 값을 지우지 않으려고 읽는 쪽만 남겨 둔다.
 function todoUrgency(todo) {
   if (todo && (todo.urgency === 'urgent' || todo.urgency === 'easy')) return todo.urgency;
   const date = String((todo && todo.date) || '').trim();
@@ -557,21 +557,18 @@ function renderTodos() {
   const list = todoTab === 'done' ? done : active;   // 접지 않고 항상 전부 보여 준다
 
   panel.innerHTML = `
-    <div class="block-head">
-      <div>
-        <h2>오늘의 할 일</h2>
-        <div class="todo-tabs">
-          <button type="button" class="todo-tab ${todoTab === 'active' ? 'active' : ''}" data-todo-tab="active">할 일 <span>${active.length}</span></button>
-          <button type="button" class="todo-tab ${todoTab === 'done' ? 'active' : ''}" data-todo-tab="done">완료 <span>${done.length}</span></button>
-        </div>
-      </div>
+    <div class="todo-head">
+      <h2>✅ 할 일 목록</h2>
+      <span class="todo-count">${list.length}개</span>
+    </div>
+    <div class="todo-tabs">
+      <button type="button" class="todo-tab ${todoTab === 'active' ? 'active' : ''}" data-todo-tab="active">할 일 <span>${active.length}</span></button>
+      <button type="button" class="todo-tab ${todoTab === 'done' ? 'active' : ''}" data-todo-tab="done">완료 <span>${done.length}</span></button>
       ${todoTab === 'done' && done.length ? `<button type="button" class="ghost-btn" id="todoClearDone">완료 목록 비우기</button>` : ''}
     </div>
     ${list.length
-      ? (todoTab === 'done'
-          ? VIEWS.todoDoneList(list)
-          : todoGroupSections(list))
-      : `<div class="todo-empty">${todoTab === 'done' ? '완료한 할 일이 없습니다.' : '지식창에 “할일 내용”을 입력해보세요.'}</div>`}`;
+      ? (todoTab === 'done' ? VIEWS.todoDoneSimpleList(list) : VIEWS.todoSimpleList(list))
+      : `<div class="todo-empty">${todoTab === 'done' ? '완료한 할 일이 없습니다.' : '왼쪽 메모칸에 할 일을 적고 엔터를 누르세요.'}</div>`}`;
 
   panel.querySelectorAll('[data-todo-tab]').forEach(button => {
     button.onclick = () => { todoTab = button.dataset.todoTab; renderTodos(); };
@@ -588,7 +585,7 @@ function renderTodos() {
   panel.querySelectorAll('[data-todo-id]').forEach(row => {
     const todo = todos.find(x => x.id === row.dataset.todoId);
     // 체크박스: 완료 상태만 바꾼다(카드 클릭으로 번지지 않게 막는다).
-    const checkBox = row.querySelector('.todo-check-box');
+    const checkBox = row.querySelector('.todo-check-box, .todo-line-check');
     if (checkBox) checkBox.addEventListener('click', event => event.stopPropagation());
     const check = row.querySelector('input');
     if (check) check.onchange = () => {
@@ -599,7 +596,7 @@ function renderTodos() {
     };
     // 카드 본문·제목·날짜·배지·빈 공간을 누르면 수정 창을 연다(완료 처리하지 않는다).
     row.addEventListener('click', event => {
-      if (event.target.closest('button') || event.target.closest('.todo-check-box')) return;
+      if (event.target.closest('button') || event.target.closest('.todo-check-box, .todo-line-check')) return;
       openTodoModal(todo);
     });
     const edit = row.querySelector('[data-todo-edit]');
@@ -650,8 +647,6 @@ function openTodoModal(todo) {
   editingTodoId = todo.id;
   $('#todoEditText').value = todo.text || '';
   $('#todoEditDate').value = todo.date || '';
-  const kind = todoUrgency(todo);
-  $('#todoModal').querySelectorAll('[name="todoUrgency"]').forEach(box => { box.checked = box.value === kind; });
   $('#todoEditError').textContent = '';
   $('#todoModal').classList.remove('hidden');
   setTimeout(() => $('#todoEditText').focus(), 50);
@@ -672,8 +667,6 @@ $('#todoForm').addEventListener('submit', event => {
   try {
     todo.text = text;
     todo.date = $('#todoEditDate').value || todo.date;
-    const picked = $('#todoModal').querySelector('[name="todoUrgency"]:checked');
-    if (picked) todo.urgency = picked.value;      // 직접 고른 값은 자동 분류보다 우선한다
     touch(todo);
     saveTodos();
   } catch (error) {
@@ -1171,7 +1164,6 @@ document.querySelectorAll('[data-add]').forEach(button => {
       $('.add-kinds').classList.add('hidden');
       $('#quickTextLabel').textContent = addKind === '기억' ? '기억할 내용' : '할 일 내용';
       $('#quickTextInput').value = '';
-      $('#quickUrgency').classList.toggle('hidden', addKind !== '할 일');
       $('#quickTextForm').classList.remove('hidden');
       setTimeout(() => $('#quickTextInput').focus(), 50);
       return;
@@ -1186,10 +1178,6 @@ $('#quickTextForm').addEventListener('submit', async event => {
   if (!text) return;
   const item = addKind === '할 일' ? createTodo(text, '사이트') : createMemory(text, '사이트');
   if (!item) return;
-  if (addKind === '할 일') {
-    const picked = $('#quickUrgency').querySelector('[name="quickTodoUrgency"]:checked');
-    if (picked) item.urgency = picked.value;
-  }
   closeAddModal();
   await commitEntry(item, addKind === '할 일' ? 'todo' : 'memory');
 });
@@ -1226,13 +1214,71 @@ function deleteSchedule(item) {
   showToast('일정 삭제됨');
 }
 
-// ── 빠른 전화 메모 (화면에서 제거됨) ────────────────────────
-// 카드는 대시보드에서 뺐지만, 이미 저장돼 있던 메모 내용은 지우지 않는다.
-// 클라우드 문서는 통째로 덮어쓰므로 저장돼 있던 값을 읽은 그대로 되돌려 둔다.
+// ── 통화 & 빠른 메모 ────────────────────────────────────────
+// 왼쪽 칸에서 한 줄을 적고 엔터를 누르면 오른쪽 할 일로 넘어간다.
+// 아래 긴 칸(상세 메모)은 이 기기와 클라우드에 초안으로 남는다.
 const QUICK_MEMO_FIELD = 'quickPhoneMemoDraft';       // Firebase 문서 필드
+const MEMO_NOTE_KEY = 'knowledge-memo-note';          // 이 기기에 남기는 초안
 function keepQuickMemoField(remote) {
   const kept = remote && remote[QUICK_MEMO_FIELD];
   return kept === undefined ? {} : { [QUICK_MEMO_FIELD]: kept };
+}
+function readMemoNote() {
+  try { return localStorage.getItem(MEMO_NOTE_KEY) || ''; } catch { return ''; }
+}
+function writeMemoNote(text) {
+  try { localStorage.setItem(MEMO_NOTE_KEY, String(text || '')); } catch { /* 저장 공간이 꽉 찬 경우 */ }
+}
+
+function renderMemoPanel() {
+  const panel = $('#memoPanel');
+  if (!panel) return;
+  const searching = Boolean(pageSearchCommitted.trim());
+  panel.classList.toggle('hidden', searching || pageCategory !== '대시보드');
+  if (panel.classList.contains('hidden')) return;
+
+  // 이미 만들어 둔 칸이 있으면 다시 만들지 않는다 — 적고 있던 글이 날아가지 않게.
+  if (panel.querySelector('#memoNote')) return;
+
+  panel.innerHTML = VIEWS.memoPanel();
+  const quick = $('#memoQuick');
+  const note = $('#memoNote');
+  note.value = readMemoNote();
+
+  // 한 줄 입력 → 할 일. 엔터도 추가 단추도 같은 일을 한다.
+  const addFromQuick = () => {
+    const text = quick.value.trim();
+    if (!text) { quick.focus(); return; }
+    createTodo(text, '통화 메모');
+    quick.value = '';
+    saveTodos(); renderTodos(); renderLibrary();
+    showToast('할 일에 넣었습니다');
+    quick.focus();
+  };
+  quick.addEventListener('keydown', event => {
+    if (event.key !== 'Enter' || event.shiftKey || event.isComposing) return;   // 한글 조합 중에는 넘기지 않는다
+    event.preventDefault();
+    addFromQuick();
+  });
+  $('#memoQuickAdd').onclick = addFromQuick;
+
+  // 상세 메모는 적는 대로 이 기기에 남는다(엔터로 할 일이 되지 않는다).
+  let noteTimer = null;
+  note.addEventListener('input', () => {
+    clearTimeout(noteTimer);
+    noteTimer = setTimeout(() => writeMemoNote(note.value), 400);
+  });
+  note.addEventListener('blur', () => writeMemoNote(note.value));
+
+  // 첨부한 사진은 상세 메모에 파일 이름만 적어 둔다(자료를 통째로 넣지 않는다).
+  $('#memoFile').addEventListener('change', event => {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+    note.value = `${note.value}${note.value ? '\n' : ''}📷 ${file.name}`;
+    writeMemoNote(note.value);
+    event.target.value = '';
+    showToast('사진 이름을 메모에 적었습니다');
+  });
 }
 
 
@@ -2454,8 +2500,17 @@ VIEWS.setup({
   scheduleDayTitle, scheduleBadge, shortcutHref, shortcutBadge, thumbImage
 });
 
+// 헤더의 돋보기는 아래 검색칸으로 데려다 준다.
+const searchOpenButton = $('#searchOpen');
+if (searchOpenButton) searchOpenButton.onclick = () => {
+  const box = $('#pageSearch');
+  box.scrollIntoView({ block: 'nearest' });
+  box.focus();
+};
+
 function renderAll() {
   renderSideNav();
+  renderMemoPanel();
   renderShortcuts();
   renderSchedule();
   renderLibrary();

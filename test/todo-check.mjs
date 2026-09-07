@@ -29,23 +29,23 @@ const ready = async () => {
 await page.goto(base+'/index.html'); await ready();
 ok('자바스크립트 오류 없음', errors.length===0, errors.join(' | '));
 
-const texts = () => page.$$eval('#todayPanel .todo-item .todo-text', n=>n.map(x=>x.textContent));
+const texts = () => page.$$eval('#todayPanel .todo-line .todo-line-text', n=>n.map(x=>x.textContent));
 const panelText = () => page.textContent('#todayPanel');
 
 // 1. 상태 배지 제거 · 날짜 유지
 ok('진행중 배지 없음', (await page.$$('#todayPanel .todo-state')).length===0 && !(await panelText()).includes('진행중'));
-ok('날짜는 오른쪽에 유지', (await page.$eval('#todayPanel .todo-item time', n=>n.textContent))==='2026-08-26');
-const order = await page.$eval('#todayPanel .todo-item', n=>[...n.querySelectorAll('*')].map(c=>c.tagName+'.'+(typeof c.className==='string'?c.className:'')).join('|'));
-ok('체크 → 내용 → 날짜 → 수정 → 삭제 순', /todo-check.*todo-text.*TIME.*todo-mini.*todo-remove/.test(order), order);
+ok('날짜는 오른쪽에 유지', (await page.$eval('#todayPanel .todo-line time', n=>n.textContent))==='2026-08-26');
+const order = await page.$eval('#todayPanel .todo-line', n=>[...n.querySelectorAll('*')].map(c=>c.tagName+'.'+(typeof c.className==='string'?c.className:'')).join('|'));
+ok('체크 → 내용 → 날짜 → 지우기 순', /todo-box.*todo-line-text.*TIME.*todo-x/.test(order), order);
 
 // 2. 수정
-const row = (text) => `#todayPanel .todo-item:has-text("${text}")`;
-await page.click(`${row('천민호')} [data-todo-edit]`); await page.waitForTimeout(300);
+const row = (text) => `#todayPanel .todo-line:has-text("${text}")`;
+await page.click(`${row('천민호')} .todo-line-text`); await page.waitForTimeout(300);
 ok('수정 창 열림', await page.isVisible('#todoForm'));
 ok('기존 값이 채워짐', (await page.inputValue('#todoEditText'))==='천민호부사장 택배 확인' && (await page.inputValue('#todoEditDate'))==='2026-08-26');
 await page.click('#todoEditCancel'); await page.waitForTimeout(200);
 ok('취소하면 그대로', !(await page.isVisible('#todoForm')) && (await texts()).includes('천민호부사장 택배 확인'));
-await page.click(`${row('천민호')} [data-todo-edit]`); await page.waitForTimeout(300);
+await page.click(`${row('천민호')} .todo-line-text`); await page.waitForTimeout(300);
 await page.fill('#todoEditText','천민호부사장 택배 확인(수정)');
 await page.fill('#todoEditDate','2026-08-28');
 await page.click('#todoForm button[type="submit"]'); await page.waitForTimeout(400);
@@ -56,7 +56,7 @@ ok('클라우드에도 저장', await page.evaluate(async()=>{const d=(await win
 
 // 3. 체크 → 완료로 이동 + 실행 취소
 const before = (await texts()).length;
-await page.click(`${row('자오건설')} .todo-check`); await page.waitForTimeout(600);
+await page.click(`${row('자오건설')} .todo-line-check`); await page.waitForTimeout(600);
 ok('체크하면 목록에서 사라짐', !(await texts()).some(t=>t.includes('자오건설')) && (await texts()).length===before-1);
 ok('데이터는 남아 있음', await page.evaluate(()=>JSON.parse(localStorage.getItem('knowledge-todos')).some(t=>t.text.includes('자오건설') && t.done && !t.deleted)));
 ok('실행 취소 안내 표시', await page.isVisible('.toast.with-action') && (await page.textContent('.toast')).includes('실행 취소'));
@@ -64,18 +64,19 @@ await page.click('.toast.with-action button'); await page.waitForTimeout(400);
 ok('실행 취소로 복구', (await texts()).some(t=>t.includes('자오건설')));
 
 // 4. 완료 탭
-await page.click(`${row('금화기업')} .todo-check`); await page.waitForTimeout(700);
+await page.click(`${row('금화기업')} .todo-line-check`); await page.waitForTimeout(700);
 await page.click('[data-todo-tab="done"]'); await page.waitForTimeout(300);
 ok('완료 탭에 모임', (await panelText()).includes('금화기업'));
 ok('완료 탭에 기존 날짜와 완료일', (await panelText()).includes('2026-08-26') && (await panelText()).includes('완료 '));
 ok('탭 개수 표시', (await page.$eval('[data-todo-tab="done"] span', n=>n.textContent))==='1');
-await page.click('#todayPanel [data-todo-restore]'); await page.waitForTimeout(400);
-ok('복구', (await page.$eval('[data-todo-tab="done"] span', n=>n.textContent))==='0');
+// 복구는 체크를 다시 눌러서 한다(따로 복구 단추를 두지 않는다)
+await page.click('#todayPanel .todo-line.done .todo-line-check'); await page.waitForTimeout(400);
+ok('체크를 다시 누르면 복구', (await page.$eval('[data-todo-tab="done"] span', n=>n.textContent))==='0');
 await page.click('[data-todo-tab="active"]'); await page.waitForTimeout(300);
 ok('복구 후 할 일 목록에 다시 표시', (await texts()).some(t=>t.includes('금화기업')));
 
 // 영구 삭제 (확인창)
-await page.click(`${row('금화기업')} .todo-check`); await page.waitForTimeout(700);
+await page.click(`${row('금화기업')} .todo-line-check`); await page.waitForTimeout(700);
 await page.click('[data-todo-tab="done"]'); await page.waitForTimeout(300);
 page.once('dialog', d=>{ ok('영구 삭제 전 확인창', d.message().includes('영구 삭제')); d.dismiss(); });
 await page.click('#todayPanel [data-todo-purge]'); await page.waitForTimeout(400);
@@ -86,7 +87,7 @@ ok('확인하면 영구 삭제', !(await panelText()).includes('금화기업'));
 
 // 완료 목록 비우기
 await page.click('[data-todo-tab="active"]'); await page.waitForTimeout(250);
-await page.click(`${row('자오건설')} .todo-check`); await page.waitForTimeout(700);
+await page.click(`${row('자오건설')} .todo-line-check`); await page.waitForTimeout(700);
 await page.click('[data-todo-tab="done"]'); await page.waitForTimeout(300);
 page.once('dialog', d=>{ ok('완료 목록 비우기 확인창', d.message().includes('영구 삭제')); d.accept(); });
 await page.click('#todoClearDone'); await page.waitForTimeout(500);
@@ -97,7 +98,7 @@ await page.click('[data-todo-tab="active"]'); await page.waitForTimeout(250);
 await page.click('#sideNav button:has-text("할 일")'); await page.waitForTimeout(400);
 ok('전체 보기에도 탭 표시', await page.isVisible('[data-todo-tab="done"]'));
 ok('전체 보기에도 배지 없음', !(await panelText()).includes('진행중'));
-await page.click(`${row('천민호')} .todo-check`); await page.waitForTimeout(700);
+await page.click(`${row('천민호')} .todo-line-check`); await page.waitForTimeout(700);
 await page.click('[data-todo-tab="done"]'); await page.waitForTimeout(300);
 ok('전체 보기에서 완료 처리', (await panelText()).includes('천민호'));
 await page.click('#sideNav button:has-text("대시보드")'); await page.waitForTimeout(400);
@@ -105,7 +106,7 @@ ok('대시보드에도 즉시 반영(완료 탭 상태 유지)', (await panelTex
 await page.click('[data-todo-tab="active"]'); await page.waitForTimeout(300);
 ok('대시보드 할 일 목록에서는 사라짐', !(await texts()).some(t=>t.includes('천민호')));
 await page.click('[data-todo-tab="done"]'); await page.waitForTimeout(250);
-await page.click('#todayPanel [data-todo-restore]'); await page.waitForTimeout(400);
+await page.click('#todayPanel .todo-line.done .todo-line-check'); await page.waitForTimeout(400);
 await page.click('[data-todo-tab="active"]'); await page.waitForTimeout(300);
 ok('완료 탭에서 복구하면 대시보드에도 반영', (await texts()).some(t=>t.includes('천민호')));
 
@@ -129,7 +130,7 @@ ok('완료일이 없으면 수정 시각으로 대체', (await panelText()).incl
 await page.click('[data-todo-tab="active"]'); await page.waitForTimeout(300);
 await page.setViewportSize({width:390,height:844}); await page.waitForTimeout(400);
 const mobile = await page.evaluate(()=>{
-  const row=document.querySelector('#todayPanel .todo-item');
+  const row=document.querySelector('#todayPanel .todo-line');
   if(!row) return {none:true};
   const kids=[...row.children]
     .filter(el=>{ const c=getComputedStyle(el); return c.opacity!=='0' && c.visibility!=='hidden' && c.position!=='absolute'; })
@@ -141,10 +142,10 @@ const mobile = await page.evaluate(()=>{
   }
   const box=row.getBoundingClientRect();
   return { overlap, inside: kids.every(k=>k.right <= box.right+1),
-           editVisible: getComputedStyle(row.querySelector('[data-todo-edit]')).opacity==='1' };
+           xVisible: getComputedStyle(row.querySelector('.todo-x')).opacity==='1' };
 });
 ok('모바일에서 버튼·체크박스 겹침 없음', !mobile.overlap && mobile.inside, JSON.stringify(mobile));
-ok('모바일에서 수정 버튼이 항상 보임', mobile.editVisible, JSON.stringify(mobile));
+ok('모바일에서 지우기 단추가 항상 보임', mobile.xVisible, JSON.stringify(mobile));
 
 ok('끝까지 오류 없음', errors.length===0, errors.join(' | '));
 await b.close(); server.close();
