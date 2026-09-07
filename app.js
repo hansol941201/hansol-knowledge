@@ -348,6 +348,29 @@ function searchFilter(list, term, fields) {
     .map(row => row.item);
 }
 
+// 화면이 비었을 때 왜 비었는지 알려 준다.
+// 동기화에 연결하지 않으면 다른 컴퓨터에 넣은 계정·지식이 이 기기에 없다.
+// 그냥 "검색 결과 없음" 만 보이면 자료가 사라진 것처럼 읽히므로 이유를 밝힌다.
+function paintEmptyNotice(query) {
+  const box = $('#pageEmpty');
+  if (!box) return;
+  if (query) { box.textContent = '검색 결과 없음'; return; }
+  if (cloudStatus === 'syncing') { box.textContent = '불러오는 중…'; return; }
+  if (cloudStatus === 'live') {
+    box.textContent = pageCategory === '계정'
+      ? '저장된 계정이 없습니다. ＋ 지식 추가에서 계정을 넣어 보세요.'
+      : '아직 저장된 자료가 없습니다.';
+    return;
+  }
+  // 아직 동기화 전 — 다른 컴퓨터의 자료가 안 보이는 상태다.
+  const what = pageCategory === '계정' ? '계정과 비밀번호' : '자료';
+  box.innerHTML = `<b>이 기기는 동기화에 연결돼 있지 않습니다.</b>`
+    + `<span>다른 컴퓨터에 저장한 ${what}는 연결해야 보입니다. 지워진 것이 아닙니다.</span>`
+    + `<button type="button" id="emptyConnect">동기화 연결</button>`;
+  const button = $('#emptyConnect');
+  if (button) button.onclick = () => openSyncModal();
+}
+
 function renderLibrary() {
   const query = pageSearchCommitted.trim();
   const items = searchFilter(categoryItems(pageCategory), query,
@@ -431,7 +454,10 @@ function renderLibrary() {
       openDetailFromCard(card);
     });
   });
-  $('#pageEmpty').classList.toggle('hidden', items.length + accounts.length + partnerItems.length + memoryItems.length + todoItems.length + patentItems.length !== 0);
+  const shownCount = items.length + accounts.length + partnerItems.length
+    + memoryItems.length + todoItems.length + patentItems.length;
+  $('#pageEmpty').classList.toggle('hidden', shownCount !== 0);
+  if (shownCount === 0) paintEmptyNotice(query);
   $('#pageCategories').querySelectorAll('[data-category]').forEach(button => button.onclick = () => { pageCategory = button.dataset.category; renderLibrary(); });
   $('#pageGrid').querySelectorAll('.page-card[data-id]').forEach(card => {
     const item = knowledge.find(x => x.id === card.dataset.id);
@@ -2749,6 +2775,9 @@ function setCloudStatus(status) {
   cloudStatus = status;
   const label = labels[status] || labels.offline;
   paintShortcutNotice();
+  // 비어 있는 화면의 안내도 연결 상태에 맞춰 다시 쓴다.
+  const empty = $('#pageEmpty');
+  if (empty && !empty.classList.contains('hidden')) paintEmptyNotice(pageSearchCommitted.trim());
   const badge = $('#syncState');
   if (badge) {
     badge.textContent = label;

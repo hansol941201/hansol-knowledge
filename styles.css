@@ -444,6 +444,15 @@ svg { display: block; flex: none; }
 .partner-record time { color: var(--ink-3); font-size: 10px; }
 .secret-line { letter-spacing: 2px; }
 .page-empty { padding: 40px 0; color: var(--ink-3); font-size: 13px; text-align: center; }
+/* 화면이 빈 이유가 동기화 미연결일 때 — 이유와 연결 단추를 함께 보여 준다 */
+.page-empty:has(button) { display: grid; justify-items: center; gap: 8px; }
+.page-empty b { color: var(--ink-1); font-size: 14px; }
+.page-empty span { max-width: 460px; line-height: 1.6; }
+.page-empty button {
+  margin-top: 4px; padding: 8px 16px; border-radius: 8px; border: 0;
+  background: var(--violet); color: #fff; font-size: 13px; font-weight: 700; cursor: pointer;
+}
+.page-empty button:hover { background: #5B3AD0; }
 mark { padding: 0 1px; border-radius: 3px; background: #FFF3A0; color: #000; }
 
 /* ── 모달 ───────────────────────────────────────────────────── */
