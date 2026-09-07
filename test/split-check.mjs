@@ -8,8 +8,29 @@ const ok=(n,p,d='')=>{ if(!p) failures.push(n); console.log(`${p?'PASS':'FAIL'} 
 
 // ── 파일이 나뉘어 있는지 (브라우저 없이) ──────────────────────
 const svc = fs.readFileSync(path.join(root,'shortcuts.js'),'utf8');
+const store = fs.readFileSync(path.join(root,'store.js'),'utf8');
+const views = fs.readFileSync(path.join(root,'views.js'),'utf8');
 const css = fs.readFileSync(path.join(root,'styles.css'),'utf8');
 const app = fs.readFileSync(path.join(root,'app.js'),'utf8');
+const noComments = (text) => text.replace(/\/\/.*$/gm,'').replace(/\/\*[\s\S]*?\*\//g,'');
+
+// 자료 보관 — store.js
+ok('모든 자료의 저장·불러오기가 store.js 에 있음',
+   /knowledge-messenger-data/.test(store) && /knowledge-todos/.test(store) &&
+   /knowledge-schedule/.test(store) && /function readList/.test(store) && /function writeList/.test(store));
+ok('store.js 에는 디자인도 화면 코드도 없음',
+   !/#[0-9A-Fa-f]{6}|px\b|querySelector|innerHTML/.test(noComments(store)));
+// 화면 구성 — views.js
+ok('할 일·일정·즐겨찾기 화면 구성이 views.js 에 있음',
+   /todoActiveRow/.test(views) && /scheduleGroups/.test(views) && /shortcutGrid/.test(views));
+ok('views.js 는 자료를 직접 읽거나 쓰지 않음',
+   !/localStorage/.test(views));
+ok('views.js 는 클릭 처리를 하지 않음',
+   !/addEventListener|\.onclick|querySelector/.test(noComments(views)));
+ok('app.js 는 자료를 직접 읽고 쓰지 않음(대체 동작 제외)',
+   !/localStorage\.(get|set)Item\('knowledge-(messenger-data|todos|memories|account-meta|schedule|shortcuts)'/
+      .test(app.replace(/const STORE = window\.HANSOL_STORE[\s\S]*?\n\}\)\(\);\n/,'')
+              .replace(/const SHORTCUT_STORE[\s\S]*?\n\};\n/,'')));
 ok('즐겨찾기 자료·창 열기가 shortcuts.js 에 있음',
    /STORE_KEY\s*=\s*'knowledge-shortcuts'/.test(svc) && /function open\(item/.test(svc) && /availWidth \/ 2/.test(svc));
 ok('shortcuts.js 에는 디자인(색·픽셀)이 없음',
@@ -17,9 +38,10 @@ ok('shortcuts.js 에는 디자인(색·픽셀)이 없음',
 ok('app.js 는 즐겨찾기를 직접 읽고 쓰지 않음',
    !/localStorage\.(get|set)Item\('knowledge-shortcuts'/.test(app.replace(/const SHORTCUT_STORE[\s\S]*?\n};\n/,'')));
 ok('레이아웃·색은 styles.css 에 있음', /\.todo-group-list\s*{/.test(css) && /\.todo-item\.late/.test(css));
-ok('index.html 이 shortcuts.js 를 app.js 보다 먼저 읽음', (()=>{
+ok('index.html 이 네 파일을 app.js 보다 먼저 읽음', (()=>{
   const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
-  return html.indexOf('shortcuts.js') > 0 && html.indexOf('shortcuts.js') < html.indexOf('app.js?v=');
+  const at = html.indexOf('app.js?v=');
+  return ['store.js','shortcuts.js','views.js'].every(f => html.indexOf(f) > 0 && html.indexOf(f) < at);
 })());
 
 // ── 실제로 돌려 본다 ─────────────────────────────────────────
@@ -46,7 +68,12 @@ await page.goto(base+'/index.html');
 await page.waitForFunction(()=>document.querySelector('#syncState')?.dataset.state==='live',null,{timeout:10000});
 await page.waitForTimeout(600);
 
-ok('shortcuts.js 가 실제로 실린다', await page.evaluate(()=>Boolean(window.HANSOL_SHORTCUTS)));
+ok('네 파일이 실제로 실린다', await page.evaluate(()=>
+  Boolean(window.HANSOL_SHORTCUTS) && Boolean(window.HANSOL_STORE) && Boolean(window.HANSOL_VIEWS)));
+ok('화면 구성이 views.js 것으로 그려진다', await page.evaluate(()=>{
+  const made = window.HANSOL_VIEWS.todoActiveRow({ id:'t1', text:'검사', date:'' });
+  return made.includes('todo-item') && made.includes('todo-badge') && made.includes('검사');
+}));
 ok('app.js 가 대체 동작이 아니라 shortcuts.js 를 쓴다',
    await page.evaluate(()=>window.HANSOL_SHORTCUTS.STORE_KEY==='knowledge-shortcuts' && typeof window.HANSOL_SHORTCUTS.open==='function'));
 ok('저장돼 있던 즐겨찾기가 그대로 보임',

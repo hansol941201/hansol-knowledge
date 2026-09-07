@@ -44,6 +44,33 @@ const seed = [
   { id: `seed-특허번호차이`, title: '특허번호 차이', answer: '내용 확인', aliases: ['특허 번호', '특허번호'] }
 ];
 
+// 자료 보관은 store.js, 즐겨찾기 창 열기는 shortcuts.js, 화면 구성은 views.js 가 맡는다.
+// 세 파일 중 하나라도 못 불러온 경우에 대비해 최소한의 대체 동작을 준비해 둔다.
+const STORE = window.HANSOL_STORE || (() => {
+  const KEYS = { knowledge: 'knowledge-messenger-data', todos: 'knowledge-todos',
+    memories: 'knowledge-memories', accountMeta: 'knowledge-account-meta',
+    schedule: 'knowledge-schedule', shortcuts: 'knowledge-shortcuts' };
+  const readList = (name) => { try { const raw = JSON.parse(localStorage.getItem(KEYS[name] || name) || '[]'); return Array.isArray(raw) ? raw : []; } catch { return []; } };
+  const writeList = (name, list) => { try { localStorage.setItem(KEYS[name] || name, JSON.stringify(list || [])); return true; } catch { return false; } };
+  return { KEYS, readList, writeList,
+    writeAll: (bundle) => Object.keys(bundle || {}).every(name => writeList(name, bundle[name])),
+    clearKeys: (extra) => Object.values(KEYS).concat(extra || []).map(key => { try { localStorage.removeItem(key); } catch { /* 계속 간다 */ } return key; }) };
+})();
+
+const VIEWS = window.HANSOL_VIEWS || {
+  // views.js 를 못 읽었을 때의 최소 화면 — 자료는 그대로 보이게만 한다.
+  setup: () => {},
+  TODO_GROUPS: [{ key: 'urgent', name: '오늘 당장 급한 일' }, { key: 'easy', name: '여유 있게 해야 할 일' }],
+  TODO_STATE_NAMES: { late: '지연', today: '오늘', future: '예정', none: '날짜 없음' },
+  todoGroupSections: (list) => `<div class="todo-groups">${list.map(t => `<div class="todo-item" data-todo-id="${t.id}">${escapeHtml(t.text)}</div>`).join('')}</div>`,
+  todoActiveRow: (t) => `<div class="todo-item" data-todo-id="${t.id}">${escapeHtml(t.text)}</div>`,
+  todoDoneRow: (t) => `<div class="todo-item done" data-todo-id="${t.id}">${escapeHtml(t.text)}</div>`,
+  todoDoneList: (list) => `<div class="todo-group-list">${list.map(t => `<div class="todo-item done" data-todo-id="${t.id}">${escapeHtml(t.text)}</div>`).join('')}</div>`,
+  scheduleGroups: (rows) => rows.map(r => `<div class="schedule-row" data-schedule="${r.id}">${escapeHtml(r.title)}<button type="button" class="schedule-more" data-row-menu></button></div>`).join(''),
+  shortcutGrid: (list) => list.map(item => `<div class="shortcut" data-shortcut="${item.id}"><a href="${escapeHtml(shortcutHref(item.url))}">${escapeHtml(item.name)}</a><button type="button" class="shortcut-more" data-row-menu data-shortcut-edit></button></div>`).join('')
+    + `<button type="button" class="shortcut add" id="shortcutAdd">사이트 추가</button>`
+};
+
 // 즐겨찾기 자료·창 열기는 shortcuts.js 가 맡는다. 그 파일을 못 불러온 경우에도
 // 나머지 화면이 죽지 않도록 최소한의 대체 동작을 준비해 둔다.
 const SHORTCUT_STORE = window.HANSOL_SHORTCUTS || {
@@ -58,14 +85,13 @@ const SHORTCUT_STORE = window.HANSOL_SHORTCUTS || {
   popups: new Map()
 };
 
-let knowledge = JSON.parse(localStorage.getItem('knowledge-messenger-data') || 'null') || [];
+let knowledge = STORE.readList('knowledge');
 knowledge = knowledge.filter(item => !(item.title === '통신도장' && item.answer === '통신도장'));
-let todos = JSON.parse(localStorage.getItem('knowledge-todos') || '[]');
-let memories = JSON.parse(localStorage.getItem('knowledge-memories') || '[]');
-let accountMeta = JSON.parse(localStorage.getItem('knowledge-account-meta') || '[]');
-let schedule = JSON.parse(localStorage.getItem('knowledge-schedule') || '[]');
-// 즐겨찾기 자료는 shortcuts.js 가 맡는다(디자인 코드와 분리해 두었다).
-let shortcuts = SHORTCUT_STORE.read();
+let todos = STORE.readList('todos');
+let memories = STORE.readList('memories');
+let accountMeta = STORE.readList('accountMeta');
+let schedule = STORE.readList('schedule');
+let shortcuts = STORE.readList('shortcuts');
 const partners = Array.isArray(window.PARTNERS) ? window.PARTNERS : [];
 const patents = Array.isArray(window.PATENTS) ? window.PATENTS : [];
 let vaultKey = null;
@@ -507,68 +533,17 @@ function todoDateState(todo) {
   if (date === today) return 'today';
   return date < today ? 'late' : 'future';
 }
-// 카드에 붙는 작은 상태 배지 — 지연(빨강) · 오늘(초록) · 예정(보라) · 날짜 없음(회색)
-const TODO_STATE_NAMES = { late: '지연', today: '오늘', future: '예정', none: '날짜 없음' };
 function doneTodos() {
   return alive(todos).filter(isTodoEntry).filter(todo => todo.done)
     .sort((a, b) => String(b.doneAt || b.updatedAt || '').localeCompare(String(a.doneAt || a.updatedAt || '')));
 }
 
-// 급한 일 · 여유 있는 일 두 구역으로 나눠 보여 준다(모두 펼친 상태).
-const TODO_GROUPS = [
-  { key: 'urgent', name: '오늘 당장 급한 일' },
-  { key: 'easy', name: '여유 있게 해야 할 일' }
-];
-function todoGroupSections(list) {
-  const buckets = { urgent: [], easy: [] };
-  for (const todo of list) buckets[todoUrgency(todo)].push(todo);
-  const sections = TODO_GROUPS.filter(group => buckets[group.key].length).map(group => `
-    <section class="todo-group ${group.key}">
-      <h3 class="todo-group-head">${group.name}<span>${buckets[group.key].length}</span></h3>
-      <div class="todo-group-list">${buckets[group.key].map(todoActiveRow).join('')}</div>
-    </section>`).join('');
-  return `<div class="todo-groups">${sections}</div>`;
-}
-// 작은 메모 카드 한 장 — 위: 체크 + 제목, 아래: 상태·날짜와 수정·삭제
-function todoActiveRow(todo) {
-  const state = todoDateState(todo);
-  const kind = todoUrgency(todo);
-  const when = escapeHtml(todo.date || '날짜 없음');
-  // 카드 전체를 label 로 감싸지 않는다. 체크박스만 자기 label 안에 두어
-  // 카드를 눌렀을 때 완료 처리되지 않고 수정 창이 열리게 한다.
-  return `
-    <div class="todo-item ${kind} ${state}" data-todo-id="${todo.id}">
-      <span class="todo-head">
-        <label class="todo-check-box" title="완료 표시"><input type="checkbox"><span class="todo-check">${icon('check', 12)}</span></label>
-        <span class="todo-text" title="${escapeHtml(todo.text)}">${escapeHtml(todo.text)}</span>
-      </span>
-      <span class="todo-foot">
-        <b class="todo-badge ${state}">${TODO_STATE_NAMES[state]}</b>
-        ${state === 'none' ? '' : `<time class="${state}">${when}</time>`}
-        <span class="todo-tools">
-          <button type="button" class="todo-mini" data-todo-edit title="수정">${icon('pencil', 12)}</button>
-          <button type="button" class="todo-remove" data-todo-delete title="삭제">${icon('more', 13)}</button>
-        </span>
-      </span>
-    </div>`;
-}
-function todoDoneRow(todo) {
-  return `
-    <div class="todo-item done" data-todo-id="${todo.id}">
-      <span class="todo-head">
-        <label class="todo-check-box" title="완료 취소"><input type="checkbox" checked><span class="todo-check done">${icon('check', 12)}</span></label>
-        <span class="todo-text" title="${escapeHtml(todo.text)}">${escapeHtml(todo.text)}</span>
-      </span>
-      <span class="todo-foot">
-        <b class="todo-badge done" title="완료 ${escapeHtml(todoDoneLabel(todo))}">완료 ${escapeHtml(todoDoneShort(todo))}</b>
-        <time>${escapeHtml(todo.date || '날짜 없음')}</time>
-        <span class="todo-tools">
-          <button type="button" class="todo-mini" data-todo-restore title="복구">복구</button>
-          <button type="button" class="todo-mini danger" data-todo-purge title="영구 삭제">삭제</button>
-        </span>
-      </span>
-    </div>`;
-}
+// 카드 모양은 views.js 가 만든다. 여기서는 어떤 자료를 넘길지만 정한다.
+const TODO_GROUPS = VIEWS.TODO_GROUPS;
+const TODO_STATE_NAMES = VIEWS.TODO_STATE_NAMES;
+const todoGroupSections = (list) => VIEWS.todoGroupSections(list);
+const todoActiveRow = (todo) => VIEWS.todoActiveRow(todo);
+const todoDoneRow = (todo) => VIEWS.todoDoneRow(todo);
 
 function renderTodos() {
   const panel = $('#todayPanel');
@@ -594,7 +569,7 @@ function renderTodos() {
     </div>
     ${list.length
       ? (todoTab === 'done'
-          ? `<div class="todo-group-list">${list.map(todoDoneRow).join('')}</div>`
+          ? VIEWS.todoDoneList(list)
           : todoGroupSections(list))
       : `<div class="todo-empty">${todoTab === 'done' ? '완료한 할 일이 없습니다.' : '지식창에 “할일 내용”을 입력해보세요.'}</div>`}`;
 
@@ -1573,32 +1548,8 @@ function renderSchedule() {
   });
 }
 
-// 같은 날짜끼리 묶어서 날짜 머리글 아래에 나란히 보여 준다.
-function renderScheduleGroups(rows) {
-  const groups = [];
-  for (const item of rows) {
-    const last = groups[groups.length - 1];
-    if (last && last.date === item.date) last.items.push(item);
-    else groups.push({ date: item.date, items: [item] });
-  }
-  return groups.map(group => `
-    <div class="schedule-group">
-      <div class="schedule-group-head">
-        <b>${escapeHtml(scheduleDayTitle(group.date))}</b>
-        ${scheduleBadge(group.date) ? `<em class="schedule-badge">${scheduleBadge(group.date)}</em>` : ''}
-        <span class="schedule-group-count">${group.items.length}건</span>
-      </div>
-      ${group.items.map(item => `
-        <div class="schedule-row" data-schedule="${item.id}">
-          ${item.time ? `<span class="schedule-date">${escapeHtml(item.time)}</span>` : '<span class="schedule-date muted">종일</span>'}
-          <div class="schedule-body">
-            <b>${escapeHtml(item.title)}</b>
-            ${item.memo ? `<small>${escapeHtml(item.memo)}</small>` : ''}
-          </div>
-          <button type="button" class="schedule-more" data-row-menu title="수정·삭제">${icon('more', 14)}</button>
-        </div>`).join('')}
-    </div>`).join('');
-}
+// 날짜별로 묶은 모양은 views.js 가 만든다.
+const renderScheduleGroups = (rows) => VIEWS.scheduleGroups(rows);
 
 function scheduleDayTitle(dateKey) {
   const parts = String(dateKey || '').split('-').map(Number);
@@ -1770,17 +1721,7 @@ function paintShortcutNotice() {
 function renderShortcuts() {
   paintShortcutNotice();
   const list = sortedShortcuts();
-  $('#shortcutGrid').innerHTML = list.map(item => `
-    <div class="shortcut" data-shortcut="${item.id}" draggable="true">
-      <a href="${escapeHtml(shortcutHref(item.url))}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(item.name)}">
-        <span class="shortcut-thumb">${item.image
-          ? thumbImage(item.image)
-          : `<span class="shortcut-badge">${escapeHtml(shortcutBadge(item))}</span>`}</span>
-        <b>${escapeHtml(item.name)}</b>
-      </a>
-      <button type="button" class="shortcut-more" data-row-menu data-shortcut-edit title="수정·삭제">${icon('more', 14)}</button>
-    </div>`).join('') + `
-    <button type="button" class="shortcut add" id="shortcutAdd">${icon('plus', 18)}<b>사이트 추가</b></button>`;
+  $('#shortcutGrid').innerHTML = VIEWS.shortcutGrid(list);   // 카드 모양은 views.js
 
   $('#shortcutGrid').querySelectorAll('[data-shortcut]').forEach(node => {
     // 팝업 차단을 피하려면 클릭 이벤트 안에서 바로 window.open 을 불러야 한다.
@@ -1985,8 +1926,8 @@ $('#resetBackup').addEventListener('click', () => {
 // 이 컴퓨터 사본만 지운다. 클라우드 자료는 그대로라 새로고침하면 다시 내려온다.
 $('#resetLocal').addEventListener('click', () => {
   if (!confirm('이 컴퓨터에 저장된 사본을 지웁니다.\n클라우드 자료는 그대로 남고, 다시 내려받습니다.\n진행할까요?')) return;
-  ['knowledge-messenger-data', 'knowledge-todos', 'knowledge-memories', 'knowledge-account-meta',
-   'knowledge-vault-data', 'knowledge-sync-pending', SHORTCUT_STORE.STORE_KEY, 'knowledge-schedule'].forEach(key => localStorage.removeItem(key));
+  // 자료 열쇠 목록은 store.js 한 곳에만 있다. 금고와 동기화 표시만 여기서 덧붙인다.
+  STORE.clearKeys(['knowledge-vault-data', 'knowledge-sync-pending']);
   location.reload();
 });
 
@@ -2135,7 +2076,7 @@ $('#vaultForm').addEventListener('submit', async e => {
     const id = crypto.randomUUID();
     accountMeta.unshift(newEntry({ id, service: $('#accountService').value.trim(), user: $('#accountId').value.trim() }));
     vaultSecrets[id] = $('#accountPassword').value;
-    localStorage.setItem('knowledge-account-meta', JSON.stringify(accountMeta));
+    STORE.writeList('accountMeta', accountMeta);
     await persistVault(); queueCloudSave(); renderLibrary(); closeVault(); showToast('계정 암호화 저장됨');
   } catch { showToast('계정 저장 확인'); }
 });
@@ -2155,7 +2096,7 @@ async function deleteAccount(id) {
   if (!confirm('계정 삭제?')) return;
   const account = accountMeta.find(x => x.id === id);
   if (account) { account.deleted = true; touch(account); }
-  localStorage.setItem('knowledge-account-meta', JSON.stringify(accountMeta));
+  STORE.writeList('accountMeta', accountMeta);
   if (vaultKey) { delete vaultSecrets[id]; await persistVault(); }
   queueCloudSave();
   renderLibrary(); showToast('계정 삭제됨');
@@ -2504,13 +2445,14 @@ function createKnowledge(title, answer, options = {}) {
 function saveLocalState() {
   markSearchIndexDirty();   // 자료가 바뀌면 검색 목록도 다시 만든다
   sortIntoCollections();
-  localStorage.setItem('knowledge-messenger-data', JSON.stringify(knowledge));
-  localStorage.setItem('knowledge-todos', JSON.stringify(todos));
-  localStorage.setItem('knowledge-memories', JSON.stringify(memories));
-  localStorage.setItem('knowledge-account-meta', JSON.stringify(accountMeta));
-  SHORTCUT_STORE.write(shortcuts);
-  localStorage.setItem('knowledge-schedule', JSON.stringify(schedule));
+  STORE.writeAll({ knowledge, todos, memories, accountMeta, shortcuts, schedule });
 }
+
+// views.js 는 자료만 받고 잔심부름은 못 한다. 필요한 것들을 여기서 건네준다.
+VIEWS.setup({
+  escapeHtml, icon, todoUrgency, todoDateState, todoDoneShort, todoDoneLabel,
+  scheduleDayTitle, scheduleBadge, shortcutHref, shortcutBadge, thumbImage
+});
 
 function renderAll() {
   renderSideNav();
