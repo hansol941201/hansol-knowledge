@@ -138,14 +138,16 @@ await m.goto(base+'/index.html');
 await m.waitForFunction(()=>document.querySelector('#syncState')?.dataset.state==='live',null,{timeout:10000});
 await m.waitForTimeout(600);
 const mobile = await m.evaluate(()=>{
+  const memo=document.querySelector('#memoPanel').getBoundingClientRect();
   const todo=document.querySelector('#todayPanel').getBoundingClientRect();
   const sched=document.querySelector('#schedulePanel').getBoundingClientRect();
   const cards=[...document.querySelectorAll('#todayPanel .todo-line')].map(c=>c.getBoundingClientRect());
-  return { stacked: sched.top >= todo.bottom - 2, sameWidth: Math.abs(todo.width-sched.width)<2,
+  return { 차례: memo.bottom <= todo.top + 2 && todo.bottom <= sched.top + 2,
+           sameWidth: Math.abs(todo.width-sched.width)<2 && Math.abs(memo.width-todo.width)<2,
            perRow: cards.filter(c=>Math.abs(c.top-cards[0].top)<2).length,
            overflowX: document.documentElement.scrollWidth-document.documentElement.clientWidth };
 });
-ok('모바일은 할 일 위 · 일정 아래', mobile.stacked && mobile.sameWidth, JSON.stringify(mobile));
+ok('모바일 차례: 메모 → 할 일 → 일정', mobile.차례 && mobile.sameWidth, JSON.stringify(mobile));
 ok('모바일 카드 한 줄에 한 장', mobile.perRow===1, `${mobile.perRow}장`);
 ok('모바일 가로 스크롤 없음', mobile.overflowX===0, `${mobile.overflowX}px`);
 
@@ -154,14 +156,17 @@ await m.setViewportSize({ width: 1100, height: 900 });
 await m.waitForTimeout(400);
 const tablet = await m.evaluate(()=>{
   const memo=document.querySelector('#memoPanel').getBoundingClientRect();
-  const side=document.querySelector('.dash-side').getBoundingClientRect();
+  const todo=document.querySelector('#todayPanel').getBoundingClientRect();
+  const sched=document.querySelector('#schedulePanel').getBoundingClientRect();
   const rows=[...document.querySelectorAll('#todayPanel .todo-line')].map(c=>c.getBoundingClientRect());
-  return { ratio: Math.round(memo.width/(memo.width+side.width)*100),
-           sideBySide: Math.abs(memo.top-side.top)<2 && memo.left < side.left,
+  return { ratio: Math.round(todo.width/(todo.width+memo.width)*100),
+           sideBySide: Math.abs(memo.top-todo.top)<2 && todo.left < memo.left,
+           일정도오른쪽: sched.left >= todo.right - 2 && sched.top >= memo.bottom - 2,
            perRow: rows.filter(c=>Math.abs(c.top-rows[0].top)<2).length };
 });
 ok('태블릿에서도 두 단 유지', tablet.sideBySide, JSON.stringify(tablet));
-ok('태블릿 메모 쪽이 조금 더 넓다(52~58%)', tablet.ratio>=52 && tablet.ratio<=58, `${tablet.ratio}%`);
+ok('태블릿 할 일 쪽이 더 넓다(52~58%)', tablet.ratio>=52 && tablet.ratio<=58, `${tablet.ratio}%`);
+ok('태블릿에서도 일정은 메모 아래 오른쪽', tablet.일정도오른쪽, JSON.stringify(tablet));
 ok('할 일은 한 줄에 하나', tablet.perRow===1, `${tablet.perRow}장`);
 
 ok('끝까지 오류 없음', errors.length===0, errors.join(' | '));

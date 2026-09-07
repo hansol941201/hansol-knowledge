@@ -36,22 +36,22 @@ ok('모아 보기 숨김', !(await page.isVisible('#knowledgeBlock')));
 ok('카테고리 버튼 숨김', !(await page.isVisible('#pageCategories')));
 ok('AI 인사이트 제거', (await page.$$('.ai-insight')).length===0 && !(await page.content()).includes('AI 인사이트'));
 const cols = await page.evaluate(()=>{
-  const a=document.querySelector('#memoPanel').getBoundingClientRect();
-  const s=document.querySelector('.dash-side').getBoundingClientRect();
+  const a=document.querySelector('#todayPanel').getBoundingClientRect();
+  const s=document.querySelector('#memoPanel').getBoundingClientRect();
   const scroll=document.querySelector('.main-scroll').getBoundingClientRect();
   const pad=parseFloat(getComputedStyle(document.querySelector('.main-scroll')).paddingLeft);
   return { todoW:Math.round(a.width), schedW:Math.round(s.width), gap:Math.round(s.left-a.right),
            sideBySide: Math.abs(a.top-s.top)<2 && a.left < s.left,
            ratio: Math.round(a.width/(a.width+s.width)*100), fullWidth: Math.round(scroll.width - pad*2) };
 });
-// 시안대로 왼쪽은 통화·메모 칸, 오른쪽은 할 일 + 일정
-ok('메모 왼쪽 · 할 일/일정 오른쪽 두 단', cols.sideBySide, JSON.stringify(cols));
-ok('왼쪽이 더 넓다(55~62%)', cols.ratio>=55 && cols.ratio<=62, `${cols.ratio}%`);
+// 왼쪽 넓은 칸에 할 일, 오른쪽 위에 통화·메모, 그 아래 일정
+ok('할 일 왼쪽 · 메모/일정 오른쪽 두 단', cols.sideBySide, JSON.stringify(cols));
+ok('왼쪽 약 58% : 오른쪽 약 42%', cols.ratio>=55 && cols.ratio<=61, `${cols.ratio}%`);
 ok('두 단 간격 16~24px', cols.gap>=16 && cols.gap<=24, `${cols.gap}px`);
-ok('오른쪽은 할 일 위 · 일정 아래', await page.evaluate(()=>{
-  const t=document.querySelector('#todayPanel').getBoundingClientRect();
+ok('오른쪽은 메모 위 · 일정 아래', await page.evaluate(()=>{
+  const m=document.querySelector('#memoPanel').getBoundingClientRect();
   const s=document.querySelector('#schedulePanel').getBoundingClientRect();
-  return s.top >= t.bottom - 2; }));
+  return s.top >= m.bottom - 2; }));
 
 // 일정 추가 → 목록 표시
 const iso = (offset) => { const d=new Date(); d.setDate(d.getDate()+offset); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };

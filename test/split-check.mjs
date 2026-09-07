@@ -21,8 +21,12 @@ ok('모든 자료의 저장·불러오기가 store.js 에 있음',
 ok('store.js 에는 디자인도 화면 코드도 없음',
    !/#[0-9A-Fa-f]{6}|px\b|querySelector|innerHTML/.test(noComments(store)));
 // 화면 구성 — views.js
-ok('할 일·일정·즐겨찾기 화면 구성이 views.js 에 있음',
-   /todoActiveRow/.test(views) && /scheduleGroups/.test(views) && /shortcutGrid/.test(views));
+ok('메모·할 일·일정·즐겨찾기 화면 구성이 views.js 에 있음',
+   /memoPanel/.test(views) && /todoSimpleList/.test(views)
+   && /scheduleGroups/.test(views) && /shortcutGrid/.test(views));
+ok('없앤 급함·여유 구역 코드가 남아 있지 않음',
+   !/todoActiveRow|TODO_GROUPS|todoGroupSections/.test(views + app)
+   && !/\.todo-item|\.todo-group|urgency-pick/.test(css));
 ok('views.js 는 자료를 직접 읽거나 쓰지 않음',
    !/localStorage/.test(views));
 ok('views.js 는 클릭 처리를 하지 않음',
@@ -37,7 +41,7 @@ ok('shortcuts.js 에는 디자인(색·픽셀)이 없음',
    !/#[0-9A-Fa-f]{6}|px\b|grid-template|border-radius/.test(svc.replace(/\/\/.*$/gm,'')));
 ok('app.js 는 즐겨찾기를 직접 읽고 쓰지 않음',
    !/localStorage\.(get|set)Item\('knowledge-shortcuts'/.test(app.replace(/const SHORTCUT_STORE[\s\S]*?\n};\n/,'')));
-ok('레이아웃·색은 styles.css 에 있음', /\.todo-group-list\s*{/.test(css) && /\.todo-item\.late/.test(css));
+ok('레이아웃·색은 styles.css 에 있음', /\.todo-list\s*{/.test(css) && /\.todo-line\s*{/.test(css) && /\.memo-add\s*{/.test(css));
 ok('index.html 이 네 파일을 app.js 보다 먼저 읽음', (()=>{
   const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
   const at = html.indexOf('app.js?v=');
@@ -71,8 +75,8 @@ await page.waitForTimeout(600);
 ok('네 파일이 실제로 실린다', await page.evaluate(()=>
   Boolean(window.HANSOL_SHORTCUTS) && Boolean(window.HANSOL_STORE) && Boolean(window.HANSOL_VIEWS)));
 ok('화면 구성이 views.js 것으로 그려진다', await page.evaluate(()=>{
-  const made = window.HANSOL_VIEWS.todoActiveRow({ id:'t1', text:'검사', date:'' });
-  return made.includes('todo-item') && made.includes('todo-badge') && made.includes('검사');
+  const made = window.HANSOL_VIEWS.todoSimpleList([{ id:'t1', text:'검사', date:'' }]);
+  return made.includes('todo-line') && made.includes('todo-line-text') && made.includes('검사');
 }));
 ok('app.js 가 대체 동작이 아니라 shortcuts.js 를 쓴다',
    await page.evaluate(()=>window.HANSOL_SHORTCUTS.STORE_KEY==='knowledge-shortcuts' && typeof window.HANSOL_SHORTCUTS.open==='function'));

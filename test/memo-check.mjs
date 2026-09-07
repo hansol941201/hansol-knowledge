@@ -28,8 +28,8 @@ await page.waitForTimeout(600);
 ok('자바스크립트 오류 없음', errors.length===0, errors.join(' | '));
 
 // 1. 화면 구성
-ok('왼쪽에 통화 & 빠른 메모 칸', await page.isVisible('#memoPanel #memoQuick') && await page.isVisible('#memoNote'));
-ok('안내 문구', (await page.textContent('#memoPanel')).includes('엔터(Enter)를 누르면 오른쪽 할 일로 자동 추가됩니다'));
+ok('통화 & 빠른 메모 칸이 있음', await page.isVisible('#memoPanel #memoQuick') && await page.isVisible('#memoNote'));
+ok('안내 문구', (await page.textContent('#memoPanel')).includes('엔터(Enter)를 누르면 왼쪽 할 일 목록에 자동 추가됩니다'));
 ok('사진/파일 첨부 · 줄바꿈 안내', (await page.textContent('#memoPanel')).includes('사진/파일 첨부')
   && (await page.textContent('#memoPanel')).includes('Shift + Enter'));
 ok('오른쪽에 할 일 목록 · 개수 배지', (await page.textContent('#todayPanel')).includes('할 일 목록')
@@ -38,12 +38,40 @@ const side = await page.evaluate(()=>{
   const memo=document.querySelector('#memoPanel').getBoundingClientRect();
   const todo=document.querySelector('#todayPanel').getBoundingClientRect();
   const sch=document.querySelector('#schedulePanel').getBoundingClientRect();
-  return { 메모왼쪽: memo.right <= todo.left + 2, 일정이할일아래: sch.top >= todo.bottom - 2 };
+  return { 할일왼쪽: todo.right <= memo.left + 2,
+           메모오른쪽위: Math.abs(memo.top - todo.top) < 4,
+           일정이메모아래: sch.top >= memo.bottom - 2,
+           일정도오른쪽: sch.left >= todo.right - 2,
+           칸사이간격: Math.round(sch.top - memo.bottom) };
 });
-ok('메모가 왼쪽 · 할 일이 오른쪽', side.메모왼쪽, JSON.stringify(side));
-ok('일정은 할 일 아래', side.일정이할일아래, JSON.stringify(side));
+ok('할 일이 왼쪽 넓은 칸', side.할일왼쪽, JSON.stringify(side));
+ok('통화 & 빠른 메모가 오른쪽 위', side.메모오른쪽위 && side.일정도오른쪽, JSON.stringify(side));
+ok('일정은 메모 바로 아래', side.일정이메모아래, JSON.stringify(side));
+ok('오른쪽 카드 사이 간격 16~24px', side.칸사이간격>=16 && side.칸사이간격<=24, `${side.칸사이간격}px`);
+// 왼쪽이 길어져도 오른쪽 카드를 억지로 늘리지 않는다
+ok('일정 카드는 내용 높이만 차지', await page.evaluate(()=>{
+  const sch=document.querySelector('#schedulePanel').getBoundingClientRect();
+  const todo=document.querySelector('#todayPanel').getBoundingClientRect();
+  return sch.height < todo.height; }));
 ok('헤더에 이름표와 프로필', (await page.textContent('.brand-mark')).includes('한솔 지식')
   && (await page.textContent('.brand-avatar'))==='H');
+
+// 오른쪽 칸에 맞춘 메모 칸 모양
+const memoShape = await page.evaluate(()=>{
+  const head=getComputedStyle(document.querySelector('.memo-head'));
+  const add=getComputedStyle(document.querySelector('.memo-add'));
+  const input=document.querySelector('#memoQuick').getBoundingClientRect();
+  const btn=document.querySelector('#memoQuickAdd').getBoundingClientRect();
+  const row=document.querySelector('.memo-add').getBoundingClientRect();
+  return { 머리말세로: head.flexDirection==='column', 입력칸방향: add.flexDirection,
+           단추오른쪽끝: Math.abs(btn.right - (row.right - parseFloat(add.paddingRight))) < 3,
+           입력칸이남은너비: input.width > row.width * 0.5,
+           메모높이: Math.round(document.querySelector('#memoNote').getBoundingClientRect().height) };
+});
+ok('제목 아래에 안내 문구(겹치지 않음)', memoShape.머리말세로, JSON.stringify(memoShape));
+ok('입력칸은 남은 너비 · 추가 단추는 오른쪽 고정',
+   memoShape.입력칸방향==='row' && memoShape.단추오른쪽끝 && memoShape.입력칸이남은너비, JSON.stringify(memoShape));
+ok('상세 메모 높이 180~240px', memoShape.메모높이>=180 && memoShape.메모높이<=240, `${memoShape.메모높이}px`);
 
 // 2. 엔터로 할 일 등록
 await page.fill('#memoQuick','엔터로 넣은 할 일');
@@ -97,6 +125,28 @@ await page.evaluate(()=>[...document.querySelectorAll('#todayPanel .todo-line')]
 await page.waitForTimeout(400);
 ok('✕ 로 지워짐', !(await page.textContent('#todayPanel')).includes('엔터로 넣은 할 일'));
 ok('다른 할 일은 그대로', (await page.textContent('#todayPanel')).includes('미리 있던 할 일'));
+// 좁은 화면: 한 단으로 쌓이고 차례는 메모 → 할 일 → 일정, 입력칸은 위아래
+await page.setViewportSize({width:390,height:844});
+await page.waitForTimeout(500);
+const narrow = await page.evaluate(()=>{
+  const box = id => document.querySelector(id).getBoundingClientRect();
+  const m=box('#memoPanel'), t=box('#todayPanel'), s=box('#schedulePanel');
+  const title=document.querySelector('.todo-line-text');
+  const time=document.querySelector('.todo-line time');
+  return { 한단: Math.abs(m.left-t.left)<2 && Math.abs(t.left-s.left)<2,
+           차례: m.top < t.top && t.top < s.top,
+           입력칸방향: getComputedStyle(document.querySelector('.memo-add')).flexDirection,
+           제목날짜겹침: time ? title.getBoundingClientRect().right > time.getBoundingClientRect().left + 1 : false,
+           가로스크롤: Math.round(document.documentElement.scrollWidth - window.innerWidth),
+           메모높이: Math.round(document.querySelector('#memoNote').getBoundingClientRect().height) };
+});
+ok('모바일은 한 단', narrow.한단, JSON.stringify(narrow));
+ok('모바일 차례: 메모 → 할 일 → 일정', narrow.차례, JSON.stringify(narrow));
+ok('모바일에서는 입력칸과 추가 단추가 위아래', narrow.입력칸방향==='column', narrow.입력칸방향);
+ok('모바일에서 제목과 날짜가 겹치지 않음', !narrow.제목날짜겹침);
+ok('모바일 가로 스크롤 없음', narrow.가로스크롤<=0, `${narrow.가로스크롤}px`);
+ok('모바일 상세 메모도 180~240px', narrow.메모높이>=180 && narrow.메모높이<=240, `${narrow.메모높이}px`);
+
 ok('끝까지 오류 없음', errors.length===0, errors.join(' | '));
 
 await b.close(); server.close();

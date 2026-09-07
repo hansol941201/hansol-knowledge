@@ -60,12 +60,9 @@ const STORE = window.HANSOL_STORE || (() => {
 const VIEWS = window.HANSOL_VIEWS || {
   // views.js 를 못 읽었을 때의 최소 화면 — 자료는 그대로 보이게만 한다.
   setup: () => {},
-  TODO_GROUPS: [{ key: 'urgent', name: '오늘 당장 급한 일' }, { key: 'easy', name: '여유 있게 해야 할 일' }],
-  TODO_STATE_NAMES: { late: '지연', today: '오늘', future: '예정', none: '날짜 없음' },
-  todoGroupSections: (list) => `<div class="todo-groups">${list.map(t => `<div class="todo-item" data-todo-id="${t.id}">${escapeHtml(t.text)}</div>`).join('')}</div>`,
-  todoActiveRow: (t) => `<div class="todo-item" data-todo-id="${t.id}">${escapeHtml(t.text)}</div>`,
-  todoDoneRow: (t) => `<div class="todo-item done" data-todo-id="${t.id}">${escapeHtml(t.text)}</div>`,
-  todoDoneList: (list) => `<div class="todo-group-list">${list.map(t => `<div class="todo-item done" data-todo-id="${t.id}">${escapeHtml(t.text)}</div>`).join('')}</div>`,
+  memoPanel: () => '<textarea id="memoNote" rows="8"></textarea>',
+  todoSimpleList: (list) => `<ul class="todo-list">${list.map(t => `<li class="todo-line" data-todo-id="${t.id}"><label class="todo-line-check"><input type="checkbox"><span class="todo-box"></span></label><span class="todo-line-text">${escapeHtml(t.text)}</span></li>`).join('')}</ul>`,
+  todoDoneSimpleList: (list) => `<ul class="todo-list">${list.map(t => `<li class="todo-line done" data-todo-id="${t.id}"><label class="todo-line-check"><input type="checkbox" checked><span class="todo-box done"></span></label><span class="todo-line-text">${escapeHtml(t.text)}</span></li>`).join('')}</ul>`,
   scheduleGroups: (rows) => rows.map(r => `<div class="schedule-row" data-schedule="${r.id}">${escapeHtml(r.title)}<button type="button" class="schedule-more" data-row-menu></button></div>`).join(''),
   shortcutGrid: (list) => list.map(item => `<div class="shortcut" data-shortcut="${item.id}"><a href="${escapeHtml(shortcutHref(item.url))}">${escapeHtml(item.name)}</a><button type="button" class="shortcut-more" data-row-menu data-shortcut-edit></button></div>`).join('')
     + `<button type="button" class="shortcut add" id="shortcutAdd">사이트 추가</button>`
@@ -517,14 +514,8 @@ function activeTodos() {
       return savedMillis(a) - savedMillis(b);     // 같은 날짜면 먼저 적은 것부터
     });
 }
-// 업무 구분 — 지금 화면에는 급함·여유 구역이 없다(시안대로 한 줄 목록).
-// 예전에 저장해 둔 값을 지우지 않으려고 읽는 쪽만 남겨 둔다.
-function todoUrgency(todo) {
-  if (todo && (todo.urgency === 'urgent' || todo.urgency === 'easy')) return todo.urgency;
-  const date = String((todo && todo.date) || '').trim();
-  if (!date) return 'easy';
-  return date <= todayKey() ? 'urgent' : 'easy';
-}
+// 급함·여유 구분은 화면에서 없앴다. 저장돼 있던 urgency 값은 지우지 않고
+// 그대로 두지만(다른 기기와 동기화될 수 있다), 화면에서는 더 쓰지 않는다.
 // 오늘 / 지연 / 앞으로 / 날짜 없음 — 카드 왼쪽 선과 배지 색을 고르는 기준
 function todoDateState(todo) {
   const date = String(todo.date || '').trim();
@@ -537,13 +528,6 @@ function doneTodos() {
   return alive(todos).filter(isTodoEntry).filter(todo => todo.done)
     .sort((a, b) => String(b.doneAt || b.updatedAt || '').localeCompare(String(a.doneAt || a.updatedAt || '')));
 }
-
-// 카드 모양은 views.js 가 만든다. 여기서는 어떤 자료를 넘길지만 정한다.
-const TODO_GROUPS = VIEWS.TODO_GROUPS;
-const TODO_STATE_NAMES = VIEWS.TODO_STATE_NAMES;
-const todoGroupSections = (list) => VIEWS.todoGroupSections(list);
-const todoActiveRow = (todo) => VIEWS.todoActiveRow(todo);
-const todoDoneRow = (todo) => VIEWS.todoDoneRow(todo);
 
 function renderTodos() {
   const panel = $('#todayPanel');
@@ -2496,7 +2480,7 @@ function saveLocalState() {
 
 // views.js 는 자료만 받고 잔심부름은 못 한다. 필요한 것들을 여기서 건네준다.
 VIEWS.setup({
-  escapeHtml, icon, todoUrgency, todoDateState, todoDoneShort, todoDoneLabel,
+  escapeHtml, icon, todoDateState, todoDoneShort, todoDoneLabel,
   scheduleDayTitle, scheduleBadge, shortcutHref, shortcutBadge, thumbImage
 });
 
