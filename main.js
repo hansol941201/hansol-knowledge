@@ -19,7 +19,10 @@ if (!app.requestSingleInstanceLock()) {
 
 function loadKnowledgeWindow() {
   usingBundledCopy = false;
-  win.loadURL(`${SITE_URL}?overlay=1`).catch(loadBundledCopy);
+  // 앱 안에는 서비스 워커가 없으므로(overlay=1 이면 등록하지 않는다) 여기서 직접
+  // "저장본 쓰지 말라"고 알려 준다. 사이트를 고쳤는데 예전 화면이 남는 일을 막는다.
+  win.loadURL(`${SITE_URL}?overlay=1`, { extraHeaders: 'pragma: no-cache\ncache-control: no-cache\n' })
+    .catch(loadBundledCopy);
 }
 function loadBundledCopy() {
   if (usingBundledCopy || !win) return;
