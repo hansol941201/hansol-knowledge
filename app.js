@@ -44,13 +44,28 @@ const seed = [
   { id: `seed-특허번호차이`, title: '특허번호 차이', answer: '내용 확인', aliases: ['특허 번호', '특허번호'] }
 ];
 
+// 즐겨찾기 자료·창 열기는 shortcuts.js 가 맡는다. 그 파일을 못 불러온 경우에도
+// 나머지 화면이 죽지 않도록 최소한의 대체 동작을 준비해 둔다.
+const SHORTCUT_STORE = window.HANSOL_SHORTCUTS || {
+  STORE_KEY: 'knowledge-shortcuts',
+  read: () => { try { return JSON.parse(localStorage.getItem('knowledge-shortcuts') || '[]') || []; } catch { return []; } },
+  write: (list) => { try { localStorage.setItem('knowledge-shortcuts', JSON.stringify(list || [])); } catch { /* 저장 공간이 꽉 찬 경우 */ } },
+  href: (url) => String(url || '').trim(),
+  host: (url) => String(url || '').replace(/^https?:\/\//i, '').split('/')[0],
+  canOpenSidePopup: () => false,
+  windowName: (id) => `favorite-${id}`,
+  open: (item) => window.open(String((item && item.url) || ''), '_blank', 'noopener,noreferrer'),
+  popups: new Map()
+};
+
 let knowledge = JSON.parse(localStorage.getItem('knowledge-messenger-data') || 'null') || [];
 knowledge = knowledge.filter(item => !(item.title === '통신도장' && item.answer === '통신도장'));
 let todos = JSON.parse(localStorage.getItem('knowledge-todos') || '[]');
 let memories = JSON.parse(localStorage.getItem('knowledge-memories') || '[]');
 let accountMeta = JSON.parse(localStorage.getItem('knowledge-account-meta') || '[]');
 let schedule = JSON.parse(localStorage.getItem('knowledge-schedule') || '[]');
-let shortcuts = JSON.parse(localStorage.getItem('knowledge-shortcuts') || '[]');
+// 즐겨찾기 자료는 shortcuts.js 가 맡는다(디자인 코드와 분리해 두었다).
+let shortcuts = SHORTCUT_STORE.read();
 const partners = Array.isArray(window.PARTNERS) ? window.PARTNERS : [];
 const patents = Array.isArray(window.PATENTS) ? window.PATENTS : [];
 let vaultKey = null;
@@ -1691,15 +1706,8 @@ function seedShortcuts() {
   if (changed) { saveLocalState(); queueCloudSave(); }
 }
 
-function shortcutHref(url) {
-  const raw = String(url || '').trim();
-  if (!raw) return '';
-  return /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
-}
-function shortcutHost(url) {
-  try { return new URL(shortcutHref(url)).hostname.replace(/^www\./, ''); }
-  catch { return String(url || '').replace(/^https?:\/\//i, '').split('/')[0]; }
-}
+const shortcutHref = (url) => SHORTCUT_STORE.href(url);
+const shortcutHost = (url) => SHORTCUT_STORE.host(url);
 // 뒤에는 같은 그림을 흐리게 깔아 이미지 영역을 빈틈없이 채우고,
 // 앞에는 원본을 잘림 없이(contain) 그대로 보여 준다.
 function thumbImage(src) {
@@ -1708,50 +1716,17 @@ function thumbImage(src) {
 }
 
 // ── 즐겨찾기 열기 ───────────────────────────────────────────
-// 카드를 누르면 화면 오른쪽 절반 크기의 창으로 연다(대시보드 창은 그대로 둔다).
-// 즐겨찾기마다 창 이름을 다르게 줘서 각각 따로 열리고, 같은 카드를 다시 누르면
-// 이미 열린 창을 앞으로 가져온다.
-const shortcutPopups = new Map();          // 즐겨찾기 id → 열어 둔 창
-const popupWindowName = (id) => `favorite-${String(id).replace(/[^A-Za-z0-9_-]/g, '')}`;
-
-// 모바일·좁은 화면·데스크톱 오버레이에서는 팝업 대신 새 탭으로 연다.
-function canOpenSidePopup() {
-  if (overlayMode || !window.screen) return false;
-  const coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
-  const width = window.screen.availWidth || window.innerWidth || 0;
-  return !coarse && width >= 900;
-}
+// 창 크기·위치를 정하는 규칙은 shortcuts.js 에 있다.
+// 여기서는 팝업이 막혔을 때 띄울 안내 문구만 넘겨 준다.
+const shortcutPopups = SHORTCUT_STORE.popups;
+const popupWindowName = (id) => SHORTCUT_STORE.windowName(id);
+const canOpenSidePopup = () => SHORTCUT_STORE.canOpenSidePopup(overlayMode);
 
 function openShortcutSite(item) {
-  const url = shortcutHref(item && item.url);
-  if (!url) return;
-  if (!canOpenSidePopup()) { window.open(url, '_blank', 'noopener,noreferrer'); return; }
-
-  // 이미 열어 둔 창이 있으면 새로 띄우지 않고 앞으로 가져온다.
-  const opened = shortcutPopups.get(item.id);
-  if (opened && !opened.closed) {
-    try { opened.focus(); return; } catch { /* 창을 잃었으면 아래에서 다시 연다 */ }
-  }
-
-  const view = window.screen;
-  const availWidth = view.availWidth || window.innerWidth;
-  const availHeight = view.availHeight || window.innerHeight;   // 작업표시줄을 뺀 높이
-  const availLeft = Number.isFinite(view.availLeft) ? view.availLeft : 0;
-  const availTop = Number.isFinite(view.availTop) ? view.availTop : 0;
-  const width = Math.floor(availWidth / 2);
-  const height = availHeight;
-  const left = availLeft + availWidth - width;                  // 오른쪽 끝에 붙인다
-  const top = availTop;
-
-  const popup = window.open(url, popupWindowName(item.id),
-    `popup=yes,width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`);
-
-  if (!popup || popup.closed) {
-    showToast('브라우저 설정에서 이 사이트의 팝업을 허용해주세요', 4000);
-    return;
-  }
-  shortcutPopups.set(item.id, popup);
-  try { popup.focus(); } catch { /* 포커스는 실패해도 창은 열려 있다 */ }
+  SHORTCUT_STORE.open(item, {
+    overlayMode,
+    onBlocked: () => showToast('브라우저 설정에서 이 사이트의 팝업을 허용해주세요', 4000)
+  });
 }
 
 function shortcutBadge(item) {
@@ -2011,7 +1986,7 @@ $('#resetBackup').addEventListener('click', () => {
 $('#resetLocal').addEventListener('click', () => {
   if (!confirm('이 컴퓨터에 저장된 사본을 지웁니다.\n클라우드 자료는 그대로 남고, 다시 내려받습니다.\n진행할까요?')) return;
   ['knowledge-messenger-data', 'knowledge-todos', 'knowledge-memories', 'knowledge-account-meta',
-   'knowledge-vault-data', 'knowledge-sync-pending', 'knowledge-shortcuts', 'knowledge-schedule'].forEach(key => localStorage.removeItem(key));
+   'knowledge-vault-data', 'knowledge-sync-pending', SHORTCUT_STORE.STORE_KEY, 'knowledge-schedule'].forEach(key => localStorage.removeItem(key));
   location.reload();
 });
 
@@ -2533,7 +2508,7 @@ function saveLocalState() {
   localStorage.setItem('knowledge-todos', JSON.stringify(todos));
   localStorage.setItem('knowledge-memories', JSON.stringify(memories));
   localStorage.setItem('knowledge-account-meta', JSON.stringify(accountMeta));
-  localStorage.setItem('knowledge-shortcuts', JSON.stringify(shortcuts));
+  SHORTCUT_STORE.write(shortcuts);
   localStorage.setItem('knowledge-schedule', JSON.stringify(schedule));
 }
 

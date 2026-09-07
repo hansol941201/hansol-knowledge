@@ -125,7 +125,7 @@ const design = await page.evaluate(()=>{
            h:parseFloat(getComputedStyle(card).height),
            tabs:[...document.querySelectorAll('.todo-tab span')].map(x=>x.textContent) };
 });
-ok('3열 배치·카드 높이 74px 유지', design.cols===3 && design.h===74, JSON.stringify(design));
+ok('3열 배치·조밀한 카드 높이 유지', design.cols===3 && design.h<=80, JSON.stringify(design));
 ok('할 일·완료 개수 표시 유지', design.tabs.length===2, design.tabs.join(' / '));
 
 ok('끝까지 오류 없음', errors.length===0, errors.join(' | '));

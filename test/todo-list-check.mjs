@@ -102,7 +102,8 @@ const card = await page.$eval('#todayPanel .todo-item', n=>{
            radius:parseFloat(s.borderTopLeftRadius), pad:parseFloat(s.paddingTop),
            bg:s.backgroundColor, shadow:s.boxShadow };
 });
-ok('카드 높이 74px 고정(조밀)', card.h===74 && card.minH===74 && card.maxH===74, JSON.stringify(card));
+ok('고정 높이를 두지 않음(최소 높이만)', card.maxH===0 || Number.isNaN(card.maxH), `max-height ${card.maxH}`);
+ok('카드가 조밀함(80px 이하)', card.h<=80, `${card.h}px`);
 const sizes = await page.$$eval('#todayPanel .todo-item', n=>({
   h:[...new Set(n.map(x=>Math.round(x.getBoundingClientRect().height)))],
   w:[...new Set(n.map(x=>Math.round(x.getBoundingClientRect().width)))] }));

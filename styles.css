@@ -242,7 +242,7 @@ svg { display: block; flex: none; }
 .todo-group-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; align-items: stretch; }
 .todo-item {
   position: relative;   /* 숨긴 체크박스가 카드 밖으로 빠져나가 페이지를 늘리지 않도록 */
-  width: 100%; min-width: 0; height: 74px; min-height: 74px; max-height: 74px;   /* 조밀하게 — 제목이 길어도 크기가 그대로 */
+  width: 100%; min-width: 0; min-height: 62px;   /* 조밀하게 — 고정 높이는 두지 않고 한 줄에 놓인 카드끼리만 키를 맞춘다 */
   display: flex; flex-direction: column; justify-content: space-between; gap: 5px; padding: 8px 10px;
   border: 1px solid var(--line); border-left: 3px solid var(--line);
   border-radius: 6px; background: #fff; box-shadow: 0 1px 1px rgba(24, 20, 38, .03);
@@ -319,7 +319,6 @@ svg { display: block; flex: none; }
 /* ── 일정 (월 달력) ─────────────────────────────────────────── */
 /* 왼쪽 70% 할 일 · 오른쪽 30% 일정 */
 .dash-cols { display: grid; grid-template-columns: minmax(0, 7fr) minmax(300px, 3fr); gap: 16px; align-items: stretch; }
-.todo-panel, .schedule-panel { min-height: 520px; }
 .schedule-panel { grid-template-rows: auto minmax(0, 1fr); align-content: stretch; }
 .dash-cols > .today-panel { align-content: start; }
 /* 태블릿: 할 일 65% · 일정 35%, 카드는 한 줄에 두 장 */
@@ -330,7 +329,6 @@ svg { display: block; flex: none; }
 /* 모바일: 두 단을 풀고 할 일 위 · 일정 아래 */
 @media (max-width: 900px) {
   .dash-cols { grid-template-columns: minmax(0, 1fr); }
-  .todo-panel, .schedule-panel { min-height: 0; }
   .schedule-list { max-height: 360px; }
 }
 .cal-tools { display: flex; align-items: center; gap: 5px; }
