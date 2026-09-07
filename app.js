@@ -484,7 +484,7 @@ function todoUrgency(todo) {
   if (!date) return 'easy';
   return date <= todayKey() ? 'urgent' : 'easy';
 }
-// 오늘 / 지연 / 앞으로 / 날짜 없음 — 날짜 글씨 색을 고르는 기준
+// 오늘 / 지연 / 앞으로 / 날짜 없음 — 카드 왼쪽 선과 배지 색을 고르는 기준
 function todoDateState(todo) {
   const date = String(todo.date || '').trim();
   if (!date) return 'none';
@@ -492,6 +492,8 @@ function todoDateState(todo) {
   if (date === today) return 'today';
   return date < today ? 'late' : 'future';
 }
+// 카드에 붙는 작은 상태 배지 — 지연(빨강) · 오늘(초록) · 예정(보라) · 날짜 없음(회색)
+const TODO_STATE_NAMES = { late: '지연', today: '오늘', future: '예정', none: '날짜 없음' };
 function doneTodos() {
   return alive(todos).filter(isTodoEntry).filter(todo => todo.done)
     .sort((a, b) => String(b.doneAt || b.updatedAt || '').localeCompare(String(a.doneAt || a.updatedAt || '')));
@@ -526,8 +528,8 @@ function todoActiveRow(todo) {
         <span class="todo-text" title="${escapeHtml(todo.text)}">${escapeHtml(todo.text)}</span>
       </span>
       <span class="todo-foot">
-        <b class="todo-badge ${kind}">${kind === 'urgent' ? '급함' : '여유'}</b>
-        <time class="${state}">${when}</time>
+        <b class="todo-badge ${state}">${TODO_STATE_NAMES[state]}</b>
+        ${state === 'none' ? '' : `<time class="${state}">${when}</time>`}
         <span class="todo-tools">
           <button type="button" class="todo-mini" data-todo-edit title="수정">${icon('pencil', 12)}</button>
           <button type="button" class="todo-remove" data-todo-delete title="삭제">${icon('more', 13)}</button>

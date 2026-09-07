@@ -55,22 +55,35 @@ ok('마감일이 빠른 순', dated.join('|')===[...dated].sort().join('|'), dat
 ok('날짜 없는 항목은 여유 구역에', await page.evaluate(()=>
   [...document.querySelectorAll('.todo-group.easy .todo-item')].some(c=>c.textContent.includes('날짜 없음'))));
 
-// 3. 상태 배지
-const first = await page.$eval('#todayPanel .todo-item', n=>({ cls:n.className, text:n.textContent.replace(/\s+/g,' ').trim() }));
-ok('급한 일 카드에 급함 배지', first.cls.includes('urgent') && first.text.includes('급함'), first.text.slice(0,30));
+// 3. 지연 · 오늘 · 예정 상태별 구분 (왼쪽 얇은 선 + 작은 배지)
 const rgb = s => (s.match(/\d+/g)||[0,0,0]).map(Number);
-const lateBg = await page.$eval('#todayPanel .todo-item.urgent', n=>getComputedStyle(n).backgroundColor);
-const plainBg = await page.$eval('#todayPanel .todo-item.easy', n=>getComputedStyle(n).backgroundColor);
-ok('급한 카드 배경은 빨갛지 않음(흰 배경)', rgb(lateBg)[0]===rgb(lateBg)[1] && rgb(lateBg)[1]===rgb(lateBg)[2], lateBg);
-const bars = await page.evaluate(()=>({
-  urgent: getComputedStyle(document.querySelector('#todayPanel .todo-item.urgent')).borderLeftColor,
-  easy: getComputedStyle(document.querySelector('#todayPanel .todo-item.easy')).borderLeftColor,
-  width: getComputedStyle(document.querySelector('#todayPanel .todo-item.urgent')).borderLeftWidth }));
-ok('급함은 왼쪽 빨간 선', rgb(bars.urgent)[0] > rgb(bars.urgent)[1] + 40, bars.urgent);
-ok('여유는 왼쪽 남색 선', rgb(bars.easy)[2] > rgb(bars.easy)[0] + 20, bars.easy);
+const badges = await page.$$eval('#todayPanel .todo-item', n=>n.map(x=>({
+  cls:x.className, badge:x.querySelector('.todo-badge')?.textContent.trim() || '' })));
+const badgeOf = state => (badges.find(b=>b.cls.includes(state))||{}).badge;
+ok('지연 카드에 지연 배지', badgeOf('late')==='지연', badgeOf('late'));
+ok('오늘 카드에 오늘 배지', badgeOf('today')==='오늘', badgeOf('today'));
+ok('예정 카드에 예정 배지', badgeOf('future')==='예정', badgeOf('future'));
+ok('날짜 없는 카드는 날짜 없음 배지', badgeOf('none')==='날짜 없음', badgeOf('none'));
+const lateBg = await page.$eval('#todayPanel .todo-item.late', n=>getComputedStyle(n).backgroundColor);
+ok('지연 카드 배경은 빨갛지 않음(흰 배경)', rgb(lateBg)[0]===rgb(lateBg)[1] && rgb(lateBg)[1]===rgb(lateBg)[2], lateBg);
+const bars = await page.evaluate(()=>{
+  const bar = sel => getComputedStyle(document.querySelector(sel)).borderLeftColor;
+  return { late: bar('#todayPanel .todo-item.late'), today: bar('#todayPanel .todo-item.today'),
+           future: bar('#todayPanel .todo-item.future'),
+           width: getComputedStyle(document.querySelector('#todayPanel .todo-item.late')).borderLeftWidth };
+});
+ok('지연은 왼쪽 빨간 선', rgb(bars.late)[0] > rgb(bars.late)[1] + 40, bars.late);
+ok('오늘은 왼쪽 초록 선', rgb(bars.today)[1] > rgb(bars.today)[0] + 30, bars.today);
+ok('예정은 왼쪽 보라 선', rgb(bars.future)[2] > rgb(bars.future)[1] + 20, bars.future);
 ok('왼쪽 선은 얇게', parseFloat(bars.width) <= 4, bars.width);
-const easyColor = await page.$eval('#todayPanel .todo-badge.easy', n=>getComputedStyle(n).color);
-ok('여유 배지는 남색 계열', rgb(easyColor)[2] > rgb(easyColor)[0], easyColor);
+const badgeColors = await page.evaluate(()=>{
+  const c = sel => getComputedStyle(document.querySelector(sel)).color;
+  return { late: c('#todayPanel .todo-badge.late'), today: c('#todayPanel .todo-badge.today'),
+           future: c('#todayPanel .todo-badge.future') };
+});
+ok('지연 배지는 빨간 계열', rgb(badgeColors.late)[0] > rgb(badgeColors.late)[1] + 40, badgeColors.late);
+ok('오늘 배지는 초록 계열', rgb(badgeColors.today)[1] > rgb(badgeColors.today)[0] + 30, badgeColors.today);
+ok('예정 배지는 보라 계열', rgb(badgeColors.future)[2] > rgb(badgeColors.future)[1] + 20, badgeColors.future);
 const futureColor = await page.$eval('#todayPanel .todo-item time.future', n=>getComputedStyle(n).color);
 const fc = rgb(futureColor);
 ok('앞으로 예정된 날짜는 회색(채도 낮음)', Math.max(...fc)-Math.min(...fc) <= 25, futureColor);
@@ -82,14 +95,14 @@ const row = await page.$eval('#todayPanel .todo-item', n=>{
            padTop:parseFloat(s.paddingTop), padBottom:parseFloat(s.paddingBottom), bg:s.backgroundColor };
 });
 ok('행마다 테두리·둥근 모서리', row.border>0 && row.radius>=5, JSON.stringify(row));
-ok('카드 안쪽 여백 9~12px', row.padTop>=9 && row.padTop<=12, `${row.padTop}/${row.padBottom}`);
+ok('카드 안쪽 여백 8~12px', row.padTop>=8 && row.padTop<=12, `${row.padTop}/${row.padBottom}`);
 const card = await page.$eval('#todayPanel .todo-item', n=>{
   const s=getComputedStyle(n);
   return { h:parseFloat(s.height), minH:parseFloat(s.minHeight), maxH:parseFloat(s.maxHeight),
            radius:parseFloat(s.borderTopLeftRadius), pad:parseFloat(s.paddingTop),
            bg:s.backgroundColor, shadow:s.boxShadow };
 });
-ok('카드 높이 88px 고정', card.h===88 && card.minH===88 && card.maxH===88, JSON.stringify(card));
+ok('카드 높이 74px 고정(조밀)', card.h===74 && card.minH===74 && card.maxH===74, JSON.stringify(card));
 const sizes = await page.$$eval('#todayPanel .todo-item', n=>({
   h:[...new Set(n.map(x=>Math.round(x.getBoundingClientRect().height)))],
   w:[...new Set(n.map(x=>Math.round(x.getBoundingClientRect().width)))] }));
@@ -99,9 +112,10 @@ ok('카드 배경은 흰색', card.bg==='rgb(255, 255, 255)', card.bg);
 ok('그림자는 아주 약하게', card.shadow!=='none' && !/rgba\(0, 0, 0, 0\.[3-9]/.test(card.shadow), card.shadow);
 const gap = await page.$eval('.todo-group-list', n=>parseFloat(getComputedStyle(n).rowGap));
 ok('항목 사이 간격', gap>=5, `${gap}px`);
-await page.hover('#todayPanel .todo-item.easy');
+const plainBg = await page.$eval('#todayPanel .todo-item.future', n=>getComputedStyle(n).backgroundColor);
+await page.hover('#todayPanel .todo-item.future');
 await page.waitForTimeout(250);
-const hoverBg = await page.$eval('#todayPanel .todo-item.easy', n=>getComputedStyle(n).backgroundColor);
+const hoverBg = await page.$eval('#todayPanel .todo-item.future', n=>getComputedStyle(n).backgroundColor);
 ok('마우스를 올리면 배경이 진해짐', hoverBg!==plainBg, `${plainBg} → ${hoverBg}`);
 
 // 5. 제목 한 줄 · 날짜 오른쪽
