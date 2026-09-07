@@ -101,7 +101,8 @@ ok('가까운 일정부터 날짜순', scheduleOrder.length===2, scheduleOrder.j
 const timeBadge = await page.$eval('#schedulePanel .schedule-date', n=>({ text:n.textContent, color:getComputedStyle(n).color }));
 ok('시간이 보라색 배지', /\d{2}:\d{2}/.test(timeBadge.text) && (timeBadge.color.match(/\d+/g)||[]).map(Number)[2] > (timeBadge.color.match(/\d+/g)||[]).map(Number)[1], JSON.stringify(timeBadge));
 const listStyle = await page.$eval('#schedulePanel .schedule-list', n=>({ display:getComputedStyle(n).display, overflow:getComputedStyle(n).overflowY }));
-ok('일정은 세로 목록 · 영역 안에서만 스크롤', listStyle.display==='grid' && listStyle.overflow==='auto', JSON.stringify(listStyle));
+// 카드 안에서 따로 스크롤하지 않는다 — 길어지면 페이지 전체가 스크롤된다.
+ok('일정은 세로 목록 · 카드 안 스크롤 없음', listStyle.display==='grid' && listStyle.overflow==='visible', JSON.stringify(listStyle));
 
 // 지난 일정 · 일정 추가 · 수정
 ok('지난 일정 버튼 있음', await page.isVisible('#schedulePast'));

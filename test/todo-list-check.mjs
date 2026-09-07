@@ -162,7 +162,9 @@ const box = await page.evaluate(()=>{
 });
 ok('카드 안에서 스크롤하지 않음', !box.innerScroll, JSON.stringify(box));
 ok('최대 높이·overflow 설정이 없음', !box.fixedHeight);
-ok('두 영역 바깥 높이가 같음', Math.abs(box.schedH - box.panelH) < 2, `할 일 ${box.panelH} · 일정 ${box.schedH}`);
+// 서로 키를 맞추면 일정이 몇 건 없을 때 아래가 텅 빈다. 각자 내용만큼만 차지해야 한다.
+ok('두 영역이 서로 키를 맞추지 않음(빈 흰 공간 없음)', box.schedH < box.panelH,
+   `할 일 ${box.panelH} · 일정 ${box.schedH}`);
 ok('높이 강제 클래스 제거됨', await page.evaluate(()=>!document.querySelector('.main-scroll').classList.contains('dash-fill')));
 
 // 지연 · 오늘 · 예정 구역과 개수

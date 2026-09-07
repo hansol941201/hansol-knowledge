@@ -318,8 +318,9 @@ svg { display: block; flex: none; }
 
 /* ── 일정 (월 달력) ─────────────────────────────────────────── */
 /* 왼쪽 70% 할 일 · 오른쪽 30% 일정 */
-.dash-cols { display: grid; grid-template-columns: minmax(0, 7fr) minmax(300px, 3fr); gap: 16px; align-items: stretch; }
-.schedule-panel { grid-template-rows: auto minmax(0, 1fr); align-content: stretch; }
+/* align-items: start — 두 칸이 서로 키를 맞추지 않는다.
+   맞추게 두면 일정이 2건뿐이어도 할 일 높이만큼 늘어나 아래가 텅 빈다. */
+.dash-cols { display: grid; grid-template-columns: minmax(0, 7fr) minmax(300px, 3fr); gap: 16px; align-items: start; }
 .dash-cols > .today-panel { align-content: start; }
 /* 태블릿: 할 일 65% · 일정 35%, 카드는 한 줄에 두 장 */
 @media (max-width: 1280px) {
@@ -339,7 +340,7 @@ svg { display: block; flex: none; }
 .cal-nav:hover { background: var(--line-soft); border-color: var(--violet-line); }
 /* 일정 목록 */
 /* 일정은 세로 목록 — 많아지면 이 영역 안에서만 스크롤한다 */
-.schedule-list { min-height: 0; display: grid; gap: 12px; align-content: start; overflow-y: auto; overscroll-behavior: contain; padding-right: 2px; }
+.schedule-list { min-height: 0; display: grid; gap: 12px; align-content: start; padding-right: 2px; }
 .schedule-group { min-width: 0; display: grid; gap: 2px; align-content: start; }
 .schedule-group-head { display: flex; align-items: center; gap: 7px; margin-bottom: 3px; padding-bottom: 5px; border-bottom: 1px solid var(--line-soft); }
 .schedule-group-head b { font-size: 12.5px; }
