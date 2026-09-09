@@ -424,7 +424,7 @@ function renderLibrary() {
     + accounts.map(item => shell('계정', 'lock', 'account-card',
       `data-account-id="${item.id}"`,
       `<h3>${mark(item.service)}</h3><p>${mark(item.user)}\n<span class="secret-line">••••••••</span></p>`,
-      '<button data-copy-id>아이디 복사</button><button data-copy-pw>비번 복사</button><button data-account-delete>삭제</button>')).join('')
+      '<button data-copy-id>아이디 복사</button><button data-copy-pw>비번 복사</button><button data-account-edit>수정</button><button data-account-delete>삭제</button>')).join('')
     + todoItems.map(todo => shell('할 일', 'check', `todo-result-card ${todo.done ? 'done' : ''}`,
       `data-todo-result="${todo.id}"`,
       `<p class="card-body">${mark(todo.text)}</p><time class="card-time">${escapeHtml(todo.date || '날짜 확인')}</time>`,
@@ -473,6 +473,7 @@ function renderLibrary() {
     const item = accountMeta.find(x => x.id === card.dataset.accountId);
     card.querySelector('[data-copy-id]').onclick = () => copyText(item.user);
     card.querySelector('[data-copy-pw]').onclick = () => requestPasswordCopy(item.id);
+    card.querySelector('[data-account-edit]').onclick = () => openVault(item.id);
     card.querySelector('[data-account-delete]').onclick = () => deleteAccount(item.id);
   });
   $('#pageGrid').querySelectorAll('[data-patent-key]').forEach(card => {
@@ -2124,29 +2125,82 @@ async function unlockDeviceVault() {
     await persistVault();
   }
 }
-async function openVault() {
-  await unlockDeviceVault();
-  $('#accountService').value = '';
-  $('#accountId').value = '';
-  $('#accountPassword').value = '';
+// 같은 창으로 추가와 수정을 다 한다(저장 흐름을 둘로 나누지 않는다).
+// id 를 주면 그 계정을 고치는 창이 되고, 없으면 새로 추가하는 창이 된다.
+let editingAccountId = null;
+async function openVault(id) {
+  const account = id ? accountMeta.find(x => x.id === id && !x.deleted) : null;
+  editingAccountId = account ? account.id : null;
+  let locked = false;
+  try { await unlockDeviceVault(); }
+  catch { locked = true; }                      // 금고가 잠겨도 사이트명·아이디는 고칠 수 있게 연다
+
+  const hint = $('#vaultHint');
+  const password = $('#accountPassword');
+  $('#accountService').value = account ? (account.service || '') : '';
+  $('#accountId').value = account ? (account.user || '') : '';
+  const secret = account && !locked ? vaultSecrets[account.id] : undefined;
+  password.value = typeof secret === 'string' ? secret : '';
+  password.required = !account;                 // 수정할 때 비우면 쓰던 비밀번호를 그대로 둔다
+  $('#accountShow').checked = false;
+  password.type = 'password';
+  $('#vaultTitle').textContent = account ? '계정 수정' : '새 계정 추가';
+  $('#vaultSubmit').textContent = account ? '수정 저장' : '암호화 저장';
+
+  let note = '';
+  if (account && typeof secret !== 'string') {
+    note = '이 기기에는 비밀번호가 없습니다. 새로 적으면 저장되고, 비워 두면 그대로 둡니다.';
+  } else if (account) {
+    note = '비워 두면 쓰던 비밀번호를 그대로 둡니다.';
+  }
+  hint.textContent = note;
+  hint.classList.toggle('hidden', !note);
+
   $('#vaultModal').classList.remove('hidden');
   setTimeout(() => $('#accountService').focus(), 50);
 }
-function closeVault() { $('#vaultModal').classList.add('hidden'); pendingSecretCopy = null; }
+function closeVault() {
+  $('#vaultModal').classList.add('hidden');
+  pendingSecretCopy = null;
+  editingAccountId = null;
+}
 
 $('#vaultClose').addEventListener('click', closeVault);
 $('#vaultCancel').addEventListener('click', closeVault);
 $('#vaultModal').addEventListener('click', e => { if (e.target.id === 'vaultModal') closeVault(); });
+$('#accountShow').addEventListener('change', e => {
+  $('#accountPassword').type = e.target.checked ? 'text' : 'password';
+});
 $('#vaultForm').addEventListener('submit', async e => {
   e.preventDefault();
+  const service = $('#accountService').value.trim();
+  const user = $('#accountId').value.trim();
+  const password = $('#accountPassword').value;
+  const editing = editingAccountId ? accountMeta.find(x => x.id === editingAccountId && !x.deleted) : null;
+
+  // 금고를 못 열면 비밀번호는 손대지 않는다. 잠긴 채로 다시 쓰면 쓰던 비밀번호가 지워진다.
+  let unlocked = true;
+  try { await unlockDeviceVault(); } catch { unlocked = false; }
+  const touchesSecret = Boolean(password) || !editing;
+  if (!unlocked && touchesSecret) return showToast('비밀번호 보관함이 잠겨 저장할 수 없습니다');
+
   try {
-    await unlockDeviceVault();
-    const id = crypto.randomUUID();
-    accountMeta.unshift(newEntry({ id, service: $('#accountService').value.trim(), user: $('#accountId').value.trim() }));
-    vaultSecrets[id] = $('#accountPassword').value;
+    if (editing) {
+      editing.service = service;
+      editing.user = user;
+      touch(editing);
+      // 비워 두면 쓰던 비밀번호를 지우지 않고 그대로 둔다.
+      if (password) vaultSecrets[editing.id] = password;
+    } else {
+      const id = crypto.randomUUID();
+      accountMeta.unshift(newEntry({ id, service, user }));
+      vaultSecrets[id] = password;
+    }
     STORE.writeList('accountMeta', accountMeta);
-    await persistVault(); queueCloudSave(); renderLibrary(); closeVault(); showToast('계정 암호화 저장됨');
-  } catch { showToast('계정 저장 확인'); }
+    if (touchesSecret) await persistVault();
+    queueCloudSave(); renderLibrary(); closeVault();
+    showToast(editing ? '계정 수정됨' : '계정 암호화 저장됨');
+  } catch { showToast(editing ? '계정 수정 확인' : '계정 저장 확인'); }
 });
 
 async function requestPasswordCopy(id) {
