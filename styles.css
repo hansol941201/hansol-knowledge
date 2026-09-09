@@ -326,6 +326,22 @@ svg { display: block; flex: none; }
 .todo-box.done { background: var(--violet); }
 .todo-box.done::after { opacity: 1; }
 .todo-line-text { flex: 1 1 auto; min-width: 0; font-size: 14px; color: var(--ink-1); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* 별표(중요) — 누르면 목록 맨 위로 올라가고 제목에 형광펜이 그어진다 */
+.todo-star {
+  flex: none; width: 22px; padding: 0; color: #CFCBD8; background: none;
+  font-size: 15px; line-height: 1; cursor: pointer; transition: color var(--ease), transform var(--ease);
+}
+.todo-star:hover { color: #E8A93A; transform: scale(1.15); }
+.todo-line.star .todo-star { color: #EFA918; }
+/* 형광펜은 글자 길이만큼만 긋는다(줄 전체를 칠하지 않는다) */
+.todo-mark { padding: 1px 0; }
+.todo-line.star .todo-line-text { font-weight: 600; }
+.todo-line.star .todo-mark {
+  padding: 1px 5px; border-radius: 3px;
+  background: linear-gradient(transparent 6%, #FFE9A0 6%, #FFDE84 90%, transparent 90%);
+}
+.todo-line.star { background: #FFFCF3; }
+.todo-line.star:hover { background: #FFF8E8; }
 .todo-line.done .todo-line-text { color: var(--ink-3); text-decoration: line-through; }
 .todo-line time { flex: none; color: var(--ink-3); font-size: 11px; font-variant-numeric: tabular-nums; }
 .todo-line time.late { color: #C0433D; font-weight: 600; }

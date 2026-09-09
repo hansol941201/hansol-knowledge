@@ -35,12 +35,16 @@
     </div>`;
   }
 
-  // 오른쪽 위: 할 일 목록 — 체크 + 제목 한 줄, 오른쪽 끝에 지우기(✕)
+  // 오른쪽 위: 할 일 목록 — 체크 + 별표(중요) + 제목 한 줄, 오른쪽 끝에 지우기(✕)
+  // 별표를 누른 것은 맨 위로 올라오고 제목에 형광펜이 그어진다.
   function todoSimpleList(list) {
     return `<ul class="todo-list">${list.map(todo => `
-      <li class="todo-line" data-todo-id="${todo.id}">
+      <li class="todo-line${todo.starred ? ' star' : ''}" data-todo-id="${todo.id}">
         <label class="todo-line-check" title="완료 표시"><input type="checkbox" /><span class="todo-box"></span></label>
-        <span class="todo-line-text" title="${helper.escapeHtml(todo.text)}">${helper.escapeHtml(todo.text)}</span>
+        <button type="button" class="todo-star" data-todo-star
+          title="${todo.starred ? '중요 표시 끄기' : '중요 표시'}"
+          aria-pressed="${todo.starred ? 'true' : 'false'}">${todo.starred ? '★' : '☆'}</button>
+        <span class="todo-line-text" title="${helper.escapeHtml(todo.text)}"><span class="todo-mark">${helper.escapeHtml(todo.text)}</span></span>
         ${todo.date ? `<time class="${helper.todoDateState(todo)}">${helper.escapeHtml(todo.date)}</time>` : ''}
         <button type="button" class="todo-x" data-todo-delete title="지우기">✕</button>
       </li>`).join('')}</ul>`;

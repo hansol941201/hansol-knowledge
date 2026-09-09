@@ -532,10 +532,11 @@ function todoDoneLabel(todo) {
   const when = todo.doneAt || todo.updatedAt;
   return when ? savedLabel({ createdAt: when }) : '완료일 확인';
 }
-// 마감일이 빠른 순. 날짜가 없는 항목은 가장 아래에 둔다.
+// 별표(중요)를 맨 위로. 그다음은 마감일이 빠른 순, 날짜가 없는 항목은 가장 아래.
 function activeTodos() {
   return alive(todos).filter(isTodoEntry).filter(todo => !todo.done)
     .sort((a, b) => {
+      if (Boolean(a.starred) !== Boolean(b.starred)) return a.starred ? -1 : 1;
       const left = String(a.date || '').trim();
       const right = String(b.date || '').trim();
       if (left && !right) return -1;
@@ -615,6 +616,14 @@ function renderTodos() {
     });
     const edit = row.querySelector('[data-todo-edit]');
     if (edit) edit.onclick = event => { event.preventDefault(); openTodoModal(todo); };
+    // 별표: 중요 표시만 바꾼다. 켜면 목록 맨 위로 올라가고 형광펜이 그어진다.
+    const star = row.querySelector('[data-todo-star]');
+    if (star) star.onclick = event => {
+      event.preventDefault(); event.stopPropagation();
+      todo.starred = !todo.starred; touch(todo);
+      saveTodos(); renderTodos(); renderLibrary();
+      showToast(todo.starred ? '중요 표시함' : '중요 표시를 뗐습니다');
+    };
     const remove = row.querySelector('[data-todo-delete]');
     if (remove) remove.onclick = event => {
       event.preventDefault();
