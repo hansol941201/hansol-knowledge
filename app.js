@@ -384,8 +384,11 @@ function renderLibrary() {
   const patentItems = pageCategory === '특허'
     ? (patentTerm ? findPatents(patentTerm, patents.length) : patents)
     : (query ? findPatents(patentTerm, 5) : []);
+  // 완료한 할 일은 목록에서 숨긴다(할 일 화면의 "완료" 탭에서만 본다).
+  // 다만 검색할 때는 지난 기록을 찾는 것이 목적이므로 완료한 것도 같이 보여 준다.
+  const todoPool = query ? alive(todos) : alive(todos).filter(todo => !todo.done);
   const todoItems = (searchAll ? Boolean(query) : pageCategory === '할 일')
-    ? searchFilter(sortBySaved(alive(todos)), query,
+    ? searchFilter(sortBySaved(todoPool), query,
         todo => ({ title: todo.text, body: `${todo.date || ''} ${savedLabel(todo)} ${todo.done ? '완료' : '미완료 진행중'}` })) : [];
   const memoryItems = (searchAll ? Boolean(query) : pageCategory === '기억')
     ? searchFilter(sortBySaved(alive(memories)), query,
