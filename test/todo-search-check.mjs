@@ -1,4 +1,4 @@
-// 완료한 할 일 — 그냥 볼 때는 숨기고, 검색할 때는 같이 찾아 준다
+// 완료한 할 일 — 그냥 볼 때도 검색할 때도 목록에서 숨긴다(완료 탭에만 남는다)
 import { chromium } from 'playwright';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
@@ -75,13 +75,10 @@ await page.fill('#pageSearch', '도장');
 await page.press('#pageSearch', 'Enter');
 await page.waitForTimeout(700);
 const found = await cards();
-ok('검색하면 완료한 할 일도 나옴', found.filter(c => c.완료).length === 2,
+ok('검색해도 완료한 할 일은 안 나옴', found.filter(c => c.완료).length === 0,
    JSON.stringify(found.map(c => `${c.글}${c.완료?'(완료)':''}`)));
-ok('진행중 할 일도 함께 나옴', found.some(c => !c.완료 && c.글.includes('견적')), JSON.stringify(found.map(c=>c.글)));
+ok('진행중 할 일은 나옴', found.some(c => !c.완료 && c.글.includes('견적')), JSON.stringify(found.map(c=>c.글)));
 ok('검색어와 상관없는 할 일은 안 나옴', !found.some(c => c.글.includes('도면')), JSON.stringify(found.map(c=>c.글)));
-
-const badge = await page.$$eval('.todo-result-card.done .todo-state', els => els.map(e => e.textContent.trim()));
-ok('완료 표시가 붙어 있음', badge.length === 2 && badge.every(t => t === '완료'), JSON.stringify(badge));
 
 // 4. 검색을 지우면 다시 완료 항목이 숨는다
 await page.fill('#pageSearch', '');

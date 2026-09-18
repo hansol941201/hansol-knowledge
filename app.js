@@ -384,9 +384,12 @@ function renderLibrary() {
   const patentItems = pageCategory === '특허'
     ? (patentTerm ? findPatents(patentTerm, patents.length) : patents)
     : (query ? findPatents(patentTerm, 5) : []);
-  // 완료한 할 일은 목록에서 숨긴다(할 일 화면의 "완료" 탭에서만 본다).
-  // 다만 검색할 때는 지난 기록을 찾는 것이 목적이므로 완료한 것도 같이 보여 준다.
-  const todoPool = query ? alive(todos) : alive(todos).filter(todo => !todo.done);
+  // 검색할 때든 그냥 볼 때든 완료한 할 일은 목록에 넣지 않는다 — 끝낸 일이 섞여 나와
+  // 결과가 지저분해진다는 요청. 완료한 할 일은 지워진 게 아니라 할 일 화면의
+  // "완료" 탭에 그대로 남아 있고, 거기서 되돌릴 수도 있다.
+  // alive()가 삭제 표시(deleted)를 걸러내고, isTodoEntry가 할 일이 아닌 기록(type:'memory' 등)이
+  // 섞여 들어온 경우를 막는다 — 할 일 칸에는 할 일만 나온다.
+  const todoPool = alive(todos).filter(isTodoEntry).filter(todo => !todo.done);
   const todoItems = (searchAll ? Boolean(query) : pageCategory === '할 일')
     ? searchFilter(sortBySaved(todoPool), query,
         todo => ({ title: todo.text, body: `${todo.date || ''} ${savedLabel(todo)} ${todo.done ? '완료' : '미완료 진행중'}` })) : [];
@@ -404,7 +407,20 @@ function renderLibrary() {
       <footer>${foot}</footer>
     </article>`;
 
-  $('#pageGrid').innerHTML = patentItems.map(item => shell('특허', 'patent', 'patent-card',
+  // §업무지식 우선 노출 — 검색할 때는 업무지식 카드를 가장 먼저 그린다.
+  // 검색 결과(어떤 항목이 걸리는지)와 정렬 기준은 전혀 바꾸지 않고 "그리는 순서"만
+  // 나눈다 — 두 묶음을 합치면 items 와 완전히 같아서 빠지는 카드가 없다.
+  const knowledgeCard = (item) => shell(findCategory(item), findCategory(item) === '연락처' ? 'phone' : 'book',
+      findCategory(item) === '대본' ? 'script-card' : (findCategory(item) === '기획' ? 'plan-card' : ''),
+      `data-id="${item.id}"`,
+      `<h3>${mark(item.title)}</h3><p>${mark(item.answer)}</p>${savedDateOf(item) ? `<time class="card-time">${escapeHtml(savedLabel(item))}</time>` : ''}`,
+      '<button data-copy>복사</button><button class="card-act" data-edit>수정</button><button data-chat>지식창에서 보기</button><button class="card-act card-del" data-delete>삭제</button>');
+  const workFirst = Boolean(query);
+  const workItems = workFirst ? items.filter(item => findCategory(item) === '업무지식') : [];
+  const restItems = workFirst ? items.filter(item => findCategory(item) !== '업무지식') : items;
+
+  $('#pageGrid').innerHTML = workItems.map(knowledgeCard).join('')
+    + patentItems.map(item => shell('특허', 'patent', 'patent-card',
       `data-patent-key="${escapeHtml(item.num || item.name)}"`,
       `<h3>${item.num ? mark(item.num) : escapeHtml(item.status || '번호 확인')}</h3>
        ${item.name ? `<p>${mark(item.name)}</p>` : ''}
@@ -433,11 +449,7 @@ function renderLibrary() {
       `data-memory-result="${memory.id}"`,
       `<p class="card-body">${mark(memory.text)}</p><time class="card-time">${escapeHtml(savedLabel(memory))}</time>`,
       '<button data-memory-open>기억 저장소에서 보기</button>')).join('')
-    + items.map(item => shell(findCategory(item), findCategory(item) === '연락처' ? 'phone' : 'book',
-      findCategory(item) === '대본' ? 'script-card' : (findCategory(item) === '기획' ? 'plan-card' : ''),
-      `data-id="${item.id}"`,
-      `<h3>${mark(item.title)}</h3><p>${mark(item.answer)}</p>${savedDateOf(item) ? `<time class="card-time">${escapeHtml(savedLabel(item))}</time>` : ''}`,
-      '<button data-copy>복사</button><button class="card-act" data-edit>수정</button><button data-chat>지식창에서 보기</button><button class="card-act card-del" data-delete>삭제</button>')).join('');
+    + restItems.map(knowledgeCard).join('');
 
   // 화면별 제목과 영역 표시
   const [heading, lead] = VIEW_LEAD[pageCategory] || VIEW_LEAD['전체'];
