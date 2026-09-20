@@ -126,7 +126,7 @@ const design = await page.evaluate(()=>{
            tabs:[...document.querySelectorAll('.todo-tab span')].map(x=>x.textContent) };
 });
 ok('한 줄에 하나 · 조밀한 높이 유지', design.cols===1 && design.h<=52, JSON.stringify(design));
-ok('할 일·긴급중요·완료 개수 표시 유지', design.tabs.length===3, design.tabs.join(' / '));
+ok('할 일·완료 개수 표시 유지', design.tabs.length===2, design.tabs.join(' / '));
 
 ok('끝까지 오류 없음', errors.length===0, errors.join(' | '));
 await b.close(); server.close();

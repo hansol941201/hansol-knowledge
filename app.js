@@ -567,22 +567,6 @@ function todoDateState(todo) {
   if (date === today) return 'today';
   return date < today ? 'late' : 'future';
 }
-// ── 긴급·중요 매트릭스 ──────────────────────────────────────────
-// 아이젠하워 사분면. 할 일마다 사용자가 직접 고른 값을 todo.quadrant(1~4)에 담는다.
-// 고르지 않은 할 일은 값이 없고(미분류), 자동으로 정해 주지 않는다 — 판단은 사람 몫이다.
-// 예전에 없앤 급함·여유(urgency) 값은 건드리지 않는다(다른 기기와 동기화될 수 있다).
-const TODO_QUADRANTS = [
-  { id: 1, mark: '①', label: '긴급 + 중요',      judge: '지금 안 하면 문제 생김',                   act: '즉시 실행' },
-  { id: 2, mark: '②', label: '중요 + 안 긴급',    judge: '중요한데 당장 할 필요 없음',               act: '일정·마감 설정' },
-  { id: 3, mark: '③', label: '긴급 + 안 중요',    judge: '빨리 해야 하지만 내가 꼭 할 필요 없음',     act: '위임/자동화' },
-  { id: 4, mark: '④', label: '안 긴급 + 안 중요', judge: '해도 성과에 거의 영향 없음',               act: '삭제/최소화' }
-];
-function todoQuadrant(todo) {
-  const n = Number(todo && todo.quadrant);
-  return (n === 1 || n === 2 || n === 3 || n === 4) ? n : 0;   // 0 = 아직 안 정함
-}
-function quadrantMeta(id) { return TODO_QUADRANTS.find(q => q.id === id) || null; }
-
 function doneTodos() {
   return alive(todos).filter(isTodoEntry).filter(todo => todo.done)
     .sort((a, b) => String(b.doneAt || b.updatedAt || '').localeCompare(String(a.doneAt || a.updatedAt || '')));
@@ -598,27 +582,20 @@ function renderTodos() {
   const active = activeTodos();
   const done = doneTodos();
   const list = todoTab === 'done' ? done : active;   // 접지 않고 항상 전부 보여 준다
-  // 매트릭스는 진행중인 할 일만 나눈다 — 완료한 일은 완료 탭에서 본다.
-  const cells = TODO_QUADRANTS.map(q => Object.assign({}, q, { list: active.filter(t => todoQuadrant(t) === q.id) }));
-  const unset = active.filter(t => todoQuadrant(t) === 0);
 
   panel.innerHTML = `
     <div class="todo-head">
       <h2>✅ 할 일 목록</h2>
-      <span class="todo-count">${todoTab === 'matrix' ? `${active.length}개` : `${list.length}개`}</span>
+      <span class="todo-count">${list.length}개</span>
     </div>
     <div class="todo-tabs">
       <button type="button" class="todo-tab ${todoTab === 'active' ? 'active' : ''}" data-todo-tab="active">할 일 <span>${active.length}</span></button>
-      <button type="button" class="todo-tab ${todoTab === 'matrix' ? 'active' : ''}" data-todo-tab="matrix">긴급·중요 <span>${active.length - unset.length}</span></button>
       <button type="button" class="todo-tab ${todoTab === 'done' ? 'active' : ''}" data-todo-tab="done">완료 <span>${done.length}</span></button>
       ${todoTab === 'done' && done.length ? `<button type="button" class="ghost-btn" id="todoClearDone">완료 목록 비우기</button>` : ''}
     </div>
-    ${todoTab === 'matrix'
-      ? (active.length ? VIEWS.todoMatrix(cells, unset)
-                       : `<div class="todo-empty">나눌 할 일이 없습니다.</div>`)
-      : (list.length
-          ? (todoTab === 'done' ? VIEWS.todoDoneSimpleList(list) : VIEWS.todoSimpleList(list))
-          : `<div class="todo-empty">${todoTab === 'done' ? '완료한 할 일이 없습니다.' : '왼쪽 메모칸에 할 일을 적고 엔터를 누르세요.'}</div>`)}`;
+    ${list.length
+      ? (todoTab === 'done' ? VIEWS.todoDoneSimpleList(list) : VIEWS.todoSimpleList(list))
+      : `<div class="todo-empty">${todoTab === 'done' ? '완료한 할 일이 없습니다.' : '왼쪽 메모칸에 할 일을 적고 엔터를 누르세요.'}</div>`}`;
 
   panel.querySelectorAll('[data-todo-tab]').forEach(button => {
     button.onclick = () => { todoTab = button.dataset.todoTab; renderTodos(); };
@@ -705,29 +682,14 @@ function openTodoModal(todo) {
   editingTodoId = todo.id;
   $('#todoEditText').value = todo.text || '';
   $('#todoEditDate').value = todo.date || '';
-  paintQuadrantPick(todoQuadrant(todo));
   $('#todoEditError').textContent = '';
   $('#todoModal').classList.remove('hidden');
   setTimeout(() => $('#todoEditText').focus(), 50);
 }
-// 수정 창에서 고른 사분면은 창을 닫을 때까지만 들고 있다가 저장할 때 반영한다.
-let editingQuadrant = 0;
-function paintQuadrantPick(value) {
-  editingQuadrant = value;
-  const box = $('#todoEditQuadrant');
-  if (!box) return;
-  box.querySelectorAll('[data-quadrant]').forEach(button => {
-    button.classList.toggle('is-on', Number(button.dataset.quadrant) === value);
-  });
-}
-function closeTodoModal() { $('#todoModal').classList.add('hidden'); editingTodoId = null; editingQuadrant = 0; }
+function closeTodoModal() { $('#todoModal').classList.add('hidden'); editingTodoId = null; }
 $('#todoModalClose').addEventListener('click', closeTodoModal);
 $('#todoEditCancel').addEventListener('click', closeTodoModal);
 $('#todoModal').addEventListener('click', event => { if (event.target.id === 'todoModal') closeTodoModal(); });
-$('#todoEditQuadrant').addEventListener('click', event => {
-  const button = event.target.closest('[data-quadrant]');
-  if (button) paintQuadrantPick(Number(button.dataset.quadrant));
-});
 $('#todoForm').addEventListener('submit', event => {
   event.preventDefault();
   const todo = todos.find(x => x.id === editingTodoId);
@@ -736,13 +698,10 @@ $('#todoForm').addEventListener('submit', event => {
   if (!todo) return;
   if (!text) { $('#todoEditError').textContent = '내용을 적어 주세요.'; return; }
   // 완료 상태(done · doneAt)는 건드리지 않는다 — 내용만 고친다.
-  const before = { text: todo.text, date: todo.date, urgency: todo.urgency, quadrant: todo.quadrant };
+  const before = { text: todo.text, date: todo.date, urgency: todo.urgency };
   try {
     todo.text = text;
     todo.date = $('#todoEditDate').value || todo.date;
-    // "아직 안 정함"(0)을 고르면 값을 지워 미분류로 되돌린다.
-    if (editingQuadrant) todo.quadrant = editingQuadrant;
-    else delete todo.quadrant;
     touch(todo);
     saveTodos();
   } catch (error) {

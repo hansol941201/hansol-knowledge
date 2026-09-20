@@ -60,29 +60,6 @@
       </li>`).join('')}</ul>`;
   }
 
-  // ── 긴급·중요 매트릭스 ──────────────────────────────────
-  // 네 칸(①~④)과 아직 안 정한 할 일을 함께 보여 준다. 칸 안의 줄은
-  // todoSimpleList 를 그대로 쓴다 — 체크·별표·수정·지우기가 목록과 똑같이 동작한다
-  // (핸들러를 새로 만들지 않고 기존 [data-todo-id] 처리를 그대로 탄다).
-  function todoMatrix(cells, unset) {
-    const cell = (c) => `
-      <section class="quad-cell quad-${c.id}">
-        <header>
-          <b>${helper.escapeHtml(c.mark)} ${helper.escapeHtml(c.label)}</b>
-          <em>${helper.escapeHtml(c.act)}</em>
-          <span class="quad-count">${c.list.length}</span>
-        </header>
-        ${c.list.length ? todoSimpleList(c.list) : `<p class="quad-empty">${helper.escapeHtml(c.judge)}</p>`}
-      </section>`;
-    return `
-      <div class="quad-grid">${cells.map(cell).join('')}</div>
-      ${unset && unset.length ? `
-        <section class="quad-unset">
-          <header><b>아직 안 정함</b><span class="quad-count">${unset.length}</span></header>
-          ${todoSimpleList(unset)}
-        </section>` : ''}`;
-  }
-
   // ── 일정 ────────────────────────────────────────────────
   // 같은 날짜끼리 묶어서 날짜 머리글 아래에 나란히 보여 준다.
   function scheduleGroups(rows) {
@@ -128,7 +105,7 @@
 
   global.HANSOL_VIEWS = {
     setup,
-    memoPanel, todoSimpleList, todoDoneSimpleList, todoMatrix,
+    memoPanel, todoSimpleList, todoDoneSimpleList,
     scheduleGroups, shortcutGrid
   };
 })(window);
