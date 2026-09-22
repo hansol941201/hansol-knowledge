@@ -13,7 +13,8 @@
     memories: 'knowledge-memories',
     accountMeta: 'knowledge-account-meta',
     schedule: 'knowledge-schedule',
-    shortcuts: 'knowledge-shortcuts'
+    shortcuts: 'knowledge-shortcuts',
+    partnerEdits: 'knowledge-partner-edits'
   };
 
   // 저장된 내용이 깨져 있어도 화면이 죽지 않도록 빈 목록으로 돌려준다.

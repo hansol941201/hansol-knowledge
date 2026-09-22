@@ -89,7 +89,33 @@ let memories = STORE.readList('memories');
 let accountMeta = STORE.readList('accountMeta');
 let schedule = STORE.readList('schedule');
 let shortcuts = STORE.readList('shortcuts');
-const partners = Array.isArray(window.PARTNERS) ? window.PARTNERS : [];
+// 협력업체 원본은 partners.js(288곳) — 빌드 파일이라 여기서 고치지 않는다.
+// 대신 고친 내용만 따로 저장해 두고(knowledge-partner-edits) 화면에 보여 줄 때
+// 원본 위에 덮어씌운다. 그래서 원본 파일이 나중에 갱신돼도 고친 내용이 살아 있고,
+// "원래대로" 를 누르면 고친 기록만 지우면 원본이 그대로 돌아온다.
+// 업체명 288개가 전부 고유해서(확인함) 이름을 원본과 잇는 열쇠로 쓴다.
+const PARTNER_SOURCE = Array.isArray(window.PARTNERS) ? window.PARTNERS : [];
+let partnerEdits = STORE.readList('partnerEdits');
+let partners = PARTNER_SOURCE;
+// 고친 내용을 원본에 덮어씌운 목록을 다시 만든다.
+function rebuildPartners() {
+  const byKey = new Map(alive(partnerEdits).map(edit => [edit.id, edit]));
+  partners = PARTNER_SOURCE.map(base => {
+    const edit = byKey.get(base.name);
+    if (!edit) return base;
+    return {
+      ...base,
+      name: typeof edit.name === 'string' && edit.name ? edit.name : base.name,
+      phone: typeof edit.phone === 'string' ? edit.phone : base.phone,
+      email: typeof edit.email === 'string' ? edit.email : base.email,
+      sourceName: base.name,        // 원본과 잇는 열쇠(이름을 바꿔도 안 끊긴다)
+      edited: true
+    };
+  });
+}
+// 원본 이름 — 고치지 않은 업체는 이름 그대로가 열쇠다.
+// (아래쪽 partnerKey(name) 은 관련 기록 찾기용 정규화 함수라 이름이 겹치면 안 된다)
+function partnerSourceName(item) { return (item && item.sourceName) || (item && item.name) || ''; }
 const patents = Array.isArray(window.PATENTS) ? window.PATENTS : [];
 let vaultKey = null;
 let vaultSecrets = {};
@@ -129,6 +155,7 @@ function ensureStamps(list) {
   return list;
 }
 ensureStamps(knowledge); ensureStamps(todos); ensureStamps(memories); ensureStamps(accountMeta); ensureStamps(shortcuts); ensureStamps(schedule);
+ensureStamps(partnerEdits); rebuildPartners();
 
 // 배열마다 자기 종류만 남긴다. 예전 버전이 기억을 todos 에 넣어 둔 경우처럼
 // 잘못 들어간 항목은 화면에서 숨기는 게 아니라 제 배열로 옮겨서 실제로 분리한다.
@@ -436,7 +463,7 @@ function renderLibrary() {
       `<h3>${mark(item.name)}</h3>
        <p>${mark(item.phone || '전화번호 확인')}\n${mark(item.email || '이메일 확인')}</p>
        ${partnerRecordsHtml(item.name, term)}`,
-      '<button data-copy-phone>번호 복사</button><button data-copy-email>메일 복사</button><button data-partner-chat>지식창에서 보기</button>')).join('')
+      '<button data-copy-phone>번호 복사</button><button data-copy-email>메일 복사</button><button data-partner-edit>수정</button><button data-partner-chat>지식창에서 보기</button>')).join('')
     + accounts.map(item => shell('계정', 'lock', 'account-card',
       `data-account-id="${item.id}"`,
       `<h3>${mark(item.service)}</h3><p>${mark(item.user)}\n<span class="secret-line">••••••••</span></p>`,
@@ -499,6 +526,7 @@ function renderLibrary() {
     const item = partners[Number(card.dataset.partnerIndex)];
     card.querySelector('[data-copy-phone]').onclick = () => item.phone ? copyText(item.phone) : showToast('전화번호 확인');
     card.querySelector('[data-copy-email]').onclick = () => item.email ? copyText(item.email) : showToast('이메일 확인');
+    card.querySelector('[data-partner-edit]').onclick = () => openPartnerModal(item);
     card.querySelector('[data-partner-chat]').onclick = () => { openApp(); addPartnerBubble(item); };
   });
   $('#pageGrid').querySelectorAll('[data-todo-result]').forEach(card => {
@@ -712,6 +740,75 @@ $('#todoForm').addEventListener('submit', event => {
   }
   renderTodos(); renderLibrary(); closeTodoModal();
   showToast('할 일 수정됨');
+});
+
+// ── 협력업체 정보 수정 ─────────────────────────────────────────
+// 원본(partners.js)은 건드리지 않고 고친 내용만 따로 쌓는다. 저장 흐름은 다른
+// 수정 창(할 일·계정)과 같은 모양이다 — 새 저장 경로를 만들지 않았다.
+let editingPartnerKey = null;
+function openPartnerModal(item) {
+  if (!item) return;
+  editingPartnerKey = partnerSourceName(item);
+  const base = PARTNER_SOURCE.find(row => row.name === editingPartnerKey) || item;
+  $('#partnerName').value = item.name || '';
+  $('#partnerPhone').value = item.phone || '';
+  $('#partnerEmail').value = item.email || '';
+  $('#partnerError').textContent = '';
+  // 고친 적이 있으면 원본 값을 함께 보여 주고 되돌릴 수 있게 한다.
+  const changed = Boolean(item.edited);
+  $('#partnerOrigin').textContent = changed
+    ? `원래 정보 — ${base.name} · ${base.phone || '전화 없음'} · ${base.email || '이메일 없음'}`
+    : '';
+  $('#partnerOrigin').classList.toggle('hidden', !changed);
+  $('#partnerRestore').classList.toggle('hidden', !changed);
+  $('#partnerModal').classList.remove('hidden');
+  setTimeout(() => $('#partnerName').focus(), 50);
+}
+function closePartnerModal() { $('#partnerModal').classList.add('hidden'); editingPartnerKey = null; }
+function savePartnerEdits() {
+  STORE.writeList('partnerEdits', partnerEdits);
+  rebuildPartners();
+  markSearchIndexDirty();
+  queueCloudSave();
+  renderLibrary();
+}
+$('#partnerClose').addEventListener('click', closePartnerModal);
+$('#partnerCancel').addEventListener('click', closePartnerModal);
+$('#partnerModal').addEventListener('click', event => { if (event.target.id === 'partnerModal') closePartnerModal(); });
+$('#partnerRestore').addEventListener('click', () => {
+  const key = editingPartnerKey;
+  const edit = partnerEdits.find(row => row.id === key && !row.deleted);
+  if (!edit) return closePartnerModal();
+  if (!confirm('고친 내용을 지우고 원래 정보로 되돌릴까요?')) return;
+  edit.deleted = true; touch(edit);          // 기록만 지운다 — 원본은 건드리지 않는다
+  savePartnerEdits(); closePartnerModal();
+  showToast('원래 정보로 되돌렸습니다');
+});
+$('#partnerForm').addEventListener('submit', event => {
+  event.preventDefault();
+  const key = editingPartnerKey;
+  const name = $('#partnerName').value.trim();
+  $('#partnerError').textContent = '';
+  if (!key) return;
+  if (!name) { $('#partnerError').textContent = '업체명을 적어 주세요.'; return; }
+  let edit = partnerEdits.find(row => row.id === key && !row.deleted);
+  const before = edit ? { name: edit.name, phone: edit.phone, email: edit.email } : null;
+  try {
+    if (!edit) { edit = newEntry({ id: key }); partnerEdits.unshift(edit); }
+    edit.name = name;
+    edit.phone = $('#partnerPhone').value.trim();
+    edit.email = $('#partnerEmail').value.trim();
+    touch(edit);
+    savePartnerEdits();
+  } catch (error) {
+    if (before) Object.assign(edit, before);   // 저장이 안 되면 원래대로 되돌린다
+    else partnerEdits = partnerEdits.filter(row => row !== edit);
+    console.error('협력업체 저장 실패', error);
+    $('#partnerError').textContent = '저장하지 못했습니다. 잠시 뒤 다시 눌러 주세요.';
+    return;                                    // 창은 그대로 두어 쓰던 내용을 지키지 않는다
+  }
+  closePartnerModal();
+  showToast('협력업체 정보 수정됨');
 });
 
 function renderMemories() {
@@ -2001,7 +2098,7 @@ $('#resetModal').addEventListener('click', event => { if (event.target.id === 'r
 $('#resetConfirm').addEventListener('input', event => { $('#resetAll').disabled = event.currentTarget.value.trim() !== '삭제'; });
 
 $('#resetBackup').addEventListener('click', () => {
-  const backup = JSON.stringify({ savedAt: nowIso(), knowledge, todos, memories, accountMeta, shortcuts, schedule }, null, 2);
+  const backup = JSON.stringify({ savedAt: nowIso(), knowledge, todos, memories, accountMeta, shortcuts, schedule, partnerEdits }, null, 2);
   const url = URL.createObjectURL(new Blob([backup], { type: 'application/json' }));
   const link = document.createElement('a');
   link.href = url;
@@ -2028,9 +2125,10 @@ $('#resetAll').addEventListener('click', async () => {
   if (!confirm('지식·할 일·기억·계정을 모두 삭제합니다.\n다른 컴퓨터에서도 사라집니다.\n정말 진행할까요?')) return;
   $('#resetAll').disabled = true;
   $('#resetAll').textContent = '삭제 중…';
-  for (const list of [knowledge, todos, memories, accountMeta, shortcuts, schedule]) {
+  for (const list of [knowledge, todos, memories, accountMeta, shortcuts, schedule, partnerEdits]) {
     for (const item of list) { item.deleted = true; touch(item); }
   }
+  rebuildPartners();
   vaultSecrets = {};
   saveLocalState();
   renderAll();
@@ -2588,7 +2686,7 @@ function createKnowledge(title, answer, options = {}) {
 function saveLocalState() {
   markSearchIndexDirty();   // 자료가 바뀌면 검색 목록도 다시 만든다
   sortIntoCollections();
-  STORE.writeAll({ knowledge, todos, memories, accountMeta, shortcuts, schedule });
+  STORE.writeAll({ knowledge, todos, memories, accountMeta, shortcuts, schedule, partnerEdits });
 }
 
 // views.js 는 자료만 받고 잔심부름은 못 한다. 필요한 것들을 여기서 건네준다.
@@ -2913,6 +3011,7 @@ async function saveCloudState({ verifyIds = [] } = {}) {
         accountMeta: mergeById(accountMeta, remote.accountMeta),
         shortcuts: mergeById(shortcuts, remote.shortcuts),
         schedule: mergeById(schedule, remote.schedule),
+        partnerEdits: mergeById(partnerEdits, remote.partnerEdits),
         ...keepMailFields(remote),   // 없앤 메일함 자료는 건드리지 않고 그대로 둔다
         vaultSecrets: { ...(remote.vaultSecrets || {}), ...vaultSecrets },
         ...keepQuickMemoField(remote)   // 화면에서 뺀 빠른 메모 값은 건드리지 않고 그대로 둔다
@@ -2931,7 +3030,8 @@ async function saveCloudState({ verifyIds = [] } = {}) {
       ...((saved && saved.memories) || []),
       ...((saved && saved.accountMeta) || []),
       ...((saved && saved.shortcuts) || []),
-      ...((saved && saved.schedule) || [])
+      ...((saved && saved.schedule) || []),
+      ...((saved && saved.partnerEdits) || [])
     ].map(entry => entry && entry.id));
     const missing = verifyIds.filter(id => !storedIds.has(id));
     resolveWaitingBubbles(storedIds);   // 뒤늦게 올라간 항목의 말풍선을 완료로 바꾼다
@@ -2962,13 +3062,16 @@ async function applyCloudState(state) {
     || hasLocalOnlyItems(memories, state.memories)
     || hasLocalOnlyItems(accountMeta, state.accountMeta)
     || hasLocalOnlyItems(shortcuts, state.shortcuts)
-    || hasLocalOnlyItems(schedule, state.schedule);
+    || hasLocalOnlyItems(schedule, state.schedule)
+    || hasLocalOnlyItems(partnerEdits, state.partnerEdits);
   knowledge = mergeById(knowledge, state.knowledge);
   todos = mergeById(todos, state.todos);
   memories = mergeById(memories, state.memories);
   accountMeta = mergeById(accountMeta, state.accountMeta);
   shortcuts = mergeById(shortcuts, state.shortcuts);
   schedule = mergeById(schedule, state.schedule);
+  partnerEdits = mergeById(partnerEdits, state.partnerEdits);
+  rebuildPartners();
   sortIntoCollections();   // 병합 뒤에도 종류별로 갈라 둔다
 
   const remoteSecrets = state.vaultSecrets && typeof state.vaultSecrets === 'object' ? state.vaultSecrets : {};

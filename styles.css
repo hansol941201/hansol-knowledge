@@ -759,6 +759,9 @@ html:has(> .overlay-mode) { overflow: hidden; }
 .edit-box footer { display: flex; justify-content: flex-end; gap: 7px; margin-top: 17px; }
 .edit-box footer button { padding: 9px 15px; border-radius: 9px; color: #716a75; background: #efecf1; font-size: 11px; }
 .edit-box footer button[type="submit"] { color: white; background: #8f66df; }
+/* 협력업체 수정 창의 "원래 정보" 안내 — .edit-help 는 float:right 라 아래 footer 를
+   너비 0 으로 찌그러뜨린다. 그래서 띄우지 않는 전용 칸을 따로 쓴다. */
+.partner-origin { clear: both; margin: 4px 0 0; color: #8b8391; font-size: 10.5px; line-height: 1.5; }
 .vault-note { margin: 0 0 13px; padding: 10px; border-radius: 9px; color: #756c7c; background: #f4f0f7; font-size: 10px; line-height: 1.5; }
 .hidden { display: none !important; }
 @keyframes rise { from { opacity: 0; transform: translateY(3px); } }
