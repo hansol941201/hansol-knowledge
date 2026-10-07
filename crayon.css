@@ -322,9 +322,9 @@ body { font-size: 16px; }
 /* Brand artwork leads the navigation; tabs retain their horizontal scroll. */
 .topnav { grid-template-rows: 34px 76px; }
 .navigation-row { grid-column: 1 / -1; grid-row: 2; display: flex; align-items: center; gap: 12px; min-width: 0; }
-.hansol-story-logo { flex: 0 0 auto; display: block; width: 100px; height: 67px; object-fit: contain; border-radius: 7px; }
+.hansol-story-logo { flex: 0 0 auto; display: block; width: 130px; height: 87px; object-fit: contain; border-radius: 7px; }
 .topnav .navigation-row .top-nav { flex: 1; min-width: 0; border-top: 0; overflow-x: auto; }
-@media (max-width: 760px) { .navigation-row { gap: 8px; } .hansol-story-logo { width: 84px; height: 56px; } }
+@media (max-width: 760px) { .navigation-row { gap: 8px; } .hansol-story-logo { width: 105px; height: 70px; } }
 
 /* Importance is indicated by the icon only: circle off, star on. */
 #todayPanel .todo-star[aria-pressed="false"]::before {
