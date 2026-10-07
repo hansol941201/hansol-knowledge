@@ -173,7 +173,7 @@ button:focus-visible, a:focus-visible { outline-color: #b3a4cf; }
   .main-scroll:has(#knowledgeBlock.hidden) #schedulePanel { position: sticky; top: 0; height: min(100%, 65dvh); align-self: start; }
 }
 
-@font-face { font-family: 'NanumBaReunHiPi'; src: url('fonts/NanumBaReunHiPi.woff2') format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; }
+@font-face { font-family: 'NanumBaReunHiPi'; src: url('fonts/NanumBaReunHiPi.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
 body, button, input, textarea, select, option, #memoNote, .page-search input, .edit-box, .memory-item, .chat-bubble { font-family: 'NanumBaReunHiPi', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; }
 body { font-size: 18px; }
 .top-item { font-size: 18px; }
@@ -334,3 +334,11 @@ body { font-size: 18px; }
 }
 #todayPanel .todo-star[aria-pressed="true"]::before { background-image: url('crayon-star.svg'); }
 #todayPanel .todo-line.star .todo-mark { background: none; box-shadow: none; }
+
+/* Bold site typography; larger memory and todo text. */
+body, body * { font-weight: 700 !important; font-synthesis: weight; }
+input::placeholder, textarea::placeholder { font-weight: 700; }
+#todayPanel .todo-line-text { font-size: 23px; }
+.memory-item p { font-size: 15.5px; }
+.page-card.memory-result-card h3 { font-size: 23px; }
+.page-card.memory-result-card p, .page-card.memory-result-card .card-body { font-size: 20px; }
