@@ -114,3 +114,29 @@ button:focus-visible, a:focus-visible { outline-color: #b3a4cf; }
 #todayPanel .todo-star[aria-pressed="true"]::before { opacity: 1; filter: none; transform: rotate(-8deg); }
 #todayPanel .todo-star:hover { transform: none; background: #fbf5df; }
 #todayPanel .todo-star:hover::before { opacity: 1; filter: none; transform: rotate(4deg) scale(1.08); }
+
+/* Small crayon characters sit in a reserved footer, clear of working text. */
+.main-scroll:has(#knowledgeBlock.hidden) #todayPanel,
+.main-scroll:has(#knowledgeBlock.hidden) #callNotesPanel,
+.main-scroll:has(#knowledgeBlock.hidden) #memoPanel { position: relative; padding-bottom: 98px; }
+#todayPanel::after, #callNotesPanel::after, #memoPanel::after {
+  content: ''; position: absolute; bottom: 5px; right: 12px;
+  width: 160px; height: 84px; background-position: center bottom;
+  background-repeat: no-repeat; background-size: contain; pointer-events: none;
+}
+#todayPanel::after { background-image: url('theme-art/cowboy.svg'); }
+#callNotesPanel::after { background-image: url('theme-art/alien.svg'); }
+#memoPanel::after { background-image: url('theme-art/astronaut.svg'); }
+#schedulePanel { background-image: url('theme-art/dinosaur.svg'); background-position: right 12px bottom 5px; background-size: 110px 58px; }
+#schedulePanel .todo-empty { padding-right: 120px; }
+.page-card { position: relative; }
+.page-card::after { content: ''; position: absolute; top: 9px; right: 9px; width: 42px; height: 33px; background: url('theme-art/bear.svg') center / contain no-repeat; pointer-events: none; opacity: .8; }
+.page-card:nth-child(3n)::after { background-image: url('theme-art/alien.svg'); }
+.page-card:nth-child(3n+2)::after { background-image: url('theme-art/dinosaur.svg'); }
+.page-card .card-kind { padding-right: 45px; }
+@media (max-height: 700px) and (min-width: 751px) {
+  .main-scroll:has(#knowledgeBlock.hidden) #todayPanel,
+  .main-scroll:has(#knowledgeBlock.hidden) #callNotesPanel,
+  .main-scroll:has(#knowledgeBlock.hidden) #memoPanel { padding-bottom: 70px; }
+  #todayPanel::after, #callNotesPanel::after, #memoPanel::after { width: 110px; height: 56px; }
+}
