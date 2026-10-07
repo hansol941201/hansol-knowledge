@@ -62,7 +62,7 @@
   }
 
   // ── 일정 ────────────────────────────────────────────────
-  // 같은 날짜끼리 묶어서 날짜 머리글 아래에 나란히 보여 준다.
+  // 같은 날짜끼리 묶고, 각 일정 행에는 날짜 옆에 일정명을 바로 붙여 한눈에 보이게 한다.
   function scheduleGroups(rows) {
     const groups = [];
     for (const item of rows) {
@@ -77,15 +77,19 @@
         ${helper.scheduleBadge(group.date) ? `<em class="schedule-badge">${helper.scheduleBadge(group.date)}</em>` : ''}
         <span class="schedule-group-count">${group.items.length}건</span>
       </div>
-      ${group.items.map(item => `
-        <div class="schedule-row" data-schedule="${item.id}" data-date="${helper.escapeHtml(String(item.date).slice(5).replace('-', '/'))}" title="${helper.escapeHtml(`${item.date} ${item.time || ''} · ${item.title}`)}">
-          ${item.time ? `<span class="schedule-date">${helper.escapeHtml(item.time)}</span>` : '<span class="schedule-date muted">종일</span>'}
+      ${group.items.map(item => {
+        const shortDate = String(item.date || '').slice(5).replace('-', '/');
+        return `
+        <div class="schedule-row" data-schedule="${item.id}" data-date="${helper.escapeHtml(shortDate)}" title="${helper.escapeHtml(`${item.date} ${item.time || ''} · ${item.title}`)}">
+          <span class="schedule-date">${helper.escapeHtml(shortDate)}</span>
           <div class="schedule-body">
             <b>${helper.escapeHtml(item.title)}</b>
+            ${item.time ? `<small>${helper.escapeHtml(item.time)}</small>` : ''}
             ${item.memo ? `<small>${helper.escapeHtml(item.memo)}</small>` : ''}
           </div>
           <button type="button" class="schedule-more" data-row-menu title="수정·삭제">${helper.icon('more', 14)}</button>
-        </div>`).join('')}
+        </div>`;
+      }).join('')}
     </div>`).join('');
   }
 
