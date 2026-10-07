@@ -189,3 +189,19 @@ body { font-size: 16px; }
 .page-card p, .page-card .card-body { font-size: 16px; }
 #schedulePanel h2 { font-size: 16px; }
 #schedulePanel .schedule-row::before { font-size: 17px; }
+
+/* Three work columns; notes and a compact schedule share the right column. */
+.main-scroll:has(#knowledgeBlock.hidden) .dash-cols {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-areas: "todo memo notes" "todo memo schedule";
+  grid-template-rows: minmax(0, 1fr) 130px;
+}
+.main-scroll:has(#knowledgeBlock.hidden) #schedulePanel { position: static; height: 100%; align-self: stretch; padding: 12px 16px; grid-template-rows: auto minmax(0, 1fr); gap: 5px; }
+#schedulePanel .block-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-bottom: 9px; }
+#schedulePanel .schedule-list { display: flex; flex-wrap: wrap; align-content: flex-start; gap: 7px; }
+#schedulePanel .schedule-group { display: contents; }
+#schedulePanel .schedule-row { min-width: 82px; padding: 5px 8px; }
+#schedulePanel .todo-empty { width: 100%; padding: 0; }
+@media (max-width: 750px) {
+  .main-scroll:has(#knowledgeBlock.hidden) .dash-cols { grid-template-columns: minmax(0, 1fr); grid-template-areas: "todo" "memo" "notes" "schedule"; grid-template-rows: 340px 380px 340px 130px; overflow-y: auto; }
+}
