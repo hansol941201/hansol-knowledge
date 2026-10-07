@@ -228,7 +228,7 @@ body { font-size: 18px; }
 .main-scroll:has(#knowledgeBlock.hidden) #memoPanel { padding-bottom: 20px; }
 #todayPanel::after, #memoPanel::after { display: none; }
 .main-scroll:has(#knowledgeBlock.hidden) #memoPanel { grid-template-rows: auto minmax(0, 1fr) auto; }
-.main-scroll:has(#knowledgeBlock.hidden) #todayPanel { grid-template-rows: auto auto minmax(0, 1fr); }
+.main-scroll:has(#knowledgeBlock.hidden) #todayPanel { grid-template-rows: auto minmax(0, 1fr); }
 #todayPanel .todo-list { height: auto; min-height: 0; align-self: stretch; }
 #memoPanel .memo-note-shell { min-height: 0; height: 100%; }
 .main-scroll:has(#knowledgeBlock.hidden) #memoPanel #memoNote {

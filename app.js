@@ -552,7 +552,6 @@ function todayKey() {
   return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
 }
 const isTodoEntry = (item) => Boolean(item) && (!item.type || item.type === 'todo');
-let todoTab = 'active';            // 'active' = 할 일, 'done' = 완료
 let todoUndo = null;               // 실행 취소용 직전 상태
 
 // 완료 처리는 지우는 게 아니라 '완료' 목록으로 옮기는 것이다(원본은 그대로 남는다).
@@ -609,35 +608,15 @@ function renderTodos() {
   // 검색 중이거나 다른 화면이면 상단 할 일 카드는 접어 둔다.
   panel.classList.toggle('hidden', searching || !(pageCategory === '대시보드' || onTodoView));
 
-  const active = activeTodos();
-  const done = doneTodos();
-  const list = todoTab === 'done' ? done : active;   // 접지 않고 항상 전부 보여 준다
-
+  const list = activeTodos();
   panel.innerHTML = `
     <div class="todo-head">
       <h2>할 일 목록</h2>
       <span class="todo-count">${list.length}개</span>
     </div>
-    <div class="todo-tabs">
-      <button type="button" class="todo-tab ${todoTab === 'active' ? 'active' : ''}" data-todo-tab="active">할 일 <span>${active.length}</span></button>
-      <button type="button" class="todo-tab ${todoTab === 'done' ? 'active' : ''}" data-todo-tab="done">완료 <span>${done.length}</span></button>
-      ${todoTab === 'done' && done.length ? `<button type="button" class="ghost-btn" id="todoClearDone">완료 목록 비우기</button>` : ''}
-    </div>
     ${list.length
-      ? (todoTab === 'done' ? VIEWS.todoDoneSimpleList(list) : VIEWS.todoSimpleList(list))
-      : `<div class="todo-empty">${todoTab === 'done' ? '완료한 할 일이 없습니다.' : '위의 지식 추가에서 할 일을 등록하세요.'}</div>`}`;
-
-  panel.querySelectorAll('[data-todo-tab]').forEach(button => {
-    button.onclick = () => { todoTab = button.dataset.todoTab; renderTodos(); };
-  });
-  const clearDone = $('#todoClearDone');
-  if (clearDone) clearDone.onclick = () => {
-    const rows = doneTodos();
-    if (!rows.length || !confirm(`완료한 할 일 ${rows.length}개를 영구 삭제할까요? 되돌릴 수 없습니다.`)) return;
-    rows.forEach(todo => { todo.deleted = true; touch(todo); });
-    saveTodos(); renderTodos(); renderLibrary();
-    showToast('완료 목록을 비웠습니다');
-  };
+      ? VIEWS.todoSimpleList(list)
+      : '<div class="todo-empty">위의 지식 추가에서 할 일을 등록하세요.</div>'}`;
 
   panel.querySelectorAll('[data-todo-id]').forEach(row => {
     const todo = todos.find(x => x.id === row.dataset.todoId);
