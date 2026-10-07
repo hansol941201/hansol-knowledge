@@ -996,3 +996,33 @@ body:not(.overlay-mode) { height: 100dvh; overflow: hidden; }
   .top-nav { padding: 8px 0 10px; gap: 6px; }
   .top-item { height: 38px; padding: 0 15px; font-size: 13px; }
 }
+
+/* Consistent knowledge, account, contact, script and plan card rhythm. */
+.page-grid { align-items: start; }
+.page-card:not(.patent-card):not(.partner-card) {
+  height: 280px; min-height: 280px; gap: 0; overflow: hidden;
+}
+.page-card:not(.patent-card):not(.partner-card) .card-kind {
+  flex: none; align-self: flex-start; margin-bottom: 14px;
+  padding: 4px 8px; border-radius: 6px; background: var(--nav-soft);
+}
+.page-card:not(.patent-card):not(.partner-card) h3 {
+  flex: none; min-height: 24px; max-height: 48px; margin-bottom: 10px;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.page-card:not(.patent-card):not(.partner-card) p,
+.page-card.script-card p, .page-card.plan-card p {
+  flex: 1; min-height: 0; display: -webkit-box; -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical; overflow: hidden; font-size: 13px; line-height: 1.8;
+}
+.page-card:not(.patent-card):not(.partner-card) .card-time { flex: none; margin-top: 10px; }
+.page-card:not(.patent-card):not(.partner-card) footer {
+  flex: none; margin-top: 14px; padding-top: 12px; gap: 6px; justify-content: flex-start;
+}
+.page-card footer button {
+  padding: 5px 8px; border: 1px solid var(--line); border-radius: 6px;
+  background: #fff; color: var(--ink-2); font-size: 11px; line-height: 1.5;
+}
+.page-card footer button.card-act { padding: 5px 8px; border-radius: 6px; font-size: 11px; }
+.page-card footer button:hover { background: var(--nav-soft); border-color: var(--violet-line); }
+.account-card .secret-line { display: block; margin-top: 10px; color: #8a9bb0; letter-spacing: 3px; }
