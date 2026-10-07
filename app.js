@@ -812,6 +812,7 @@ $('#partnerForm').addEventListener('submit', event => {
 });
 
 function renderMemories() {
+  renderCallNotes();
   const query = normalize($('#memorySearch').value || '');
   const filtered = sortBySaved(alive(memories).filter(memory => !query || normalize(`${memory.text} ${memory.createdAt || ''} ${savedLabel(memory)}`).includes(query)));
   $('#memoryCount').textContent = query ? `${filtered.length}개 검색됨` : `${alive(memories).length}개 기록`;
@@ -1362,6 +1363,16 @@ function writeMemoNote(text) {
   try { localStorage.setItem(MEMO_NOTE_KEY, String(text || '')); } catch { /* 저장 공간이 꽉 찬 경우 */ }
 }
 
+function renderCallNotes() {
+  const panel = $('#callNotesPanel');
+  if (!panel) return;
+  panel.classList.toggle('hidden', Boolean(pageSearchCommitted.trim()) || pageCategory !== '대시보드');
+  if (panel.classList.contains('hidden')) return;
+  const notes = sortBySaved(alive(memories).filter(item => item.source === '통화 메모'));
+  panel.innerHTML = `<div class="memo-head"><h2>메모장</h2><small>전화 메모를 저장하면 여기에 쌓입니다.</small></div>
+    <div class="call-notes-list">${notes.map(item => `<article class="call-note"><p>${escapeHtml(item.text)}</p><time>${escapeHtml(savedLabel(item))}</time></article>`).join('')}</div>`;
+}
+
 function renderMemoPanel() {
   const panel = $('#memoPanel');
   if (!panel) return;
@@ -1377,31 +1388,22 @@ function renderMemoPanel() {
   note.value = readMemoNote();
   const saveDraft = () => writeMemoNote(note.value);
 
-  // 엔터 한 번 → 그 줄을 왼쪽 할 일 목록으로 보낸다. Shift+Enter 는 줄바꿈.
-  note.addEventListener('keydown', event => {
-    if (event.key !== 'Enter' || event.shiftKey || event.isComposing) return;   // 한글 조합 중에는 넘기지 않는다
-    event.preventDefault();
-    const text = note.value.trim();
-    if (!text) return;
-    createTodo(text, '통화 메모');
-    note.value = '';
-    saveDraft();
-    saveTodos(); renderTodos(); renderLibrary();
-    showToast('할 일에 넣었습니다');
-    note.focus();
-  });
-
-  // 추가 단추 → 적어 둔 내용을 기억으로 저장하고 기억 저장소를 연다.
-  $('#memoQuickAdd').onclick = () => {
+  const submitCallNote = () => {
     const text = note.value.trim();
     if (!text) { note.focus(); return; }
     createMemory(text, '통화 메모');
     note.value = '';
     saveDraft();
-    saveMemories(); renderLibrary();
-    showToast('기억 저장소에 담았습니다');
-    openMemoryLibrary();
+    saveMemories(); renderMemories(); renderCallNotes(); renderLibrary();
+    showToast('메모장에 저장했습니다');
+    note.focus();
   };
+  note.addEventListener('keydown', event => {
+    if (event.key !== 'Enter' || event.shiftKey || event.isComposing || event.keyCode === 229) return;
+    event.preventDefault();
+    submitCallNote();
+  });
+  $('#memoQuickAdd').onclick = submitCallNote;
 
   // 적는 대로 이 기기에 초안으로 남는다(다시 열어도 그대로).
   let noteTimer = null;
@@ -2715,6 +2717,7 @@ if (searchOpenButton) searchOpenButton.onclick = () => {
 function renderAll() {
   renderSideNav();
   renderMemoPanel();
+  renderCallNotes();
   renderShortcuts();
   renderSchedule();
   renderLibrary();

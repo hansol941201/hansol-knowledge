@@ -24,14 +24,14 @@
   function memoPanel() {
     return `
     <div class="memo-head">
-      <h2>📞 통화 &amp; 빠른 메모</h2>
-      <small>엔터(Enter)는 왼쪽 할 일 목록으로 · Shift+Enter는 줄바꿈</small>
+      <h2>전화 메모</h2>
+      <small>Enter로 가운데 메모장에 저장 · Shift+Enter로 줄바꿈</small>
     </div>
     <textarea id="memoNote" rows="9"
-      placeholder="통화 내용이나 할 일을 적으세요...&#10;엔터를 누르면 왼쪽 할 일 목록에 들어갑니다.&#10;길게 적은 뒤 [추가]를 누르면 기억 저장소에 담깁니다."></textarea>
+      placeholder="통화 내용을 적으세요...&#10;Enter를 누르면 가운데 메모장에 쌓입니다."></textarea>
     <div class="memo-tools">
       <label class="memo-file">📷 사진/파일 첨부<input id="memoFile" type="file" accept="image/*" hidden /></label>
-      <button type="button" id="memoQuickAdd" class="memo-add-btn">추가 → 기억 저장소</button>
+      <button type="button" id="memoQuickAdd" class="memo-add-btn">메모 저장</button>
     </div>`;
   }
 

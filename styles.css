@@ -1202,3 +1202,27 @@ html, body:not(.overlay-mode), .workspace, .main,
 .shortcut.add { background: #fafbfc; }
 .preview-item:hover, .preview-item.on, .page-categories button.active { background: #f3f5f7; }
 .orb { background: #8e7a85; }
+
+/* Three work columns: tasks, saved call notes, call input. */
+.dash-cols > #callNotesPanel { grid-area: notes; }
+.call-notes-panel { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 12px; overflow: hidden; }
+.call-notes-list { min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.call-note { padding: 14px 0; border-bottom: 1px solid var(--line); }
+.call-note p { margin: 0 0 8px; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.6; }
+.call-note time { font-size: 11px; color: var(--muted); }
+.main-scroll:has(#knowledgeBlock.hidden) .dash-cols {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-areas: "todo notes memo" "schedule schedule schedule";
+  grid-template-rows: minmax(0, 1fr) minmax(130px, 24%);
+  overflow: hidden;
+}
+.main-scroll:has(#knowledgeBlock.hidden) #callNotesPanel { height: 100%; min-height: 0; max-height: 100%; padding: 20px; }
+.main-scroll:has(#knowledgeBlock.hidden) #schedulePanel { height: 100%; min-height: 0; max-height: 100%; overflow-y: auto; align-self: stretch; }
+@media (max-width: 750px) {
+  .main-scroll:has(#knowledgeBlock.hidden) .dash-cols {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "todo" "notes" "memo" "schedule";
+    grid-template-rows: repeat(3, 320px) 180px;
+    overflow-y: auto;
+  }
+}
