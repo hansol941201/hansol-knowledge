@@ -25,11 +25,10 @@
     return `
     <div class="memo-head">
       <h2>전화 메모</h2>
-      <small>Enter로 보관함에 저장 · Shift+Enter로 줄바꿈</small>
     </div>
-    <textarea id="memoNote" rows="14"
-      style="min-height:220px;height:220px;resize:vertical"
-      placeholder="통화 내용을 넉넉하게 적으세요...&#10;Enter를 누르면 전화메모 보관함에 저장됩니다."></textarea>
+    <textarea id="memoNote" rows="20"
+      style="min-height:340px;height:340px;resize:vertical"
+      placeholder="통화 내용을 넉넉하게 적으세요..."></textarea>
     <div class="memo-tools" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
       <label class="memo-file">📷 사진/파일 첨부<input id="memoFile" type="file" accept="image/*" hidden /></label>
       <button type="button" id="memoQuickAdd" class="memo-add-btn">메모 저장</button>
