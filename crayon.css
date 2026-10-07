@@ -173,8 +173,8 @@ button:focus-visible, a:focus-visible { outline-color: #b3a4cf; }
   .main-scroll:has(#knowledgeBlock.hidden) #schedulePanel { position: sticky; top: 0; height: min(100%, 65dvh); align-self: start; }
 }
 
-@font-face { font-family: 'NanumHimNaeRaNeunMarBoDan'; src: url('fonts/NanumHimNaeRaNeunMarBoDan.woff2') format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; }
-body, button, input, textarea, select, option, #memoNote, .page-search input, .edit-box, .memory-item, .chat-bubble { font-family: 'NanumHimNaeRaNeunMarBoDan', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; }
+@font-face { font-family: 'NanumBaReunHiPi'; src: url('fonts/NanumBaReunHiPi.woff2') format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; }
+body, button, input, textarea, select, option, #memoNote, .page-search input, .edit-box, .memory-item, .chat-bubble { font-family: 'NanumBaReunHiPi', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; }
 body { font-size: 18px; }
 .top-item { font-size: 18px; }
 .shortcut a b { font-size: 15px; }
