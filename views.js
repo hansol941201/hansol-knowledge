@@ -20,20 +20,32 @@
   };
   function setup(parts) { helper = Object.assign({}, helper, parts || {}); }
 
-  // 왼쪽: 통화 & 빠른 메모 — 한 줄 입력으로 할 일을 넣고, 아래에 긴 통화 기록을 적는다.
+  // 전화 메모: 입력 영역을 넓게 쓰고, 보관함은 별도 팝업으로 연다.
   function memoPanel() {
     return `
     <div class="memo-head">
       <h2>전화 메모</h2>
-      <small>Enter로 아래 보관함에 저장 · Shift+Enter로 줄바꿈</small>
+      <small>Enter로 보관함에 저장 · Shift+Enter로 줄바꿈</small>
     </div>
-    <textarea id="memoNote" rows="9"
-      placeholder="통화 내용을 적으세요...&#10;Enter를 누르면 아래 전화메모 보관함에 쌓입니다."></textarea>
-    <div class="memo-tools">
+    <textarea id="memoNote" rows="14"
+      style="min-height:220px;height:220px;resize:vertical"
+      placeholder="통화 내용을 넉넉하게 적으세요...&#10;Enter를 누르면 전화메모 보관함에 저장됩니다."></textarea>
+    <div class="memo-tools" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
       <label class="memo-file">📷 사진/파일 첨부<input id="memoFile" type="file" accept="image/*" hidden /></label>
       <button type="button" id="memoQuickAdd" class="memo-add-btn">메모 저장</button>
+      <button type="button" class="memo-add-btn" style="margin-left:auto" onclick="document.getElementById('phoneArchiveDialog').showModal()">전화메모 보관함 열기</button>
     </div>
-    <section class="phone-archive" aria-label="전화메모 보관함"><h3>전화메모 보관함</h3><div id="phoneArchiveList" class="call-notes-list"></div></section>`;
+    <dialog id="phoneArchiveDialog" aria-label="전화메모 보관함"
+      onclick="if(event.target===this)this.close()"
+      style="width:min(760px,92vw);max-height:78vh;padding:0;border:1px solid #e5dfe3;border-radius:18px;background:#fffafc;box-shadow:0 24px 70px rgba(80,55,68,.22);overflow:hidden">
+      <section class="phone-archive" style="display:flex;flex-direction:column;max-height:78vh;background:#fffafc">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 20px 14px;border-bottom:1px solid #eee0e6">
+          <div><h3 style="margin:0;font-size:18px">전화메모 보관함</h3><small style="display:block;margin-top:4px;color:#9a8390">저장한 전화메모를 한곳에서 확인하고 삭제할 수 있어요.</small></div>
+          <button type="button" aria-label="닫기" onclick="this.closest('dialog').close()" style="width:34px;height:34px;border-radius:10px;font-size:21px;background:#f6e9ed;color:#796976">×</button>
+        </div>
+        <div id="phoneArchiveList" class="call-notes-list" style="min-height:260px;max-height:58vh;overflow:auto;padding:16px 20px 22px"></div>
+      </section>
+    </dialog>`;
   }
 
   // 오른쪽 위: 할 일 목록 — 체크 + 별표(중요) + 제목 한 줄, 오른쪽 끝에 지우기(✕)
