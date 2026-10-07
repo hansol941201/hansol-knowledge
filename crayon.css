@@ -309,7 +309,7 @@ body { font-size: 18px; }
 /* Approved minimal search design. */
 .topbar .page-search {
   position: relative; overflow: hidden; min-height: 48px;
-  border: 1px solid #816247; border-radius: 25px;
+  border: 1px solid #816247; border-radius: 5px;
   background: #fffdf7; color: #654e38; padding: 0 20px 0 27px;
   box-shadow: none;
 }
