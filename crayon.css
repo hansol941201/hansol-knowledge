@@ -242,3 +242,27 @@ body { font-size: 18px; }
 @media (max-width: 750px) {
   .main-scroll:has(#knowledgeBlock.hidden) .dash-cols { grid-template-rows: 440px 540px 340px 340px; }
 }
+
+/* Keep the character inside the memo border without covering typed text. */
+#memoPanel .memo-note-shell {
+  display: grid; grid-template-rows: minmax(0, 1fr) 76px;
+  overflow: hidden; border: 1px solid #e2ddeb;
+  border-radius: 12px 15px 11px 16px; background: #fdfcfa;
+}
+.main-scroll:has(#knowledgeBlock.hidden) #memoPanel #memoNote {
+  border: 0; border-radius: 0; background: transparent;
+}
+#memoPanel .memo-note-shell:focus-within { border-color: #b9b2d4; box-shadow: 0 0 0 3px #f5f2fb; }
+.memo-character { display: flex; justify-content: flex-end; align-items: center; gap: 4px; padding: 0 14px 6px; pointer-events: none; }
+.memo-character img { display: block; width: 94px; height: 70px; object-fit: contain; }
+.memo-character .memo-character-star { width: 26px; height: 26px; align-self: flex-start; }
+/* Show each schedule title next to its date, with room for long titles. */
+#schedulePanel .schedule-list { display: grid; align-content: start; }
+#schedulePanel .schedule-row { display: flex; width: 100%; min-width: 0; gap: 10px; padding: 8px; align-items: flex-start; }
+#schedulePanel .schedule-row::before { content: none; }
+#schedulePanel .schedule-date { display: block; font-size: 17px; }
+#schedulePanel .schedule-body { display: block; min-width: 0; }
+#schedulePanel .schedule-body b { font-size: 19px; white-space: normal; overflow-wrap: anywhere; }
+#schedulePanel .schedule-body small { font-size: 15px; white-space: normal; overflow-wrap: anywhere; }
+.main-scroll:has(#knowledgeBlock.hidden) #schedulePanel { position: relative; padding-bottom: 64px; }
+#schedulePanel::after { content: ''; position: absolute; right: 14px; bottom: 6px; width: 85px; height: 52px; background: url('theme-art/alien.svg') center / contain no-repeat; pointer-events: none; }
