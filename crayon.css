@@ -267,3 +267,10 @@ body { font-size: 18px; }
 .main-scroll:has(#knowledgeBlock.hidden) #schedulePanel { position: relative; padding-bottom: 64px; }
 #schedulePanel::after { content: ''; position: absolute; right: 0; bottom: 10px; width: 80px; height: 136px; background: url('theme-art/schedule-bear.png') right bottom / contain no-repeat; pointer-events: none; }
 #schedulePanel .schedule-list { padding-right: 78px; }
+
+/* Two sideways paper panels, softly visible behind the navigation. */
+.topnav { position: relative; isolation: isolate; }
+.header-check-art { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); overflow: hidden; border-radius: inherit; pointer-events: none; z-index: -1; opacity: .12; }
+.header-check-art span { position: relative; overflow: hidden; }
+.header-check-art img { position: absolute; top: 50%; left: 50%; width: 140px; height: 50vw; max-width: none; object-fit: cover; transform: translate(-50%, -50%) rotate(90deg); filter: blur(.3px); }
+.topnav .top-nav { background: transparent; }
