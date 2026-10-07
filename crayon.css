@@ -255,7 +255,7 @@ body { font-size: 18px; }
 #memoPanel .memo-note-shell:focus-within { border-color: #b9b2d4; box-shadow: 0 0 0 3px #f5f2fb; }
 .memo-character { display: flex; justify-content: flex-end; align-items: center; gap: 4px; padding: 0 14px 6px; pointer-events: none; }
 .memo-character img { display: block; width: 94px; height: 70px; object-fit: contain; }
-.memo-character .memo-character-star { width: 26px; height: 26px; align-self: flex-start; }
+
 /* Show each schedule title next to its date, with room for long titles. */
 #schedulePanel .schedule-list { display: grid; align-content: start; }
 #schedulePanel .schedule-row { display: flex; width: 100%; min-width: 0; gap: 10px; padding: 8px; align-items: flex-start; }
