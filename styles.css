@@ -1124,3 +1124,41 @@ body:not(.overlay-mode) { height: 100dvh; overflow: hidden; }
 .orb { background: #ae7187; }
 .orb span { background: #f3dce6; }
 button:focus-visible, a:focus-visible { outline-color: #ac7088; }
+
+/* Narrow, tall work panels with the schedule alongside them. */
+.main-scroll:has(#knowledgeBlock.hidden) .dash-cols {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(240px, .8fr);
+  grid-template-areas: "todo memo schedule";
+  grid-template-rows: minmax(0, 1fr); align-items: stretch;
+}
+.main-scroll:has(#knowledgeBlock.hidden) #todayPanel,
+.main-scroll:has(#knowledgeBlock.hidden) #memoPanel {
+  height: 100%; min-height: 0; max-height: 100%; align-self: stretch;
+  padding: 20px; gap: 12px;
+}
+.main-scroll:has(#knowledgeBlock.hidden) #memoPanel {
+  grid-template-rows: auto minmax(0, 1fr) auto; overflow: hidden;
+}
+.main-scroll:has(#knowledgeBlock.hidden) #memoNote {
+  height: 100%; min-height: 0; resize: none; padding: 14px; overflow-y: auto;
+}
+.main-scroll:has(#knowledgeBlock.hidden) #schedulePanel { align-self: start; }
+.memo-tools { gap: 8px; }
+.memo-file { padding: 8px; }
+.memo-add-btn { padding: 9px 12px; }
+@media (max-width: 1050px) {
+  .main-scroll:has(#knowledgeBlock.hidden) .dash-cols {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas: "todo memo" "schedule schedule";
+    grid-template-rows: minmax(220px, 1fr) auto; overflow-y: auto;
+  }
+  .main-scroll:has(#knowledgeBlock.hidden) #schedulePanel { max-height: 140px; }
+}
+@media (max-width: 600px) {
+  .main-scroll:has(#knowledgeBlock.hidden) .dash-cols {
+    grid-template-columns: minmax(0, 1fr); grid-template-areas: "todo" "memo" "schedule";
+    grid-template-rows: 360px 360px auto;
+  }
+  .main-scroll:has(#knowledgeBlock.hidden) #todayPanel,
+  .main-scroll:has(#knowledgeBlock.hidden) #memoPanel { height: 100%; max-height: none; }
+}
