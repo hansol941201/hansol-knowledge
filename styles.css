@@ -1171,3 +1171,34 @@ html, body:not(.overlay-mode), .workspace, .main,
 .schedule-panel .block-head { flex-wrap: wrap; align-items: flex-start; }
 .schedule-panel .cal-tools { flex-wrap: wrap; }
 #crmMeetingConnect { white-space: normal; height: auto; min-height: 30px; text-align: left; }
+
+/* Neutral white surfaces, with blush restricted to small accents. */
+:root {
+  --bg: #fff; --card: #fff; --line: #e5e7eb; --line-soft: #f5f6f8;
+  --ink: #344052; --ink-1: #344052; --ink-2: #6c7582; --ink-3: #939aa5;
+  --violet: #8e7481; --violet-soft: #f6f0f3; --violet-line: #e3d8de;
+  --nav-navy: #49596e; --nav-soft: #f1f3f6;
+  --shadow: 0 3px 12px rgba(45, 56, 72, .045);
+  --shadow-hover: 0 5px 16px rgba(45, 56, 72, .075);
+}
+.top-item, .today-panel, .page-card, .shortcut, .search-preview,
+.edit-box, .page-categories button, .page-card footer button { background: #fff; border-color: var(--line); }
+.top-item { color: #697382; box-shadow: none; }
+.top-item.active, .top-item.active:hover { background: #eef1f5; border-color: #dce2e9; color: #49596e; box-shadow: none; }
+.top-item:hover { background: #f7f8fa; border-color: #dce2e9; color: #49596e; }
+.brand-badge { background: #657386; box-shadow: none; }
+.page-search { background: #fff; border-color: #e4e0e3; color: #a68b99; box-shadow: inset 1px 1px 3px rgba(70, 65, 75, .035), 0 3px 9px rgba(70, 65, 75, .06); }
+.page-search:focus-within { background: #fff; border-color: #cbbac3; box-shadow: 0 0 0 3px #f8f3f5; }
+.primary-btn, .memo-add-btn, .edit-box footer button[type="submit"] { background: #8e7a85; box-shadow: none; }
+.primary-btn:hover, .memo-add-btn:hover { background: #7a6671; }
+#memoNote, .todo-empty { background: #fafbfc; border-color: var(--line); box-shadow: none; }
+.todo-head, .schedule-panel .block-head { border-bottom-color: var(--line); }
+.todo-tab.active { color: #49596e; border-color: #dce2e9; background: #eef1f5; }
+.todo-tab.active span { color: #49596e; }
+.todo-line:hover, .todo-line.star:hover { background: #f7f8fa; }
+.shortcut { box-shadow: none; }
+.shortcut-thumb { background: #f6f7f9; }
+.shortcut a b { color: #687382; }
+.shortcut.add { background: #fafbfc; }
+.preview-item:hover, .preview-item.on, .page-categories button.active { background: #f3f5f7; }
+.orb { background: #8e7a85; }
