@@ -265,4 +265,5 @@ body { font-size: 18px; }
 #schedulePanel .schedule-body b { font-size: 19px; white-space: normal; overflow-wrap: anywhere; }
 #schedulePanel .schedule-body small { font-size: 15px; white-space: normal; overflow-wrap: anywhere; }
 .main-scroll:has(#knowledgeBlock.hidden) #schedulePanel { position: relative; padding-bottom: 64px; }
-#schedulePanel::after { content: ''; position: absolute; right: 14px; bottom: 6px; width: 85px; height: 52px; background: url('theme-art/alien.svg') center / contain no-repeat; pointer-events: none; }
+#schedulePanel::after { content: ''; position: absolute; right: 0; bottom: 10px; width: 80px; height: 136px; background: url('theme-art/schedule-bear.png') right bottom / contain no-repeat; pointer-events: none; }
+#schedulePanel .schedule-list { padding-right: 78px; }
