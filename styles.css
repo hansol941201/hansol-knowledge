@@ -1037,3 +1037,7 @@ body:not(.overlay-mode) { height: 100dvh; overflow: hidden; }
 .shortcut.add { min-height: 76px; gap: 3px; }
 .shortcut.add b { font-size: 10px; }
 .shortcut-more { top: 2px; right: 2px; padding: 2px; }
+
+.top-item { gap: 7px; }
+.top-item > svg { flex: none; opacity: .72; background: transparent; }
+.top-item.active > svg, .top-item:hover > svg { opacity: 1; }
