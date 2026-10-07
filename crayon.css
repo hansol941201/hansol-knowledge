@@ -325,3 +325,12 @@ body { font-size: 18px; }
 .hansol-story-logo { flex: 0 0 auto; display: block; width: 100px; height: 67px; object-fit: contain; border-radius: 7px; }
 .topnav .navigation-row .top-nav { flex: 1; min-width: 0; border-top: 0; overflow-x: auto; }
 @media (max-width: 760px) { .navigation-row { gap: 8px; } .hansol-story-logo { width: 84px; height: 56px; } }
+
+/* Importance is indicated by the icon only: circle off, star on. */
+#todayPanel .todo-star[aria-pressed="false"]::before {
+ background-image: url('theme-art/todo-circle.png'); background-size: 30px 45px;
+ background-position: center; opacity: 1; filter: none; transform: none;
+ mix-blend-mode: multiply;
+}
+#todayPanel .todo-star[aria-pressed="true"]::before { background-image: url('crayon-star.svg'); }
+#todayPanel .todo-line.star .todo-mark { background: none; box-shadow: none; }
