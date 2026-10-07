@@ -1702,7 +1702,7 @@ function sortedSchedule(list) {
 
 function renderSchedule() {
   const today = todayKey();
-  const all = alive(schedule);
+  const all = [...alive(schedule), ...((window.CRM_MEETINGS && window.CRM_MEETINGS.items) || []).filter(item => item.date >= today)];
   const upcoming = sortedSchedule(all.filter(item => String(item.date) >= today));
   const past = sortedSchedule(all.filter(item => String(item.date) < today)).reverse();   // 최근 지난 일정부터
   const rows = showPastSchedule ? past : upcoming;
@@ -1711,6 +1711,7 @@ function renderSchedule() {
     <div class="block-head">
       <div><h2>일정</h2><p>${showPastSchedule ? `지난 일정 ${past.length}건` : `다가오는 일정 ${upcoming.length}건`}</p></div>
       <div class="cal-tools">
+        <button type="button" class="cal-nav" id="crmMeetingConnect">${escapeHtml(window.CRM_MEETINGS ? window.CRM_MEETINGS.status : '고객관리 미팅 연결')}</button>
         ${past.length ? `<button type="button" class="cal-nav" id="schedulePast">${showPastSchedule ? '다가오는 일정' : '지난 일정'}</button>` : ''}
         <button type="button" class="ghost-btn" id="scheduleAdd">＋ 일정</button>
       </div>
@@ -1723,9 +1724,15 @@ function renderSchedule() {
   const pastButton = $('#schedulePast');
   if (pastButton) pastButton.onclick = () => { showPastSchedule = !showPastSchedule; renderSchedule(); };
   $('#scheduleAdd').onclick = () => openScheduleModal(null, today);
+  $('#crmMeetingConnect').onclick = () => { if (window.CRM_MEETINGS) window.CRM_MEETINGS.open(); };
   $('#schedulePanel').querySelectorAll('[data-schedule]').forEach(row => {
-    const item = schedule.find(x => x.id === row.dataset.schedule);
+    const item = all.find(x => x.id === row.dataset.schedule);
     const button = row.querySelector('.schedule-more');
+    if (item && item.source === 'crm-meeting') {
+      button.title = '고객관리에서 수정';
+      row.onclick = () => window.open('https://bridgeone-m.github.io/card/', '_blank', 'noopener');
+      return;
+    }
     button.onclick = () => openRowMenu(button, [
       { label: '수정', run: () => openScheduleModal(item) },
       { label: '삭제', danger: true, run: () => deleteSchedule(item) }
@@ -1734,6 +1741,8 @@ function renderSchedule() {
     row.onclick = event => { if (!event.target.closest('button')) openScheduleModal(item); };
   });
 }
+
+window.addEventListener('crm-meetings-update', renderSchedule);
 
 // 날짜별로 묶은 모양은 views.js 가 만든다.
 const renderScheduleGroups = (rows) => VIEWS.scheduleGroups(rows);

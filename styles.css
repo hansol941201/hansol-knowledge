@@ -1166,3 +1166,8 @@ button:focus-visible, a:focus-visible { outline-color: #ac7088; }
 /* White page background; existing blush controls and cards remain. */
 html, body:not(.overlay-mode), .workspace, .main,
 .topnav, .shortcut-band, .topbar, .main-scroll { background: #fff; }
+
+/* Keep meeting connection controls usable in the narrow schedule panel. */
+.schedule-panel .block-head { flex-wrap: wrap; align-items: flex-start; }
+.schedule-panel .cal-tools { flex-wrap: wrap; }
+#crmMeetingConnect { white-space: normal; height: auto; min-height: 30px; text-align: left; }
