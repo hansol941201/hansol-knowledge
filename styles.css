@@ -1162,3 +1162,7 @@ button:focus-visible, a:focus-visible { outline-color: #ac7088; }
   .main-scroll:has(#knowledgeBlock.hidden) #todayPanel,
   .main-scroll:has(#knowledgeBlock.hidden) #memoPanel { height: 100%; max-height: none; }
 }
+
+/* White page background; existing blush controls and cards remain. */
+html, body:not(.overlay-mode), .workspace, .main,
+.topnav, .shortcut-band, .topbar, .main-scroll { background: #fff; }
