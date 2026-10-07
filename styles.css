@@ -933,3 +933,44 @@ button:focus-visible, a:focus-visible { outline: 2px solid #527ca5; outline-offs
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
+
+/* Fixed workspace; long lists scroll within their own panel. */
+body:not(.overlay-mode) { height: 100dvh; overflow: hidden; }
+.workspace { height: 100dvh; min-height: 0; overflow: hidden; }
+.main { height: 100%; min-height: 0; }
+.shortcut-band, .topbar { flex-shrink: 0; }
+.main-scroll { min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.main-scroll:has(#knowledgeBlock.hidden) {
+  overflow: hidden; grid-template-rows: minmax(0, 1fr); padding-bottom: 24px;
+}
+.main-scroll:has(#knowledgeBlock.hidden) .dash-cols {
+  height: 100%; min-height: 0; grid-template-rows: minmax(0, 2fr) minmax(0, 1fr);
+}
+#todayPanel {
+  min-height: 0; max-height: 100%; grid-template-rows: auto auto minmax(0, 1fr); overflow: hidden;
+}
+#todayPanel .todo-list {
+  min-height: 0; overflow-y: auto; align-content: start; overscroll-behavior: contain;
+  scrollbar-width: thin; scrollbar-color: #cdd6e1 transparent; padding-right: 6px;
+}
+.main-scroll:has(#knowledgeBlock.hidden) #todayPanel { height: 100%; }
+.main-scroll:has(#knowledgeBlock.hidden) #memoPanel,
+.main-scroll:has(#knowledgeBlock.hidden) #schedulePanel { max-height: 100%; overflow-y: auto; overscroll-behavior: contain; }
+.main-scroll:not(:has(#knowledgeBlock.hidden)) #todayPanel { max-height: min(60dvh, 560px); }
+@media (max-width: 900px) {
+  .main-scroll:has(#knowledgeBlock.hidden) .dash-cols {
+    grid-template-rows: auto minmax(160px, 1fr) auto; gap: 12px;
+  }
+  .main-scroll:has(#knowledgeBlock.hidden) #memoPanel { max-height: 180px; }
+  .main-scroll:has(#knowledgeBlock.hidden) #schedulePanel { max-height: 120px; }
+  .main-scroll:has(#knowledgeBlock.hidden) #memoNote { height: 80px; min-height: 80px; }
+}
+@media (max-height: 700px) {
+  .main-scroll:has(#knowledgeBlock.hidden) .dash-cols { overflow-y: auto; }
+  .main-scroll:has(#knowledgeBlock.hidden) #todayPanel { min-height: 180px; }
+}
+
+/* Square favorite artwork, with the name kept underneath. */
+.shortcut-thumb { height: auto; aspect-ratio: 1 / 1; }
+.shortcut-thumb .thumb-face { position: absolute; inset: 0; padding: 12px; }
+.shortcut.add { height: auto; min-height: 0; aspect-ratio: 1 / 1; align-self: flex-start; }
