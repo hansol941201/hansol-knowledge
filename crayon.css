@@ -336,8 +336,8 @@ body { font-size: 16px; }
 #todayPanel .todo-line.star .todo-mark { background: none; box-shadow: none; }
 
 /* Bold site typography; larger memory and todo text. */
-body, body * { font-weight: 700 !important; font-synthesis: weight; }
-input::placeholder, textarea::placeholder { font-weight: 700; }
+body, body * { font-weight: 600 !important; font-synthesis: weight; }
+input::placeholder, textarea::placeholder { font-weight: 600; }
 #todayPanel .todo-line-text { font-size: 18px; }
 .memory-item p { font-size: 13.5px; }
 .page-card.memory-result-card h3 { font-size: 21px; }
