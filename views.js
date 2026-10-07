@@ -20,90 +20,14 @@
   };
   function setup(parts) { helper = Object.assign({}, helper, parts || {}); }
 
-  // 전화 메모: 입력 영역을 고정 크기로 두고, 캐릭터는 메모장 안에, 버튼은 메모장 밖에 둔다.
+  // 전화 메모: 입력 영역은 패널을 채우고, 저장 버튼과 보관함 팝업을 분리한다.
   function memoPanel() {
     return `
-    <style id="todo-fill-fix">
-      .main-scroll:has(#knowledgeBlock.hidden) #todayPanel {
-        height: 100% !important;
-        min-height: 0 !important;
-        align-self: stretch !important;
-      }
-      .main-scroll:has(#knowledgeBlock.hidden) #todayPanel .todo-list {
-        min-height: 0;
-        height: 100%;
-        overflow-y: auto;
-        align-content: start;
-      }
-    </style>
-    <style id="memo-fixed-layout">
-      #memoPanel::after { display: none !important; }
-      #memoPanel .memo-note-shell {
-        position: relative;
-        width: 100%;
-        height: 456px;
-        min-height: 456px;
-        max-height: 456px;
-        overflow: hidden;
-        border: 1px solid #b9b2d4;
-        border-radius: 18px 15px 17px 14px;
-        background: #fdfcfa;
-        box-shadow: 0 0 0 3px rgba(245,242,251,.45);
-      }
-      #memoPanel .memo-note-shell::after {
-        content: '';
-        position: absolute;
-        right: 18px;
-        bottom: 10px;
-        width: 112px;
-        height: 78px;
-        background: url('theme-art/astronaut.svg') center bottom / contain no-repeat;
-        pointer-events: none;
-        z-index: 2;
-      }
-      #memoPanel .memo-note-shell::before {
-        content: '';
-        position: absolute;
-        right: 8px;
-        bottom: 66px;
-        width: 28px;
-        height: 28px;
-        background: url('crayon-star.svg') center / contain no-repeat;
-        pointer-events: none;
-        z-index: 3;
-      }
-      #memoPanel .memo-note-shell #memoNote {
-        display: block;
-        width: 100% !important;
-        height: 456px !important;
-        min-height: 456px !important;
-        max-height: 456px !important;
-        margin: 0 !important;
-        padding: 20px 20px 100px !important;
-        resize: none !important;
-        overflow-y: auto;
-        border: 0 !important;
-        border-radius: 0 !important;
-        outline: 0 !important;
-        background: transparent !important;
-        box-shadow: none !important;
-      }
-      #memoPanel .memo-tools {
-        position: static !important;
-        display: flex !important;
-        align-items: center !important;
-        gap: 10px !important;
-        width: 100%;
-        margin-top: 12px !important;
-        padding: 0 2px !important;
-        flex-wrap: wrap;
-      }
-    </style>
     <div class="memo-head">
       <h2>전화 메모</h2>
     </div>
     <div class="memo-note-shell">
-      <textarea id="memoNote" rows="20" placeholder="통화 내용을 넉넉하게 적으세요..."></textarea>
+      <textarea id="memoNote" rows="20" aria-label="통화내용" placeholder="통화 내용을 넉넉하게 적으세요..."></textarea>
     </div>
     <div class="memo-tools">
       <label class="memo-file">📷 사진/파일 첨부<input id="memoFile" type="file" accept="image/*" hidden /></label>
