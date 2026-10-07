@@ -613,7 +613,7 @@ function renderTodos() {
 
   panel.innerHTML = `
     <div class="todo-head">
-      <h2>✅ 할 일 목록</h2>
+      <h2>할 일 목록</h2>
       <span class="todo-count">${list.length}개</span>
     </div>
     <div class="todo-tabs">
@@ -623,7 +623,7 @@ function renderTodos() {
     </div>
     ${list.length
       ? (todoTab === 'done' ? VIEWS.todoDoneSimpleList(list) : VIEWS.todoSimpleList(list))
-      : `<div class="todo-empty">${todoTab === 'done' ? '완료한 할 일이 없습니다.' : '왼쪽 메모칸에 할 일을 적고 엔터를 누르세요.'}</div>`}`;
+      : `<div class="todo-empty">${todoTab === 'done' ? '완료한 할 일이 없습니다.' : '위의 지식 추가에서 할 일을 등록하세요.'}</div>`}`;
 
   panel.querySelectorAll('[data-todo-tab]').forEach(button => {
     button.onclick = () => { todoTab = button.dataset.todoTab; renderTodos(); };

@@ -1226,3 +1226,86 @@ html, body:not(.overlay-mode), .workspace, .main,
     overflow-y: auto;
   }
 }
+
+/* Refined workspace: white canvas, ink typography and quiet sage accents. */
+:root {
+  --bg: #fff; --card: #fff; --line: #e6ebea; --line-soft: #f1f4f3;
+  --ink: #253532; --ink-1: #253532; --ink-2: #65746f; --ink-3: #89958f;
+  --violet: #41675c; --violet-soft: #edf4f0; --violet-line: #ccded5;
+  --nav-navy: #34594e; --nav-text: #65746f; --nav-soft: #edf4f0;
+  --shadow: 0 2px 5px rgba(30,55,45,.025), 0 10px 28px rgba(30,55,45,.035);
+  --shadow-hover: 0 6px 24px rgba(30,55,45,.085);
+}
+body { letter-spacing: -.15px; }
+.topnav { grid-template-rows: 56px 48px; border-bottom: 1px solid var(--line); }
+.brand-mark { letter-spacing: -.5px; font-size: 17px; }
+.brand-badge { background: #34594e; border-radius: 10px; box-shadow: 0 3px 8px rgba(52,89,78,.12); }
+.brand-avatar { background: #f1f5f3; color: #41675c; border-color: #e2ebe6; }
+.top-nav { gap: 3px; border-top-color: #f3f5f4; }
+.top-item { height: 35px; padding: 0 13px; border: 1px solid transparent; border-radius: 9px; color: #6b7772; font-size: 13px; font-weight: 550; background: transparent; box-shadow: none; }
+.top-item::before { opacity: .7; }
+.top-item.active, .top-item.active:hover { color: #34594e; border-color: #dfeae4; background: #edf4f0; font-weight: 700; box-shadow: none; }
+.top-item.active::before { opacity: 1; }
+.top-item:hover { background: #f6f8f7; color: #34594e; border-color: transparent; }
+.top-mini { border-radius: 9px; color: #8a9690; }
+.top-mini:hover { background: #f0f5f2; color: #34594e; }
+.shortcut-band { padding-top: 14px; }
+.shortcut-grid { gap: 9px; padding-bottom: 8px; }
+.shortcut { border-radius: 12px; border-color: #e8ecea; background: #fff; transition: border-color var(--ease), box-shadow var(--ease), transform var(--ease); }
+.shortcut:hover { border-color: #cdded5; box-shadow: 0 4px 12px rgba(35,64,50,.055); transform: translateY(-2px); }
+.shortcut-thumb { background: #f6f8f7; border-bottom: 1px solid #f0f3f1; }
+.shortcut a b { color: #67766f; font-weight: 600; }
+.shortcut.add { background: #fff; border-color: #dce5df; }
+.shortcut-notice { background: #fcfaf4; border-color: #ede7d6; color: #88784e; font-size: 11px; padding: 6px 10px; }
+.topbar { padding-top: 8px; padding-bottom: 16px; }
+.search-wrap { max-width: 480px; }
+.page-search { border-radius: 11px; background: #f8faf9; border-color: #e7ece9; color: #8d9b94; box-shadow: none; }
+.page-search input { font-size: 13px; padding: 9px 0; }
+.page-search:focus-within { border-color: #afcabb; background: #fff; box-shadow: 0 0 0 3px #edf4f0; }
+.primary-btn, .memo-add-btn, .edit-box footer button[type="submit"] { background: #41675c; border-radius: 10px; box-shadow: 0 3px 8px rgba(52,89,78,.09); font-weight: 600; }
+.primary-btn:hover, .memo-add-btn:hover { background: #34594e; }
+.main-scroll { padding-top: 20px; }
+.dash-cols { gap: 16px; }
+.today-panel, .page-card { border: 1px solid #e5ebe7; border-radius: 16px; background: #fff; box-shadow: var(--shadow); }
+.memo-head h2, .todo-head h2, .schedule-panel h2 { font-size: 15px; line-height: 1.5; font-weight: 700; letter-spacing: -.4px; }
+.memo-head { gap: 6px; }
+.memo-head small { font-size: 11px; line-height: 1.6; color: #8a968f; }
+.todo-head { padding-bottom: 12px; border-bottom-color: #eef2ef; }
+.todo-count { background: #f1f5f2; color: #657b6e; border-radius: 7px; font-size: 11px; }
+.todo-tabs { gap: 7px; }
+.todo-tab { border-radius: 8px; border-color: #e8edea; color: #85918a; background: #fff; font-size: 12px; }
+.todo-tab.active { background: #edf4f0; color: #41675c; border-color: #d9e6df; }
+.todo-tab.active span { color: #41675c; }
+.todo-empty { padding: 20px 16px; background: #fafcfb; border: 1px dashed #e2eae5; border-radius: 11px; color: #94a098; font-size: 12px; line-height: 1.8; }
+.todo-line { padding: 13px 3px; border-color: #eef2ef; }
+.todo-line:hover, .todo-line.star:hover { background: #f8faf9; }
+.todo-line.star { background: transparent; }
+#memoNote { border: 1px solid #e5ece7; border-radius: 12px; background: #fafcfb; padding: 16px; color: #354c41; line-height: 1.85; font-size: 13px; }
+#memoNote::placeholder { color: #9aa59e; }
+#memoNote:focus { border-color: #b9cfc1; background: #fff; box-shadow: 0 0 0 3px #f1f6f3; }
+.memo-file { background: #fff; border: 1px solid #e7ece9; border-radius: 9px; color: #7b8a80; font-size: 11px; }
+.memo-file:hover { background: #f3f7f4; color: #41675c; }
+.call-notes-list { scrollbar-width: thin; scrollbar-color: #d6e1d9 transparent; }
+.call-note { padding: 16px 2px; border-color: #edf2ee; }
+.call-note p { font-size: 13px; color: #3f5348; line-height: 1.85; }
+.call-note time { font-size: 10px; color: #99a49d; }
+.schedule-panel .block-head { padding-bottom: 12px; border-color: #edf2ee; }
+.cal-tools button { border: 1px solid #e4ebe6; border-radius: 8px; padding: 6px 10px; color: #78877e; background: #fff; font-size: 11px; }
+.cal-tools button:hover { background: #f3f7f4; border-color: #cdded2; color: #41675c; }
+.page-categories { gap: 8px; margin-bottom: 4px; }
+.page-categories button { border-radius: 9px; padding: 7px 12px; color: #77867e; border: 1px solid #e8ede9; }
+.page-categories button.active { background: #edf4f0; border-color: #d7e5dc; color: #41675c; }
+.page-card { padding: 20px; }
+.page-card:hover { border-color: #cdded2; box-shadow: var(--shadow-hover); }
+.page-card .card-kind { color: #608573; font-size: 11px; letter-spacing: .15px; margin-bottom: 12px; }
+.page-card h3 { font-size: 15px; line-height: 1.55; letter-spacing: -.3px; }
+.page-card p { color: #7a887f; line-height: 1.85; }
+.page-card footer { border-color: #eef2ef; }
+.page-card .card-time { color: #a0aaa3; }
+.edit-box, .search-preview { border-color: #e0e9e2; border-radius: 16px; box-shadow: 0 16px 64px rgba(27,50,36,.12); }
+.preview-item:hover, .preview-item.on { background: #f0f6f2; }
+.orb { background: #41675c; }
+.orb span { background: #dcebe1; }
+button:focus-visible, a:focus-visible { outline: 2px solid #91b7a1; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
+@media (max-width: 750px) { .topnav { padding-inline: 16px; } .shortcut-band, .topbar { padding-inline: 16px; } .main-scroll { padding-inline: 16px; } }
