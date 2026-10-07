@@ -278,15 +278,12 @@ body { font-size: 18px; }
 /* Opaque pastel paper tabs keep labels clear over the checkered header. */
 .topnav .top-nav { gap: 7px; padding-top: 7px; padding-bottom: 9px; }
 .topnav .top-item {
-  --paper: #eee5f6; --paper-active: #dbcaed;
+  --paper: #df1237; --paper-active: #bd0c2d;
   position: relative; isolation: isolate; flex: 0 0 auto;
   height: 39px; padding: 0 17px; border: 0; border-radius: 0;
-  background: transparent; color: #514957; font-size: 17px; font-weight: 600;
+  background: transparent; color: #fff; font-size: 17px; font-weight: 600;
   box-shadow: none; white-space: nowrap;
 }
-.topnav .top-item:nth-child(4n+2) { --paper: #e4f0e4; --paper-active: #c9e1cb; }
-.topnav .top-item:nth-child(4n+3) { --paper: #fae8d7; --paper-active: #f1d3b6; }
-.topnav .top-item:nth-child(4n) { --paper: #f4e1e7; --paper-active: #eac5d2; }
 .topnav .top-item::after {
   content: ''; position: absolute; inset: 1px 0; z-index: -1;
   background: var(--paper); pointer-events: none;
@@ -294,7 +291,7 @@ body { font-size: 18px; }
 }
 .topnav .top-item::before { color: currentColor; opacity: .85; }
 .topnav .top-item:hover, .topnav .top-item.active,
-.topnav .top-item.active:hover { background: transparent; color: #39313f; border: 0; box-shadow: none; }
+.topnav .top-item.active:hover { background: transparent; color: #fff; border: 0; box-shadow: none; }
 .topnav .top-item:hover::after, .topnav .top-item.active::after { background: var(--paper-active); }
 .topnav .top-item.active { font-weight: 800; text-decoration: underline; text-underline-offset: 5px; text-decoration-thickness: 2px; }
 .topnav .top-item:focus-visible { outline: 2px solid #76618b; outline-offset: 2px; }
