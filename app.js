@@ -100,15 +100,15 @@ let partners = PARTNER_SOURCE;
 // 고친 내용을 원본에 덮어씌운 목록을 다시 만든다.
 function rebuildPartners() {
   const byKey = new Map(alive(partnerEdits).map(edit => [edit.id, edit]));
-  partners = PARTNER_SOURCE.map(base => {
-    const edit = byKey.get(base.name);
+  partners = (window.CRM_PARTNER_MODEL ? window.CRM_PARTNER_MODEL.merge(PARTNER_SOURCE, window.CRM_MEETINGS?.partners || []) : PARTNER_SOURCE).map(base => {
+    const edit = byKey.get(partnerSourceName(base));
     if (!edit) return base;
     return {
       ...base,
       name: typeof edit.name === 'string' && edit.name ? edit.name : base.name,
       phone: typeof edit.phone === 'string' ? edit.phone : base.phone,
       email: typeof edit.email === 'string' ? edit.email : base.email,
-      sourceName: base.name,        // 원본과 잇는 열쇠(이름을 바꿔도 안 끊긴다)
+      sourceName: partnerSourceName(base),        // 원본과 잇는 열쇠(이름을 바꿔도 안 끊긴다)
       edited: true
     };
   });
@@ -399,6 +399,8 @@ function paintEmptyNotice(query) {
 }
 
 function renderLibrary() {
+  const connect = $('#crmPartnerConnect');
+  if (connect) { connect.classList.toggle('hidden', pageCategory !== '협력업체'); connect.textContent = window.CRM_MEETINGS?.status || '고객관리 연결'; connect.onclick = () => window.CRM_MEETINGS?.open(); }
   const query = pageSearchCommitted.trim();
   const items = searchFilter(categoryItems(pageCategory), query,
     item => ({ title: item.title, body: item.answer, keywords: (item.aliases || []).join(' '), extra: item.category || '' }));
@@ -749,7 +751,7 @@ let editingPartnerKey = null;
 function openPartnerModal(item) {
   if (!item) return;
   editingPartnerKey = partnerSourceName(item);
-  const base = PARTNER_SOURCE.find(row => row.name === editingPartnerKey) || item;
+  const base = (window.CRM_PARTNER_MODEL ? window.CRM_PARTNER_MODEL.merge(PARTNER_SOURCE, window.CRM_MEETINGS?.partners || []) : PARTNER_SOURCE).find(row => partnerSourceName(row) === editingPartnerKey) || item;
   $('#partnerName').value = item.name || '';
   $('#partnerPhone').value = item.phone || '';
   $('#partnerEmail').value = item.email || '';
@@ -1369,8 +1371,16 @@ function renderCallNotes() {
   panel.classList.toggle('hidden', Boolean(pageSearchCommitted.trim()) || pageCategory !== '대시보드');
   if (panel.classList.contains('hidden')) return;
   const notes = sortBySaved(alive(memories).filter(item => item.source === '통화 메모'));
-  panel.innerHTML = `<div class="memo-head"><h2>메모장</h2><small>전화 메모를 저장하면 여기에 쌓입니다.</small></div>
-    <div class="call-notes-list">${notes.map(item => `<article class="call-note"><p>${escapeHtml(item.text)}</p><time>${escapeHtml(savedLabel(item))}</time></article>`).join('')}</div>`;
+  panel.innerHTML = `<div class="memo-head"><h2>메모장</h2><small>잠깐 적고, 필요 없으면 삭제하세요.</small></div>
+    <div class="call-notes-list">${notes.map(item => `<article class="call-note"><p>${escapeHtml(item.text)}</p><time>${escapeHtml(savedLabel(item))}</time><button type="button" data-note-delete="${escapeHtml(item.id)}" aria-label="메모 삭제">삭제</button></article>`).join('')}</div>`;
+  panel.querySelectorAll('[data-note-delete]').forEach(button => {
+    button.onclick = () => {
+      const memory = memories.find(item => item.id === button.dataset.noteDelete && item.source === '통화 메모');
+      if (!memory) return;
+      memory.deleted = true; touch(memory);
+      saveMemories(); renderMemories(); renderLibrary();
+    };
+  });
 }
 
 function renderMemoPanel() {
@@ -1744,7 +1754,7 @@ function renderSchedule() {
   });
 }
 
-window.addEventListener('crm-meetings-update', renderSchedule);
+window.addEventListener('crm-meetings-update', () => { rebuildPartners(); markSearchIndexDirty(); renderSchedule(); renderLibrary(); });
 
 // 날짜별로 묶은 모양은 views.js 가 만든다.
 const renderScheduleGroups = (rows) => VIEWS.scheduleGroups(rows);
