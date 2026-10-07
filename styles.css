@@ -1073,3 +1073,54 @@ body:not(.overlay-mode) { height: 100dvh; overflow: hidden; }
 .top-item[data-nav="대본"] { --menu-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M5%204h11a2%202%200%20012%202v14H7a2%202%200%2001-2-2zM5%2017h13%22%2F%3E%3C%2Fsvg%3E"); }
 .top-item[data-nav="기획"] { --menu-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%203l1.9%205.1L19%2010l-5.1%201.9L12%2017l-1.9-5.1L5%2010l5.1-1.9z%22%2F%3E%3C%2Fsvg%3E"); }
 #memoryToggle { --menu-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.6%22%3E%3Cpath%20d%3D%22M7%204h10a1%201%200%20011%201v15l-6-4-6%204V5a1%201%200%20011-1z%22%2F%3E%3C%2Fsvg%3E"); }
+
+/* Soft blush workspace inspired by the supplied rounded search reference. */
+:root {
+  --bg: #f7eeee; --card: #fffafa; --line: #ead8dc; --line-soft: #f6e9ed;
+  --ink: #493e4c; --ink-1: #493e4c; --ink-2: #796976; --ink-3: #9a8390;
+  --violet: #aa647d; --violet-soft: #f6e6ed; --violet-line: #deb8c7;
+  --nav-navy: #92536b; --nav-soft: #f7e8ee;
+  --shadow: 4px 5px 12px rgba(139, 91, 106, .10), -3px -3px 9px rgba(255, 255, 255, .85);
+  --shadow-hover: 5px 7px 16px rgba(139, 91, 106, .14);
+}
+.topnav, .shortcut-band, .topbar { background: #fcf4f5; }
+.topnav { border-bottom-color: #ebdce0; }
+.top-nav { border-top-color: #f0e1e5; }
+.brand-badge { background: #ae7187; box-shadow: 2px 3px 6px rgba(139, 91, 106, .16); }
+.top-item {
+  background: #fcf5f6; border-color: #f1e3e7; color: #826876; border-radius: 12px;
+  box-shadow: 2px 3px 5px rgba(139, 91, 106, .08), -2px -2px 5px #fff;
+}
+.top-item:hover { color: #92536b; background: #fff8fa; border-color: #dec1cd; }
+.top-item.active { background: #ba8296; border-color: #ba8296; color: #fff; box-shadow: 2px 4px 8px rgba(139, 91, 106, .20); }
+.top-item.active:hover { background: #ac7088; }
+.page-search {
+  border: 1px solid #d9b5c3; border-radius: 999px; background: #fff9fa;
+  box-shadow: inset 2px 2px 5px rgba(148, 98, 116, .10), 3px 4px 8px rgba(139, 91, 106, .16), -2px -2px 5px #fff;
+  color: #b67b90;
+}
+.page-search:focus-within { background: #fffdfd; border-color: #bd8298; box-shadow: 0 0 0 3px #f3dfe7, 3px 4px 8px rgba(139, 91, 106, .12); }
+.primary-btn, .memo-add-btn { background: #ae7187; color: #fff; box-shadow: 2px 3px 7px rgba(139, 91, 106, .16); }
+.primary-btn:hover, .memo-add-btn:hover { background: #996077; }
+.today-panel, .page-card { border-color: #eedee3; border-radius: 18px; box-shadow: var(--shadow); background: #fff9fa; }
+#memoNote { background: #fcf4f6; border-color: #e6cdd6; box-shadow: inset 2px 2px 5px rgba(139, 91, 106, .06); border-radius: 12px; }
+.todo-head, .schedule-panel .block-head { border-bottom-color: #f0e1e6; }
+.todo-tab.active { color: #92536b; border-color: #dbb4c4; background: #f3e0e8; }
+.todo-tab.active span { color: #92536b; }
+.todo-empty { background: #fcf4f6; border-color: #e8d4dc; }
+.todo-line:hover, .todo-line.star:hover { background: #fbf0f4; }
+.todo-line.star { background: transparent; }
+.shortcut { background: #fff9fa; border-color: #e8d5dc; box-shadow: 2px 3px 6px rgba(139, 91, 106, .08); border-radius: 12px; }
+.shortcut-thumb { background: #f9edf1; }
+.shortcut a b { color: #816575; }
+.shortcut.add { background: #fcf5f7; }
+.search-preview { background: #fff9fa; border-color: #dfbccb; border-radius: 16px; box-shadow: 5px 7px 16px rgba(139, 91, 106, .17); }
+.preview-item:hover, .preview-item.on { background: #f7e8ee; }
+.page-categories button { background: #fff9fa; border-color: #e8d5dc; border-radius: 9px; }
+.page-categories button.active { background: #f4e1e9; }
+.page-card footer button { background: #fff9fa; border-color: #e8d5dc; }
+.edit-box { background: #fffafa; border-color: #e5cbd6; border-radius: 18px; }
+.edit-box footer button[type="submit"] { background: #ae7187; }
+.orb { background: #ae7187; }
+.orb span { background: #f3dce6; }
+button:focus-visible, a:focus-visible { outline-color: #ac7088; }
