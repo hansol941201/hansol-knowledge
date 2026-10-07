@@ -172,3 +172,20 @@ button:focus-visible, a:focus-visible { outline-color: #b3a4cf; }
   .main-scroll:has(#knowledgeBlock.hidden) .dash-cols { grid-template-columns: minmax(0, 1fr) 92px; grid-template-areas: "todo schedule" "notes schedule" "memo schedule"; grid-template-rows: repeat(3, 340px); overflow-y: auto; gap: 10px; }
   .main-scroll:has(#knowledgeBlock.hidden) #schedulePanel { position: sticky; top: 0; height: min(100%, 65dvh); align-self: start; }
 }
+
+@font-face { font-family: 'NanumBaReunHiPi'; src: url('fonts/NanumBaReunHiPi.woff2') format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; }
+body, button, input, textarea, select, option, #memoNote, .page-search input, .edit-box, .memory-item, .chat-bubble { font-family: 'NanumBaReunHiPi', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; }
+body { font-size: 16px; }
+.top-item { font-size: 16px; }
+.shortcut a b { font-size: 13px; }
+.page-search input { font-size: 16px; }
+.memo-head h2, .todo-head h2 { font-size: 19px; }
+#todayPanel .todo-head h2 { font-size: 21px; }
+#todayPanel .todo-line-text { font-size: 19px; line-height: 1.6; }
+#memoNote, .call-note p { font-size: 18px; line-height: 1.7; }
+.memo-head small { font-size: 14px; }
+.primary-btn, .memo-add-btn { font-size: 16px; }
+.page-card h3 { font-size: 19px; }
+.page-card p, .page-card .card-body { font-size: 16px; }
+#schedulePanel h2 { font-size: 16px; }
+#schedulePanel .schedule-row::before { font-size: 17px; }
