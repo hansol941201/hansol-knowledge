@@ -340,8 +340,8 @@ svg { display: block; flex: none; }
   padding: 1px 5px; border-radius: 3px;
   background: linear-gradient(transparent 6%, #FFE9A0 6%, #FFDE84 90%, transparent 90%);
 }
-.todo-line.star { background: #FFFCF3; }
-.todo-line.star:hover { background: #FFF8E8; }
+.todo-line.star { background: transparent; }
+.todo-line.star:hover { background: #f6f8fb; }
 .todo-line.done .todo-line-text { color: var(--ink-3); text-decoration: line-through; }
 .todo-line time { flex: none; color: var(--ink-3); font-size: 11px; font-variant-numeric: tabular-nums; }
 .todo-line time.late { color: #C0433D; font-weight: 600; }
@@ -843,11 +843,11 @@ html:has(> .overlay-mode) { overflow: hidden; }
 .shortcut.add { height: 80px; background: #fafbfd; }
 .shortcut-more { color: #697b90; }
 .topbar { justify-content: flex-start; gap: 12px; padding: 10px 28px 22px; background: var(--card); backdrop-filter: none; }
-.search-wrap { flex: 1; max-width: none; }
+.search-wrap { flex: 1 1 560px; max-width: 560px; }
 .page-search { border-radius: 10px; background: #f6f8fb; border-color: var(--line); }
-.page-search input { padding: 13px 0; font-size: 15px; min-width: 0; }
+.page-search input { padding: 9px 0; font-size: 14px; min-width: 0; }
 .page-search:focus-within { background: #fff; border-color: #8ca8c5; box-shadow: 0 0 0 3px var(--nav-soft); }
-.primary-btn { position: static; transform: none; flex: none; margin-left: 0; padding: 13px 18px; border-radius: 10px; white-space: nowrap; }
+.primary-btn { position: static; transform: none; flex: none; margin-left: auto; padding: 10px 16px; border-radius: 10px; white-space: nowrap; }
 .primary-btn:hover, .memo-add-btn:hover, .script-save:hover { background: #193958; }
 .main-scroll { padding: 24px 28px 48px; gap: 24px; scrollbar-width: thin; scrollbar-color: #cdd6e1 transparent; }
 .dash-cols { gap: 18px; grid-template-columns: minmax(0, 58fr) minmax(320px, 42fr); }
