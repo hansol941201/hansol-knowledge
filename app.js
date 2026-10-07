@@ -303,7 +303,592 @@ const categoryRules = ['전체', '기억', '특허', '협력업체', '계정', '
 const virtualCategories = ['계정', '협력업체', '할 일', '기억', '특허', '대시보드'];
 let pageCategory = '대시보드';
 // 검색 미리보기 목록 — 한 번 만들고 자료가 바뀔 때만 다시 만든다.
-// saveLocalState() 가 …9864 tokens truncated…emoryModal') closeMemoryLibrary(); });
+// saveLocalState() 가 파일 위쪽에서도 불리므로 var 로 두어 초기화 순서를 타지 않게 한다.
+var searchIndex = null;
+var searchIndexDirty = true;
+let detailItemId = null;   // 상세 창에 띄운 지식(수정·삭제 대상)
+let pageSearchCommitted = '';
+let viewBeforeSearch = '';   // 검색을 지우면 보던 화면으로 되돌린다
+
+function categoryItems(name) {
+  if (name === '전체' || name === '대시보드') return alive(knowledge);
+  if (virtualCategories.includes(name)) return [];
+  return alive(knowledge).filter(item => item.category === name);
+}
+
+// 검색창에 화면 이름을 치고 Enter 하면 검색 대신 그 화면으로 바로 넘어간다.
+const SEARCH_VIEW_WORDS = {
+  '대시보드': '대시보드', '홈': '대시보드',
+  '내지식': '전체', '지식': '전체', '전체': '전체',
+  '할일': '할 일', 'todo': '할 일',
+  '기억': '기억', '기록': '기억',
+  '특허': '특허',
+  '협력업체': '협력업체', '업체': '협력업체',
+  '계정': '계정',
+  '연락처': '연락처',
+  '업무지식': '업무지식',
+  '대본': '대본', '스크립트': '대본', '멘트': '대본',
+  '기획': '기획', '아이디어': '기획', '계획': '기획', '나중에': '기획'
+};
+function viewForSearch(text) {
+  const key = String(text || '').replace(/\s+/g, '').toLowerCase();
+  return SEARCH_VIEW_WORDS[key] || '';
+}
+
+function goToView(name) {
+  closeSearchPreview();
+  pageCategory = name;
+  viewBeforeSearch = '';
+  $('#pageSearch').value = '';
+  pageSearchCommitted = '';
+  renderAll();
+  $('.main-scroll').scrollTop = 0;
+}
+
+function renderSideNav() {
+  // 상단 가로 메뉴 — 마지막에 기억 저장소(모달)를 함께 둔다.
+  $('#sideNav').innerHTML = NAV_ITEMS.map(item => {
+    const target = item.category || item.name;
+    return `<button type="button" class="top-item ${target === pageCategory ? 'active' : ''}" data-nav="${target}">${escapeHtml(item.name)}</button>`;
+  }).join('') + `<button type="button" class="top-item" id="memoryToggle">기억 저장소</button>`;
+  $('#sideNav').querySelectorAll('[data-nav]').forEach(button => {
+    button.onclick = () => goToView(button.dataset.nav);
+  });
+  $('#memoryToggle').onclick = openMemoryLibrary;
+  // 좁은 화면에서 선택한 메뉴가 가려져 있으면 보이는 위치까지 메뉴 줄만 움직인다(페이지는 그대로).
+  const nav = $('#sideNav');
+  const active = nav.querySelector('.top-item.active');
+  if (active && nav.scrollWidth > nav.clientWidth) {
+    nav.scrollLeft = Math.max(0, active.offsetLeft - (nav.clientWidth - active.offsetWidth) / 2);
+  }
+}
+
+// 통합검색용 — 유사 표현·붙여쓰기·조사 차이를 함께 본다(search-rules.js).
+// 점수가 높은 자료가 위로 오고, 검색어가 없으면 원래 순서를 그대로 둔다.
+function searchFilter(list, term, fields) {
+  if (!term) return list;
+  const parsed = buildSearchQuery(term);
+  return list
+    .map(item => ({ item, found: matchSearchDoc(buildSearchDoc(fields(item)), parsed) }))
+    .filter(row => row.found)
+    .sort((a, b) => b.found.points - a.found.points)
+    .map(row => row.item);
+}
+
+// 화면이 비었을 때 왜 비었는지 알려 준다.
+// 동기화에 연결하지 않으면 다른 컴퓨터에 넣은 계정·지식이 이 기기에 없다.
+// 그냥 "검색 결과 없음" 만 보이면 자료가 사라진 것처럼 읽히므로 이유를 밝힌다.
+function paintEmptyNotice(query) {
+  const box = $('#pageEmpty');
+  if (!box) return;
+  if (query) { box.textContent = '검색 결과 없음'; return; }
+  if (cloudStatus === 'syncing') { box.textContent = '불러오는 중…'; return; }
+  if (cloudStatus === 'live') {
+    box.textContent = pageCategory === '계정'
+      ? '저장된 계정이 없습니다. ＋ 지식 추가에서 계정을 넣어 보세요.'
+      : '아직 저장된 자료가 없습니다.';
+    return;
+  }
+  // 아직 동기화 전 — 다른 컴퓨터의 자료가 안 보이는 상태다.
+  const what = pageCategory === '계정' ? '계정과 비밀번호' : '자료';
+  box.innerHTML = `<b>이 기기는 동기화에 연결돼 있지 않습니다.</b>`
+    + `<span>다른 컴퓨터에 저장한 ${what}는 연결해야 보입니다. 지워진 것이 아닙니다.</span>`
+    + `<button type="button" id="emptyConnect">동기화 연결</button>`;
+  const button = $('#emptyConnect');
+  if (button) button.onclick = () => openSyncModal();
+}
+
+function renderLibrary() {
+  const query = pageSearchCommitted.trim();
+  const items = searchFilter(categoryItems(pageCategory), query,
+    item => ({ title: item.title, body: item.answer, keywords: (item.aliases || []).join(' '), extra: item.category || '' }));
+  const accounts = (pageCategory === '전체' || pageCategory === '계정')
+    ? searchFilter(alive(accountMeta), query, item => ({ title: item.service, body: item.user, extra: item.url || '' })) : [];
+  const partnerItems = (pageCategory === '전체' || pageCategory === '협력업체')
+    ? searchFilter(partners, query, item => ({ title: item.name, body: `${item.phone || ''} ${item.email || ''}` })) : [];
+  const searchAll = pageCategory === '전체';
+  const patentTerm = pageSearchCommitted.trim();
+  const patentItems = pageCategory === '특허'
+    ? (patentTerm ? findPatents(patentTerm, patents.length) : patents)
+    : (query ? findPatents(patentTerm, 5) : []);
+  // 검색할 때든 그냥 볼 때든 완료한 할 일은 목록에 넣지 않는다 — 끝낸 일이 섞여 나와
+  // 결과가 지저분해진다는 요청. 완료한 할 일은 지워진 게 아니라 할 일 화면의
+  // "완료" 탭에 그대로 남아 있고, 거기서 되돌릴 수도 있다.
+  // alive()가 삭제 표시(deleted)를 걸러내고, isTodoEntry가 할 일이 아닌 기록(type:'memory' 등)이
+  // 섞여 들어온 경우를 막는다 — 할 일 칸에는 할 일만 나온다.
+  const todoPool = alive(todos).filter(isTodoEntry).filter(todo => !todo.done);
+  const todoItems = (searchAll ? Boolean(query) : pageCategory === '할 일')
+    ? searchFilter(sortBySaved(todoPool), query,
+        todo => ({ title: todo.text, body: `${todo.date || ''} ${savedLabel(todo)} ${todo.done ? '완료' : '미완료 진행중'}` })) : [];
+  const memoryItems = (searchAll ? Boolean(query) : pageCategory === '기억')
+    ? searchFilter(sortBySaved(alive(memories)), query,
+        memory => ({ title: memory.text, body: `${memory.createdAt || ''} ${savedLabel(memory)}` })) : [];
+  $('#pageCount').textContent = `${alive(knowledge).length + alive(todos).length + alive(memories).length + alive(accountMeta).length + partners.length + patents.length}개`;
+  $('#pageCategories').innerHTML = categoryRules.filter(name => name !== '기타' || categoryItems('기타').length).map(name => `<button class="${name === pageCategory ? 'active' : ''}" data-category="${name}">${name}</button>`).join('');
+  const term = pageSearchCommitted.trim();
+  const mark = (text) => highlight(text, term);
+  const shell = (kind, iconName, cls, attrs, body, foot) => `
+    <article class="page-card ${cls}" ${attrs}>
+      <header class="card-kind">${icon(iconName, 14)}<span>${escapeHtml(kind)}</span></header>
+      ${body}
+      <footer>${foot}</footer>
+    </article>`;
+
+  // §업무지식 우선 노출 — 검색할 때는 업무지식 카드를 가장 먼저 그린다.
+  // 검색 결과(어떤 항목이 걸리는지)와 정렬 기준은 전혀 바꾸지 않고 "그리는 순서"만
+  // 나눈다 — 두 묶음을 합치면 items 와 완전히 같아서 빠지는 카드가 없다.
+  const knowledgeCard = (item) => shell(findCategory(item), findCategory(item) === '연락처' ? 'phone' : 'book',
+      findCategory(item) === '대본' ? 'script-card' : (findCategory(item) === '기획' ? 'plan-card' : ''),
+      `data-id="${item.id}"`,
+      `<h3>${mark(item.title)}</h3><p>${mark(item.answer)}</p>${savedDateOf(item) ? `<time class="card-time">${escapeHtml(savedLabel(item))}</time>` : ''}`,
+      '<button data-copy>복사</button><button class="card-act" data-edit>수정</button><button data-chat>지식창에서 보기</button><button class="card-act card-del" data-delete>삭제</button>');
+  const workFirst = Boolean(query);
+  const workItems = workFirst ? items.filter(item => findCategory(item) === '업무지식') : [];
+  const restItems = workFirst ? items.filter(item => findCategory(item) !== '업무지식') : items;
+
+  $('#pageGrid').innerHTML = workItems.map(knowledgeCard).join('')
+    + patentItems.map(item => shell('특허', 'patent', 'patent-card',
+      `data-patent-key="${escapeHtml(item.num || item.name)}"`,
+      `<h3>${item.num ? mark(item.num) : escapeHtml(item.status || '번호 확인')}</h3>
+       ${item.name ? `<p>${mark(item.name)}</p>` : ''}
+       ${(item.gongjong || []).length ? `<div class="tag-row">${item.gongjong.map(tag => `<span>${mark(tag)}</span>`).join('')}</div>` : ''}
+       <dl class="patent-meta">
+         ${item.gongbeop ? `<div><dt>공법</dt><dd>${mark(item.gongbeop)}</dd></div>` : ''}
+         ${item.owner ? `<div><dt>특허권자</dt><dd>${mark(item.owner)}</dd></div>` : ''}
+         ${patentStatusNote(item) ? `<div><dt>상태</dt><dd>${escapeHtml(patentStatusNote(item))}</dd></div>` : ''}
+       </dl>`,
+      '<button data-patent-copy>특허번호 복사</button><button data-patent-chat>지식창에서 보기</button>')).join('')
+    + partnerItems.map(item => shell('협력업체', 'building', 'partner-card',
+      `data-partner-index="${partners.indexOf(item)}"`,
+      `<h3>${mark(item.name)}</h3>
+       <p>${mark(item.phone || '전화번호 확인')}\n${mark(item.email || '이메일 확인')}</p>
+       ${partnerRecordsHtml(item.name, term)}`,
+      '<button data-copy-phone>번호 복사</button><button data-copy-email>메일 복사</button><button data-partner-edit>수정</button><button data-partner-chat>지식창에서 보기</button>')).join('')
+    + accounts.map(item => shell('계정', 'lock', 'account-card',
+      `data-account-id="${item.id}"`,
+      `<h3>${mark(item.service)}</h3><p>${mark(item.user)}\n<span class="secret-line">••••••••</span></p>`,
+      '<button data-copy-id>아이디 복사</button><button data-copy-pw>비번 복사</button><button data-account-edit>수정</button><button data-account-delete>삭제</button>')).join('')
+    + todoItems.map(todo => shell('할 일', 'check', `todo-result-card ${todo.done ? 'done' : ''}`,
+      `data-todo-result="${todo.id}"`,
+      `<p class="card-body">${mark(todo.text)}</p><time class="card-time">${escapeHtml(todo.date || '날짜 확인')}</time>`,
+      `<span class="todo-state ${todo.done ? 'done' : ''}">${todo.done ? '완료' : '진행중'}</span><button data-todo-toggle>${todo.done ? '완료 취소' : '완료 표시'}</button>`)).join('')
+    + memoryItems.map(memory => shell('기억', 'bookmark', 'memory-result-card',
+      `data-memory-result="${memory.id}"`,
+      `<p class="card-body">${mark(memory.text)}</p><time class="card-time">${escapeHtml(savedLabel(memory))}</time>`,
+      '<button data-memory-open>기억 저장소에서 보기</button>')).join('')
+    + restItems.map(knowledgeCard).join('');
+
+  // 화면별 제목과 영역 표시
+  const [heading, lead] = VIEW_LEAD[pageCategory] || VIEW_LEAD['전체'];
+  $('#pageHeading').textContent = term ? '검색 결과' : heading;
+  $('#pageLead').textContent = term ? `“${term}” 으로 찾은 내용입니다.` : lead;
+  const onDashboard = pageCategory === '대시보드' && !term;
+  $('#shortcutSection').classList.toggle('hidden', Boolean(term) || pageCategory !== '대시보드');
+  $('#dashCols').classList.toggle('hidden', !onDashboard && pageCategory !== '할 일');
+  $('#schedulePanel').classList.toggle('hidden', !onDashboard);
+  $('#knowledgeBlock').classList.toggle('hidden', onDashboard);
+  $('#pageCategories').classList.toggle('hidden', Boolean(term));
+  paintIcons($('#pageGrid'));
+  // 카드 본문을 누르면 상세로 연다(버튼 클릭은 제외).
+  $('#pageGrid').querySelectorAll('.page-card').forEach(card => {
+    card.addEventListener('click', event => {
+      if (event.target.closest('button') || event.target.closest('a')) return;
+      openDetailFromCard(card);
+    });
+  });
+  const shownCount = items.length + accounts.length + partnerItems.length
+    + memoryItems.length + todoItems.length + patentItems.length;
+  $('#pageEmpty').classList.toggle('hidden', shownCount !== 0);
+  if (shownCount === 0) paintEmptyNotice(query);
+  $('#pageCategories').querySelectorAll('[data-category]').forEach(button => button.onclick = () => { pageCategory = button.dataset.category; renderLibrary(); });
+  $('#pageGrid').querySelectorAll('.page-card[data-id]').forEach(card => {
+    const item = knowledge.find(x => x.id === card.dataset.id);
+    card.querySelector('[data-copy]').onclick = () => copyText(item.answer);
+    card.querySelector('[data-edit]').onclick = () => openEditor(item);
+    card.querySelector('[data-chat]').onclick = () => { openApp(); addBubble(`${item.title}\n${item.answer}`, 'answer', item); };
+    card.querySelector('[data-delete]').onclick = () => removeItem(item);
+  });
+  $('#pageGrid').querySelectorAll('[data-account-id]').forEach(card => {
+    const item = accountMeta.find(x => x.id === card.dataset.accountId);
+    card.querySelector('[data-copy-id]').onclick = () => copyText(item.user);
+    card.querySelector('[data-copy-pw]').onclick = () => requestPasswordCopy(item.id);
+    card.querySelector('[data-account-edit]').onclick = () => openVault(item.id);
+    card.querySelector('[data-account-delete]').onclick = () => deleteAccount(item.id);
+  });
+  $('#pageGrid').querySelectorAll('[data-patent-key]').forEach(card => {
+    const item = patentItems.find(x => (x.num || x.name) === card.dataset.patentKey);
+    if (!item) return;
+    card.querySelector('[data-patent-copy]').onclick = () =>
+      item.num ? copyText(item.num) : showToast('아직 번호가 부여되지 않았습니다');
+    card.querySelector('[data-patent-chat]').onclick = () => { openApp(); addPatentBubble(item); };
+  });
+  $('#pageGrid').querySelectorAll('[data-partner-index]').forEach(card => {
+    const item = partners[Number(card.dataset.partnerIndex)];
+    card.querySelector('[data-copy-phone]').onclick = () => item.phone ? copyText(item.phone) : showToast('전화번호 확인');
+    card.querySelector('[data-copy-email]').onclick = () => item.email ? copyText(item.email) : showToast('이메일 확인');
+    card.querySelector('[data-partner-edit]').onclick = () => openPartnerModal(item);
+    card.querySelector('[data-partner-chat]').onclick = () => { openApp(); addPartnerBubble(item); };
+  });
+  $('#pageGrid').querySelectorAll('[data-todo-result]').forEach(card => {
+    const todo = todos.find(x => x.id === card.dataset.todoResult);
+    card.querySelector('[data-todo-toggle]').onclick = () => {
+      setTodoDone(todo, !todo.done); saveTodos(); renderTodos(); renderLibrary();
+    };
+  });
+  $('#pageGrid').querySelectorAll('[data-memory-result]').forEach(card => {
+    card.querySelector('[data-memory-open]').onclick = () => {
+      $('#memorySearch').value = pageSearchCommitted;
+      $('#memoryModal').classList.remove('hidden');
+      markMemoryOpen(true);
+      renderMemories();
+    };
+  });
+}
+
+function todayKey() {
+  const date = new Date();
+  return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+}
+const isTodoEntry = (item) => Boolean(item) && (!item.type || item.type === 'todo');
+let todoTab = 'active';            // 'active' = 할 일, 'done' = 완료
+let todoUndo = null;               // 실행 취소용 직전 상태
+
+// 완료 처리는 지우는 게 아니라 '완료' 목록으로 옮기는 것이다(원본은 그대로 남는다).
+function setTodoDone(todo, done) {
+  todo.done = Boolean(done);
+  if (todo.done) todo.doneAt = nowIso();
+  else delete todo.doneAt;
+  touch(todo);
+}
+// 작은 카드에 들어갈 짧은 완료일 — 자세한 시각은 마우스를 올리면 뜬다.
+function todoDoneShort(todo) {
+  const when = timeOf(todo.doneAt || todo.updatedAt);
+  if (!when) return '확인';
+  const date = new Date(when);
+  const year = date.getFullYear() === new Date().getFullYear() ? '' : `${date.getFullYear()}.`;
+  return `${year}${date.getMonth() + 1}.${date.getDate()}`;
+}
+function todoDoneLabel(todo) {
+  const when = todo.doneAt || todo.updatedAt;
+  return when ? savedLabel({ createdAt: when }) : '완료일 확인';
+}
+// 별표(중요)를 맨 위로. 그다음은 마감일이 빠른 순, 날짜가 없는 항목은 가장 아래.
+function activeTodos() {
+  return alive(todos).filter(isTodoEntry).filter(todo => !todo.done)
+    .sort((a, b) => {
+      if (Boolean(a.starred) !== Boolean(b.starred)) return a.starred ? -1 : 1;
+      const left = String(a.date || '').trim();
+      const right = String(b.date || '').trim();
+      if (left && !right) return -1;
+      if (!left && right) return 1;
+      if (left && right && left !== right) return left.localeCompare(right);
+      return savedMillis(a) - savedMillis(b);     // 같은 날짜면 먼저 적은 것부터
+    });
+}
+// 급함·여유 구분은 화면에서 없앴다. 저장돼 있던 urgency 값은 지우지 않고
+// 그대로 두지만(다른 기기와 동기화될 수 있다), 화면에서는 더 쓰지 않는다.
+// 오늘 / 지연 / 앞으로 / 날짜 없음 — 카드 왼쪽 선과 배지 색을 고르는 기준
+function todoDateState(todo) {
+  const date = String(todo.date || '').trim();
+  if (!date) return 'none';
+  const today = todayKey();
+  if (date === today) return 'today';
+  return date < today ? 'late' : 'future';
+}
+function doneTodos() {
+  return alive(todos).filter(isTodoEntry).filter(todo => todo.done)
+    .sort((a, b) => String(b.doneAt || b.updatedAt || '').localeCompare(String(a.doneAt || a.updatedAt || '')));
+}
+
+function renderTodos() {
+  const panel = $('#todayPanel');
+  const onTodoView = pageCategory === '할 일';
+  const searching = Boolean(pageSearchCommitted.trim());
+  // 검색 중이거나 다른 화면이면 상단 할 일 카드는 접어 둔다.
+  panel.classList.toggle('hidden', searching || !(pageCategory === '대시보드' || onTodoView));
+
+  const active = activeTodos();
+  const done = doneTodos();
+  const list = todoTab === 'done' ? done : active;   // 접지 않고 항상 전부 보여 준다
+
+  panel.innerHTML = `
+    <div class="todo-head">
+      <h2>✅ 할 일 목록</h2>
+      <span class="todo-count">${list.length}개</span>
+    </div>
+    <div class="todo-tabs">
+      <button type="button" class="todo-tab ${todoTab === 'active' ? 'active' : ''}" data-todo-tab="active">할 일 <span>${active.length}</span></button>
+      <button type="button" class="todo-tab ${todoTab === 'done' ? 'active' : ''}" data-todo-tab="done">완료 <span>${done.length}</span></button>
+      ${todoTab === 'done' && done.length ? `<button type="button" class="ghost-btn" id="todoClearDone">완료 목록 비우기</button>` : ''}
+    </div>
+    ${list.length
+      ? (todoTab === 'done' ? VIEWS.todoDoneSimpleList(list) : VIEWS.todoSimpleList(list))
+      : `<div class="todo-empty">${todoTab === 'done' ? '완료한 할 일이 없습니다.' : '왼쪽 메모칸에 할 일을 적고 엔터를 누르세요.'}</div>`}`;
+
+  panel.querySelectorAll('[data-todo-tab]').forEach(button => {
+    button.onclick = () => { todoTab = button.dataset.todoTab; renderTodos(); };
+  });
+  const clearDone = $('#todoClearDone');
+  if (clearDone) clearDone.onclick = () => {
+    const rows = doneTodos();
+    if (!rows.length || !confirm(`완료한 할 일 ${rows.length}개를 영구 삭제할까요? 되돌릴 수 없습니다.`)) return;
+    rows.forEach(todo => { todo.deleted = true; touch(todo); });
+    saveTodos(); renderTodos(); renderLibrary();
+    showToast('완료 목록을 비웠습니다');
+  };
+
+  panel.querySelectorAll('[data-todo-id]').forEach(row => {
+    const todo = todos.find(x => x.id === row.dataset.todoId);
+    // 체크박스: 완료 상태만 바꾼다(카드 클릭으로 번지지 않게 막는다).
+    const checkBox = row.querySelector('.todo-check-box, .todo-line-check');
+    if (checkBox) checkBox.addEventListener('click', event => event.stopPropagation());
+    const check = row.querySelector('input');
+    if (check) check.onchange = () => {
+      if (check.checked) return completeTodo(todo, row);
+      setTodoDone(todo, false);
+      saveTodos(); renderTodos(); renderLibrary();
+      showToast('할 일로 되돌렸습니다');
+    };
+    // 카드 본문·제목·날짜·배지·빈 공간을 누르면 수정 창을 연다(완료 처리하지 않는다).
+    row.addEventListener('click', event => {
+      if (event.target.closest('button') || event.target.closest('.todo-check-box, .todo-line-check')) return;
+      openTodoModal(todo);
+    });
+    const edit = row.querySelector('[data-todo-edit]');
+    if (edit) edit.onclick = event => { event.preventDefault(); openTodoModal(todo); };
+    // 별표: 중요 표시만 바꾼다. 켜면 목록 맨 위로 올라가고 형광펜이 그어진다.
+    const star = row.querySelector('[data-todo-star]');
+    if (star) star.onclick = event => {
+      event.preventDefault(); event.stopPropagation();
+      todo.starred = !todo.starred; touch(todo);
+      saveTodos(); renderTodos(); renderLibrary();
+      showToast(todo.starred ? '중요 표시함' : '중요 표시를 뗐습니다');
+    };
+    const remove = row.querySelector('[data-todo-delete]');
+    if (remove) remove.onclick = event => {
+      event.preventDefault();
+      todo.deleted = true; touch(todo);
+      saveTodos(); renderTodos(); renderLibrary();
+    };
+    const restore = row.querySelector('[data-todo-restore]');
+    if (restore) restore.onclick = () => {
+      setTodoDone(todo, false);
+      saveTodos(); renderTodos(); renderLibrary();
+      showToast('할 일로 되돌렸습니다');
+    };
+    const purge = row.querySelector('[data-todo-purge]');
+    if (purge) purge.onclick = () => {
+      if (!confirm(`「${todo.text}」 을(를) 영구 삭제할까요? 되돌릴 수 없습니다.`)) return;
+      todo.deleted = true; touch(todo);
+      saveTodos(); renderTodos(); renderLibrary();
+      showToast('영구 삭제했습니다');
+    };
+  });
+}
+
+// 체크하면 목록에서 바로 빠지고, 잠시 동안 되돌릴 수 있다.
+function completeTodo(todo, row) {
+  if (!todo) return;
+  setTodoDone(todo, true);
+  if (row) row.classList.add('just-changed');
+  saveTodos();
+  setTimeout(() => { renderTodos(); renderLibrary(); }, 200);
+  todoUndo = { id: todo.id };
+  showUndoToast('완료로 옮겼습니다', () => {
+    const target = todos.find(x => x.id === todoUndo.id);
+    if (!target) return;
+    setTodoDone(target, false);
+    saveTodos(); renderTodos(); renderLibrary();
+    showToast('되돌렸습니다');
+  });
+}
+
+// ── 할 일 수정 ────────────────────────────────────────────────
+let editingTodoId = null;
+function openTodoModal(todo) {
+  if (!todo) return;
+  editingTodoId = todo.id;
+  $('#todoEditText').value = todo.text || '';
+  $('#todoEditDate').value = todo.date || '';
+  $('#todoEditError').textContent = '';
+  $('#todoModal').classList.remove('hidden');
+  setTimeout(() => $('#todoEditText').focus(), 50);
+}
+function closeTodoModal() { $('#todoModal').classList.add('hidden'); editingTodoId = null; }
+$('#todoModalClose').addEventListener('click', closeTodoModal);
+$('#todoEditCancel').addEventListener('click', closeTodoModal);
+$('#todoModal').addEventListener('click', event => { if (event.target.id === 'todoModal') closeTodoModal(); });
+$('#todoForm').addEventListener('submit', event => {
+  event.preventDefault();
+  const todo = todos.find(x => x.id === editingTodoId);
+  const text = $('#todoEditText').value.trim();
+  $('#todoEditError').textContent = '';
+  if (!todo) return;
+  if (!text) { $('#todoEditError').textContent = '내용을 적어 주세요.'; return; }
+  // 완료 상태(done · doneAt)는 건드리지 않는다 — 내용만 고친다.
+  const before = { text: todo.text, date: todo.date, urgency: todo.urgency };
+  try {
+    todo.text = text;
+    todo.date = $('#todoEditDate').value || todo.date;
+    touch(todo);
+    saveTodos();
+  } catch (error) {
+    Object.assign(todo, before);                  // 저장이 안 되면 원래대로 되돌린다
+    console.error('할 일 저장 실패', error);
+    $('#todoEditError').textContent = '저장하지 못했습니다. 잠시 뒤 다시 눌러 주세요.';
+    return;                                        // 창은 그대로 두어 쓰던 내용을 지키지 않는다
+  }
+  renderTodos(); renderLibrary(); closeTodoModal();
+  showToast('할 일 수정됨');
+});
+
+// ── 협력업체 정보 수정 ─────────────────────────────────────────
+// 원본(partners.js)은 건드리지 않고 고친 내용만 따로 쌓는다. 저장 흐름은 다른
+// 수정 창(할 일·계정)과 같은 모양이다 — 새 저장 경로를 만들지 않았다.
+let editingPartnerKey = null;
+function openPartnerModal(item) {
+  if (!item) return;
+  editingPartnerKey = partnerSourceName(item);
+  const base = PARTNER_SOURCE.find(row => row.name === editingPartnerKey) || item;
+  $('#partnerName').value = item.name || '';
+  $('#partnerPhone').value = item.phone || '';
+  $('#partnerEmail').value = item.email || '';
+  $('#partnerError').textContent = '';
+  // 고친 적이 있으면 원본 값을 함께 보여 주고 되돌릴 수 있게 한다.
+  const changed = Boolean(item.edited);
+  $('#partnerOrigin').textContent = changed
+    ? `원래 정보 — ${base.name} · ${base.phone || '전화 없음'} · ${base.email || '이메일 없음'}`
+    : '';
+  $('#partnerOrigin').classList.toggle('hidden', !changed);
+  $('#partnerRestore').classList.toggle('hidden', !changed);
+  $('#partnerModal').classList.remove('hidden');
+  setTimeout(() => $('#partnerName').focus(), 50);
+}
+function closePartnerModal() { $('#partnerModal').classList.add('hidden'); editingPartnerKey = null; }
+function savePartnerEdits() {
+  STORE.writeList('partnerEdits', partnerEdits);
+  rebuildPartners();
+  markSearchIndexDirty();
+  queueCloudSave();
+  renderLibrary();
+}
+$('#partnerClose').addEventListener('click', closePartnerModal);
+$('#partnerCancel').addEventListener('click', closePartnerModal);
+$('#partnerModal').addEventListener('click', event => { if (event.target.id === 'partnerModal') closePartnerModal(); });
+$('#partnerRestore').addEventListener('click', () => {
+  const key = editingPartnerKey;
+  const edit = partnerEdits.find(row => row.id === key && !row.deleted);
+  if (!edit) return closePartnerModal();
+  if (!confirm('고친 내용을 지우고 원래 정보로 되돌릴까요?')) return;
+  edit.deleted = true; touch(edit);          // 기록만 지운다 — 원본은 건드리지 않는다
+  savePartnerEdits(); closePartnerModal();
+  showToast('원래 정보로 되돌렸습니다');
+});
+$('#partnerForm').addEventListener('submit', event => {
+  event.preventDefault();
+  const key = editingPartnerKey;
+  const name = $('#partnerName').value.trim();
+  $('#partnerError').textContent = '';
+  if (!key) return;
+  if (!name) { $('#partnerError').textContent = '업체명을 적어 주세요.'; return; }
+  let edit = partnerEdits.find(row => row.id === key && !row.deleted);
+  const before = edit ? { name: edit.name, phone: edit.phone, email: edit.email } : null;
+  try {
+    if (!edit) { edit = newEntry({ id: key }); partnerEdits.unshift(edit); }
+    edit.name = name;
+    edit.phone = $('#partnerPhone').value.trim();
+    edit.email = $('#partnerEmail').value.trim();
+    touch(edit);
+    savePartnerEdits();
+  } catch (error) {
+    if (before) Object.assign(edit, before);   // 저장이 안 되면 원래대로 되돌린다
+    else partnerEdits = partnerEdits.filter(row => row !== edit);
+    console.error('협력업체 저장 실패', error);
+    $('#partnerError').textContent = '저장하지 못했습니다. 잠시 뒤 다시 눌러 주세요.';
+    return;                                    // 창은 그대로 두어 쓰던 내용을 지키지 않는다
+  }
+  closePartnerModal();
+  showToast('협력업체 정보 수정됨');
+});
+
+function renderMemories() {
+  const query = normalize($('#memorySearch').value || '');
+  const filtered = sortBySaved(alive(memories).filter(memory => !query || normalize(`${memory.text} ${memory.createdAt || ''} ${savedLabel(memory)}`).includes(query)));
+  $('#memoryCount').textContent = query ? `${filtered.length}개 검색됨` : `${alive(memories).length}개 기록`;
+  $('#memoryPanel').innerHTML = `
+    <div class="memory-list">${filtered.length ? filtered.map(memory => `
+      <article class="memory-item" data-memory-id="${memory.id}"><div><p>${highlight(memory.text, ($('#memorySearch').value || '').trim())}</p><time>${escapeHtml(savedLabel(memory))}</time></div><button type="button" title="삭제">×</button></article>
+    `).join('') : `<div class="todo-empty">${query ? '검색 결과 없음' : '지식창에 “기록 내용”을 입력하면 여기에 따로 모여요.'}</div>`}</div>`;
+  $('#memoryPanel').querySelectorAll('[data-memory-id]').forEach(row => {
+    row.querySelector('button').onclick = () => {
+      const memory = memories.find(x => x.id === row.dataset.memoryId);
+      if (!memory) return;
+      memory.deleted = true; touch(memory);
+      saveMemories(); renderMemories(); renderLibrary();
+    };
+  });
+}
+
+// 협력업체 고객카드에 붙는 관련 할 일·기억. 업체명(㈜ 등 접두어 제외)이 들어간 기록을 모은다.
+function partnerKey(name) {
+  return normalize(String(name || '').replace(/㈜|\(주\)|주식회사/g, ''));
+}
+function partnerRecords(name) {
+  const key = partnerKey(name);
+  if (key.length < 2) return { todos: [], memories: [] };
+  return {
+    todos: sortBySaved(alive(todos).filter(todo => normalize(todo.text).includes(key))),
+    memories: sortBySaved(alive(memories).filter(memory => normalize(memory.text).includes(key)))
+  };
+}
+function partnerRecordsHtml(name, term = '') {
+  const { todos: todoHits, memories: memoryHits } = partnerRecords(name);
+  const total = todoHits.length + memoryHits.length;
+  if (!total) return '';
+  return `<div class="partner-records"><b>관련 기록 ${total}건</b>`
+    + todoHits.map(todo => `<div class="partner-record"><span>✓ 할 일</span><p>${highlight(todo.text, term)}</p><time>${escapeHtml(todo.date || '')} · ${todo.done ? '완료' : '진행중'}</time></div>`).join('')
+    + memoryHits.map(memory => `<div class="partner-record"><span>📝 기억</span><p>${highlight(memory.text, term)}</p><time>${escapeHtml(savedLabel(memory))}</time></div>`).join('')
+    + '</div>';
+}
+
+function findCategory(item) {
+  return item.category || '기타';
+}
+
+// 검색어와 글자 그대로 일치하는 부분을 전부 <mark> 로 감싼다(대소문자 무시).
+function highlight(text, query) {
+  const raw = String(text === undefined || text === null ? '' : text);
+  const needle = String(query || '').trim();
+  if (!needle) return escapeHtml(raw);
+  const haystack = raw.toLowerCase();
+  const target = needle.toLowerCase();
+  let out = '';
+  let from = 0;
+  for (;;) {
+    const at = haystack.indexOf(target, from);
+    if (at === -1) break;
+    out += escapeHtml(raw.slice(from, at)) + `<mark>${escapeHtml(raw.slice(at, at + needle.length))}</mark>`;
+    from = at + needle.length;
+  }
+  return out + escapeHtml(raw.slice(from));
+}
+
+function escapeHtml(text) {
+  return String(text).replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]));
+}
+function markMemoryOpen(open) {
+  const button = $('#memoryToggle');          // 상단 메뉴가 그려진 뒤에만 있다
+  if (button) button.classList.toggle('active', open);
+}
+function openMemoryLibrary() {
+  $('#memoryModal').classList.remove('hidden');
+  markMemoryOpen(true);
+  renderMemories();
+  setTimeout(() => $('#memorySearch').focus(), 50);
+}
+function closeMemoryLibrary() { $('#memoryModal').classList.add('hidden'); markMemoryOpen(false); }
+$('#memoryClose').addEventListener('click', closeMemoryLibrary);
+$('#memoryModal').addEventListener('click', event => { if (event.target.id === 'memoryModal') closeMemoryLibrary(); });
 $('#memorySearch').addEventListener('input', renderMemories);
 // ── 검색 미리보기 ─────────────────────────────────────────────
 // 입력하는 즉시 검색창 아래에 "기능 바로가기 + 저장된 자료"를 보여 준다.
