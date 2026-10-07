@@ -1858,6 +1858,8 @@ const shortcutHost = (url) => SHORTCUT_STORE.host(url);
 // 뒤에는 같은 그림을 흐리게 깔아 이미지 영역을 빈틈없이 채우고,
 // 앞에는 원본을 잘림 없이(contain) 그대로 보여 준다.
 function thumbImage(src) {
+  const character = characterIconMarkup(src);
+  if (character) return character;
   const url = escapeHtml(src);
   return `<img class="thumb-back" alt="" aria-hidden="true" src="${url}" /><img class="thumb-face" alt="" src="${url}" />`;
 }
@@ -2026,7 +2028,7 @@ function paintShortcutPreview() {
 function paintIconPicker() {
   $('#iconPicker').innerHTML = BUILTIN_ICONS.map(item => `
     <button type="button" data-icon="${item.id}" title="${escapeHtml(item.name)}">
-      <img alt="${escapeHtml(item.name)}" src="${escapeHtml(builtinIconUrl(item.id))}" />
+      ${characterIconMarkup(builtinIconUrl(item.id)) || `<img alt="${escapeHtml(item.name)}" src="${escapeHtml(builtinIconUrl(item.id))}" />`}
     </button>`).join('');
   $('#iconPicker').querySelectorAll('[data-icon]').forEach(button => {
     button.onclick = () => {

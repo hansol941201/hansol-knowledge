@@ -129,7 +129,10 @@ function iconForShortcut(item) {
 }
 
 function builtinIconUrl(id) {
+  if (CHARACTER_ICONS.some(item => item.id === id)) return 'theme-art/favorite-characters.png#' + id;
   const found = BUILTIN_ICONS.find(item => item.id === id);
   if (!found) return '';
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(found.svg.replace(/\s+/g, ' ').trim())}`;
 }
+
+BUILTIN_ICONS.push(...CHARACTER_ICONS);
