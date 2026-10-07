@@ -1041,3 +1041,20 @@ body:not(.overlay-mode) { height: 100dvh; overflow: hidden; }
 .top-item { gap: 7px; }
 .top-item > svg { flex: none; opacity: .72; background: transparent; }
 .top-item.active > svg, .top-item:hover > svg { opacity: 1; }
+
+/* Half-height task and quick-memo panels; each retains internal scrolling. */
+.main-scroll:has(#knowledgeBlock.hidden) #todayPanel {
+  height: 50%; min-height: 160px; align-self: start;
+}
+.main-scroll:has(#knowledgeBlock.hidden) #memoPanel {
+  height: 50%; min-height: 160px; align-self: start;
+  padding: 14px 18px; gap: 8px;
+}
+.main-scroll:has(#knowledgeBlock.hidden) #memoNote {
+  height: 80px; min-height: 80px; padding: 10px 12px;
+}
+.main-scroll:not(:has(#knowledgeBlock.hidden)) #todayPanel { max-height: min(30dvh, 280px); }
+@media (max-width: 900px) {
+  .main-scroll:has(#knowledgeBlock.hidden) #todayPanel { min-height: 140px; }
+  .main-scroll:has(#knowledgeBlock.hidden) #memoPanel { height: 90px; min-height: 90px; }
+}
