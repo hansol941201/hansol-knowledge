@@ -97,3 +97,20 @@ button:focus-visible, a:focus-visible { outline-color: #b3a4cf; }
 .today-panel { background-image: url("data:image/svg+xml,%3Csvg%20preserveAspectRatio%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22110%22%20height%3D%2290%22%20viewBox%3D%220%200%20110%2090%22%3E%3Cg%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.55%22%3E%3Cpath%20d%3D%22M77%2012l3%2016m-11-7%2017-2%22%20stroke%3D%22%23cb96ac%22%20stroke-width%3D%223%22%2F%3E%3Cpath%20d%3D%22M91%2047l2%2010m-7-4%2012-2%22%20stroke%3D%22%23d8b562%22%20stroke-width%3D%223%22%2F%3E%3Cpath%20d%3D%22M15%2070q15%2014%2025-2%22%20stroke%3D%22%239d9ecb%22%20stroke-width%3D%223%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right bottom; background-size: 85px 70px; }
 
 .todo-head::after, .memo-head::after, .schedule-panel .block-head::after { height: 16px; background-size: 100% 16px; opacity: .85; }
+
+/* The reference's yellow pencil star is also the importance control. */
+#todayPanel .todo-star {
+  flex: 0 0 29px; width: 29px; height: 29px; padding: 2px; margin-top: 0;
+  font-size: 0; line-height: 0; display: grid; place-items: center;
+  background: transparent; border-radius: 7px;
+}
+#todayPanel .todo-star::before {
+  content: ''; display: block; width: 25px; height: 25px;
+  background: url('crayon-star.svg') center / contain no-repeat;
+  opacity: .5; filter: saturate(.5); transform: rotate(-8deg);
+  transition: opacity var(--ease), filter var(--ease), transform var(--ease);
+  pointer-events: none;
+}
+#todayPanel .todo-star[aria-pressed="true"]::before { opacity: 1; filter: none; transform: rotate(-8deg); }
+#todayPanel .todo-star:hover { transform: none; background: #fbf5df; }
+#todayPanel .todo-star:hover::before { opacity: 1; filter: none; transform: rotate(4deg) scale(1.08); }
