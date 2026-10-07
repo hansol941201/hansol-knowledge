@@ -23,6 +23,19 @@
   // 전화 메모: 입력 영역을 넓게 쓰고, 보관함은 별도 팝업으로 연다.
   function memoPanel() {
     return `
+    <style id="todo-fill-fix">
+      .main-scroll:has(#knowledgeBlock.hidden) #todayPanel {
+        height: 100% !important;
+        min-height: 0 !important;
+        align-self: stretch !important;
+      }
+      .main-scroll:has(#knowledgeBlock.hidden) #todayPanel .todo-list {
+        min-height: 0;
+        height: 100%;
+        overflow-y: auto;
+        align-content: start;
+      }
+    </style>
     <div class="memo-head">
       <h2>전화 메모</h2>
     </div>
@@ -48,7 +61,7 @@
   }
 
   // 오른쪽 위: 할 일 목록 — 체크 + 별표(중요) + 제목 한 줄, 오른쪽 끝에 지우기(✕)
-  // 별표를 누른 것은 맨 위로 올라오고 제목에 형광펜이 그어진다.
+  // 별표를 누른 것은 맨 위로 올라가고 제목에 형광펜이 그어진다.
   function todoSimpleList(list) {
     return `<ul class="todo-list">${list.map(todo => `
       <li class="todo-line${todo.starred ? ' star' : ''}" data-todo-id="${todo.id}">
