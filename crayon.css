@@ -1,0 +1,97 @@
+/* Crayon notebook theme — readable text, hand-drawn details. */
+:root {
+  --ink: #414247; --ink-1: #414247; --ink-2: #72716f; --ink-3: #92918a;
+  --line: #e8e5dd; --line-soft: #f3f0e9;
+  --violet: #7778b3; --violet-soft: #f0eff9; --violet-line: #d5d3ed;
+  --nav-navy: #6f70aa; --nav-soft: #f0eff9;
+  --shadow: 0 3px 9px rgba(90,78,56,.035); --shadow-hover: 0 5px 16px rgba(90,78,56,.075);
+}
+html, body, .workspace, .main, .topnav, .shortcut-band, .topbar, .main-scroll { background: #fff; }
+.brand-badge { background: #8889bd; border-radius: 10px 13px 9px 12px; transform: rotate(-3deg); box-shadow: none; }
+.brand-mark b { color: #55556b; }
+.brand-avatar { background: #f4f2e9; color: #8e876d; border-color: #ebe5d5; }
+.topnav { border-bottom-color: #eeeae0; }
+.top-nav { border-top-color: #f4f0e8; gap: 5px; }
+.top-item { border-radius: 11px 8px 12px 9px; color: #77756e; font-weight: 600; }
+.top-item.active, .top-item.active:hover { background: #f3f0fb; border-color: #d9d4ee; color: #7770a9; box-shadow: none; }
+.top-item:hover { background: #faf6eb; color: #a28851; }
+.top-item:nth-child(3n)::before { color: #ba8c54; }
+.top-item:nth-child(3n+1)::before { color: #8d8ab9; }
+.top-item:nth-child(3n+2)::before { color: #87a27a; }
+.top-mini:hover { background: #f5f1fb; color: #8580b0; }
+.shortcut { border-color: #e7e2d9; border-radius: 13px 10px 14px 9px; }
+.shortcut-thumb { background: #f7f5ef; border-color: #eee9df; }
+.shortcut:nth-child(3n) .shortcut-thumb { background: #faf0e9; }
+.shortcut:nth-child(3n+1) .shortcut-thumb { background: #f3f1fa; }
+.shortcut:nth-child(3n+2) .shortcut-thumb { background: #f2f6ed; }
+.shortcut:hover { border-color: #d6c9a8; transform: rotate(-1deg) translateY(-2px); box-shadow: var(--shadow-hover); }
+.shortcut a b { color: #817b6d; }
+.shortcut.add { border: 1px dashed #d9cfb8; background: #fffdfa; }
+.shortcut-notice { background: #fffaf0; border-color: #eee3c8; border-radius: 8px 11px 7px 10px; }
+.page-search { background: #fffdfa; border-color: #e8e0ce; border-radius: 12px 15px 11px 14px; color: #a79572; }
+.page-search:focus-within { background: #fff; border-color: #bdb6d8; box-shadow: 0 0 0 3px #f4f1fb; }
+.primary-btn, .memo-add-btn, .edit-box footer button[type="submit"] { background: #8585b9; border-radius: 10px 13px 9px 12px; box-shadow: none; }
+.primary-btn:hover, .memo-add-btn:hover { background: #7373a8; }
+.today-panel, .page-card { background: #fffefa; border-color: #e7e2d6; border-radius: 18px 14px 19px 13px; box-shadow: var(--shadow); }
+#todayPanel { border-color: #e4d9bc; background: #fffefa; box-shadow: var(--shadow); }
+#callNotesPanel { background: #fffdfb; border-color: #eadbd3; }
+#memoPanel { background: #fefeff; border-color: #e0ddeb; }
+#schedulePanel { background: #fcfefb; border-color: #dce5d4; }
+.memo-head, .todo-head, .schedule-panel .block-head { position: relative; padding-bottom: 16px; border: 0; }
+.todo-head::after, .memo-head::after, .schedule-panel .block-head::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 12px; background-repeat: no-repeat; background-size: 100% 12px; pointer-events: none; }
+#todayPanel .todo-head h2 { color: #be7970; font-size: 18px; font-weight: 750; letter-spacing: .2px; }
+#callNotesPanel h2 { color: #b58c58; }
+#memoPanel h2 { color: #8580b0; }
+#schedulePanel h2 { color: #829e6c; }
+.memo-head small { color: #8c8983; }
+#todayPanel .todo-count { background: #f6efdc; color: #a18752; border-radius: 8px 6px 9px 7px; }
+#todayPanel .todo-tab { background: #fff; border-color: #e9dfc9; color: #9a8967; border-radius: 9px 7px 10px 8px; }
+#todayPanel .todo-tab.active { background: #f5edd9; border-color: #dcc798; color: #947337; }
+#todayPanel .todo-tab.active span { color: #947337; }
+#todayPanel .todo-line { border: 0; position: relative; padding-bottom: 18px; }
+#todayPanel .todo-line::after { content: ''; position: absolute; bottom: 0; left: 30px; right: 0; height: 9px; background-size: 100% 9px; background-repeat: no-repeat; pointer-events: none; opacity: .7; }
+#todayPanel .todo-line-text { color: #494943; font-size: 16px; font-weight: 600; }
+#todayPanel .todo-box { width: 22px; height: 22px; border: 0; border-radius: 50%; background-color: transparent; background-size: 22px 22px; }
+#todayPanel .todo-box.done { background-color: #a7b88b; }
+#todayPanel .todo-line.done .todo-line-text { color: #918e83; }
+#todayPanel .todo-star { color: #c4ad7b; }
+#todayPanel .todo-line.star .todo-star { color: #d1a047; }
+#todayPanel .todo-line time { color: #9a896a; }
+#todayPanel .todo-line time.late { color: #bc7470; }
+#todayPanel .todo-line time.today { color: #829d6a; }
+#todayPanel .todo-empty { color: #897d67; background: transparent; border: 0; font-size: 14px; padding: 18px 8px; }
+.todo-line:hover, .todo-line.star:hover { background: #fcf8ed; }
+.todo-line.star { background: transparent; }
+.todo-mark { border-radius: 4px 2px 5px 3px; }
+#memoNote { background-color: #fdfcfa; border-color: #e2ddeb; border-radius: 12px 15px 11px 16px; color: #575467; line-height: 1.85; }
+#memoNote::placeholder { color: #a09aab; }
+#memoNote:focus { border-color: #b9b2d4; box-shadow: 0 0 0 3px #f5f2fb; }
+.memo-file { color: #9a8d76; border-color: #e8dfcf; border-radius: 9px 7px 10px 8px; background: #fffdf7; }
+.call-note { border: 0; position: relative; padding-bottom: 23px; }
+.call-note::after { content: ''; position: absolute; bottom: 2px; left: 0; width: 100%; height: 9px; background-size: 100% 9px; background-repeat: no-repeat; opacity: .5; }
+.call-note p { color: #63584d; font-size: 14px; }
+.call-note time { color: #aaa090; }
+.cal-tools button { border-color: #dce5d4; color: #869c72; border-radius: 8px 10px 7px 9px; background: #fff; }
+.cal-tools button:hover { background: #f1f6e9; color: #71865e; border-color: #c5d4b3; }
+.page-categories button { border-color: #e6dfcf; color: #93866e; border-radius: 9px 7px 10px 8px; }
+.page-categories button.active { background: #f2eef9; color: #8b7dac; border-color: #dcd2ec; }
+.page-card:nth-child(3n) { background: #fffdf7; border-color: #e8ddc4; }
+.page-card:nth-child(3n+1) { background: #fefcfd; border-color: #ebd9dc; }
+.page-card:nth-child(3n+2) { background: #fcfdf9; border-color: #dfe6d1; }
+.page-card:hover { border-color: #d5c8aa; box-shadow: var(--shadow-hover); }
+.page-card .card-kind { color: #a78c62; }
+.page-card h3 { color: #555048; }
+.page-card p { color: #878074; }
+.page-card footer { border-color: #eee6d8; }
+.page-card .card-time { color: #aba394; }
+.edit-box, .search-preview { background: #fffefa; border-color: #e2d9c6; border-radius: 17px 14px 18px 13px; }
+.preview-item:hover, .preview-item.on { background: #f5f1fb; }
+.orb { background: #9391bd; border-radius: 48% 52% 45% 55%; }
+.orb span { background: #e9e5f5; }
+button:focus-visible, a:focus-visible { outline-color: #b3a4cf; }
+.todo-head::after, #todayPanel .todo-line::after { background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22500%22%20height%3D%2224%22%20viewBox%3D%220%200%20500%2024%22%3E%3Cdefs%3E%3Cfilter%20id%3D%22wax%22%20x%3D%22-10%25%22%20y%3D%22-30%25%22%20width%3D%22120%25%22%20height%3D%22160%25%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%22.14%20.65%22%20numOctaves%3D%223%22%20seed%3D%227%22%20result%3D%22grain%22%2F%3E%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22grain%22%20scale%3D%222.4%22%2F%3E%3CfeComposite%20in2%3D%22grain%22%20operator%3D%22arithmetic%22%20k1%3D%220%22%20k2%3D%22.85%22%20k3%3D%22-.18%22%20k4%3D%22.12%22%2F%3E%3C%2Ffilter%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M3%2013%20Q45%209%2085%2013%20T165%2012%20T245%2013%20T325%2011%20T405%2013%20T497%2011%22%20fill%3D%22none%22%20stroke%3D%22%23d6a14f%22%20stroke-width%3D%223.7%22%20stroke-linecap%3D%22round%22%20filter%3D%22url%28%23wax%29%22%2F%3E%3C%2Fsvg%3E"); }
+#callNotesPanel .memo-head::after, .call-note::after { background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22500%22%20height%3D%2224%22%20viewBox%3D%220%200%20500%2024%22%3E%3Cdefs%3E%3Cfilter%20id%3D%22wax%22%20x%3D%22-10%25%22%20y%3D%22-30%25%22%20width%3D%22120%25%22%20height%3D%22160%25%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%22.14%20.65%22%20numOctaves%3D%223%22%20seed%3D%227%22%20result%3D%22grain%22%2F%3E%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22grain%22%20scale%3D%222.4%22%2F%3E%3CfeComposite%20in2%3D%22grain%22%20operator%3D%22arithmetic%22%20k1%3D%220%22%20k2%3D%22.85%22%20k3%3D%22-.18%22%20k4%3D%22.12%22%2F%3E%3C%2Ffilter%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M3%2013%20Q45%209%2085%2013%20T165%2012%20T245%2013%20T325%2011%20T405%2013%20T497%2011%22%20fill%3D%22none%22%20stroke%3D%22%23d58483%22%20stroke-width%3D%223.7%22%20stroke-linecap%3D%22round%22%20filter%3D%22url%28%23wax%29%22%2F%3E%3C%2Fsvg%3E"); }
+#memoPanel .memo-head::after { background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22500%22%20height%3D%2224%22%20viewBox%3D%220%200%20500%2024%22%3E%3Cdefs%3E%3Cfilter%20id%3D%22wax%22%20x%3D%22-10%25%22%20y%3D%22-30%25%22%20width%3D%22120%25%22%20height%3D%22160%25%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%22.14%20.65%22%20numOctaves%3D%223%22%20seed%3D%227%22%20result%3D%22grain%22%2F%3E%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22grain%22%20scale%3D%222.4%22%2F%3E%3CfeComposite%20in2%3D%22grain%22%20operator%3D%22arithmetic%22%20k1%3D%220%22%20k2%3D%22.85%22%20k3%3D%22-.18%22%20k4%3D%22.12%22%2F%3E%3C%2Ffilter%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M3%2013%20Q45%209%2085%2013%20T165%2012%20T245%2013%20T325%2011%20T405%2013%20T497%2011%22%20fill%3D%22none%22%20stroke%3D%22%238688c8%22%20stroke-width%3D%223.7%22%20stroke-linecap%3D%22round%22%20filter%3D%22url%28%23wax%29%22%2F%3E%3C%2Fsvg%3E"); }
+.schedule-panel .block-head::after { background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22500%22%20height%3D%2224%22%20viewBox%3D%220%200%20500%2024%22%3E%3Cdefs%3E%3Cfilter%20id%3D%22wax%22%20x%3D%22-10%25%22%20y%3D%22-30%25%22%20width%3D%22120%25%22%20height%3D%22160%25%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%22.14%20.65%22%20numOctaves%3D%223%22%20seed%3D%227%22%20result%3D%22grain%22%2F%3E%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22grain%22%20scale%3D%222.4%22%2F%3E%3CfeComposite%20in2%3D%22grain%22%20operator%3D%22arithmetic%22%20k1%3D%220%22%20k2%3D%22.85%22%20k3%3D%22-.18%22%20k4%3D%22.12%22%2F%3E%3C%2Ffilter%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M3%2013%20Q45%209%2085%2013%20T165%2012%20T245%2013%20T325%2011%20T405%2013%20T497%2011%22%20fill%3D%22none%22%20stroke%3D%22%238aab70%22%20stroke-width%3D%223.7%22%20stroke-linecap%3D%22round%22%20filter%3D%22url%28%23wax%29%22%2F%3E%3C%2Fsvg%3E"); }
+#todayPanel .todo-box { background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2236%22%20height%3D%2236%22%20viewBox%3D%220%200%2036%2036%22%3E%3Cdefs%3E%3Cfilter%20id%3D%22wax%22%20x%3D%22-10%25%22%20y%3D%22-30%25%22%20width%3D%22120%25%22%20height%3D%22160%25%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%22.14%20.65%22%20numOctaves%3D%223%22%20seed%3D%227%22%20result%3D%22grain%22%2F%3E%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22grain%22%20scale%3D%222.4%22%2F%3E%3CfeComposite%20in2%3D%22grain%22%20operator%3D%22arithmetic%22%20k1%3D%220%22%20k2%3D%22.85%22%20k3%3D%22-.18%22%20k4%3D%22.12%22%2F%3E%3C%2Ffilter%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M8%204%20Q3%204%204%2011%20L4%2025%20Q3%2031%2010%2031%20L26%2030%20Q32%2031%2031%2024%20L30%2010%20Q31%203%2024%204%20Z%22%20fill%3D%22none%22%20stroke%3D%22%23d6a14f%22%20stroke-width%3D%223.7%22%20stroke-linecap%3D%22round%22%20filter%3D%22url%28%23wax%29%22%2F%3E%3C%2Fsvg%3E"); }
+.today-panel { background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22110%22%20height%3D%2290%22%20viewBox%3D%220%200%20110%2090%22%3E%3Cg%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.55%22%3E%3Cpath%20d%3D%22M77%2012l3%2016m-11-7%2017-2%22%20stroke%3D%22%23cb96ac%22%20stroke-width%3D%223%22%2F%3E%3Cpath%20d%3D%22M91%2047l2%2010m-7-4%2012-2%22%20stroke%3D%22%23d8b562%22%20stroke-width%3D%223%22%2F%3E%3Cpath%20d%3D%22M15%2070q15%2014%2025-2%22%20stroke%3D%22%239d9ecb%22%20stroke-width%3D%223%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right bottom; background-size: 85px 70px; }
