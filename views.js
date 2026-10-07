@@ -27,7 +27,7 @@
       <h2>전화 메모</h2>
     </div>
     <div class="memo-note-shell">
-      <textarea id="memoNote" rows="20" aria-label="통화내용" placeholder="통화 내용을 넉넉하게 적으세요..."></textarea>
+      <textarea id="memoNote" rows="20" aria-label="통화내용"></textarea>
       <div class="memo-character" aria-hidden="true"><img src="theme-art/potato-couple-transparent.png" alt="" /></div>
     </div>
     <div class="memo-tools">

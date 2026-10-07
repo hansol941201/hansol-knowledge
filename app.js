@@ -1349,7 +1349,7 @@ function renderCallNotes() {
   if (!panel) return;
   panel.classList.toggle('hidden', Boolean(pageSearchCommitted.trim()) || pageCategory !== '대시보드');
   if (!panel.querySelector('#scratchNote')) {
-    panel.innerHTML = `<div class="memo-head"><h2>메모장</h2><button type="button" id="scratchClear">비우기</button></div><textarea id="scratchNote" aria-label="자유 메모장" placeholder="생각나는 대로 편하게 적으세요."></textarea>`;
+    panel.innerHTML = `<div class="memo-head"><h2>메모장</h2><button type="button" id="scratchClear">비우기</button></div><textarea id="scratchNote" aria-label="자유 메모장"></textarea>`;
     const scratch = panel.querySelector('#scratchNote');
     try { scratch.value = localStorage.getItem('knowledge-scratch-note') || ''; } catch {}
     const save = () => { try { localStorage.setItem('knowledge-scratch-note', scratch.value); } catch {} };
