@@ -28,7 +28,7 @@
     </div>
     <div class="memo-note-shell">
       <textarea id="memoNote" rows="20" aria-label="통화내용" placeholder="통화 내용을 넉넉하게 적으세요..."></textarea>
-      <div class="memo-character" aria-hidden="true"><img src="theme-art/potato-couple.png" alt="" /></div>
+      <div class="memo-character" aria-hidden="true"><img src="theme-art/potato-couple-transparent.png" alt="" /></div>
     </div>
     <div class="memo-tools">
       <label class="memo-file">📷 사진/파일 첨부<input id="memoFile" type="file" accept="image/*" hidden /></label>

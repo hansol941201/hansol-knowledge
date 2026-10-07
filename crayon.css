@@ -245,7 +245,7 @@ body { font-size: 18px; }
 
 /* Keep the character inside the memo border without covering typed text. */
 #memoPanel .memo-note-shell {
-  display: grid; grid-template-rows: minmax(0, 1fr) 76px;
+  display: grid; grid-template-rows: minmax(0, 1fr) 156px;
   overflow: hidden; border: 1px solid #e2ddeb;
   border-radius: 12px 15px 11px 16px; background: #fdfcfa;
 }
@@ -254,7 +254,7 @@ body { font-size: 18px; }
 }
 #memoPanel .memo-note-shell:focus-within { border-color: #b9b2d4; box-shadow: 0 0 0 3px #f5f2fb; }
 .memo-character { display: flex; justify-content: flex-end; align-items: center; gap: 4px; padding: 0 14px 6px; pointer-events: none; }
-.memo-character img { display: block; width: 94px; height: 70px; object-fit: contain; }
+.memo-character img { display: block; width: 150px; height: 150px; max-width: 100%; object-fit: contain; }
 
 /* Show each schedule title next to its date, with room for long titles. */
 #schedulePanel .schedule-list { display: grid; align-content: start; }
