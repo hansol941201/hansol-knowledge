@@ -25,14 +25,15 @@
     return `
     <div class="memo-head">
       <h2>전화 메모</h2>
-      <small>Enter로 오른쪽 메모장에 저장 · Shift+Enter로 줄바꿈</small>
+      <small>Enter로 아래 보관함에 저장 · Shift+Enter로 줄바꿈</small>
     </div>
     <textarea id="memoNote" rows="9"
-      placeholder="통화 내용을 적으세요...&#10;Enter를 누르면 오른쪽 메모장에 쌓입니다."></textarea>
+      placeholder="통화 내용을 적으세요...&#10;Enter를 누르면 아래 전화메모 보관함에 쌓입니다."></textarea>
     <div class="memo-tools">
       <label class="memo-file">📷 사진/파일 첨부<input id="memoFile" type="file" accept="image/*" hidden /></label>
       <button type="button" id="memoQuickAdd" class="memo-add-btn">메모 저장</button>
-    </div>`;
+    </div>
+    <section class="phone-archive" aria-label="전화메모 보관함"><h3>전화메모 보관함</h3><div id="phoneArchiveList" class="call-notes-list"></div></section>`;
   }
 
   // 오른쪽 위: 할 일 목록 — 체크 + 별표(중요) + 제목 한 줄, 오른쪽 끝에 지우기(✕)

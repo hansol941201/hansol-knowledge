@@ -1369,11 +1369,19 @@ function renderCallNotes() {
   const panel = $('#callNotesPanel');
   if (!panel) return;
   panel.classList.toggle('hidden', Boolean(pageSearchCommitted.trim()) || pageCategory !== '대시보드');
-  if (panel.classList.contains('hidden')) return;
+  if (!panel.querySelector('#scratchNote')) {
+    panel.innerHTML = `<div class="memo-head"><h2>메모장</h2><button type="button" id="scratchClear">비우기</button></div><textarea id="scratchNote" aria-label="자유 메모장" placeholder="생각나는 대로 편하게 적으세요."></textarea>`;
+    const scratch = panel.querySelector('#scratchNote');
+    try { scratch.value = localStorage.getItem('knowledge-scratch-note') || ''; } catch {}
+    const save = () => { try { localStorage.setItem('knowledge-scratch-note', scratch.value); } catch {} };
+    scratch.oninput = save;
+    panel.querySelector('#scratchClear').onclick = () => { scratch.value = ''; save(); scratch.focus(); };
+  }
+  const archive = $('#phoneArchiveList');
+  if (!archive) return;
   const notes = sortBySaved(alive(memories).filter(item => item.source === '통화 메모'));
-  panel.innerHTML = `<div class="memo-head"><h2>메모장</h2><small>잠깐 적고, 필요 없으면 삭제하세요.</small></div>
-    <div class="call-notes-list">${notes.map(item => `<article class="call-note"><p>${escapeHtml(item.text)}</p><time>${escapeHtml(savedLabel(item))}</time><button type="button" data-note-delete="${escapeHtml(item.id)}" aria-label="메모 삭제">삭제</button></article>`).join('')}</div>`;
-  panel.querySelectorAll('[data-note-delete]').forEach(button => {
+  archive.innerHTML = notes.length ? notes.map(item => `<article class="call-note"><p>${escapeHtml(item.text)}</p><time>${escapeHtml(savedLabel(item))}</time><button type="button" data-note-delete="${escapeHtml(item.id)}" aria-label="전화메모 삭제">삭제</button></article>`).join('') : '<p class="phone-archive-empty">저장한 전화메모가 여기에 쌓입니다.</p>';
+  archive.querySelectorAll('[data-note-delete]').forEach(button => {
     button.onclick = () => {
       const memory = memories.find(item => item.id === button.dataset.noteDelete && item.source === '통화 메모');
       if (!memory) return;
@@ -1405,7 +1413,7 @@ function renderMemoPanel() {
     note.value = '';
     saveDraft();
     saveMemories(); renderMemories(); renderCallNotes(); renderLibrary();
-    showToast('메모장에 저장했습니다');
+    showToast('전화메모 보관함에 저장했습니다');
     note.focus();
   };
   note.addEventListener('keydown', event => {
@@ -1422,6 +1430,7 @@ function renderMemoPanel() {
     noteTimer = setTimeout(saveDraft, 400);
   });
   note.addEventListener('blur', saveDraft);
+  renderCallNotes();
 
   // 첨부한 사진은 파일 이름만 적어 둔다(자료를 통째로 넣지 않는다).
   $('#memoFile').addEventListener('change', event => {

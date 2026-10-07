@@ -208,3 +208,13 @@ body { font-size: 18px; }
 
 .call-note { position: relative; padding-right: 52px; }
 .call-note [data-note-delete] { position: absolute; right: 0; top: 8px; border: 0; background: transparent; color: #9c5555; padding: 5px; cursor: pointer; }
+
+/* Independent scratchpad; saved calls stay beneath the attachment tools. */
+.main-scroll:has(#knowledgeBlock.hidden) #memoPanel { grid-template-rows: auto minmax(90px, .8fr) auto minmax(100px, 1fr); }
+.phone-archive { display: grid; grid-template-rows: auto minmax(0, 1fr); min-height: 0; overflow: hidden; gap: 6px; }
+.phone-archive h3 { margin: 0; color: #7770a9; font-size: 20px; }
+.phone-archive-empty { color: var(--ink-2); font-size: 18px; }
+#callNotesPanel .memo-head { display: flex; align-items: center; justify-content: space-between; }
+#scratchClear { border: 0; background: transparent; color: #9c5555; cursor: pointer; font-size: 18px; }
+#scratchNote { width: 100%; height: 100%; min-height: 0; resize: none; overflow-y: auto; border: 0; background: transparent; color: var(--ink); font: inherit; font-size: 20px; line-height: 1.7; padding: 8px 4px; }
+#scratchNote:focus { outline: none; }
