@@ -1026,3 +1026,14 @@ body:not(.overlay-mode) { height: 100dvh; overflow: hidden; }
 .page-card footer button.card-act { padding: 5px 8px; border-radius: 6px; font-size: 11px; }
 .page-card footer button:hover { background: var(--nav-soft); border-color: var(--violet-line); }
 .account-card .secret-line { display: block; margin-top: 10px; color: #8a9bb0; letter-spacing: 3px; }
+
+/* Compact favorites: the entire tile, including its label, is square. */
+.shortcut-grid { gap: 8px; }
+.shortcut, .shortcut.add { width: 76px; height: 76px; aspect-ratio: 1 / 1; border-radius: 9px; }
+.shortcut a { height: 100%; display: flex; flex-direction: column; }
+.shortcut-thumb { flex: 1; min-height: 0; height: 48px; aspect-ratio: auto; border-bottom: 0; }
+.shortcut-thumb .thumb-face { padding: 6px 17px; }
+.shortcut a b { flex: none; padding: 4px 3px 7px; font-size: 10px; line-height: 1.4; }
+.shortcut.add { min-height: 76px; gap: 3px; }
+.shortcut.add b { font-size: 10px; }
+.shortcut-more { top: 2px; right: 2px; padding: 2px; }
