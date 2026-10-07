@@ -338,7 +338,7 @@ body { font-size: 18px; }
 /* Bold site typography; larger memory and todo text. */
 body, body * { font-weight: 700 !important; font-synthesis: weight; }
 input::placeholder, textarea::placeholder { font-weight: 700; }
-#todayPanel .todo-line-text { font-size: 23px; }
+#todayPanel .todo-line-text { font-size: 22px; }
 .memory-item p { font-size: 15.5px; }
 .page-card.memory-result-card h3 { font-size: 23px; }
 .page-card.memory-result-card p, .page-card.memory-result-card .card-body { font-size: 20px; }
