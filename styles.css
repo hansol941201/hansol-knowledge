@@ -974,3 +974,25 @@ body:not(.overlay-mode) { height: 100dvh; overflow: hidden; }
 .shortcut-thumb { height: auto; aspect-ratio: 1 / 1; }
 .shortcut-thumb .thumb-face { position: absolute; inset: 0; padding: 12px; }
 .shortcut.add { height: auto; min-height: 0; aspect-ratio: 1 / 1; align-self: flex-start; }
+
+/* Refined top navigation: clear selected state and balanced tab proportions. */
+.topnav { grid-template-rows: 58px 62px; }
+.top-nav { gap: 7px; padding: 9px 0 12px; border-top-color: #edf1f5; }
+.top-item {
+  position: relative; height: 40px; padding: 0 18px;
+  border: 1px solid #e3e9f0; border-radius: 10px;
+  background: #fff; color: #596b80; font-size: 14px; font-weight: 600;
+  letter-spacing: -.25px;
+  transition: color var(--ease), background var(--ease), border-color var(--ease), box-shadow var(--ease);
+}
+.top-item:hover { color: #23476c; background: #f3f7fb; border-color: #bdcfe1; }
+.top-item.active {
+  color: #fff; background: #23476c; border-color: #23476c; font-weight: 700;
+  box-shadow: 0 3px 8px rgba(35, 71, 108, .16);
+}
+.top-item.active:hover { background: #1d3e60; }
+@media (max-width: 760px) {
+  .topnav { grid-template-rows: 54px 58px; }
+  .top-nav { padding: 8px 0 10px; gap: 6px; }
+  .top-item { height: 38px; padding: 0 15px; font-size: 13px; }
+}
