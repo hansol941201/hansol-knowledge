@@ -77,7 +77,7 @@
         <span class="schedule-group-count">${group.items.length}건</span>
       </div>
       ${group.items.map(item => `
-        <div class="schedule-row" data-schedule="${item.id}">
+        <div class="schedule-row" data-schedule="${item.id}" data-date="${helper.escapeHtml(String(item.date).slice(5).replace('-', '/'))}" title="${helper.escapeHtml(`${item.date} ${item.time || ''} · ${item.title}`)}">
           ${item.time ? `<span class="schedule-date">${helper.escapeHtml(item.time)}</span>` : '<span class="schedule-date muted">종일</span>'}
           <div class="schedule-body">
             <b>${helper.escapeHtml(item.title)}</b>
