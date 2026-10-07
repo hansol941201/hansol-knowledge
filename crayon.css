@@ -318,3 +318,10 @@ body { font-size: 18px; }
 .topbar .page-search input::placeholder { color: #776957; opacity: 1; }
 .topbar .page-search:focus-within { background: #fffdf7; border-color: #68482e; box-shadow: 0 0 0 3px rgba(129,98,71,.10); }
 @media (max-width: 760px) { .topbar .page-search { padding-right: 12px; padding-left: 23px; } .topbar .page-search input { font-size: 16px; } }
+
+/* Brand artwork leads the navigation; tabs retain their horizontal scroll. */
+.topnav { grid-template-rows: 34px 76px; }
+.navigation-row { grid-column: 1 / -1; grid-row: 2; display: flex; align-items: center; gap: 12px; min-width: 0; }
+.hansol-story-logo { flex: 0 0 auto; display: block; width: 100px; height: 67px; object-fit: contain; border-radius: 7px; }
+.topnav .navigation-row .top-nav { flex: 1; min-width: 0; border-top: 0; overflow-x: auto; }
+@media (max-width: 760px) { .navigation-row { gap: 8px; } .hansol-story-logo { width: 84px; height: 56px; } }
