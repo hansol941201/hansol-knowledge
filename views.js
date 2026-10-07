@@ -58,7 +58,7 @@
           title="${todo.starred ? '중요 표시 끄기' : '중요 표시'}"
           aria-pressed="${todo.starred ? 'true' : 'false'}">${todo.starred ? '★' : '☆'}</button>
         <span class="todo-line-text" title="${helper.escapeHtml(todo.text)}"><span class="todo-mark">${helper.escapeHtml(todo.text)}</span></span>
-        ${todo.date ? `<time class="${helper.todoDateState(todo)}">${helper.escapeHtml(todo.date)}</time>` : ''}
+        ${todo.date ? `<time class="${helper.todoDateState(todo)}">${helper.escapeHtml(String(todo.date).slice(5).replace("-", "/"))}</time>` : ''}
         <button type="button" class="todo-x" data-todo-delete title="지우기">✕</button>
       </li>`).join('')}</ul>`;
   }
@@ -67,7 +67,7 @@
       <li class="todo-line done" data-todo-id="${todo.id}">
         <label class="todo-line-check" title="완료 취소"><input type="checkbox" checked /><span class="todo-box done"></span></label>
         <span class="todo-line-text" title="${helper.escapeHtml(todo.text)}">${helper.escapeHtml(todo.text)}</span>
-        ${todo.date ? `<time class="muted">${helper.escapeHtml(todo.date)}</time>` : ''}
+        ${todo.date ? `<time class="muted">${helper.escapeHtml(String(todo.date).slice(5).replace("-", "/"))}</time>` : ''}
         <time title="완료 ${helper.escapeHtml(helper.todoDoneLabel(todo))}">완료 ${helper.escapeHtml(helper.todoDoneShort(todo))}</time>
         <button type="button" class="todo-x" data-todo-purge title="영구 삭제">✕</button>
       </li>`).join('')}</ul>`;
