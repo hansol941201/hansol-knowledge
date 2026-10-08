@@ -345,6 +345,6 @@ input::placeholder, textarea::placeholder { font-weight: 600; }
 /* A whisper of the landscape reference around slightly smaller work panels. */
 .workspace { position: relative; isolation: isolate; }
 .workspace, .main, .topnav, .shortcut-band, .topbar, .main-scroll { background: transparent; }
-.workspace::before { content: ''; position: fixed; left: 50%; top: 50%; width: 100dvh; height: 100vw; transform: translate(-50%, -50%) rotate(-90deg); background: url('theme-art/cloud-background.png') center / contain no-repeat; opacity: .055; pointer-events: none; z-index: -1; }
+.workspace::before { content: ''; position: fixed; left: 50%; top: 50%; width: 100dvh; height: 100vw; transform: translate(-50%, -50%) rotate(-90deg); background: url('theme-art/cloud-background.png') center / contain no-repeat; opacity: .075; pointer-events: none; z-index: -1; }
 .main-scroll:has(#knowledgeBlock.hidden) .dash-cols { width: calc(100% - 16px); height: calc(100% - 16px); margin: 8px auto; }
 @media (max-width: 750px) { .main-scroll:has(#knowledgeBlock.hidden) .dash-cols { width: calc(100% - 8px); margin: 4px auto; } }
