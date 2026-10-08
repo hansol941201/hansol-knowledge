@@ -180,7 +180,7 @@ body { font-size: 16px; }
 .shortcut a b { font-size: 13px; }
 .page-search input { font-size: 16px; }
 .memo-head h2, .todo-head h2 { font-size: 19px; }
-#todayPanel .todo-head h2 { font-size: 19px; }
+#todayPanel .todo-head h2 { font-size: 17px; }
 #todayPanel .todo-line-text { font-size: 17px; line-height: 1.6; }
 #memoNote, .call-note p { font-size: 18px; line-height: 1.7; }
 .memo-head small { font-size: 14px; }
@@ -338,7 +338,7 @@ body { font-size: 16px; }
 /* Bold site typography; larger memory and todo text. */
 body, body * { font-weight: 600 !important; font-synthesis: weight; }
 input::placeholder, textarea::placeholder { font-weight: 600; }
-#todayPanel .todo-line-text { font-size: 18px; }
+#todayPanel .todo-line-text { font-size: 16px; }
 .memory-item p { font-size: 13.5px; }
 .page-card.memory-result-card h3 { font-size: 21px; }
 .page-card.memory-result-card p, .page-card.memory-result-card .card-body { font-size: 18px; }
