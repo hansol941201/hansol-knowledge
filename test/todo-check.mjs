@@ -1,7 +1,7 @@
 // 오늘의 할 일 — 상태 배지 제거 · 수정 · 완료 이동 · 완료 탭
 import { chromium } from 'playwright';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
-const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+import { root } from './test-path.mjs';
 const failures = [];
 const types={'.html':'text/html','.js':'text/javascript','.css':'text/css','.png':'image/png'};
 const server=http.createServer((req,res)=>{

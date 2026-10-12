@@ -8,7 +8,8 @@
     "start": "electron .",
     "pack": "electron-builder --win portable",
     "test": "node test/entry-check.mjs && node test/ui-check.mjs && node test/layout-check.mjs && node test/dashboard-check.mjs && node test/shortcut-check.mjs && node test/shortcut-recover-check.mjs && node test/reset-check.mjs && node test/sync-check.mjs && node test/offline-check.mjs && node test/login-check.mjs && node test/no-pin-popup-check.mjs && node test/jump-check.mjs && node test/window-check.mjs && node test/todo-check.mjs && node test/todo-click-check.mjs && node test/todo-list-check.mjs && node test/work-area-check.mjs && node test/preview-check.mjs && node test/fuzzy-check.mjs && node test/edit-check.mjs && node test/script-check.mjs && node test/script-view-check.mjs && node test/plan-check.mjs && node test/no-mail-check.mjs && node test/popup-check.mjs && node test/pwa-check.mjs && node test/cache-check.mjs && node test/split-check.mjs && node test/memo-check.mjs && node test/account-check.mjs && node test/todo-search-check.mjs && node test/account-edit-check.mjs && node test/todo-star-check.mjs && node test/search-order-check.mjs && node test/partner-edit-check.mjs",
-    "test:popup-geometry": "node test/popup-geometry-check.mjs"
+    "test:popup-geometry": "node test/popup-geometry-check.mjs",
+    "test:ai": "node --test functions/test/*.test.js && node test/ai-check.mjs"
   },
   "devDependencies": {
     "electron": "latest",
@@ -32,7 +33,23 @@
       "netform-logo.png",
       "firebase-config.js",
       "main.js",
-      "preload.js"
+      "preload.js",
+      "store.js",
+      "shortcuts.js",
+      "views.js",
+      "bootstrap.js",
+      "cloud-storage.js",
+      "functions/storage-codec.js",
+      "ai-search.js",
+      "ai-config.js",
+      "crayon.css",
+      "character-icons.js",
+      "crm-partner-model.js",
+      "crm-meeting-model.js",
+      "crm-meetings.js",
+      "theme-art/**/*",
+      "fonts/**/*",
+      "icons/**/*"
     ],
     "win": {
       "target": "portable"

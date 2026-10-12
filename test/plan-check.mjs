@@ -1,7 +1,7 @@
 // 기획 탭 — 나중에 해 볼 일·아이디어 적어 두기 (추가·수정·삭제·검색)
 import { chromium } from 'playwright';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
-const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+import { root } from './test-path.mjs';
 const failures = [];
 const types={'.html':'text/html','.js':'text/javascript','.css':'text/css','.png':'image/png','.json':'application/manifest+json'};
 const server=http.createServer((req,res)=>{

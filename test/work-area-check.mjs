@@ -1,7 +1,7 @@
 // 대시보드 업무 영역 — 오른쪽 할 일 목록과 일정, 기존 기능 유지
 import { chromium } from 'playwright';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
-const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+import { root } from './test-path.mjs';
 const failures = [];
 const types={'.html':'text/html','.js':'text/javascript','.css':'text/css','.png':'image/png','.json':'application/manifest+json'};
 const server=http.createServer((req,res)=>{

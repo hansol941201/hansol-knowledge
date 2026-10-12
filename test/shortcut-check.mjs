@@ -26,7 +26,7 @@ function transparentSquarePng(size = 64) {
   return Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
     chunk('IHDR', ihdr), chunk('IDAT', zlib.deflateSync(raw)), chunk('IEND', Buffer.alloc(0))]);
 }
-const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+import { root } from './test-path.mjs';
 const out = process.env.SHOT_DIR || '/tmp';
 const failures = [];
 const types={'.html':'text/html','.js':'text/javascript','.css':'text/css','.png':'image/png'};

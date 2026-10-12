@@ -42,7 +42,7 @@
 
       <header class="topbar">
         <div class="search-wrap">
-          <label class="page-search"><span data-icon="search" data-size="18"></span><input id="pageSearch" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="searchPreview" placeholder="지식, 특허번호, 업체명, 연락처를 검색하세요" /></label>
+          <label class="page-search"><span data-icon="search" data-size="18"></span><input id="pageSearch" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="searchPreview" placeholder="저장한 기록에 대해 질문하세요" /><button id="askKnowledge" type="button">검색</button></label>
           <div id="searchPreview" class="search-preview hidden" role="listbox" aria-label="검색 미리보기"></div>
         </div>
         <button id="accountAdd" class="hidden" type="button" aria-hidden="true"></button>
@@ -66,6 +66,8 @@
             <button id="crmPartnerConnect" class="hidden" type="button">고객관리 연결</button><b id="pageCount">0</b>
           </div>
           <nav id="pageCategories" class="page-categories"></nav>
+          <section id="aiAnswer" class="ai-answer hidden" aria-live="polite"></section>
+          <div id="storageStatus" class="storage-status" role="status"></div>
           <div id="pageGrid" class="page-grid"></div>
           <div id="pageEmpty" class="page-empty hidden">검색 결과 없음</div>
         </section>
@@ -89,7 +91,8 @@
     <form id="quickAdd" class="quick-add hidden">
       <div class="quick-title"><strong>빠른 지식 추가</strong><button id="quickClose" type="button">×</button></div>
       <input id="quickTitle" placeholder="제목  예) 시방서 문의" required />
-      <textarea id="quickAnswer" placeholder="답변" rows="4" required></textarea>
+      <textarea id="quickAnswer" placeholder="통화 대본·업무 메모·안내문을 원문 그대로 붙여넣으세요" rows="8" required></textarea>
+      <small>긴 원문은 자동 분할 저장됩니다. 전체 동기화 자료 한도 6 MB(UTF-8 JSON 기준), 기기 저장은 브라우저의 남은 공간에 따라 달라집니다.</small>
       <div><select id="quickCategory"><option>업무지식</option><option>대본</option><option>기획</option><option>연락처</option><option>기타</option></select><button type="submit">저장</button></div>
     </form>
 
@@ -259,7 +262,11 @@
   <!-- 기능과 디자인을 나눠 둔 파일들. 모두 app.js 보다 먼저 읽혀야 한다.
        store.js  : 자료 저장·불러오기      shortcuts.js : 즐겨찾기 창 열기
        views.js  : 화면 구성(HTML 만들기)  styles.css   : 색·간격·반응형 -->
-  <script src="store.js?v=2"></script>
+  <script src="store.js?v=3"></script>
+  <script src="functions/storage-codec.js?v=1"></script>
+  <script src="cloud-storage.js?v=1"></script>
+  <script src="ai-config.js?v=1"></script>
+  <script src="ai-search.js?v=1"></script>
   <script src="shortcuts.js?v=1"></script>
   <script src="views.js?v=17"></script>
   <script src="partners.js?v=1"></script>
@@ -274,8 +281,8 @@
   <script src="icons.js?v=3"></script>
   <script src="crm-partner-model.js?v=1"></script>
   <script src="crm-meeting-model.js?v=1"></script>
-  <script src="app.js?v=109"></script>
-  <script src="crm-meetings.js?v=2"></script>
+  <!-- bootstrap loads app.js?v=110 after durable local records are restored. -->
+  <script src="bootstrap.js?v=1"></script>
   <script>
     // 홈 화면 앱(주소창 없는 standalone)으로 열리게 하는 등록. 저장은 하지 않는 워커라
     // 사이트를 고치면 항상 최신 파일을 받는다. 실패해도 사이트 동작에는 영향이 없다.

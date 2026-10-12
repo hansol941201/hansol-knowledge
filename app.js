@@ -337,6 +337,7 @@ function viewForSearch(text) {
 
 function goToView(name) {
   closeSearchPreview();
+  window.HANSOL_AI?.clear();
   pageCategory = name;
   viewBeforeSearch = '';
   $('#pageSearch').value = '';
@@ -883,7 +884,7 @@ let previewIndex = -1;             // 방향키로 고른 줄
 let previewTimer = null;
 let previewComposing = false;      // 한글 조합 중인지
 
-function markSearchIndexDirty() { searchIndexDirty = true; }
+function markSearchIndexDirty() { searchIndexDirty = true; window.HANSOL_AI?.changed({ knowledge, todos, memories, schedule, partnerEdits }); }
 
 // 화면 안 기능 — 실제로 있는 메뉴·버튼·바로가기만 넣는다(없는 경로를 만들지 않는다).
 function actionEntries() {
@@ -1145,7 +1146,10 @@ function runFullSearch(text) {
   if (pageSearchCommitted && pageCategory === '대시보드') { viewBeforeSearch = pageCategory; pageCategory = '전체'; }
   if (!pageSearchCommitted && viewBeforeSearch) { pageCategory = viewBeforeSearch; viewBeforeSearch = ''; }
   renderAll();
+  window.HANSOL_AI?.ask(pageSearchCommitted, () => saveCloudState());
 }
+
+$('#askKnowledge').onclick = () => { closeSearchPreview(); runFullSearch(); };
 
 $('#pageSearch').addEventListener('compositionstart', () => { previewComposing = true; });
 $('#pageSearch').addEventListener('compositionend', () => {
@@ -1169,6 +1173,7 @@ $('#pageSearch').addEventListener('input', event => {
   else if (!previewComposing) previewTimer = setTimeout(() => renderSearchPreview(typed), 180);
   if (typed.trim() || !pageSearchCommitted) return;
   pageSearchCommitted = '';   // 검색어를 지우면 바로 원래 화면으로 돌아간다
+  window.HANSOL_AI?.clear();
   if (viewBeforeSearch) { pageCategory = viewBeforeSearch; viewBeforeSearch = ''; }
   renderAll();
 });
@@ -1194,10 +1199,7 @@ $('#pageSearch').addEventListener('keydown', event => {
     commitEntry(entry.item, entry.kind);
     return;
   }
-  pageSearchCommitted = event.currentTarget.value.trim();
-  if (pageSearchCommitted && pageCategory === '대시보드') { viewBeforeSearch = pageCategory; pageCategory = '전체'; }
-  if (!pageSearchCommitted && viewBeforeSearch) { pageCategory = viewBeforeSearch; viewBeforeSearch = ''; }
-  renderAll();
+  runFullSearch(event.currentTarget.value);
 });
 
 // ── 카드 상세 보기 ─────────────────────────────────────────────
@@ -2122,10 +2124,11 @@ $('#resetBackup').addEventListener('click', () => {
 });
 
 // 이 컴퓨터 사본만 지운다. 클라우드 자료는 그대로라 새로고침하면 다시 내려온다.
-$('#resetLocal').addEventListener('click', () => {
+$('#resetLocal').addEventListener('click', async () => {
   if (!confirm('이 컴퓨터에 저장된 사본을 지웁니다.\n클라우드 자료는 그대로 남고, 다시 내려받습니다.\n진행할까요?')) return;
   // 자료 열쇠 목록은 store.js 한 곳에만 있다. 금고와 동기화 표시만 여기서 덧붙인다.
   STORE.clearKeys(['knowledge-vault-data', 'knowledge-sync-pending']);
+  if (STORE.flush) await STORE.flush();
   location.reload();
 });
 
@@ -2380,7 +2383,7 @@ function snapshotChat() {
   try {
     const rows = [...messages.querySelectorAll('.row')].slice(-WINDOW_CHAT_MAX).map(row => {
       const bubble = row.querySelector('.bubble');
-      if (!bubble) return null;
+      if (!bubble || bubble.dataset.aiAnswer) return null;
       const copy = bubble.cloneNode(true);
       copy.querySelectorAll('.actions').forEach(node => node.remove());   // 버튼 글자는 빼고 내용만
       return { type: row.classList.contains('ask') ? 'ask' : 'answer', text: copy.textContent, patent: bubble.classList.contains('patent-bubble') };
@@ -2698,6 +2701,7 @@ function saveLocalState() {
   markSearchIndexDirty();   // 자료가 바뀌면 검색 목록도 다시 만든다
   sortIntoCollections();
   STORE.writeAll({ knowledge, todos, memories, accountMeta, shortcuts, schedule, partnerEdits });
+  return STORE.flush ? STORE.flush() : Promise.resolve(true);
 }
 
 // views.js 는 자료만 받고 잔심부름은 못 한다. 필요한 것들을 여기서 건네준다.
@@ -2774,7 +2778,7 @@ async function commitEntry(item, kind) {
       ? `${item.title}\n${item.answer}`
       : `${item.text}\n${savedLabel(item)}`;
 
-  saveLocalState();          // 2. 로컬 저장 완료
+  const localSaved = await saveLocalState();
   renderAll();               // 3. 내 지식 · 할 일 · 기억 저장소 즉시 다시 표시
 
   const bubble = addBubble(`${label} 저장 중…\n${detail}`, 'answer');
@@ -2790,8 +2794,8 @@ async function commitEntry(item, kind) {
     bubble.textContent = `✓ ${label} 저장 및 연동 완료\n${detail}`;
     showToast(`✓ ${label} 저장 및 연동 완료`);
   } else {
-    bubble.textContent = `로컬 저장 완료·클라우드 연동 대기 중\n${needsLogin ? '동기화 PIN 로그인이 필요합니다\n' : ''}${detail}`;
-    showToast('로컬 저장 완료·클라우드 연동 대기 중');
+    bubble.textContent = `${localSaved ? '로컬 저장 완료·클라우드 연동 대기 중' : '저장 실패 · 창을 닫기 전에 JSON 백업을 해 주세요'}\n${needsLogin ? '동기화 PIN 로그인이 필요합니다\n' : ''}${detail}`;
+    showToast(localSaved ? '로컬 저장 완료·클라우드 연동 대기 중' : '저장 실패 · JSON 백업을 해 주세요');
     // 자동 재전송으로 올라가면 이 말풍선을 완료로 바꾼다.
     waitingBubbles.set(item.id, { bubble, label, detail });
   }
@@ -2858,8 +2862,12 @@ function handleComposerText(text) {
 
   // 명령어가 없으면 검색이다. 저장하지 않는다.
   // 기억 저장소에는 "기억 …" / "기록 …" 으로 입력했을 때만 들어간다.
+  if (window.HANSOL_AI) {
+    const answer = addBubble('AI 검색 준비 중…', 'answer');
+    window.HANSOL_AI.ask(text, () => saveCloudState(), answer);
+  }
   const found = showSearchHits(text);
-  if (!found) addBubble(`찾은 결과 없음\n저장하려면 “기록 ${text}” 처럼 앞에 기록을 붙이세요`, 'answer');
+  if (!found && !window.HANSOL_AI) addBubble(`찾은 결과 없음\n저장하려면 “기록 ${text}” 처럼 앞에 기록을 붙이세요`, 'answer');
   return Promise.resolve(false);
 }
 
@@ -2928,7 +2936,7 @@ $('#quickAdd').addEventListener('submit', e => {
   saveLocalState(); queueCloudSave(); renderAll();
   $('#quickTitle').value = ''; $('#quickAnswer').value = '';
   $('#quickAdd').classList.add('hidden');
-  addBubble(`✓ 저장\n${item.title}\n${item.answer}`, 'answer', item);
+  addBubble(`저장 처리 중 · 아래 저장 상태를 확인해 주세요\n${item.title}`, 'answer', item);
 });
 $('#fileInput').addEventListener('change', async (e) => {
   const file = e.target.files[0];
@@ -3015,7 +3023,8 @@ async function saveCloudState({ verifyIds = [] } = {}) {
     const stateDoc = window.HANSOL_FIRESTORE.doc('shared/state');
     const merged = await window.HANSOL_FIRESTORE.runTransaction(async (transaction) => {
       const snapshot = await transaction.get(stateDoc);
-      const remote = snapshot.exists ? (snapshot.data() || {}) : {};
+      const remoteRoot = snapshot.exists ? (snapshot.data() || {}) : {};
+      const remote = await window.HANSOL_CLOUD_STORAGE.read(remoteRoot, transaction);
       const next = {
         knowledge: mergeById(knowledge, remote.knowledge),
         todos: mergeById(todos, remote.todos),
@@ -3028,14 +3037,13 @@ async function saveCloudState({ verifyIds = [] } = {}) {
         vaultSecrets: { ...(remote.vaultSecrets || {}), ...vaultSecrets },
         ...keepQuickMemoField(remote)   // 화면에서 뺀 빠른 메모 값은 건드리지 않고 그대로 둔다
       };
-      transaction.set(stateDoc, { ...next, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+      await window.HANSOL_CLOUD_STORAGE.write(transaction, stateDoc, next, remoteRoot);
       return next;
     });
 
     // 저장된 문서를 서버에서 직접 다시 읽어 확인한다(캐시가 아니라 서버).
     let saved = null;
-    try { saved = (await stateDoc.get({ source: 'server' })).data(); }
-    catch { saved = (await stateDoc.get()).data(); }
+    saved = await window.HANSOL_CLOUD_STORAGE.read((await stateDoc.get({ source: 'server' })).data());
     const storedIds = new Set([
       ...((saved && saved.knowledge) || []),
       ...((saved && saved.todos) || []),
@@ -3046,6 +3054,11 @@ async function saveCloudState({ verifyIds = [] } = {}) {
       ...((saved && saved.partnerEdits) || [])
     ].map(entry => entry && entry.id));
     const missing = verifyIds.filter(id => !storedIds.has(id));
+    const exact = saved && Object.keys(merged).every(key => window.HANSOL_STORAGE_CODEC.stable(saved[key]) === window.HANSOL_STORAGE_CODEC.stable(merged[key]));
+    if (!exact) {
+      markPending();
+      return { ok: true, verified: false, reason: 'content-not-confirmed' };
+    }
     resolveWaitingBubbles(storedIds);   // 뒤늦게 올라간 항목의 말풍선을 완료로 바꾼다
 
     cloudSyncing = false;
@@ -3060,6 +3073,8 @@ async function saveCloudState({ verifyIds = [] } = {}) {
   } catch (error) {
     console.error('Firebase 저장 실패', error);
     markPending();
+    const status = $('#storageStatus');
+    if (status) { status.textContent = `클라우드 저장 실패 · ${error.message || '연결과 권한을 확인해 주세요.'}`; status.dataset.error = 'true'; }
     return { ok: false, verified: false, reason: 'error' };
   } finally {
     cloudSyncing = false;
@@ -3068,6 +3083,7 @@ async function saveCloudState({ verifyIds = [] } = {}) {
 
 async function applyCloudState(state) {
   if (!state) return;
+  state = await window.HANSOL_CLOUD_STORAGE.read(state);
   cloudApplying = true;
   const missingOnServer = hasLocalOnlyItems(knowledge, state.knowledge)
     || hasLocalOnlyItems(todos, state.todos)
@@ -3110,7 +3126,7 @@ async function startCloudSync() {
   await saveCloudState();
   stateDoc.onSnapshot(snapshot => {
     if (!snapshot.exists || snapshot.metadata.hasPendingWrites) return;
-    applyCloudState(snapshot.data());
+    applyCloudState(snapshot.data()).catch(error => { console.error('분할 원문 읽기 실패', error); markPending(); });
   }, error => { console.error('Firebase 실시간 동기화 실패', error); markPending(); });
 }
 

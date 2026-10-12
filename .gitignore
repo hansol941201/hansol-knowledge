@@ -7,3 +7,8 @@ dist/
 dash.png
 launcher.png
 new-*.png
+.env
+.env.*
+!.env.example
+functions/.secret.local
+test-results/

@@ -1,0 +1,8 @@
+{
+  "indexes": [],
+  "fieldOverrides": [
+    { "collectionGroup": "stateParts", "fieldPath": "data", "indexes": [] },
+    { "collectionGroup": "aiEmbeddings", "fieldPath": "vector", "indexes": [] },
+    { "collectionGroup": "aiEmbeddings", "fieldPath": "expiresAt", "ttl": true, "indexes": [] }
+  ]
+}

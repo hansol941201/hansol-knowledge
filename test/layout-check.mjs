@@ -1,6 +1,6 @@
 import { chromium } from 'playwright';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
-const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+import { root } from './test-path.mjs';
 const failures = [];
 const out = process.env.SHOT_DIR || '/tmp';
 const types={'.html':'text/html','.js':'text/javascript','.css':'text/css','.png':'image/png'};
@@ -11,7 +11,7 @@ await new Promise(r=>server.listen(0,r));
 const base=`http://localhost:${server.address().port}`;
 const stub=fs.readFileSync(path.join(root,'test','fake-firebase.js'),'utf8');
 const ok=(n,p,d='')=>{ if(!p) failures.push(n); console.log(`${p?'PASS':'FAIL'}  ${n}${d?` — ${d}`:''}`); };
-const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome'});
+const b=await chromium.launch({executablePath: process.env.PW_CHROME || '/opt/pw-browsers/chromium-1194/chrome-linux/chrome'});
 const ctx=await b.newContext({viewport:{width:1920,height:1080},deviceScaleFactor:1.5});
 await ctx.addInitScript(stub);
 await ctx.route('**gstatic.com/**',r=>r.abort());

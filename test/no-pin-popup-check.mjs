@@ -1,7 +1,7 @@
 // 동기화 PIN 창이 저절로 뜨지 않는지 — 눌러서 여는 길과 동기화 자체는 그대로
 import { chromium } from 'playwright';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
-const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+import { root } from './test-path.mjs';
 const failures = [];
 const types={'.html':'text/html','.js':'text/javascript','.css':'text/css','.png':'image/png','.json':'application/manifest+json'};
 const server=http.createServer((req,res)=>{

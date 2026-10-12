@@ -115,6 +115,44 @@ main 에 푸시할 때마다 자동으로 빌드해서 `latest` 릴리스로 올
 
 사이트 상단 검색창에서 지식 · 할 일 · 기억(기록) · 협력업체 · 계정 · 연락처를 한 번에 찾습니다.
 
+### 긴 기록 AI 검색
+
+검색창 Enter/검색 버튼과 팝업 질문은 서버에서 현재 기록을 읽어 답합니다. `search-rules.js`는 기존 자료 목록/자동완성용이며 AI 검색을 대신하지 않습니다. 서버가 없거나 동기화 확인에 실패하면 연결/저장 오류를 표시하고 답변을 지어내지 않습니다.
+
+- 원문을 Q&A로 바꾸거나 유사어를 등록할 필요가 없습니다. 지식 본문이나 기록에 그대로 붙여넣습니다.
+- Firebase ID 토큰을 서버에서 검증하며 기존 소유자 UID만 접근할 수 있습니다. 계정 금고와 비밀번호는 AI 입력에서 제외합니다. 기존 특허/기본 협력업체/계정 목록 검색은 그대로 제공되며 AI 근거는 Firestore에 저장된 지식·기억·할 일·일정·업체 수정 기록입니다.
+- 문단/문장 경계에서 최대 1,200자, 180자 중첩으로 **전체 본문**을 분할합니다. 현재 제목과 본문 해시가 일치하는 임베딩만 재사용합니다. 수정 전 `raw` 사본은 색인하지 않고 삭제 표시는 제외합니다.
+- 실제 OpenAI 임베딩 + 문자 2/3-gram BM25 + 순위 융합으로 검색하고 인접 문맥을 보충합니다. 모델이 짧은 답변과 원문 인용을 생성합니다. 인용의 실제 부분문자열 검사와 별도 근거 검증을 통과해야 표시합니다. 원문 속 지시문은 신뢰하지 않는 데이터로 취급합니다.
+- 답변은 캐시하지 않습니다. 서버는 답변 직전에 현재 기록 버전을 재확인하며, 화면도 자료 변경 시 기존 답변을 무효화합니다. 다음 질문 때 추가/수정 내용을 색인하고 삭제 문맥을 후보에서 제외합니다. 비활성 임베딩 캐시는 원문을 포함하지 않고 TTL로 정리됩니다.
+- 로컬은 기존 localStorage와 IndexedDB를 사용합니다. 한쪽 저장 공간이 부족하면 다른 저장소를 사용하고 둘 다 실패하면 오류를 표시합니다.
+- 클라우드는 작은 기존 문서를 그대로 읽고, 600 KB 이상부터 UTF-8 기준 최대 180 KB 조각으로 나눕니다. 조각과 참조 목록을 한 트랜잭션으로 저장하고 SHA-256 및 실제 서버 저장 내용을 확인합니다. 원문 중간/끝을 자르지 않습니다.
+- 현재 **전체 동기화 상태 JSON 한도는 6,000,000바이트**입니다. 중복 `raw`/`text`, 이미지, 삭제 표시 등 모든 저장 필드가 포함되므로 입력 가능한 순수 글자 수와 다릅니다. 안전한 트랜잭션 요청 한도는 8 MB, 검색은 최대 12,000문맥이며 초과 시 명시적으로 실패합니다. 저장 한도 초과분은 클라우드에 저장되지 않으며 기기 저장 상태와 JSON 백업을 확인해야 합니다.
+- 처음 분할 저장된 뒤에는 구버전 클라이언트의 단일 문서 덮어쓰기를 보안 규칙이 거부합니다. 다른 기기도 최신 사이트를 다시 열어야 합니다. 기존 ID 병합/삭제 표시/계정 암호화 방식은 유지합니다. 분할 자료가 생긴 후 예전 프런트엔드나 보안 규칙으로 롤백하지 마세요.
+
+#### 최초 서버 연결
+
+현재 프로젝트는 `.firebaserc`의 `hansol-knowledge-941201`, 지역은 `asia-northeast3`입니다. GitHub Pages는 그대로 사용하고 AI만 Firebase Functions에서 실행합니다.
+
+1. `npm ci`, `npm ci --prefix functions`를 실행합니다(Node 22).
+2. `npx firebase login --interactive`로 프로젝트 관리 계정에 로그인합니다.
+3. `node tools/firebase-status.cjs`로 프로젝트·결제 연결·배포 권한·기존 함수·키 이름 존재 여부를 확인합니다. 키 값은 출력하지 않습니다.
+4. Functions 배포에는 **Blaze** 결제 연결이 필요합니다. 새 요금제 전환은 사용자가 비용을 확인하고 결정해야 합니다. Functions/빌드/Artifact Registry/Firestore 읽기·쓰기·TTL 삭제/Secret Manager와 OpenAI API 사용량이 과금 대상입니다. 무료 할당량이 있어도 전체 무료나 예산 상한을 보장하지 않습니다. API 사용료는 ChatGPT 구독과 별개입니다.
+5. 키가 없다면 [OpenAI API 키 페이지](https://platform.openai.com/api-keys)에서 해당 프로젝트 키를 만듭니다. 결제/사용량 한도를 확인한 뒤 `pwsh -File tools/set-openai-secret.ps1`의 **숨김 입력**에 붙여넣습니다. 채팅·소스·`.env`에 키를 넣지 않습니다. 이 스크립트는 stdin으로 `firebase functions:secrets:set OPENAI_API_KEY`에 전달하며 키 파일을 만들지 않습니다.
+6. `functions/.env.example`의 공개 설정만 필요시 `functions/.env.hansol-knowledge-941201`에 복사합니다. 기본 UID/출처/모델은 코드에 설정돼 있습니다.
+7. `npx firebase deploy --only firestore:rules,firestore:indexes,functions:knowledge-ai --project hansol-knowledge-941201`로 배포합니다. **규칙 배포를 먼저 완료한 뒤 새 프런트엔드를 공개**합니다. 배포 전 기존 자료를 JSON으로 백업합니다.
+8. 함수 URL이 `ai-config.js`와 같은지 확인하고 기존 방식대로 `main`을 GitHub에 푸시합니다. Pages와 Windows 빌드가 이를 반영합니다.
+9. 사이트 동기화 로그인 후 첫 질문을 실행하면 기존 전체 자료의 임베딩을 생성합니다. 처음에는 시간이 걸릴 수 있고 중간 실패 시 완료로 표시하지 않습니다. 다음 요청은 생성 완료된 임베딩부터 재사용합니다.
+
+`OPENAI_API_KEY`는 Firebase Secret Manager에서만 관리합니다. `ALLOWED_UID`는 기존 보안 규칙 UID와 일치해야 하며 임의의 로그인 사용자로 권한을 넓히지 않습니다. `ALLOWED_ORIGIN`은 GitHub Pages의 origin(경로 제외)입니다. `ANSWER_MODEL`, `EMBEDDING_MODEL` 변경 시 실제 질문 검증을 다시 실행해야 합니다.
+
+#### 검증 구분
+
+`npm run test:ai`는 원문 분할/복원/한도, 전체 문맥 범위, 추가·수정·삭제, 인용 검사, 브라우저 저장·화면·오류 표시를 검증합니다. 브라우저 테스트의 서버 응답과 단위 테스트 벡터는 명시적인 대역이므로 **실제 AI 품질 검증이 아닙니다**.
+
+`npm run test:live --prefix functions`는 실제 API 키가 있는 프로세스에서만 실행됩니다. 긴 혼합 기록의 앞·중간·끝, 제시된 현장 상태 4개 질문, 유사 표현·붙여쓰기·오타, 추가·수정·삭제, 근거 없음, 충돌, 지시문 삽입을 실제 모델로 검사합니다. 키가 없으면 실패 종료하며 가짜 성공을 반환하지 않습니다. 실제 배포된 인증/저장/사이트 연결 검증도 별도로 수행해야 합니다.
+
+공식 기준: [Firestore 저장 한도](https://firebase.google.com/docs/firestore/quotas), [Firebase 서버 비밀값](https://firebase.google.com/docs/functions/config-env), [OpenAI 임베딩](https://developers.openai.com/api/docs/guides/embeddings), [구조화 출력](https://developers.openai.com/api/docs/guides/structured-outputs).
+
 ## 특허 목록 추가
 
 `patents.js` 는 특허·상표·디자인 목록입니다. 다른 업체 특허를 엑셀로 받아 덧붙일 때:

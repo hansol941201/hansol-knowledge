@@ -1328,3 +1328,16 @@ button:focus-visible, a:focus-visible { outline: 2px solid #91b7a1; outline-offs
 #todayPanel .todo-line time.today { color: #2f774d; }
 #todayPanel .todo-line.done .todo-line-text { color: #738478; font-weight: 500; }
 #todayPanel .todo-empty { color: #65796b; font-size: 10px; line-height: 1.85; padding: 22px 16px; background: #f7faf8; border-color: #dce6de; }
+/* Grounded AI answer follows the existing paper/card palette. */
+.ai-answer { margin: 12px 0 20px; padding: 20px 22px; background: var(--card, #fffdf8); border: 1px solid #e2dbcd; border-radius: 16px; font-size: 16px; line-height: 1.75; overflow-wrap: anywhere; }
+.ai-answer p { margin: 0 0 8px; }
+.ai-answer ol { padding-left: 24px; margin: 0; }
+.ai-answer-tools { display: flex; gap: 8px; margin-top: 14px; }
+.ai-answer-tools button { font: inherit; font-size: 12px; padding: 4px 10px; border: 1px solid #ded8cc; border-radius: 8px; background: transparent; cursor: pointer; }
+.ai-evidence { margin-top: 16px; font-size: 13px; }
+.ai-evidence article + article { border-top: 1px solid #e2dbcd; padding-top: 12px; }
+.ai-evidence blockquote { white-space: pre-wrap; margin: 8px 0 16px; padding-left: 12px; border-left: 3px solid #d8cfb9; }
+.ai-conflict { display: block; color: #905718; margin-bottom: 8px; }
+.storage-status { font-size: 11px; color: #746c60; margin: 6px 0; }
+.storage-status[data-error="true"] { color: #a53025; font-weight: 600; }
+#askKnowledge { flex-shrink: 0; border: 0; border-radius: 8px; padding: 7px 12px; cursor: pointer; background: #ebe5d6; color: inherit; font: inherit; }

@@ -1,7 +1,7 @@
 // 업무지식 수정·삭제 — 카드 버튼 · 상세 창 버튼 · 실행 취소 · 새로고침 후에도 유지
 import { chromium } from 'playwright';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
-const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+import { root } from './test-path.mjs';
 const failures = [];
 const types={'.html':'text/html','.js':'text/javascript','.css':'text/css','.png':'image/png','.json':'application/manifest+json'};
 const server=http.createServer((req,res)=>{

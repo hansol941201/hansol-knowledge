@@ -1,7 +1,7 @@
 // 즐겨찾기 복구 확인 — 카드 표시 · 팝업 열기 · 추가/수정/삭제 · 동기화 안내
 import { chromium } from 'playwright';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
-const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+import { root } from './test-path.mjs';
 const failures = [];
 const types={'.html':'text/html','.js':'text/javascript','.css':'text/css','.png':'image/png','.json':'application/manifest+json','.webp':'image/webp'};
 const server=http.createServer((req,res)=>{

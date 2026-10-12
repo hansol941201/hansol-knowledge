@@ -1,7 +1,7 @@
 // 홈 화면 앱(PWA) 설정 — manifest · 아이콘 연결 · 기존 화면 영향 없음
 import { chromium } from 'playwright';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
-const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+import { root } from './test-path.mjs';
 const failures = [];
 const types={'.html':'text/html','.js':'text/javascript','.css':'text/css','.png':'image/png','.json':'application/manifest+json'};
 const server=http.createServer((req,res)=>{

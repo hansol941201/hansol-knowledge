@@ -1,7 +1,7 @@
 // 대시보드는 바로가기 · 오늘의 할 일 · 일정 세 가지만 보여 준다.
 import { chromium } from 'playwright';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
-const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+import { root } from './test-path.mjs';
 const out = process.env.SHOT_DIR || '/tmp';
 const failures = [];
 const types={'.html':'text/html','.js':'text/javascript','.css':'text/css','.png':'image/png'};

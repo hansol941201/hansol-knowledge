@@ -1,7 +1,7 @@
 // 대본 상세 화면 — 기존 글 그대로 불러오기 · 한 줄씩 그 자리 수정 · 추가/삭제/순서 · 저장 유지
 import { chromium } from 'playwright';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
-const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+import { root } from './test-path.mjs';
 const failures = [];
 const types={'.html':'text/html','.js':'text/javascript','.css':'text/css','.png':'image/png','.json':'application/manifest+json'};
 const server=http.createServer((req,res)=>{
