@@ -348,3 +348,19 @@ input::placeholder, textarea::placeholder { font-weight: 600; }
 .workspace::before { content: ''; position: fixed; left: 50%; top: 50%; width: 100dvh; height: 100vw; transform: translate(-50%, -50%) rotate(-90deg); background: url('theme-art/cloud-background.png') center / contain no-repeat; opacity: .075; pointer-events: none; z-index: -1; }
 .main-scroll:has(#knowledgeBlock.hidden) .dash-cols { width: calc(100% - 16px); height: calc(100% - 16px); margin: 8px auto; }
 @media (max-width: 750px) { .main-scroll:has(#knowledgeBlock.hidden) .dash-cols { width: calc(100% - 8px); margin: 4px auto; } }
+
+/* Readable typography for the compact knowledge messenger. */
+#app.messenger .bubble { font-size: 16px; line-height: 1.65; overflow-wrap: anywhere; }
+#app.messenger .bubble .actions { flex-wrap: wrap; }
+#app.messenger .bubble .actions button { font-size: 12px; line-height: 1.5; padding: 3px 0; }
+#app.messenger .label { font-size: 12px; }
+#app.messenger .composer input { font-size: 14px; }
+#app.messenger .composer button { font-size: 15px; }
+#app.messenger .chat-empty b, #app.messenger .home-top b { font-size: 16px; }
+#app.messenger .chat-empty span, #app.messenger .home-top span, #app.messenger .home-top em { font-size: 12px; }
+#app.messenger .category-row button, #app.messenger .home-more { font-size: 12px; }
+#app.messenger .knowledge-item b { font-size: 14px; }
+#app.messenger .knowledge-item span { font-size: 12px; }
+#app.messenger .quick-title strong { font-size: 15px; }
+#app.messenger .quick-add > input, #app.messenger .quick-add textarea, #app.messenger .quick-add select { font-size: 14px; }
+#app.messenger .quick-add > div:last-child button { font-size: 13px; }
