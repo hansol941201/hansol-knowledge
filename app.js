@@ -3332,7 +3332,15 @@ function completeReminder(id) {
   saveTodos(); renderTodos(); renderLibrary();
 }
 window.knowledgeAPI?.onCompleteReminder?.(completeReminder);
-setInterval(renderTodoReminders, 15000);
+let dashboardDay = todayKey();
+setInterval(() => {
+  if (dashboardDay !== todayKey()) {
+    dashboardDay = todayKey();
+    calendarSelected = dashboardDay;
+    calendarMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    renderAll();
+  } else renderTodoReminders();
+}, 15000);
 window.addEventListener('focus', renderTodoReminders);
 document.addEventListener('visibilitychange', renderTodoReminders);
 
