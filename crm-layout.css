@@ -112,3 +112,4 @@ html,body,body:not(.overlay-mode) { background:#edf3f6; }
 .workspace #schedulePanel .block-head { flex-direction:row !important; justify-content:space-between; align-items:center; }
 .workspace #schedulePanel .block-head>div:first-child { flex:0 0 auto; width:auto; }
 .workspace #todayPanel .todo-empty { font:400 11px/1.6 system-ui !important; padding:14px 2px; }
+@media(min-width:851px) and (max-height:900px) { .workspace .crm-overview .crm-overview-content { height:110px; min-height:110px; } .workspace .dash-cols,.workspace .main-scroll:has(#knowledgeBlock.hidden) .dash-cols { grid-template-rows:340px; } .workspace #todayPanel,.workspace .notes-hub,.workspace #schedulePanel { height:340px; } }
