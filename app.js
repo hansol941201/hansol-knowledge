@@ -347,9 +347,10 @@ function goToView(name) {
 
 function renderSideNav() {
   // 상단 가로 메뉴 — 마지막에 기억 저장소(모달)를 함께 둔다.
+  const navGroups = { '대시보드': '워크스페이스', '특허': '자료 · 사람', '업무지식': '업무 라이브러리' };
   $('#sideNav').innerHTML = NAV_ITEMS.map(item => {
     const target = item.category || item.name;
-    return `<button type="button" class="top-item ${target === pageCategory ? 'active' : ''}" data-nav="${target}">${escapeHtml(item.name)}</button>`;
+    return `${navGroups[item.name] ? `<div class="nav-group-label">${navGroups[item.name]}</div>` : ''}<button type="button" class="top-item ${target === pageCategory ? 'active' : ''}" data-nav="${target}">${escapeHtml(item.name)}</button>`;
   }).join('') + `<button type="button" class="top-item" id="memoryToggle">기억 저장소</button>`;
   $('#sideNav').querySelectorAll('[data-nav]').forEach(button => {
     button.onclick = () => goToView(button.dataset.nav);
@@ -399,6 +400,8 @@ function paintEmptyNotice(query) {
 }
 
 function renderLibrary() {
+  // Presentation state only. No records or storage are changed.
+  $('.workspace').dataset.view = pageCategory;
   const connect = $('#crmPartnerConnect');
   if (connect) { connect.classList.toggle('hidden', pageCategory !== '협력업체'); connect.textContent = window.CRM_MEETINGS?.status || '고객관리 연결'; connect.onclick = () => window.CRM_MEETINGS?.open(); }
   const query = pageSearchCommitted.trim();
