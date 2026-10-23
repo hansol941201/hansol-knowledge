@@ -1360,4 +1360,4 @@ dialog :is(input,textarea,select),.edit-box :is(input,textarea,select) { backgro
 #todoReminderPanel input { width:18px; height:18px; flex-shrink:0; }
 #todoReminderPanel span { overflow-wrap:anywhere; }
 #todoReminderPanel time { display:block; font-size:12px; color:#e6c985; }
-@media(max-width:600px) { #todoReminderPanel { top:auto; bottom:12px; right:12px; width:min(300px,calc(100vw - 24px)); max-height:30vh; } }
+@media(max-width:600px) { #todoReminderPanel { top:84px; bottom:auto; right:12px; width:min(300px,calc(100vw - 24px)); max-height:30vh; } }
