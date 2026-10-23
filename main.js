@@ -9,6 +9,33 @@ let usingBundledCopy = false;
 let win;
 let tray = null;
 let quitting = false;
+let reminderWin;
+let reminderRows = [];
+
+function updateReminders(rows) {
+  if (JSON.stringify(rows) === JSON.stringify(reminderRows) && reminderWin && !reminderWin.isDestroyed()) return;
+  reminderRows = rows;
+  if (!rows.length) { if (reminderWin) reminderWin.hide(); return; }
+  if (!reminderWin || reminderWin.isDestroyed()) {
+    const area = screen.getPrimaryDisplay().workArea;
+    reminderWin = new BrowserWindow({
+      width: 330, height: Math.min(520, area.height - 28),
+      x: area.x + area.width - 344, y: area.y + 14,
+      frame: false, alwaysOnTop: true, skipTaskbar: true, resizable: false, show: false,
+      webPreferences: { preload: path.join(__dirname, 'reminder-preload.js'), contextIsolation: true, nodeIntegration: false }
+    });
+    reminderWin.setAlwaysOnTop(true, 'screen-saver');
+    reminderWin.webContents.on('did-finish-load', () => {
+      reminderWin.webContents.send('reminder-rows', reminderRows);
+      if (reminderRows.length) reminderWin.showInactive();
+    });
+    reminderWin.on('close', event => { if (!quitting) { event.preventDefault(); reminderWin.showInactive(); } });
+    reminderWin.loadFile('reminder.html');
+  } else {
+    reminderWin.webContents.send('reminder-rows', reminderRows);
+    reminderWin.showInactive();
+  }
+}
 
 // 실행 파일을 여러 번 열어도 점(orb)이 겹쳐 뜨지 않도록 한 개만 돌게 한다.
 if (!app.requestSingleInstanceLock()) {
@@ -36,7 +63,7 @@ function createWindow() {
     x: area.x + area.width - 70, y: area.y + area.height - 70,
     frame: false, transparent: true, alwaysOnTop: true, skipTaskbar: true,
     resizable: false, show: true,
-    webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false }
+    webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false, backgroundThrottling: false }
   });
   win.setAlwaysOnTop(true, 'screen-saver');
   win.webContents.on('did-fail-load', (_event, _code, _desc, _url, isMainFrame) => { if (isMainFrame) loadBundledCopy(); });
@@ -83,6 +110,14 @@ function setExpanded(expanded) {
 }
 
 app.whenReady().then(() => {
+  ipcMain.on('todo-reminders', (event, rows) => {
+    if (event.sender !== win?.webContents || !Array.isArray(rows)) return;
+    updateReminders(rows.filter(row => row && typeof row.id === 'string' && typeof row.text === 'string' && typeof row.date === 'string'));
+  });
+  ipcMain.on('reminder-complete', (event, id) => {
+    if (event.sender !== reminderWin?.webContents || typeof id !== 'string') return;
+    win?.webContents.send('complete-todo-reminder', id);
+  });
   createWindow();
   createTray();
   globalShortcut.register('Control+Alt+K', () => {

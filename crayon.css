@@ -1339,3 +1339,25 @@ dialog :is(input,textarea,select),.edit-box :is(input,textarea,select) { backgro
 #app.messenger .bubble .actions button { font-size:10px; line-height:1.4; padding:2px 0; }
 .workspace .shortcut .shortcut-more { width:24px; height:24px; opacity:1; }
 .workspace .shortcut .shortcut-more:focus-visible { outline:2px solid currentColor; outline-offset:1px; }
+/* 개인 배경 설정 */
+#backgroundDialog { width:min(420px, calc(100vw - 32px)); padding:22px; border:1px solid #b5a371; border-radius:16px; background:#16272f; color:#f5f8fb; }
+#backgroundDialog::backdrop { background:rgba(0,0,0,.55); }
+#backgroundForm { display:grid; gap:14px; }
+#backgroundForm h2, #backgroundForm p { margin:0; }
+#backgroundForm label { display:grid; gap:7px; }
+#backgroundForm select, #backgroundForm input { max-width:100%; color:inherit; background:#263b45; border:1px solid #718088; border-radius:6px; padding:7px; }
+#backgroundForm input[type="color"] { width:100%; height:42px; }
+#backgroundForm footer { display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+#backgroundForm button { padding:7px 10px; border-radius:7px; }
+#backgroundForm small { color:#c7d2d8; }
+#backgroundStatus:empty { display:none; }
+#backgroundOpen { width:auto; min-width:38px; font-size:12px !important; }
+#todoReminderPanel { position:fixed; right:16px; top:84px; z-index:2147483000; width:300px; max-height:65vh; overflow:auto; padding:16px; background:#172b35; color:#f5f8fb; border:1px solid #cfb675; border-radius:12px; box-shadow:0 8px 28px #0008; }
+#todoReminderPanel[hidden] { display:none; }
+#todoReminderPanel h2 { font-size:16px; margin:0 0 4px; }
+#todoReminderPanel small { color:#c5d1d8; }
+#todoReminderPanel label { display:flex; align-items:flex-start; gap:10px; padding:12px 0; border-bottom:1px solid #51626b; cursor:pointer; }
+#todoReminderPanel input { width:18px; height:18px; flex-shrink:0; }
+#todoReminderPanel span { overflow-wrap:anywhere; }
+#todoReminderPanel time { display:block; font-size:12px; color:#e6c985; }
+@media(max-width:600px) { #todoReminderPanel { top:auto; bottom:12px; right:12px; width:min(300px,calc(100vw - 24px)); max-height:30vh; } }

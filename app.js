@@ -611,6 +611,7 @@ let todoQuickDraft = '';
 let todoQuickChoosing = false;
 
 function renderTodos() {
+  renderTodoReminders();
   const panel = $('#todayPanel');
   const onTodoView = pageCategory === '할 일';
   const searching = Boolean(pageSearchCommitted.trim());
@@ -638,7 +639,7 @@ function renderTodos() {
   panel.innerHTML = `
     <div class="todo-head">
       <h2>할 일 목록</h2>
-      <label class="todo-quick-entry"><span aria-hidden="true">+</span><input id="todoQuickInput" autocomplete="off" aria-label="할 일 빠른 추가" placeholder="할 일 입력 후 Enter" value="${escapeHtml(todoQuickDraft)}" /></label>
+      <label class="todo-quick-entry"><span aria-hidden="true">+</span><input id="todoQuickInput" autocomplete="off" aria-label="할 일 빠른 추가" placeholder="예: 내일 자료 보내기 → Enter" value="${escapeHtml(todoQuickDraft)}" /></label>
       <span class="todo-count">미완료 ${allActive.length}개</span>
     </div>
     ${todoQuickChoosing ? `<div class="todo-quick-choice" role="dialog" aria-label="할 일 종류 선택"><div><strong>어떤 할 일인가요?</strong><p>${escapeHtml(todoQuickDraft)}</p></div><div class="todo-quick-options"><button type="button" data-quick-kind="today">오늘<span>오늘 날짜로 등록</span></button><button type="button" data-quick-kind="star">중요<span>별표로 우선 표시</span></button><button type="button" data-quick-kind="all">일반 할 일<span>날짜 없이 등록</span></button><button type="button" data-quick-cancel>취소</button></div></div>` : ''}
@@ -663,6 +664,17 @@ function renderTodos() {
     event.preventDefault();
     todoQuickDraft = quickInput.value.trim();
     if (!todoQuickDraft) return;
+    const inferredDate = window.HANSOL_DATES.parseTodoDate(todoQuickDraft);
+    if (inferredDate) {
+      const todo = createTodo(todoQuickDraft);
+      todo.date = inferredDate;
+      todoQuickDraft = ''; todoQuickChoosing = false;
+      todoDisplayMode = 'all'; todoDisplayQuery = ''; todoDisplayPage = 1;
+      saveTodos(); renderTodos(); renderLibrary();
+      showToast(`${inferredDate} 알림으로 등록했습니다`);
+      panel.querySelector('#todoQuickInput').focus();
+      return;
+    }
     todoQuickChoosing = true;
     renderTodos();
     panel.querySelector('[data-quick-kind]').focus();
@@ -672,7 +684,7 @@ function renderTodos() {
       const kind = button.dataset.quickKind;
       const todo = createTodo(todoQuickDraft);
       if (!todo) return;
-      todo.date = kind === 'today' ? todayKey() : '';
+      todo.date = window.HANSOL_DATES.parseTodoDate(todoQuickDraft) || (kind === 'today' ? todayKey() : '');
       todo.starred = kind === 'star';
       todoQuickDraft = ''; todoQuickChoosing = false;
       todoDisplayMode = kind; todoDisplayQuery = ''; todoDisplayPage = 1;
@@ -2737,7 +2749,7 @@ function newEntry(fields, source) {
 function createTodo(text, source) {
   const raw = String(text || '').trim();
   if (!raw) return null;
-  const todo = newEntry({ type: 'todo', text: raw, raw, date: todayKey(), done: false }, source);
+  const todo = newEntry({ type: 'todo', text: raw, raw, date: window.HANSOL_DATES.parseTodoDate(raw) || todayKey(), done: false }, source);
   todos.unshift(todo);          // 할 일은 todos 에만 들어간다
   return todo;
 }
@@ -3262,6 +3274,41 @@ $('#syncForm').addEventListener('submit', async event => {
   catch { $('#syncError').textContent = 'PIN 확인 X'; }
   finally { button.disabled = false; }
 });
+
+// 기한이 지난 미완료 항목도 완료할 때까지 유지한다. 날짜는 PC의 현지 날짜 기준.
+function renderTodoReminders() {
+  const due = activeTodos().filter(todo => todo.date && todo.date <= todayKey());
+  if (window.knowledgeAPI?.updateReminders) {
+    window.knowledgeAPI.updateReminders(due.map(todo => ({ id: todo.id, text: todo.text, date: todo.date })));
+    return;
+  }
+  let panel = document.getElementById('todoReminderPanel');
+  if (!panel) {
+    panel = document.createElement('aside');
+    panel.id = 'todoReminderPanel';
+    panel.setAttribute('aria-label', '미완료 할 일 알림');
+    document.body.append(panel);
+  }
+  panel.hidden = !due.length;
+  const signature = JSON.stringify(due.map(todo => [todo.id, todo.text, todo.date]));
+  if (panel.dataset.signature === signature) return;
+  panel.dataset.signature = signature;
+  panel.innerHTML = `<h2>할 일 알림 · ${due.length}개</h2><small>완료 체크 전까지 유지됩니다.</small>` + due.map(todo =>
+    `<label><input type="checkbox" data-reminder-id="${escapeHtml(todo.id)}" aria-label="${escapeHtml(todo.text)} 완료" /><span>${escapeHtml(todo.text)}<time>${escapeHtml(todo.date)}</time></span></label>`).join('');
+  panel.querySelectorAll('[data-reminder-id]').forEach(check => {
+    check.onchange = () => completeReminder(check.dataset.reminderId);
+  });
+}
+function completeReminder(id) {
+  const todo = todos.find(row => row.id === id && !row.deleted);
+  if (!todo || todo.done) return;
+  setTodoDone(todo, true);
+  saveTodos(); renderTodos(); renderLibrary();
+}
+window.knowledgeAPI?.onCompleteReminder?.(completeReminder);
+setInterval(renderTodoReminders, 15000);
+window.addEventListener('focus', renderTodoReminders);
+document.addEventListener('visibilitychange', renderTodoReminders);
 
 seedShortcuts();   // 기본 바로가기는 없을 때만 만든다
 renderAll();       // 모든 정의가 끝난 뒤에 첫 화면을 그린다
