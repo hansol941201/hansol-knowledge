@@ -1,0 +1,422 @@
+/* Liquid Glass theme — 파스텔 핑크·블루 그라데이션 위에 반투명 유리 카드.
+   theme.css / crm-layout.css 위에 덮어쓰는 마지막 레이어다. 되돌리려면 index.html 에서 이 파일 링크만 빼면 된다. */
+:root {
+  --theme-blue: #7a5af0;
+  --theme-ink: #232846;
+  --theme-muted: #6f7897;
+  --theme-line: rgba(120, 130, 190, .18);
+  --glass-bg: rgba(255, 255, 255, .62);
+  --glass-bg-strong: rgba(255, 255, 255, .82);
+  --glass-border: rgba(255, 255, 255, .88);
+  --glass-shadow: 0 10px 32px rgba(120, 128, 190, .14), inset 0 1px 0 rgba(255, 255, 255, .9);
+  --coral: linear-gradient(135deg, #f28b82, #f6aaa3);
+  --coral-shadow: 0 8px 20px rgba(242, 139, 130, .38);
+  --glass-font: 'Pretendard', 'Inter', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+}
+
+html, body, body:not(.overlay-mode) {
+  background: linear-gradient(135deg, #f9d3e6 0%, #ecd8ee 28%, #d3dcf3 62%, #bcd5f8 100%) fixed;
+  font-family: var(--glass-font);
+}
+
+/* ── 큰 유리 판 ─────────────────────────────── */
+body .workspace {
+  display: grid;
+  grid-template-columns: 276px minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  width: calc(100% - 48px);
+  max-width: 1600px;
+  height: calc(100dvh - 48px);
+  margin: 24px auto;
+  padding: 0;
+  border: 1px solid var(--glass-border);
+  border-radius: 40px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, .34), rgba(255, 255, 255, .18));
+  box-shadow: 0 24px 70px rgba(110, 120, 185, .22), inset 0 1px 0 rgba(255, 255, 255, .95);
+  backdrop-filter: blur(26px) saturate(1.3);
+  -webkit-backdrop-filter: blur(26px) saturate(1.3);
+  overflow: hidden;
+  font-family: var(--glass-font);
+}
+/* 왼쪽 사이드바 바탕 */
+body .workspace::before {
+  content: '';
+  display: block !important;
+  grid-column: 1;
+  grid-row: 1 / -1;
+  border-right: 1px solid rgba(255, 255, 255, .6);
+  background: linear-gradient(180deg, rgba(255, 255, 255, .26), rgba(255, 255, 255, .08));
+  pointer-events: none;
+}
+/* 위쪽 경로 표시 */
+body .workspace::after {
+  content: 'Home  ›  나의 업무 공간';
+  display: block !important;
+  grid-column: 2;
+  grid-row: 1;
+  align-self: center;
+  justify-self: start;
+  padding: 26px 0 0 34px;
+  color: var(--theme-muted);
+  font: 600 16px/1 var(--glass-font);
+  letter-spacing: .01em;
+  pointer-events: none;
+}
+
+/* ── 상단 영역을 풀어서 사이드바/상단 도구로 나눈다 ── */
+body .workspace .topnav { display: contents !important; }
+
+body .workspace #dashboardHome {
+  grid-column: 1; grid-row: 1;
+  justify-self: stretch;
+  display: grid; grid-template-columns: 56px 1fr; column-gap: 14px; align-items: center;
+  width: auto; height: auto; margin: 0; padding: 30px 26px 10px;
+  background: transparent !important; border: 0; box-shadow: none;
+  color: var(--theme-ink) !important;
+  font: 800 23px/1.15 var(--glass-font) !important;
+  letter-spacing: -.01em; text-align: left; cursor: pointer;
+}
+body .workspace #dashboardHome::before {
+  content: ''; grid-row: 1 / 3; width: 56px; height: 56px; border-radius: 19px;
+  background:
+    radial-gradient(circle at 34% 40%, #fff 0 7px, transparent 8px),
+    radial-gradient(circle at 66% 66%, #fff 0 7px, transparent 8px),
+    linear-gradient(145deg, #f0629a 0%, #f58e6b 55%, #f6c25b 100%);
+  box-shadow: 0 10px 24px rgba(240, 98, 154, .34), inset 0 1px 0 rgba(255, 255, 255, .55);
+}
+body .workspace #dashboardHome span {
+  color: var(--theme-muted) !important;
+  font: 600 12px/1.4 var(--glass-font) !important;
+  letter-spacing: .14em; opacity: 1;
+}
+
+/* 메뉴(사이드바) */
+body .workspace .topnav .navigation-row #sideNav {
+  position: static !important;
+  grid-column: 1; grid-row: 2;
+  display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start;
+  width: auto; height: auto; max-height: none; gap: 6px;
+  margin: 0; padding: 14px 22px; overflow-x: hidden; overflow-y: auto;
+  background: transparent !important; border: 0; border-radius: 0;
+  scrollbar-width: thin; scrollbar-color: rgba(120, 130, 190, .3) transparent;
+}
+body .workspace #sideNav .top-item,
+body .workspace #sideNav .top-item:first-of-type,
+body .workspace #sideNav .top-item:nth-of-type(even) {
+  flex: 0 0 auto;
+  display: flex !important; flex-direction: row !important; align-items: center; justify-content: flex-start;
+  gap: 16px; width: 100% !important; height: auto !important; min-height: 52px !important;
+  margin: 0; padding: 0 18px !important;
+  border: 1px solid transparent !important; border-radius: 20px !important;
+  background: transparent !important; box-shadow: none !important; transform: none;
+  color: #2f3a5a !important; text-align: left; cursor: pointer;
+}
+body .workspace #sideNav .top-item span {
+  font: 500 17px/1.3 var(--glass-font) !important; color: #2f3a5a !important; white-space: nowrap;
+}
+body .workspace #sideNav .top-item svg { width: 22px !important; height: 22px !important; flex: 0 0 22px; }
+body .workspace #sideNav .top-item:nth-of-type(6n+1) svg { color: #e5507c; }
+body .workspace #sideNav .top-item:nth-of-type(6n+2) svg { color: #f5a02a; }
+body .workspace #sideNav .top-item:nth-of-type(6n+3) svg { color: #5b6df0; }
+body .workspace #sideNav .top-item:nth-of-type(6n+4) svg { color: #35b27d; }
+body .workspace #sideNav .top-item:nth-of-type(6n+5) svg { color: #3d92e4; }
+body .workspace #sideNav .top-item:nth-of-type(6n)   svg { color: #9a62e6; }
+body .workspace #sideNav .top-item:hover { background: rgba(255, 255, 255, .5) !important; }
+body .workspace #sideNav .top-item.active,
+body .workspace #sideNav .top-item.active:hover,
+body .workspace #sideNav .top-item.active:first-of-type {
+  background: var(--glass-bg-strong) !important;
+  border-color: rgba(255, 255, 255, .95) !important;
+  box-shadow: 0 8px 22px rgba(150, 120, 200, .16) !important;
+}
+body .workspace #sideNav .top-item.active span { font-weight: 700 !important; color: var(--theme-ink) !important; }
+
+/* 즐겨찾기 — 사이드바 맨 아래 */
+body .workspace .topnav #shortcutSection {
+  grid-column: 1; grid-row: 3;
+  display: block; margin: 0; padding: 14px 22px 22px;
+  border-top: 1px solid rgba(255, 255, 255, .6); background: transparent; overflow: hidden;
+}
+body .workspace .crm-favorites-label {
+  flex-direction: row; justify-content: flex-start; gap: 7px; margin: 0 0 10px 4px;
+  color: var(--theme-muted); font: 700 12px/1 var(--glass-font); letter-spacing: .14em;
+}
+body .workspace .topnav #shortcutGrid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+  max-height: 150px; overflow-x: hidden; overflow-y: auto; padding: 0 2px 2px;
+  scrollbar-width: thin; scrollbar-color: rgba(120, 130, 190, .3) transparent;
+}
+body .workspace .topnav .shortcut,
+body .workspace .topnav .shortcut:nth-child(even),
+body .workspace .topnav .shortcut.add {
+  width: auto !important; height: 44px; min-height: 44px;
+  border: 1px solid rgba(255, 255, 255, .85) !important; border-radius: 16px;
+  background: rgba(255, 255, 255, .55); box-shadow: 0 4px 12px rgba(120, 128, 190, .08);
+}
+body .workspace .topnav .shortcut:hover { background: rgba(255, 255, 255, .85); }
+body .workspace .topnav .shortcut a { flex-direction: row; justify-content: flex-start; gap: 6px; padding: 5px 20px 5px 10px; }
+body .workspace .topnav .shortcut a::before {
+  width: 16px; height: 16px; flex: 0 0 16px; border: 1px solid rgba(110, 120, 180, .4); color: #6a74a4; font-size: 11px;
+}
+body .workspace .topnav .shortcut a b {
+  color: #2f3a5a !important; font: 500 12px/1.3 var(--glass-font) !important;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+body .workspace .topnav .shortcut .shortcut-more { color: #8b94b8; }
+body .workspace .topnav .shortcut.add {
+  flex-direction: row; justify-content: center; gap: 4px; padding: 4px;
+  color: var(--theme-muted) !important; font-size: 12px !important;
+}
+body .workspace .topnav .shortcut.add b { color: var(--theme-muted) !important; font: 500 12px/1.2 var(--glass-font) !important; }
+
+/* 오른쪽 위 도구 */
+body .workspace .topnav .top-tools {
+  grid-column: 2; grid-row: 1; justify-self: end; align-self: center;
+  display: flex; align-items: center; gap: 10px; padding: 26px 34px 0 0; margin: 0;
+}
+body .workspace .topnav .top-mini {
+  width: 40px; height: 40px; min-width: 40px; min-height: 40px; padding: 9px;
+  border: 1px solid var(--glass-border); border-radius: 50%;
+  background: var(--glass-bg) !important; color: #5b6788 !important;
+  box-shadow: 0 4px 14px rgba(120, 128, 190, .1);
+}
+body .workspace .topnav .top-mini:hover { background: var(--glass-bg-strong) !important; }
+body .workspace .topnav .sync-state,
+body .workspace .topnav .sync-state[data-state=offline] {
+  min-height: 40px; max-width: 210px; padding: 0 14px;
+  border: 1px solid var(--glass-border) !important; border-radius: 20px;
+  background: var(--glass-bg) !important; color: #52617f !important;
+  font: 600 12px/1 var(--glass-font) !important; box-shadow: none;
+}
+body .workspace .topnav .brand-avatar {
+  width: 42px; height: 42px; margin: 0;
+  background: linear-gradient(145deg, #f0629a, #7a5af0); color: #fff;
+  border: 2px solid #fff; font: 700 16px/1 var(--glass-font);
+  box-shadow: 0 6px 16px rgba(122, 90, 240, .3);
+}
+
+/* ── 본문 ─────────────────────────────── */
+body .workspace .main {
+  grid-column: 2; grid-row: 2 / 4;
+  height: 100%; min-height: 0; border-radius: 0;
+  background: transparent !important; display: flex; flex-direction: column;
+}
+body .workspace .topbar {
+  flex-shrink: 0; display: flex; align-items: center; gap: 14px;
+  min-height: 0; margin: 12px 34px 0; padding: 0 0 20px;
+  border: 0; border-bottom: 1px solid rgba(120, 130, 190, .16); border-radius: 0;
+  background: transparent !important; box-shadow: none;
+}
+body .workspace .crm-page-title {
+  color: var(--theme-ink) !important; font: 800 36px/1.1 var(--glass-font) !important;
+  letter-spacing: -.02em; white-space: nowrap;
+}
+body .workspace .topbar .search-wrap { flex: 1; max-width: 380px; margin-left: auto; }
+body .workspace .topbar .page-search {
+  height: 46px; min-height: 46px; padding: 0 16px; gap: 10px;
+  border: 1px solid var(--glass-border) !important; border-radius: 23px;
+  background: var(--glass-bg) !important; box-shadow: 0 4px 14px rgba(120, 128, 190, .08);
+}
+body .workspace .topbar #pageSearch { font: 500 14px/1 var(--glass-font) !important; }
+body .workspace #pageAdd {
+  width: 46px; height: 46px; min-height: 46px; padding: 11px;
+  border: 0; border-radius: 50%; background: var(--coral); color: #fff; box-shadow: var(--coral-shadow);
+}
+body .workspace #pageAdd:hover { background: var(--coral); filter: brightness(1.05); box-shadow: var(--coral-shadow); }
+body .workspace .main-scroll,
+body .workspace .main-scroll:has(#knowledgeBlock.hidden) {
+  display: block; flex: 1; min-height: 0; overflow: auto;
+  padding: 26px 34px 40px; background: transparent !important;
+  scrollbar-width: thin; scrollbar-color: rgba(120, 130, 190, .3) transparent;
+}
+
+/* ── 유리 카드 공통 ─────────────────────── */
+body .workspace #todayPanel,
+body .workspace .notes-hub,
+body .workspace #schedulePanel,
+body .workspace .block,
+body .workspace .page-card,
+body .workspace .crm-overview article {
+  background: var(--glass-bg) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: 30px !important;
+  box-shadow: var(--glass-shadow) !important;
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+}
+
+/* 안내 카드 4개 (위쪽 줄) */
+body .workspace .crm-overview {
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 22px;
+  margin: 0 0 22px; padding: 0; border: 0; border-radius: 0; background: transparent !important;
+}
+body .workspace .crm-overview article { display: flex; flex-direction: column; padding: 22px 24px 20px; min-height: 176px; }
+body .workspace .crm-overview h2 {
+  margin: 0 0 8px; color: var(--theme-muted) !important; font: 700 12px/1.4 var(--glass-font) !important; letter-spacing: .12em;
+}
+body .workspace .crm-overview .crm-overview-content {
+  flex: 1; height: auto !important; min-height: 0; align-items: flex-start; justify-content: flex-end;
+  gap: 6px; padding: 0; background: transparent !important; text-align: left;
+}
+body .workspace .crm-overview .crm-overview-content strong {
+  color: var(--theme-ink) !important; font: 700 18px/1.4 var(--glass-font) !important;
+}
+body .workspace .crm-overview .crm-overview-content p {
+  color: var(--theme-muted) !important; font: 500 14px/1.5 var(--glass-font) !important;
+}
+body .workspace .crm-sun {
+  display: grid; place-items: center; width: 52px; height: 52px; margin-bottom: auto; border-radius: 18px;
+  background: linear-gradient(145deg, #f6c25b, #f58e6b); color: #fff; font-size: 26px;
+  box-shadow: 0 8px 20px rgba(245, 142, 107, .32);
+}
+body .workspace .crm-quote > span {
+  display: grid; place-items: center; width: 52px; height: 52px; margin-bottom: auto; border-radius: 18px;
+  background: linear-gradient(145deg, #b79af0, #7a5af0); color: #fff; font: 700 34px/1 Georgia, serif;
+  box-shadow: 0 8px 20px rgba(122, 90, 240, .3);
+}
+body .workspace .crm-overview [data-icon] {
+  display: grid; place-items: center; width: 52px; height: 52px; margin-bottom: auto; border-radius: 18px;
+  background: linear-gradient(145deg, #7fd6b0, #35b27d); color: #fff;
+  box-shadow: 0 8px 20px rgba(53, 178, 125, .3);
+}
+body .workspace .crm-date-badge {
+  position: absolute; top: 20px; right: 22px;
+  background: #fdecc8; color: #a8651a; font: 700 11px/1 var(--glass-font); letter-spacing: .08em; border-radius: 12px; padding: 5px 10px;
+}
+body .workspace .crm-overview article:nth-child(3) { position: relative; }
+
+/* 할 일 · 메모 · 달력 */
+body .workspace .dash-cols,
+body .workspace .main-scroll:has(#knowledgeBlock.hidden) .dash-cols { gap: 22px; }
+body .workspace #todayPanel,
+body .workspace .notes-hub,
+body .workspace #schedulePanel { padding: 22px !important; }
+body .workspace .notes-hub { padding: 0 !important; }
+body .workspace :is(.todo-head h2, .memo-head h2, #schedulePanel h2) {
+  color: var(--theme-ink) !important; font: 700 17px/1.4 var(--glass-font) !important;
+}
+body .workspace .todo-head { border-bottom: 1px solid rgba(120, 130, 190, .14); padding-bottom: 12px; }
+body .workspace .todo-head .todo-count,
+body .workspace #todayPanel .todo-count,
+body .workspace #pageCount {
+  background: rgba(255, 255, 255, .75) !important; color: #5b6788 !important;
+  border: 1px solid var(--glass-border) !important; border-radius: 12px; font: 700 11px/1 var(--glass-font) !important; padding: 5px 9px;
+}
+body .workspace :is(.todo-line-text, .todo-mark) { font: 500 14px/1.5 var(--glass-font) !important; }
+body .workspace .todo-line { border-color: rgba(120, 130, 190, .12); }
+body .workspace .todo-line.star { background: rgba(255, 244, 214, .7); border-radius: 14px; }
+body .workspace .todo-quick-entry,
+body .workspace .todo-list-search,
+body .workspace .notes-hub #memoPanel .memo-note-shell {
+  background: rgba(255, 255, 255, .55) !important; border: 1px solid var(--glass-border) !important; border-radius: 18px;
+}
+body .workspace .todo-quick-entry:focus-within,
+body .workspace .topbar .page-search:focus-within { border-color: #b8a6f6 !important; box-shadow: 0 0 0 4px rgba(122, 90, 240, .12); }
+body .workspace .notes-hub #memoPanel #memoNote { font: 500 14px/1.8 var(--glass-font) !important; }
+body .workspace .notes-hub #memoPanel .memo-tools button,
+body .workspace .page-card footer button,
+body .workspace .page-card .card-act {
+  background: rgba(255, 255, 255, .7) !important; color: #4f5c85 !important;
+  border: 1px solid var(--glass-border) !important; border-radius: 14px; font-size: 12px !important;
+}
+body .workspace .notes-hub #memoPanel .memo-tools button:hover,
+body .workspace .page-card footer button:hover { background: #fff !important; color: var(--theme-blue) !important; }
+body .workspace .todo-pagination button {
+  background: rgba(255, 255, 255, .7); color: #4f5c85; border: 1px solid var(--glass-border); border-radius: 12px; font-size: 12px !important; padding: 4px 9px;
+}
+
+/* 탭 · 카테고리 — 알약 모양 */
+body .workspace #todayPanel .todo-view-tabs,
+body .workspace #pageCategories {
+  background: rgba(255, 255, 255, .45) !important; border: 1px solid var(--glass-border) !important;
+  border-radius: 22px; padding: 4px; gap: 4px;
+}
+body .workspace #todayPanel .todo-view-tabs button,
+body .workspace #pageCategories button {
+  background: transparent; color: #5b6788 !important; border: 1px solid transparent;
+  border-radius: 18px; font: 600 13px/1 var(--glass-font) !important; box-shadow: none;
+}
+body .workspace #todayPanel .todo-view-tabs button:hover,
+body .workspace #pageCategories button:hover { background: rgba(255, 255, 255, .6); color: var(--theme-ink) !important; }
+body .workspace #todayPanel .todo-view-tabs button.active,
+body .workspace #todayPanel .todo-view-tabs button[aria-pressed='true'],
+body .workspace #pageCategories button.active {
+  background: #fff !important; color: var(--theme-ink) !important; border-color: #fff;
+  box-shadow: 0 4px 14px rgba(120, 128, 190, .16);
+}
+body .workspace #todayPanel .todo-view-tabs button[aria-pressed='true'] span { background: #eef0fb; color: #5b6788; }
+
+/* 달력 */
+body .workspace .calendar-days button.is-today { background: rgba(122, 90, 240, .12); color: #6b4de0; }
+body .workspace .calendar-days button.is-selected { background: var(--coral); color: #fff; box-shadow: 0 5px 12px rgba(242, 139, 130, .4); }
+body .workspace .calendar-days button:hover { background: rgba(255, 255, 255, .7); }
+body .workspace #calendarToday { background: rgba(255, 255, 255, .75); color: #6b4de0; }
+body .workspace .calendar-month button { background: rgba(255, 255, 255, .7); color: #6a74a4; }
+body .workspace .calendar-selected-heading { border-color: rgba(120, 130, 190, .14); color: var(--theme-muted); }
+body .workspace .cal-tools button { color: #5b6788; }
+
+/* 내 지식 목록 */
+body .workspace .block { padding: 22px 24px 24px; margin-top: 22px; }
+body .workspace .block-head h2 { font: 800 20px/1.3 var(--glass-font) !important; color: var(--theme-ink) !important; }
+body .workspace .page-card { border-radius: 26px !important; }
+
+/* ── 둥둥 뜬 버튼(지식창 열기) ─────────────── */
+body .orb {
+  background: rgba(255, 255, 255, .88) !important; border: 1px solid #fff;
+  box-shadow: 0 14px 34px rgba(110, 120, 185, .3);
+  backdrop-filter: blur(14px);
+}
+body .orb span {
+  background: conic-gradient(from 20deg, #4285f4, #9b72f2, #f0629a, #f6c25b, #34a853, #4285f4) !important;
+  clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
+  border-radius: 0; width: 20px; height: 20px; margin: 4px;
+}
+
+/* ── 창(팝업) ─────────────────────────── */
+body dialog,
+body .edit-box,
+body #phoneArchiveDialog,
+body #backgroundDialog {
+  background: rgba(255, 255, 255, .86) !important; border: 1px solid #fff !important; border-radius: 28px !important;
+  box-shadow: 0 24px 60px rgba(110, 120, 185, .28);
+  backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px);
+}
+body dialog button,
+body #phoneArchiveDialog button { background: rgba(238, 240, 251, .9) !important; color: #4a56a0 !important; border-radius: 14px; }
+body #todoReminderPanel {
+  background: var(--glass-bg-strong); border: 1px solid #fff; border-top: 4px solid #b8a6f6; border-radius: 24px;
+  box-shadow: 0 16px 40px rgba(110, 120, 185, .25); backdrop-filter: blur(18px);
+}
+
+/* ── 좁은 화면: 사이드바를 위쪽 가로 막대로 ── */
+@media (max-width: 900px) {
+  body .workspace {
+    grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto auto auto minmax(0, 1fr);
+    width: calc(100% - 20px); height: calc(100dvh - 20px); margin: 10px; border-radius: 28px;
+  }
+  body .workspace::before, body .workspace::after { display: none !important; }
+  body .workspace #dashboardHome { grid-column: 1; grid-row: 1; padding: 20px 20px 4px; }
+  body .workspace .topnav .top-tools { grid-column: 1; grid-row: 2; justify-self: start; flex-wrap: wrap; padding: 6px 20px 0; }
+  body .workspace .topnav .navigation-row #sideNav {
+    grid-column: 1; grid-row: 3; flex-direction: row; overflow-x: auto; overflow-y: hidden; padding: 10px 16px; gap: 6px;
+  }
+  body .workspace #sideNav .top-item,
+  body .workspace #sideNav .top-item:first-of-type,
+  body .workspace #sideNav .top-item:nth-of-type(even) {
+    width: auto !important; min-height: 44px !important; padding: 0 14px !important; gap: 10px;
+  }
+  body .workspace #sideNav .top-item span { font-size: 14px !important; }
+  body .workspace .topnav #shortcutSection { grid-column: 1; grid-row: 4; padding: 6px 16px 10px; border-top: 0; }
+  body .workspace .topnav #shortcutGrid { display: flex; flex-wrap: nowrap; max-height: none; overflow-x: auto; overflow-y: hidden; }
+  body .workspace .topnav .shortcut,
+  body .workspace .topnav .shortcut.add { flex: 0 0 auto; width: 120px !important; }
+  body .workspace .main { grid-column: 1; grid-row: 5; }
+  body .workspace .topbar { margin: 4px 18px 0; flex-wrap: wrap; padding-bottom: 14px; }
+  body .workspace .crm-page-title { font-size: 26px !important; }
+  body .workspace .topbar .search-wrap { max-width: none; flex-basis: 100%; order: 3; margin-left: 0; }
+  body .workspace .main-scroll, body .workspace .main-scroll:has(#knowledgeBlock.hidden) { padding: 18px 18px 32px; }
+  body .workspace .crm-overview { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+  body .workspace .crm-overview article { min-height: 150px; padding: 18px; }
+}
+@media (max-width: 560px) {
+  body .workspace .crm-overview { grid-template-columns: minmax(0, 1fr); }
+}
