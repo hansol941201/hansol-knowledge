@@ -681,3 +681,30 @@ option { background:#19263c; color:#e4edfb; }
 button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible { outline-color:#91b9f2; }
 @supports not (backdrop-filter:blur(8px)) { .today-panel,#todayPanel,#callNotesPanel,#memoPanel,#schedulePanel,.page-card:nth-child(n) { background:#172239; } }
 @media(max-width:760px) { .hansol-story-logo.b2b-brand { width:62px; height:45px; margin:0; font-size:27px !important; } }
+
+/* Clear glass needs visible light behind it; preserve the navy-black palette. */
+body,body:not(.overlay-mode) {
+ background:
+  radial-gradient(ellipse at 88% 24%,rgba(85,130,188,.43),transparent 36%),
+  radial-gradient(ellipse at 13% 90%,rgba(50,102,158,.32),transparent 40%),
+  linear-gradient(122deg,transparent 0 37%,rgba(125,170,224,.045) 37.2%,rgba(103,153,216,.20) 47%,rgba(11,21,38,.05) 47.2% 60%,rgba(112,160,222,.14) 60.2%,rgba(141,182,230,.035) 70%,transparent 70.2%),
+  linear-gradient(135deg,#111f35,#070b12 75%);
+ background-attachment:fixed;
+}
+.workspace { background:rgba(255,255,255,.005); border-color:rgba(207,229,255,.22); box-shadow:0 24px 90px rgba(0,0,0,.2),inset 0 1px rgba(255,255,255,.10); }
+.topnav { background:rgba(255,255,255,.015); backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px); }
+.main,.topbar { background:transparent; }
+.topbar { backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); }
+.today-panel,#todayPanel,#callNotesPanel,#memoPanel,#schedulePanel,.page-card:nth-child(n),.main-scroll:has(#knowledgeBlock.hidden) #schedulePanel {
+ background:linear-gradient(135deg,rgba(230,243,255,.075) 0%,rgba(255,255,255,.012) 24%,rgba(255,255,255,.004) 75%,rgba(201,225,255,.035) 100%);
+ border:1px solid rgba(222,239,255,.29); border-top-color:rgba(239,248,255,.51); border-left-color:rgba(225,243,255,.36);
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.10),inset 1px 0 0 rgba(255,255,255,.025),0 8px 28px rgba(0,0,0,.08);
+ backdrop-filter:blur(3px) saturate(120%); -webkit-backdrop-filter:blur(3px) saturate(120%);
+}
+#memoPanel .memo-note-shell { background:rgba(255,255,255,.005); border-color:rgba(235,247,255,.15); box-shadow:inset 0 1px rgba(255,255,255,.04); }
+.shortcut,.shortcut.add,.topbar .page-search { background:rgba(255,255,255,.015); border-color:rgba(230,244,255,.28); backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px); box-shadow:inset 0 1px rgba(255,255,255,.07); }
+.shortcut-thumb,.shortcut:nth-child(n) .shortcut-thumb { background:transparent; }
+.topnav .top-item.active,.topnav .top-item.active:hover { background:rgba(208,231,255,.07); border-color:rgba(224,242,255,.39); box-shadow:inset 0 1px rgba(255,255,255,.08); }
+.page-card footer button,.memo-file,.cal-tools button,#todayPanel .todo-tab { background:rgba(255,255,255,.015); border-color:rgba(225,243,255,.22); }
+.page-card:hover { border-color:rgba(234,246,255,.48); box-shadow:inset 0 1px rgba(255,255,255,.14),0 10px 32px rgba(0,0,0,.10); }
+.edit-box,.search-preview,dialog { background:rgba(16,29,48,.64); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border-color:rgba(229,243,255,.32); }
