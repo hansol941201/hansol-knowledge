@@ -347,8 +347,8 @@ function goToView(name) {
 
 function renderSideNav() {
   // 상단 가로 메뉴 — 마지막에 기억 저장소(모달)를 함께 둔다.
-  const navGroups = { '대시보드': '워크스페이스', '특허': '자료 · 사람', '업무지식': '업무 라이브러리' };
-  $('#sideNav').innerHTML = NAV_ITEMS.map(item => {
+  const navGroups = { '내 지식': '워크스페이스', '특허': '자료 · 사람', '업무지식': '업무 라이브러리' };
+  $('#sideNav').innerHTML = NAV_ITEMS.filter(item => item.name !== '대시보드').map(item => {
     const target = item.category || item.name;
     return `${navGroups[item.name] ? `<div class="nav-group-label">${navGroups[item.name]}</div>` : ''}<button type="button" class="top-item ${target === pageCategory ? 'active' : ''}" data-nav="${target}">${escapeHtml(item.name)}</button>`;
   }).join('') + `<button type="button" class="top-item" id="memoryToggle">기억 저장소</button>`;
@@ -356,6 +356,7 @@ function renderSideNav() {
     button.onclick = () => goToView(button.dataset.nav);
   });
   $('#memoryToggle').onclick = openMemoryLibrary;
+  $('#dashboardHome').onclick = () => goToView('대시보드');
   // 좁은 화면에서 선택한 메뉴가 가려져 있으면 보이는 위치까지 메뉴 줄만 움직인다(페이지는 그대로).
   const nav = $('#sideNav');
   const active = nav.querySelector('.top-item.active');
@@ -491,7 +492,7 @@ function renderLibrary() {
   $('#shortcutSection').classList.toggle('hidden', Boolean(term) || pageCategory !== '대시보드');
   $('#dashCols').classList.toggle('hidden', !onDashboard && pageCategory !== '할 일');
   $('#schedulePanel').classList.toggle('hidden', !onDashboard);
-  $('#knowledgeBlock').classList.toggle('hidden', onDashboard);
+  $('#knowledgeBlock').classList.toggle('hidden', onDashboard || (pageCategory === '할 일' && !term));
   $('#pageCategories').classList.toggle('hidden', Boolean(term));
   paintIcons($('#pageGrid'));
   // 카드 본문을 누르면 상세로 연다(버튼 클릭은 제외).
@@ -604,6 +605,11 @@ function doneTodos() {
     .sort((a, b) => String(b.doneAt || b.updatedAt || '').localeCompare(String(a.doneAt || a.updatedAt || '')));
 }
 
+// View-only controls, never saved to task records.
+let todoDisplayMode = 'all';
+let todoDisplayQuery = '';
+let todoDisplayPage = 1;
+
 function renderTodos() {
   const panel = $('#todayPanel');
   const onTodoView = pageCategory === '할 일';
@@ -611,15 +617,52 @@ function renderTodos() {
   // 검색 중이거나 다른 화면이면 상단 할 일 카드는 접어 둔다.
   panel.classList.toggle('hidden', searching || !(pageCategory === '대시보드' || onTodoView));
 
-  const list = activeTodos();
+  const allActive = activeTodos();
+  const modes = [
+    ['all', '전체', allActive],
+    ['star', '중요', allActive.filter(t => t.starred)],
+    ['today', '오늘', allActive.filter(t => todoDateState(t) === 'today')],
+    ['late', '지연', allActive.filter(t => todoDateState(t) === 'late')],
+    ['future', '예정', allActive.filter(t => todoDateState(t) === 'future')],
+    ['none', '날짜 없음', allActive.filter(t => todoDateState(t) === 'none')],
+    ['done', '완료', doneTodos()]
+  ];
+  const selected = modes.find(m => m[0] === todoDisplayMode) || modes[0];
+  const taskNeedle = todoDisplayQuery.toLocaleLowerCase().replace(/\s+/g, '');
+  const matching = selected[2].filter(t => !taskNeedle ||
+    `${t.text} ${t.date || ''}`.toLocaleLowerCase().replace(/\s+/g, '').includes(taskNeedle));
+  const pageSize = 12;
+  const pages = Math.max(1, Math.ceil(matching.length / pageSize));
+  todoDisplayPage = Math.min(Math.max(1, todoDisplayPage), pages);
+  const list = matching.slice((todoDisplayPage - 1) * pageSize, todoDisplayPage * pageSize);
   panel.innerHTML = `
     <div class="todo-head">
       <h2>할 일 목록</h2>
-      <span class="todo-count">${list.length}개</span>
+      <span class="todo-count">미완료 ${allActive.length}개</span>
     </div>
-    ${list.length
-      ? VIEWS.todoSimpleList(list)
-      : '<div class="todo-empty">위의 지식 추가에서 할 일을 등록하세요.</div>'}`;
+    <div class="todo-controls">
+      <div class="todo-view-tabs" aria-label="할 일 분류">${modes.map(([key, label, rows]) => `<button type="button" data-todo-view="${key}" class="${key === todoDisplayMode ? 'active' : ''}" aria-pressed="${key === todoDisplayMode}">${label}<span>${rows.length}</span></button>`).join('')}</div>
+      <label class="todo-list-search"><span>검색</span><input id="todoListSearch" type="search" autocomplete="off" aria-label="할 일 목록 검색" placeholder="할 일 내용이나 날짜 검색" value="${escapeHtml(todoDisplayQuery)}" /></label>
+    </div>
+    <div class="todo-results">${list.length
+      ? (todoDisplayMode === 'done' ? VIEWS.todoDoneSimpleList(list) : VIEWS.todoSimpleList(list))
+      : `<div class="todo-empty">${allActive.length || todoDisplayMode === 'done' ? '해당하는 할 일이 없습니다.' : '위의 지식 추가에서 할 일을 등록하세요.'}</div>`}</div>
+    <div class="todo-pagination">
+      <span>${matching.length ? (todoDisplayPage - 1) * pageSize + 1 : 0}–${Math.min(todoDisplayPage * pageSize, matching.length)} / ${matching.length}개</span>
+      <div><button type="button" data-todo-prev ${todoDisplayPage === 1 ? 'disabled' : ''}>이전</button><span>${todoDisplayPage} / ${pages}</span><button type="button" data-todo-next ${todoDisplayPage === pages ? 'disabled' : ''}>다음</button></div>
+    </div>`;
+  panel.querySelectorAll('[data-todo-view]').forEach(button => {
+    button.onclick = () => { todoDisplayMode = button.dataset.todoView; todoDisplayPage = 1; renderTodos(); };
+  });
+  panel.querySelector('#todoListSearch').oninput = event => {
+    todoDisplayQuery = event.target.value; todoDisplayPage = 1;
+    const caret = event.target.selectionStart;
+    renderTodos();
+    const input = panel.querySelector('#todoListSearch'); input.focus();
+    if (input.type !== 'search') input.setSelectionRange(caret, caret);
+  };
+  panel.querySelector('[data-todo-prev]').onclick = () => { todoDisplayPage--; renderTodos(); };
+  panel.querySelector('[data-todo-next]').onclick = () => { todoDisplayPage++; renderTodos(); };
 
   panel.querySelectorAll('[data-todo-id]').forEach(row => {
     const todo = todos.find(x => x.id === row.dataset.todoId);

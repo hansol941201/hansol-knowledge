@@ -110,9 +110,6 @@
     return list.map(item => `
     <div class="shortcut" data-shortcut="${item.id}" draggable="true">
       <a href="${helper.escapeHtml(helper.shortcutHref(item.url))}" target="_blank" rel="noopener noreferrer" title="${helper.escapeHtml(item.name)}">
-        <span class="shortcut-thumb">${item.image
-          ? helper.thumbImage(item.image)
-          : `<span class="shortcut-badge">${helper.escapeHtml(helper.shortcutBadge(item))}</span>`}</span>
         <b>${helper.escapeHtml(item.name)}</b>
       </a>
       <button type="button" class="shortcut-more" data-row-menu data-shortcut-edit title="수정·삭제">${helper.icon('more', 14)}</button>

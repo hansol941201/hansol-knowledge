@@ -770,3 +770,161 @@ dialog :is(button,input,textarea,select,p,small,label) { font-size:16px !importa
 .topnav .navigation-row .top-nav { gap:2px; }
 .topnav .top-item { min-height:40px; padding:6px 12px; }
 .nav-group-label { padding-top:12px; padding-bottom:5px; }
+
+/* A focused home: text favorites, spacious tasks, smaller notes, no schedule. */
+#dashboardHome { cursor:pointer; padding:0; border:0; background:transparent; justify-content:flex-start; }
+#dashboardHome:hover { color:#b7d6ff; }
+#dashboardHome:focus-visible { outline:2px solid #91b9f2; outline-offset:6px; border-radius:5px; }
+#schedulePanel { display:none !important; }
+.shortcut-band { padding-top:14px; }
+.shortcut-grid { display:flex; flex-wrap:wrap; gap:8px; padding:0; }
+.shortcut,.shortcut.add { flex:0 0 auto; width:auto; height:auto; min-height:44px; min-width:0; aspect-ratio:auto; border-radius:9px; }
+.shortcut a { display:flex; flex-direction:row; align-items:center; justify-content:flex-start; height:100%; padding:10px 42px 10px 15px; }
+.shortcut a b { margin:0; padding:0; font-weight:500 !important; text-align:left; white-space:nowrap; }
+.shortcut-more { top:50%; right:7px; transform:translateY(-50%); opacity:.65; width:26px; height:28px; }
+.shortcut.add { display:flex; align-items:center; justify-content:center; gap:8px; padding:10px 15px; border-style:dashed; background:transparent; }
+.shortcut.add b { font-size:16px; font-weight:400 !important; }
+.main-scroll:has(#knowledgeBlock.hidden) .dash-cols { grid-template-columns:minmax(0,1.85fr) minmax(280px,.85fr); grid-template-rows:minmax(0,1fr) minmax(0,.75fr); grid-template-areas:'todo memo' 'todo notes'; gap:16px; height:100%; min-height:0; }
+#todayPanel,.main-scroll:has(#knowledgeBlock.hidden) #todayPanel { display:grid; grid-template-rows:auto auto minmax(0,1fr) auto; gap:14px; height:100%; min-height:0; overflow:hidden; padding:20px; }
+#todayPanel .todo-head { margin:0; padding-bottom:12px; }
+.todo-controls { display:grid; gap:12px; min-width:0; }
+.todo-view-tabs { display:flex; gap:6px; flex-wrap:wrap; }
+.todo-view-tabs button { display:flex; align-items:center; gap:7px; padding:7px 10px; border:1px solid rgba(255,255,255,.16); border-radius:8px; color:#a9bfdc; background:rgba(255,255,255,.025); }
+.todo-view-tabs button.active { color:#eff6ff; background:rgba(133,181,245,.13); border-color:rgba(187,217,255,.4); }
+.todo-view-tabs button span { font-size:13px; color:#9ab7db; }
+.todo-list-search { display:flex; align-items:center; gap:12px; padding:7px 12px; background:rgba(0,0,0,.04); border:1px solid rgba(255,255,255,.2); border-radius:9px; color:#94afce; }
+.todo-list-search input { flex:1; min-width:0; padding:3px 0; border:0; background:transparent; outline:none; color:#e2edfd; }
+.todo-list-search input::placeholder { color:#8fa6c5; }
+.todo-list-search:focus-within { border-color:#8aafdF; }
+.todo-results { min-height:0; overflow:auto; overscroll-behavior:contain; }
+#todayPanel .todo-results .todo-list { min-height:0; height:auto; overflow:visible; padding:0; }
+#todayPanel .todo-line { margin:0; padding:13px 1px; align-items:flex-start; }
+#todayPanel .todo-line-text { min-width:0; flex:1; overflow-wrap:anywhere; }
+#todayPanel .todo-line time { flex:none; font-size:14px !important; }
+.todo-pagination { display:flex; justify-content:space-between; align-items:center; gap:12px; border-top:1px solid rgba(255,255,255,.13); padding-top:12px; color:#a9bdd9; }
+.todo-pagination > div { display:flex; align-items:center; gap:10px; }
+.todo-pagination button { border:1px solid rgba(255,255,255,.2); border-radius:8px; padding:6px 11px; color:#d6e6ff; }
+.todo-pagination button:disabled { opacity:.3; cursor:default; }
+#memoPanel,#callNotesPanel { padding:16px; }
+#memoPanel .memo-head,#callNotesPanel .memo-head { padding-bottom:10px; }
+#memoPanel .memo-tools { gap:6px; }
+#memoPanel .memo-tools button,#memoPanel .memo-tools label { padding:7px 9px; }
+#memoPanel .memo-note-shell { min-height:0; }
+.main-scroll:has(#knowledgeBlock.hidden) #memoPanel { grid-template-rows:auto minmax(0,1fr) auto; max-height:none; }
+.workspace[data-view='할 일'] .main-scroll:has(#knowledgeBlock.hidden) .dash-cols { grid-template-columns:minmax(0,1fr); grid-template-rows:minmax(0,1fr); grid-template-areas:'todo'; }
+.workspace[data-view='할 일'] #memoPanel,.workspace[data-view='할 일'] #callNotesPanel { display:none !important; }
+@media(min-width:761px) and (max-width:1150px) {
+ .main-scroll:has(#knowledgeBlock.hidden) .dash-cols { grid-template-columns:minmax(0,1.5fr) minmax(230px,1fr); grid-template-rows:minmax(0,1fr) minmax(0,.7fr); grid-template-areas:'todo memo' 'todo notes'; overflow:hidden; }
+ .todo-view-tabs button { padding:6px 8px; }
+ .todo-pagination { flex-wrap:wrap; }
+}
+@media(max-width:760px) {
+ .shortcut-grid { flex-wrap:nowrap; overflow-x:auto; }
+ .shortcut,.shortcut.add { flex:0 0 auto; width:auto; height:auto; min-height:44px; }
+ .main-scroll:has(#knowledgeBlock.hidden) .dash-cols { grid-template-columns:minmax(0,1fr); grid-template-rows:600px 300px 240px; grid-template-areas:'todo' 'memo' 'notes'; overflow:auto; }
+ .todo-pagination { flex-wrap:wrap; }
+ .workspace[data-view='할 일'] .main-scroll:has(#knowledgeBlock.hidden) .dash-cols { grid-template-rows:minmax(500px,1fr); overflow:auto; }
+}
+#dashboardHome { font-size:35px !important; line-height:1 !important; font-weight:700 !important; }
+#todayPanel .todo-star { font-size:0 !important; line-height:0 !important; width:28px; height:28px; flex:0 0 28px; }
+#todayPanel .todo-star::before { font-size:24px !important; line-height:1 !important; }
+.shortcut .shortcut-more { background:transparent; color:#a7bddb; border:0; border-radius:5px; padding:2px; }
+.shortcut .shortcut-more:hover { background:rgba(255,255,255,.08); }
+.todo-list-search input::placeholder { font-weight:400; }
+@media(max-width:760px) { #dashboardHome { font-size:27px !important; } }
+
+/* Tablet / bento theme, based on the user's latest reference. */
+:root { color-scheme:light; --bg:#d1d3c5; --card:#fff; --ink:#171918; --ink-1:#171918; --ink-2:#585c55; --ink-3:#73786e; --line:#c9cdc3; --line-soft:#e4e6df; --nav-navy:#171918; --nav-text:#51564e; }
+html { background:#d1d3c5; }
+body,body:not(.overlay-mode) { background:#d1d3c5; color:#171918; }
+body::before { content:none; }
+.workspace { width:calc(100% - 48px); height:calc(100dvh - 48px); margin:24px; border:4px solid #181a17; border-radius:32px; background:#f8f9f5; box-shadow:0 12px 35px rgba(28,34,23,.07); padding:7px; grid-template-columns:190px minmax(0,1fr); }
+.topnav { background:#f8f9f5; border:0; border-right:1px solid #d8dbd1; border-radius:21px 0 0 21px; padding:18px 12px 12px; backdrop-filter:none; -webkit-backdrop-filter:none; }
+#dashboardHome { color:#171918; width:auto; min-height:48px; height:48px; border-radius:12px; }
+#dashboardHome:hover { color:#555d4b; }
+.nav-group-label { color:#6b7262; font-size:13px !important; letter-spacing:.02em; }
+.topnav .top-item { color:#353b30; border-radius:999px; padding:8px 12px; border:1px solid transparent; }
+.topnav .top-item.active,.topnav .top-item.active:hover { color:#fff; background:#191c17; border-color:#191c17; box-shadow:none; }
+.topnav .top-item:hover { color:#111; background:#e9ece1; }
+.top-tools { border-color:#d8dbd1; }
+.top-mini { color:#4b5442; }
+.top-mini:hover { color:#111; background:#e4e8db; }
+.brand-avatar { color:#fff; background:#191c17; border:0; }
+.sync-state[data-state=offline] { color:#605d49; background:#eeeee5; border:1px solid #d8dbd1; border-radius:12px; }
+.main { background:#f8f9f5; border-radius:0 21px 21px 0; }
+.topbar { margin:8px 14px 0; padding:10px 12px; min-height:70px; background:#fff; border:1px solid #a6ada0; border-radius:999px; backdrop-filter:none; -webkit-backdrop-filter:none; }
+.topbar .page-search { border:0; background:transparent; color:#5f6856; box-shadow:none; backdrop-filter:none; }
+.topbar .page-search:focus-within { background:#f0f2e9; box-shadow:none; border-color:transparent; }
+.topbar .page-search input { color:#171918; }
+.topbar .page-search input::placeholder { color:#737b69; }
+.topbar .primary-btn,.primary-btn,.memo-add-btn,#memoPanel .memo-add-btn { color:#fff; background:#181c16; border:1px solid #181c16; border-radius:999px; box-shadow:none; }
+.topbar .primary-btn:hover,.memo-add-btn:hover { background:#373f2e; }
+.shortcut-band { padding:14px 20px 0; }
+.shortcut-notice { color:#5b6251; background:#f0f2e9; border:1px solid #d6dbcd; border-radius:10px; }
+.shortcut-notice button { color:#303928; background:#fff; border:1px solid #aab39e; border-radius:999px; }
+.shortcut,.shortcut.add { background:#fff; border:1px solid #aeb5a6; border-radius:999px; box-shadow:none; backdrop-filter:none; -webkit-backdrop-filter:none; }
+.shortcut a b { color:#252c20; }
+.shortcut:hover { background:#e9eddf; border-color:#6c785f; }
+.shortcut.add { color:#59664a; background:transparent; border-style:dashed; }
+.shortcut .shortcut-more { color:#59664a; }
+.shortcut .shortcut-more:hover { background:#e1e7d6; }
+.main-scroll { padding:18px 20px 20px; background:transparent; }
+.today-panel,#todayPanel,#callNotesPanel,#memoPanel,#schedulePanel,.page-card:nth-child(n),.main-scroll:has(#knowledgeBlock.hidden) #schedulePanel { background:#fff; border:1px solid #a8b09f; border-radius:23px; box-shadow:none; backdrop-filter:none; -webkit-backdrop-filter:none; }
+#todayPanel { background:#fff; }
+#memoPanel { background:#ffe163; border-color:#d7be54; }
+#callNotesPanel { background:#ded5ee; border-color:#bcb0cd; }
+#todayPanel .todo-head h2,#callNotesPanel h2,#memoPanel h2,#schedulePanel h2,.block-head h2 { color:#171b14; }
+.memo-head,.todo-head { border-bottom-color:#d9dfd0; }
+#memoPanel .memo-head { border-bottom-color:rgba(58,52,18,.2); }
+#callNotesPanel .memo-head { border-bottom-color:rgba(46,36,59,.18); }
+#todayPanel .todo-count,#pageCount { color:#414c34; background:#edf0e5; border:1px solid #d4dcc8; border-radius:999px; }
+#todayPanel .todo-line { border-color:#e1e6d9; }
+#todayPanel .todo-line:hover,.todo-line.star:hover { background:#f4f6ee; }
+#todayPanel .todo-line-text,.call-note p,.memory-item p,#memoNote,#scratchNote { color:#252d20; }
+#todayPanel .todo-empty,.page-empty,.phone-archive-empty { color:#717966; }
+#todayPanel .todo-line.done .todo-line-text { color:#7a8370; }
+#todayPanel .todo-line time { color:#67745a; }
+#todayPanel .todo-line time.late { color:#aa5341; }
+#todayPanel .todo-line time.today { color:#498258; }
+#todayPanel .todo-box { border-color:#7f8b71; background:#fff; }
+#todayPanel .todo-box.done { background:#859a6f; }
+#todayPanel .todo-star::before { color:#858d7b; }
+#todayPanel .todo-star[aria-pressed=true]::before { color:#a67f14; }
+#memoPanel .memo-note-shell { background:rgba(255,255,255,.12); border:1px solid rgba(78,68,20,.23); border-radius:13px; box-shadow:none; }
+#memoNote::placeholder,#scratchNote::placeholder { color:#6d694e; }
+.memo-file { background:rgba(255,255,255,.25); color:#3a3e24; border-color:rgba(82,73,29,.35); border-radius:999px; }
+#scratchClear { color:#685277; }
+.todo-view-tabs button { background:#fff; color:#58634d; border:1px solid #c4ccb9; border-radius:999px; }
+.todo-view-tabs button.active { background:#191d16; color:#fff; border-color:#191d16; }
+.todo-view-tabs button span { color:#748166; }
+.todo-view-tabs button.active span { color:#d4e2c3; }
+.todo-list-search { background:#f6f8f0; color:#768367; border:1px solid #cdd6c1; border-radius:999px; }
+.todo-list-search input { color:#20271a; }
+.todo-list-search input::placeholder { color:#818c75; }
+.todo-list-search:focus-within { border-color:#859774; }
+.todo-pagination { color:#5a674e; border-top-color:#d9e0cf; }
+.todo-pagination button { background:#fff; color:#26341c; border:1px solid #a5b595; border-radius:999px; }
+.page-categories button { background:#fff; color:#536149; border-color:#bbc7af; border-radius:999px; }
+.page-categories button.active { color:#fff; background:#191d16; border-color:#191d16; }
+.block-head p { color:#6b765f; }
+.page-card .card-kind { color:#6a785c; }
+.page-card h3 { color:#1d2817; }
+.page-card p,.page-card .card-body { color:#4b5b40; }
+.page-card footer { border-color:#dce4d4; }
+.page-card footer button,.page-card .card-act,.shortcut-menu,.edit-box header button,.edit-box footer button:not([type=submit]) { background:#fff; color:#455b35; border:1px solid #c1d0b4; border-radius:999px; }
+.page-card footer button:hover { background:#eaf0e2; color:#233b12; }
+.page-card .card-del { color:#a14d40; }
+.page-card .card-time { color:#7d8a73; }
+.page-card:hover { border-color:#879d74; box-shadow:none; }
+.edit-box,.search-preview,dialog,#app.messenger { color:#24351a; background:#fbfcf8; border:1px solid #8ea47b; border-radius:23px; backdrop-filter:none; -webkit-backdrop-filter:none; box-shadow:0 15px 60px rgba(34,45,25,.16); }
+.edit-box input,.edit-box textarea,.edit-box select,dialog input,dialog textarea,dialog select { background:#f1f5e9; color:#25381b; border-color:#c7d4b8; }
+option { color:#25381b; background:#fff; }
+#phoneArchiveDialog,#phoneArchiveDialog .phone-archive { background:#faf8f0 !important; }
+.preview-item:hover,.preview-item.on { background:#edf3e3; }
+.messenger .header,.messenger .composer,.messenger .quick-add { background:#e7eddd; }
+.messenger .messages { background:#f7f9f2; }
+.messenger .bubble,.messenger .knowledge-item { background:#fff; color:#304322; }
+.orb { background:#191e15; }
+::selection { color:#1c2b10; background:#dce7a8; }
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible { outline-color:#758e59; }
+@media(max-width:760px) { .workspace { grid-template-columns:minmax(0,1fr); width:calc(100% - 16px); height:calc(100dvh - 16px); margin:8px; padding:4px; border-width:3px; border-radius:24px; } .topnav { border-radius:15px 15px 0 0; border-right:0; border-bottom:1px solid #d8dbd1; } .main { border-radius:0 0 15px 15px; } .topbar { border-radius:17px; margin:8px; } .shortcut-band { padding-left:12px; padding-right:12px; } .main-scroll { padding-left:12px; padding-right:12px; } }
