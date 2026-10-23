@@ -24,7 +24,7 @@
   function memoPanel() {
     return `
     <div class="memo-head">
-      <h2>메모</h2><span class="unified-memo-caption">전화 · 업무 메모를 한곳에</span>
+      <h2>메모</h2>
     </div>
     <div class="memo-note-shell">
       <textarea id="memoNote" rows="20" aria-label="전화 및 업무 메모" placeholder="통화 내용이나 업무 메모를 자유롭게 적으세요."></textarea>
@@ -111,7 +111,7 @@
       <a href="${helper.escapeHtml(helper.shortcutHref(item.url))}" target="_blank" rel="noopener noreferrer" title="${helper.escapeHtml(item.name)}">
         <b>${helper.escapeHtml(item.name)}</b>
       </a>
-      <button type="button" class="shortcut-more" data-row-menu data-shortcut-edit title="수정·삭제">${helper.icon('more', 14)}</button>
+      <button type="button" class="shortcut-more" data-shortcut-edit title="제목·사이트 수정" aria-label="${helper.escapeHtml(item.name)} 제목·사이트 수정">${helper.icon('pencil', 13)}</button>
     </div>`).join('') + `
     <button type="button" class="shortcut add" id="shortcutAdd">${helper.icon('plus', 18)}<b>사이트 추가</b></button>`;
   }

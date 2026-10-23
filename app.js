@@ -448,7 +448,7 @@ function renderLibrary() {
       findCategory(item) === '대본' ? 'script-card' : (findCategory(item) === '기획' ? 'plan-card' : (findCategory(item) === '연락처' ? 'business-card contact-card' : '')),
       `data-id="${item.id}"`,
       `<h3>${mark(item.title)}</h3><p>${mark(item.answer)}</p>${savedDateOf(item) ? `<time class="card-time">${escapeHtml(savedLabel(item))}</time>` : ''}`,
-      '<button data-copy>복사</button><button class="card-act" data-edit>수정</button><button data-chat>지식창에서 보기</button><button class="card-act card-del" data-delete>삭제</button>');
+      '<button data-copy>복사</button><button class="card-act" data-edit>수정</button><button class="card-act card-del" data-delete>삭제</button>');
   const workFirst = Boolean(query);
   const workItems = workFirst ? items.filter(item => findCategory(item) === '업무지식') : [];
   const restItems = workFirst ? items.filter(item => findCategory(item) !== '업무지식') : items;
@@ -464,13 +464,13 @@ function renderLibrary() {
          ${item.owner ? `<div><dt>특허권자</dt><dd>${mark(item.owner)}</dd></div>` : ''}
          ${patentStatusNote(item) ? `<div><dt>상태</dt><dd>${escapeHtml(patentStatusNote(item))}</dd></div>` : ''}
        </dl>`,
-      '<button data-patent-copy>특허번호 복사</button><button data-patent-chat>지식창에서 보기</button>')).join('')
+      '<button data-patent-copy>특허번호 복사</button>')).join('')
     + partnerItems.map(item => shell('협력업체', 'building', 'partner-card business-card',
       `data-partner-index="${partners.indexOf(item)}"`,
       `<h3>${mark(item.name)}</h3>
        <p class="business-details"><span>${icon('phone', 16)}${mark(item.phone || '전화번호 확인')}</span><span>${icon('mail', 16)}${mark(item.email || '이메일 확인')}</span></p>
        ${partnerRecordsHtml(item.name, term)}`,
-      '<button data-copy-phone>번호 복사</button><button data-copy-email>메일 복사</button><button data-partner-edit>수정</button><button data-partner-chat>지식창에서 보기</button>')).join('')
+      '<button data-copy-phone>번호 복사</button><button data-copy-email>메일 복사</button><button data-partner-edit>수정</button>')).join('')
     + accounts.map(item => shell('계정', 'lock', 'account-card',
       `data-account-id="${item.id}"`,
       `<h3>${mark(item.service)}</h3><p>${mark(item.user)}\n<span class="secret-line">••••••••</span></p>`,
@@ -512,7 +512,6 @@ function renderLibrary() {
     const item = knowledge.find(x => x.id === card.dataset.id);
     card.querySelector('[data-copy]').onclick = () => copyText(item.answer);
     card.querySelector('[data-edit]').onclick = () => openEditor(item);
-    card.querySelector('[data-chat]').onclick = () => { openApp(); addBubble(`${item.title}\n${item.answer}`, 'answer', item); };
     card.querySelector('[data-delete]').onclick = () => removeItem(item);
   });
   $('#pageGrid').querySelectorAll('[data-account-id]').forEach(card => {
@@ -527,14 +526,12 @@ function renderLibrary() {
     if (!item) return;
     card.querySelector('[data-patent-copy]').onclick = () =>
       item.num ? copyText(item.num) : showToast('아직 번호가 부여되지 않았습니다');
-    card.querySelector('[data-patent-chat]').onclick = () => { openApp(); addPatentBubble(item); };
   });
   $('#pageGrid').querySelectorAll('[data-partner-index]').forEach(card => {
     const item = partners[Number(card.dataset.partnerIndex)];
     card.querySelector('[data-copy-phone]').onclick = () => item.phone ? copyText(item.phone) : showToast('전화번호 확인');
     card.querySelector('[data-copy-email]').onclick = () => item.email ? copyText(item.email) : showToast('이메일 확인');
     card.querySelector('[data-partner-edit]').onclick = () => openPartnerModal(item);
-    card.querySelector('[data-partner-chat]').onclick = () => { openApp(); addPartnerBubble(item); };
   });
   $('#pageGrid').querySelectorAll('[data-todo-result]').forEach(card => {
     const todo = todos.find(x => x.id === card.dataset.todoResult);
@@ -2004,12 +2001,15 @@ function renderShortcuts() {
     const menuButton = node.querySelector('[data-shortcut-edit]');
     menuButton.onclick = (event) => {
       event.preventDefault();
+      event.stopPropagation();
       const item = shortcuts.find(x => x.id === node.dataset.shortcut);
-      openRowMenu(menuButton, [
-        { label: '수정', run: () => openShortcutModal(item) },
-        { label: '삭제', danger: true, run: () => deleteShortcut(item) }
-      ]);
+      openShortcutModal(item);
     };
+    node.addEventListener('contextmenu', event => {
+      event.preventDefault();
+      const item = shortcuts.find(x => x.id === node.dataset.shortcut);
+      openShortcutModal(item);
+    });
     // 드래그로 순서 바꾸기
     node.addEventListener('dragstart', event => {
       draggingShortcutId = node.dataset.shortcut;

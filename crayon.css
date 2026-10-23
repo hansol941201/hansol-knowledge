@@ -1326,3 +1326,16 @@ dialog :is(input,textarea,select),.edit-box :is(input,textarea,select) { backgro
 .todo-quick-options button:hover { border-color:rgba(255,232,182,.6); background:rgba(255,228,171,.14); }
 .workspace input:focus-visible,.workspace textarea:focus-visible,.workspace button:focus-visible,.workspace a:focus-visible { outline-color:#ffe5ac; }
 @media(max-width:760px) { .workspace { border-width:3px; box-shadow:0 0 5px #fff4cc,0 0 18px rgba(255,224,166,.45),inset 0 0 10px rgba(255,235,186,.35); } }
+
+/* 자주 쓰는 카드 동작은 작게, 즐겨찾기 편집은 오른쪽에서 바로 연다. */
+.workspace .page-card footer { gap:5px; flex-wrap:wrap; }
+#pageGrid .page-card footer button,
+.workspace .page-card .card-act,
+.workspace .page-card.business-card footer button {
+  min-height:24px; padding:3px 7px; border-radius:5px;
+  font-size:11px !important; line-height:1.35 !important;
+}
+#app.messenger .bubble .actions { gap:7px; }
+#app.messenger .bubble .actions button { font-size:10px; line-height:1.4; padding:2px 0; }
+.workspace .shortcut .shortcut-more { width:24px; height:24px; opacity:1; }
+.workspace .shortcut .shortcut-more:focus-visible { outline:2px solid currentColor; outline-offset:1px; }
