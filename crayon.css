@@ -453,3 +453,6 @@ body:not(.overlay-mode) { background:radial-gradient(ellipse at 12% 0%,rgba(49,9
 .main-scroll:has(#knowledgeBlock.hidden) #schedulePanel { background:linear-gradient(135deg,rgba(35,52,77,.65),rgba(19,32,52,.62)); }
 .shortcut-notice { color:#bed1ec; background:rgba(29,49,77,.85); border-color:var(--line); }
 .sync-state[data-state=offline] { background:rgba(184,154,97,.12); color:#d1bd93; }
+.page-card footer button,.shortcut-menu,.edit-box header button,.edit-box footer button:not([type=submit]),.shortcut-notice button { background:#223650; color:#c5d9f5; border:1px solid var(--line); border-radius:7px; }
+.page-card footer button:hover { background:#2d486d; color:#fff; }
+body h1,body h2,body h3,body strong,body b { font-weight:600 !important; }
