@@ -27,6 +27,7 @@
       "reminder.html",
       "reminder-preload.js",
       "crayon.css",
+      "theme.css",
       "views.js",
       "store.js",
       "shortcuts.js",
