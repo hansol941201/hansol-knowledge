@@ -928,3 +928,97 @@ option { color:#25381b; background:#fff; }
 ::selection { color:#1c2b10; background:#dce7a8; }
 button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible { outline-color:#758e59; }
 @media(max-width:760px) { .workspace { grid-template-columns:minmax(0,1fr); width:calc(100% - 16px); height:calc(100dvh - 16px); margin:8px; padding:4px; border-width:3px; border-radius:24px; } .topnav { border-radius:15px 15px 0 0; border-right:0; border-bottom:1px solid #d8dbd1; } .main { border-radius:0 0 15px 15px; } .topbar { border-radius:17px; margin:8px; } .shortcut-band { padding-left:12px; padding-right:12px; } .main-scroll { padding-left:12px; padding-right:12px; } }
+
+/* iPad-inspired screen: system typography, soft wallpaper, app surfaces. */
+:root { --bg:#e7eaf1; --ink:#202632; --ink-1:#202632; --ink-2:#637083; --ink-3:#8a94a5; --nav-navy:#2168cc; --nav-text:#536174; --line:#dce2ec; --line-soft:#edf0f5; }
+html { background:#e5e8ef; }
+body,body:not(.overlay-mode) { background:radial-gradient(ellipse at 0% 0%,#d5ddf1,transparent 58%),radial-gradient(ellipse at 100% 100%,#e8dff3,transparent 60%),#e5e8ef; color:#202632; }
+.workspace { width:calc(100% - 40px); height:calc(100dvh - 40px); margin:20px; padding:7px; border:5px solid #30343d; border-radius:39px; background:linear-gradient(135deg,#e9effc,#f4f1fb 58%,#e8edf7); box-shadow:0 18px 55px rgba(46,57,81,.13),inset 0 0 0 1px #ffffff; grid-template-columns:204px minmax(0,1fr); }
+.topnav { background:rgba(248,250,255,.72); border-right:1px solid rgba(162,179,207,.24); border-radius:26px 0 0 26px; backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); }
+.main { background:transparent; border-radius:0 26px 26px 0; }
+#dashboardHome { color:#1f2d42; letter-spacing:-1.5px; }
+#dashboardHome:hover { color:#2672d5; }
+.nav-group-label { color:#8892a3; }
+.topnav .top-item { color:#4c5a70; border-radius:11px; }
+.topnav .top-item.active,.topnav .top-item.active:hover { color:#fff; background:#3478d5; border-color:#3478d5; box-shadow:0 3px 8px rgba(52,120,213,.13); }
+.topnav .top-item:hover { color:#2769bd; background:#e6eefb; }
+.top-tools { border-color:#dfe5f0; }
+.top-mini { color:#76869e; }
+.top-mini:hover { background:#e8effa; color:#3177d4; }
+.brand-avatar { background:#e1eafb; color:#5076b3; }
+.sync-state[data-state=offline] { color:#7e7b6a; background:#f1f0e9; border-color:#e6e4da; }
+.topbar { min-height:74px; background:rgba(255,255,255,.62); border:1px solid rgba(255,255,255,.85); border-radius:19px; margin:10px 16px 0; padding:10px 14px; backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); }
+.topbar .page-search { background:rgba(226,232,242,.5); border-radius:12px; }
+.topbar .page-search:focus-within { background:#fff; box-shadow:0 0 0 2px #c7dbf9; }
+.topbar .page-search input { color:#29384f; }
+.topbar .page-search input::placeholder { color:#8a97aa; }
+.topbar .primary-btn,.primary-btn,.memo-add-btn,#memoPanel .memo-add-btn { background:#3478d5; color:#fff; border-color:#3478d5; border-radius:12px; }
+.shortcut-notice { color:#7b889b; background:rgba(255,255,255,.45); border-color:rgba(209,221,240,.65); }
+.shortcut-notice button { color:#5d7ba5; background:rgba(255,255,255,.65); border-color:#d2deee; }
+.shortcut,.shortcut.add { background:rgba(255,255,255,.75); border-color:rgba(255,255,255,.95); border-radius:12px; box-shadow:0 2px 9px rgba(79,95,124,.035); }
+.shortcut a b { color:#596a83; }
+.shortcut:hover { background:#fff; border-color:#c5d8f5; }
+.shortcut.add { color:#7992b6; background:rgba(255,255,255,.25); border-color:#c4d3e8; }
+.shortcut .shortcut-more { color:#8ca0bc; }
+.today-panel,#todayPanel,#callNotesPanel,#memoPanel,.page-card:nth-child(n) { background:rgba(255,255,255,.93); border:1px solid rgba(255,255,255,.95); border-radius:22px; box-shadow:0 4px 18px rgba(66,84,116,.05); }
+#memoPanel { background:#fff1bc; border-color:#fff5cf; }
+#callNotesPanel { background:#e6e1fa; border-color:#eee9ff; }
+#todayPanel .todo-head h2,#callNotesPanel h2,#memoPanel h2,.block-head h2 { color:#29374c; letter-spacing:-.5px; }
+#todayPanel .todo-head { border-bottom-color:#e9edf4; }
+#todayPanel .todo-count,#pageCount { background:#edf3fc; color:#6b8ab8; border-color:#e3ecf9; border-radius:9px; }
+.todo-view-tabs { gap:4px; padding:4px; background:#eff2f7; border-radius:12px; }
+.todo-view-tabs button { border:0; color:#8390a3; background:transparent; border-radius:9px; padding:6px 9px; }
+.todo-view-tabs button.active { color:#3b5c8e; background:#fff; border:0; box-shadow:0 1px 5px rgba(64,82,113,.1); }
+.todo-view-tabs button span,.todo-view-tabs button.active span { color:#96a5bb; }
+.todo-list-search { border:0; border-radius:11px; background:#f1f4f9; color:#8b9bb0; }
+.todo-list-search input { color:#394e69; }
+.todo-list-search input::placeholder { color:#9ca9bc; }
+#todayPanel .todo-line { border-color:#edf0f6; }
+#todayPanel .todo-line:hover { background:#f7f9fd; }
+#todayPanel .todo-line-text,.call-note p,.memory-item p,#memoNote,#scratchNote { color:#3d4e65; }
+#todayPanel .todo-box { background:#fff; border-color:#adbcd2; border-radius:50%; }
+#todayPanel .todo-box.done { background:#76a0da; }
+.todo-pagination { border-color:#edf0f6; color:#96a3b6; }
+.todo-pagination button { color:#668abe; border-color:#dce6f5; border-radius:10px; }
+#memoPanel .memo-note-shell { border-color:rgba(159,137,69,.18); border-radius:12px; background:rgba(255,255,255,.14); }
+.memo-file { color:#8d805b; border-color:rgba(159,137,69,.22); border-radius:12px; }
+#scratchClear { color:#9a88b7; }
+.page-categories button { border:1px solid #e0e7f2; background:rgba(255,255,255,.7); color:#91a0b6; border-radius:10px; }
+.page-categories button.active { color:#4d79b8; background:#e2ecfc; border-color:#d8e6fb; }
+.block-head p { color:#8c9aaf; }
+.page-card h3 { color:#31445f; }
+.page-card p,.page-card .card-body { color:#718198; }
+.page-card .card-kind { color:#9aaac0; }
+.page-card footer { border-color:#edf1f7; }
+.page-card footer button,.page-card .card-act { border:1px solid #e1e9f5; color:#7895bf; background:#f7faff; border-radius:10px; }
+.page-card footer button:hover { background:#e8f1ff; color:#487bbf; }
+.page-card .card-del { color:#bc8b8b; }
+.edit-box,.search-preview,dialog,#app.messenger { background:#fbfcff; color:#3a4c67; border:1px solid #dce6f5; border-radius:24px; box-shadow:0 20px 70px rgba(60,79,111,.16); }
+.edit-box input,.edit-box textarea,.edit-box select,dialog input,dialog textarea,dialog select { color:#465d7b; background:#f1f5fc; border-color:#e0e9f7; }
+option { background:#fff; color:#465d7b; }
+#phoneArchiveDialog,#phoneArchiveDialog .phone-archive { background:#fbfcff !important; }
+.orb { background:#3478d5; }
+::selection { background:#d9e8ff; color:#315b91; }
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible { outline-color:#8cb3eb; }
+
+/* Business-card directory. All existing names, contact values and actions remain. */
+.workspace[data-view='연락처'] .page-grid,.workspace[data-view='협력업체'] .page-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; align-items:stretch; }
+.page-card.business-card,.workspace[data-view='연락처'] .page-card.business-card,.workspace[data-view='협력업체'] .page-card.business-card { position:relative; display:flex; flex-direction:column; align-items:stretch; gap:0; min-height:286px; height:auto; padding:25px 26px 20px; border:1px solid #e1e7f2; border-radius:18px; background:linear-gradient(125deg,#fff 70%,#f1f6ff); box-shadow:0 5px 18px rgba(59,83,119,.045); overflow:hidden; }
+.page-card.business-card::before { content:''; position:absolute; top:0; left:0; right:0; height:4px; background:linear-gradient(90deg,#719bdd,#bdd3f5); }
+.page-card.business-card::after { display:block !important; content:'B2B' !important; position:absolute; top:22px; right:23px; width:auto; height:auto; background:none !important; color:#c6d4e9; font:700 16px/1 sans-serif; letter-spacing:.03em; opacity:1; pointer-events:none; }
+.page-card.business-card .card-kind { margin:0 64px 20px 0; padding:0; display:flex; align-items:center; gap:7px; color:#9aaecb; background:none; border:0; }
+.page-card.business-card h3,.workspace[data-view='연락처'] .page-card.business-card h3,.workspace[data-view='협력업체'] .page-card.business-card h3 { margin:0 0 15px; padding:0; color:#2d4568; font-size:22px !important; line-height:1.5 !important; font-weight:600 !important; letter-spacing:-.5px; }
+.page-card.business-card p,.workspace[data-view='연락처'] .page-card.business-card p,.workspace[data-view='협력업체'] .page-card.business-card p { margin:0 0 20px; color:#697f9f; line-height:1.85 !important; white-space:pre-wrap; overflow-wrap:anywhere; }
+.page-card.business-card .business-details { display:flex; flex-direction:column; gap:9px; }
+.page-card.business-card .business-details > span { display:flex; gap:10px; align-items:flex-start; min-width:0; overflow-wrap:anywhere; }
+.page-card.business-card .business-details svg { color:#9db5d6; margin-top:6px; flex:none; }
+.page-card.business-card .card-time { margin:0 0 14px; color:#a1b1c7; }
+.page-card.business-card footer,.workspace[data-view='연락처'] .page-card.business-card footer,.workspace[data-view='협력업체'] .page-card.business-card footer { display:flex; justify-content:flex-start; flex-wrap:wrap; gap:7px; border-top:1px solid #eaf0f8; margin-top:auto; padding-top:15px; }
+.page-card.business-card footer button { padding:7px 10px; min-height:38px; background:#f4f8ff; border:1px solid #e2ebf8; color:#7b9ac4; }
+.page-card.contact-card { background:linear-gradient(125deg,#fff 70%,#f6f3fd); }
+.page-card.contact-card::before { background:linear-gradient(90deg,#a99acb,#d9cfec); }
+.page-card.contact-card::after { color:#d3cbe5; }
+@media(min-width:761px) and (max-width:1100px) { .workspace[data-view='연락처'] .page-grid,.workspace[data-view='협력업체'] .page-grid { grid-template-columns:minmax(0,1fr); } }
+@media(max-width:760px) { .workspace { grid-template-columns:minmax(0,1fr); margin:8px; width:calc(100% - 16px); height:calc(100dvh - 16px); padding:4px; border-width:4px; border-radius:27px; } .topnav { border-radius:17px 17px 0 0; border-right:0; border-bottom:1px solid #dfe6f2; } .main { border-radius:0 0 17px 17px; } .topbar { margin:8px; border-radius:15px; } .workspace[data-view='연락처'] .page-grid,.workspace[data-view='협력업체'] .page-grid { grid-template-columns:minmax(0,1fr); gap:14px; } .page-card.business-card,.workspace[data-view='연락처'] .page-card.business-card,.workspace[data-view='협력업체'] .page-card.business-card { padding:22px; min-height:270px; } }
+.page-card.business-card p,.workspace[data-view='연락처'] .page-card.business-card p,.workspace[data-view='협력업체'] .page-card.business-card p { color:#536b8d; }
+.page-card.business-card footer button { color:#587cae; }

@@ -247,6 +247,7 @@ const ICONS = {
   patent: 'M12 3l8 4.5v9L12 21l-8-4.5v-9zM12 12l8-4.5M12 12v9M12 12L4 7.5',
   building: 'M4 21V6a1 1 0 011-1h6a1 1 0 011 1v15M12 21V10h7a1 1 0 011 1v10M7 9h2M7 13h2M7 17h2M16 14h1M16 18h1',
   lock: 'M7 11V8a5 5 0 0110 0v3M6 11h12v9H6z',
+  mail: 'M4 5h16v14H4zM4 6l8 7 8-7',
   phone: 'M7 3h3l2 5-2.5 1.5a12 12 0 005 5L16 12l5 2v3a2 2 0 01-2 2A16 16 0 015 5a2 2 0 012-2z',
   settings: 'M12 9a3 3 0 100 6 3 3 0 000-6zM19.4 15a1.6 1.6 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.6 1.6 0 00-1.8-.3 1.6 1.6 0 00-1 1.5V21a2 2 0 11-4 0v-.1A1.6 1.6 0 008 19.4a1.6 1.6 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.6 1.6 0 00.3-1.8 1.6 1.6 0 00-1.5-1H2a2 2 0 110-4h.1A1.6 1.6 0 004.6 8a1.6 1.6 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.6 1.6 0 001.8.3H9a1.6 1.6 0 001-1.5V2a2 2 0 114 0v.1a1.6 1.6 0 001 1.5 1.6 1.6 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.6 1.6 0 00-.3 1.8V9a1.6 1.6 0 001.5 1H22a2 2 0 110 4h-.1a1.6 1.6 0 00-1.5 1z',
   download: 'M12 3v12M7 11l5 5 5-5M4 20h16',
@@ -444,7 +445,7 @@ function renderLibrary() {
   // 검색 결과(어떤 항목이 걸리는지)와 정렬 기준은 전혀 바꾸지 않고 "그리는 순서"만
   // 나눈다 — 두 묶음을 합치면 items 와 완전히 같아서 빠지는 카드가 없다.
   const knowledgeCard = (item) => shell(findCategory(item), findCategory(item) === '연락처' ? 'phone' : 'book',
-      findCategory(item) === '대본' ? 'script-card' : (findCategory(item) === '기획' ? 'plan-card' : ''),
+      findCategory(item) === '대본' ? 'script-card' : (findCategory(item) === '기획' ? 'plan-card' : (findCategory(item) === '연락처' ? 'business-card contact-card' : '')),
       `data-id="${item.id}"`,
       `<h3>${mark(item.title)}</h3><p>${mark(item.answer)}</p>${savedDateOf(item) ? `<time class="card-time">${escapeHtml(savedLabel(item))}</time>` : ''}`,
       '<button data-copy>복사</button><button class="card-act" data-edit>수정</button><button data-chat>지식창에서 보기</button><button class="card-act card-del" data-delete>삭제</button>');
@@ -464,10 +465,10 @@ function renderLibrary() {
          ${patentStatusNote(item) ? `<div><dt>상태</dt><dd>${escapeHtml(patentStatusNote(item))}</dd></div>` : ''}
        </dl>`,
       '<button data-patent-copy>특허번호 복사</button><button data-patent-chat>지식창에서 보기</button>')).join('')
-    + partnerItems.map(item => shell('협력업체', 'building', 'partner-card',
+    + partnerItems.map(item => shell('협력업체', 'building', 'partner-card business-card',
       `data-partner-index="${partners.indexOf(item)}"`,
       `<h3>${mark(item.name)}</h3>
-       <p>${mark(item.phone || '전화번호 확인')}\n${mark(item.email || '이메일 확인')}</p>
+       <p class="business-details"><span>${icon('phone', 16)}${mark(item.phone || '전화번호 확인')}</span><span>${icon('mail', 16)}${mark(item.email || '이메일 확인')}</span></p>
        ${partnerRecordsHtml(item.name, term)}`,
       '<button data-copy-phone>번호 복사</button><button data-copy-email>메일 복사</button><button data-partner-edit>수정</button><button data-partner-chat>지식창에서 보기</button>')).join('')
     + accounts.map(item => shell('계정', 'lock', 'account-card',
