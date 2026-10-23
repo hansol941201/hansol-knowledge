@@ -24,23 +24,23 @@
   function memoPanel() {
     return `
     <div class="memo-head">
-      <h2>전화 메모</h2>
+      <h2>메모</h2><span class="unified-memo-caption">전화 · 업무 메모를 한곳에</span>
     </div>
     <div class="memo-note-shell">
-      <textarea id="memoNote" rows="20" aria-label="통화내용"></textarea>
+      <textarea id="memoNote" rows="20" aria-label="전화 및 업무 메모" placeholder="통화 내용이나 업무 메모를 자유롭게 적으세요."></textarea>
       <div class="memo-character" aria-hidden="true"><img src="theme-art/potato-couple-transparent.png" alt="" /></div>
     </div>
     <div class="memo-tools">
       <label class="memo-file">📷 사진/파일 첨부<input id="memoFile" type="file" accept="image/*" hidden /></label>
       <button type="button" id="memoQuickAdd" class="memo-add-btn">메모 저장</button>
-      <button type="button" class="memo-add-btn" style="margin-left:auto" onclick="document.getElementById('phoneArchiveDialog').showModal()">전화메모 보관함 열기</button>
+      <button type="button" class="memo-add-btn" style="margin-left:auto" onclick="document.getElementById('phoneArchiveDialog').showModal()">메모 보관함 열기</button>
     </div>
-    <dialog id="phoneArchiveDialog" aria-label="전화메모 보관함"
+    <dialog id="phoneArchiveDialog" aria-label="메모 보관함"
       onclick="if(event.target===this)this.close()"
       style="width:min(760px,92vw);max-height:78vh;padding:0;border:1px solid #e5dfe3;border-radius:18px;background:#fffafc;box-shadow:0 24px 70px rgba(80,55,68,.22);overflow:hidden">
       <section class="phone-archive" style="display:flex;flex-direction:column;max-height:78vh;background:#fffafc">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 20px 14px;border-bottom:1px solid #eee0e6">
-          <div><h3 style="margin:0;font-size:18px">전화메모 보관함</h3><small style="display:block;margin-top:4px;color:#9a8390">저장한 전화메모를 한곳에서 확인하고 삭제할 수 있어요.</small></div>
+          <div><h3 style="margin:0;font-size:18px">메모 보관함</h3><small style="display:block;margin-top:4px;color:#9a8390">저장한 메모를 한곳에서 확인하고 삭제할 수 있어요.</small></div>
           <button type="button" aria-label="닫기" onclick="this.closest('dialog').close()" style="width:34px;height:34px;border-radius:10px;font-size:21px;background:#f6e9ed;color:#796976">×</button>
         </div>
         <div id="phoneArchiveList" class="call-notes-list" style="min-height:260px;max-height:58vh;overflow:auto;padding:16px 20px 22px"></div>

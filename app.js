@@ -1395,14 +1395,6 @@ function renderCallNotes() {
   const panel = $('#callNotesPanel');
   if (!panel) return;
   panel.classList.toggle('hidden', Boolean(pageSearchCommitted.trim()) || pageCategory !== '대시보드');
-  if (!panel.querySelector('#scratchNote')) {
-    panel.innerHTML = `<div class="memo-head"><h2>메모장</h2><button type="button" id="scratchClear">비우기</button></div><textarea id="scratchNote" aria-label="자유 메모장"></textarea>`;
-    const scratch = panel.querySelector('#scratchNote');
-    try { scratch.value = localStorage.getItem('knowledge-scratch-note') || ''; } catch {}
-    const save = () => { try { localStorage.setItem('knowledge-scratch-note', scratch.value); } catch {} };
-    scratch.oninput = save;
-    panel.querySelector('#scratchClear').onclick = () => { scratch.value = ''; save(); scratch.focus(); };
-  }
   const archive = $('#phoneArchiveList');
   if (!archive) return;
   const notes = sortBySaved(alive(memories).filter(item => item.source === '통화 메모'));
@@ -1429,7 +1421,18 @@ function renderMemoPanel() {
 
   panel.innerHTML = VIEWS.memoPanel();
   const note = $('#memoNote');
-  note.value = readMemoNote();
+  // Fold the former scratchpad into the shared editor once. Keep its original
+  // storage key as a recovery copy; never overwrite or remove the old content.
+  let mergedDraft = readMemoNote();
+  try {
+    const oldScratch = localStorage.getItem('knowledge-scratch-note') || '';
+    if (oldScratch && !localStorage.getItem('knowledge-unified-memo-v1')) {
+      if (oldScratch !== mergedDraft) mergedDraft += `${mergedDraft ? '\n\n' : ''}${oldScratch}`;
+      localStorage.setItem(MEMO_NOTE_KEY, mergedDraft);
+      localStorage.setItem('knowledge-unified-memo-v1', '1');
+    }
+  } catch {}
+  note.value = mergedDraft;
   const saveDraft = () => writeMemoNote(note.value);
 
   const submitCallNote = () => {
@@ -1439,14 +1442,9 @@ function renderMemoPanel() {
     note.value = '';
     saveDraft();
     saveMemories(); renderMemories(); renderCallNotes(); renderLibrary();
-    showToast('전화메모 보관함에 저장했습니다');
+    showToast('메모 보관함에 저장했습니다');
     note.focus();
   };
-  note.addEventListener('keydown', event => {
-    if (event.key !== 'Enter' || event.shiftKey || event.isComposing || event.keyCode === 229) return;
-    event.preventDefault();
-    submitCallNote();
-  });
   $('#memoQuickAdd').onclick = submitCallNote;
 
   // 적는 대로 이 기기에 초안으로 남는다(다시 열어도 그대로).

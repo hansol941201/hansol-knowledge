@@ -1162,3 +1162,36 @@ body,body:not(.overlay-mode) { background:linear-gradient(145deg,#edf0f4,#e1e4ea
 .shortcut.add b { font-weight:400 !important; }
 @media(min-width:761px) and (max-width:1100px) { .main-scroll:has(#knowledgeBlock.hidden) .dash-cols { grid-template-columns:minmax(0,1.4fr) minmax(280px,1fr); } .notes-hub #memoPanel,.notes-hub #callNotesPanel,.main-scroll:has(#knowledgeBlock.hidden) .notes-hub #memoPanel,.main-scroll:has(#knowledgeBlock.hidden) .notes-hub #callNotesPanel { padding:16px; } }
 @media(max-width:760px) { .main-scroll:has(#knowledgeBlock.hidden) .dash-cols { grid-template-columns:minmax(0,1fr); grid-template-rows:560px 520px; grid-template-areas:'todo' 'notes'; overflow:auto; } .shortcut-band { grid-template-columns:minmax(0,1fr); row-gap:4px; } .favorites-heading { grid-column:1; } .shortcut-grid { grid-column:1; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); } .shortcut,.shortcut:nth-child(even),.shortcut.add { height:42px; min-height:42px; border:0 !important; width:100%; } .shortcut:nth-child(odd) { border:0; } .notes-hub { grid-template-rows:minmax(280px,1fr) minmax(180px,.7fr); } .workspace[data-view='할 일'] .main-scroll:has(#knowledgeBlock.hidden) .dash-cols { grid-template-rows:minmax(500px,1fr); } }
+
+/* Clear glass inside the retained iPad frame. */
+body,body:not(.overlay-mode) { background:radial-gradient(ellipse at 12% 12%,#c9dcf4,transparent 58%),radial-gradient(ellipse at 90% 85%,#d6d2ec,transparent 58%),#e8edf6; }
+.workspace { background:radial-gradient(ellipse at 0% 35%,rgba(153,194,236,.65),transparent 55%),radial-gradient(ellipse at 95% 90%,rgba(184,176,224,.6),transparent 56%),linear-gradient(135deg,#edf5ff,#f7f9ff 48%,#e6effb); box-shadow:0 24px 65px rgba(34,52,88,.15),inset 0 0 0 2px rgba(255,255,255,.85); }
+.main,.main-scroll { background:transparent; }
+.topnav { background:rgba(255,255,255,.3); backdrop-filter:blur(22px); }
+.topbar { background:rgba(255,255,255,.47); border:1px solid rgba(255,255,255,.9); box-shadow:0 5px 20px rgba(48,82,122,.035),inset 0 1px #fff; backdrop-filter:blur(22px); }
+.notes-hub,#todayPanel,.block,.page-card { background:rgba(255,255,255,.39) !important; border:1px solid rgba(255,255,255,.95) !important; box-shadow:0 8px 30px rgba(49,75,116,.055),inset 0 1px rgba(255,255,255,.95) !important; backdrop-filter:blur(24px) saturate(140%); }
+.notes-hub { display:block; }
+.notes-hub #callNotesPanel { display:none !important; }
+.notes-hub #memoPanel,.main-scroll:has(#knowledgeBlock.hidden) .notes-hub #memoPanel { display:grid; grid-template-rows:auto minmax(0,1fr) auto; padding:22px; gap:16px; background:transparent !important; }
+.notes-hub .memo-head { display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:8px; }
+.unified-memo-caption { color:#526984; font-size:15px; }
+.notes-hub #memoPanel .memo-note-shell { background:rgba(255,255,255,.24); border:1px solid rgba(255,255,255,.85); box-shadow:inset 0 1px 7px rgba(61,95,140,.035); min-height:100px; }
+.notes-hub #memoPanel #memoNote { padding:16px; font-size:17px; line-height:1.85; color:#233a54; background:transparent; }
+.notes-hub #memoPanel #memoNote::placeholder { color:#647993; }
+.notes-hub #memoPanel .memo-tools { display:flex; flex-wrap:wrap; }
+.notes-hub #memoPanel .memo-tools button,.notes-hub #memoPanel .memo-tools label { background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.95); color:#354f70; box-shadow:none; }
+.todo-view-tabs,.todo-list-search,.page-search { background:rgba(255,255,255,.38) !important; border:1px solid rgba(255,255,255,.65); }
+.shortcut-band { padding:14px 0 4px; }
+.shortcut-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:9px; }
+.shortcut,.shortcut:nth-child(even),.shortcut.add { width:100%; height:48px; min-height:48px; background:rgba(255,255,255,.51); border:1px solid rgba(255,255,255,.95) !important; border-radius:11px; box-shadow:0 3px 10px rgba(49,75,116,.035); backdrop-filter:blur(18px); }
+.shortcut:nth-child(even) { background:rgba(224,235,251,.49); border-color:rgba(255,255,255,.96) !important; }
+.shortcut a { height:48px; padding:10px 31px 10px 14px; border:0; }
+.shortcut a b,.shortcut:nth-child(even) a b { color:#304967; font-weight:600 !important; }
+.shortcut:hover,.shortcut:nth-child(even):hover { background:rgba(255,255,255,.82); box-shadow:0 5px 14px rgba(49,75,116,.08); }
+.shortcut:hover a { border:0; }
+.shortcut.add { justify-content:center; color:#526c8a; padding:10px; }
+.shortcut .shortcut-more { opacity:.75; color:#536d8b; }
+.shortcut-notice { background:rgba(255,255,255,.23); border-color:rgba(255,255,255,.6); }
+.favorites-heading { color:#415c7a; }
+@media(min-width:1200px) { .shortcut-grid { grid-template-columns:repeat(8,minmax(0,1fr)); } }
+@media(max-width:760px) { .shortcut-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .notes-hub #memoPanel,.main-scroll:has(#knowledgeBlock.hidden) .notes-hub #memoPanel { padding:18px; } }
