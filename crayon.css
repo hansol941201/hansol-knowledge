@@ -1121,3 +1121,44 @@ body,body:not(.overlay-mode) { background:linear-gradient(145deg,#edf0f4,#e1e4ea
 .todo-pagination { color:#677b98; }
 .page-card footer button,.page-card .card-act { color:#526e94; }
 @media(max-width:760px) { .topnav .navigation-row .top-nav { gap:6px; } .topnav .top-item,.topnav .top-item:nth-of-type(even),.topnav .top-item:first-of-type { margin:7px 0 0; padding:9px 13px; height:45px; min-height:45px; border-radius:3px 3px 0 0; } .topnav .top-item.active,.topnav .top-item.active:hover,.topnav .top-item.active:first-of-type { margin:0; padding:10px 14px; height:52px; min-height:52px; border-radius:3px 3px 0 0; } .shortcut-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0; padding:5px; } .shortcut,.shortcut:nth-child(even),.shortcut.add { width:100%; min-height:46px; height:46px; border:0; } .shortcut:nth-child(odd) { border-right:1px solid #e0e5ed; } .shortcut { border-bottom:1px solid #eef1f5 !important; } .shortcut.add { margin:0; } }
+
+/* One integrated notes surface, with both original editors preserved. */
+.main-scroll:has(#knowledgeBlock.hidden) .dash-cols { grid-template-columns:minmax(0,1.7fr) minmax(330px,1fr); grid-template-rows:minmax(0,1fr); grid-template-areas:'todo notes'; gap:18px; }
+.notes-hub { grid-area:notes; min-width:0; min-height:0; display:grid; grid-template-rows:minmax(0,1.15fr) minmax(0,.8fr); overflow:hidden; background:#fff; border:1px solid #e0e5ec; border-radius:19px; box-shadow:0 4px 18px rgba(51,68,93,.035); }
+.notes-hub #memoPanel,.notes-hub #callNotesPanel,.main-scroll:has(#knowledgeBlock.hidden) .notes-hub #memoPanel,.main-scroll:has(#knowledgeBlock.hidden) .notes-hub #callNotesPanel { grid-area:auto; height:100%; min-height:0; max-height:none; background:transparent; border:0; border-radius:0; box-shadow:none; padding:18px 20px; overflow:auto; }
+.notes-hub #memoPanel { display:grid; grid-template-rows:auto minmax(65px,1fr) auto; gap:12px; }
+.notes-hub #callNotesPanel { display:grid; grid-template-rows:auto minmax(0,1fr); border-top:1px solid #e8edf3 !important; gap:8px; }
+.notes-hub .memo-head { margin:0; padding-bottom:10px; border-bottom:0 !important; }
+.notes-hub #memoPanel .memo-note-shell { min-height:65px; background:#f9fafc; border:1px solid #e8edf4; border-radius:10px; }
+.notes-hub #memoPanel #memoNote { height:100%; min-height:0; padding:12px; }
+.notes-hub #callNotesPanel #scratchNote { width:100%; min-height:0; height:100%; padding:4px 0; resize:none; }
+.notes-hub #memoPanel .memo-tools { gap:7px; }
+.notes-hub #memoPanel .memo-tools button,.notes-hub #memoPanel .memo-tools label { padding:7px 10px; border-radius:8px; }
+.workspace[data-view='할 일'] #notesHub { display:none; }
+.workspace[data-view='할 일'] .main-scroll:has(#knowledgeBlock.hidden) .dash-cols { grid-template-areas:'todo'; grid-template-columns:minmax(0,1fr); }
+
+/* Refined tab treatment: charcoal-navy type, quiet borders, clear selected state. */
+.topnav { background:linear-gradient(180deg,#fbfcfe,#f4f6f9); }
+.topnav .navigation-row .top-nav { gap:8px; border-bottom:1px solid #c5cedc; }
+.topnav .top-item,.topnav .top-item:nth-of-type(even),.topnav .top-item:first-of-type { color:#53647c; background:#edf1f6; border:1px solid #d0d8e4; border-bottom:0; border-radius:5px 5px 0 0; font-weight:500 !important; box-shadow:inset 0 1px rgba(255,255,255,.9); }
+.topnav .top-item:hover { color:#253e60; background:#e4ebf5; border-color:#a8bad3; }
+.topnav .top-item.active,.topnav .top-item.active:hover,.topnav .top-item.active:first-of-type { color:#fff; background:linear-gradient(145deg,#405772,#293e58); border-color:#344a65; border-top:3px solid #8ea4c1; border-bottom:0; border-radius:5px 5px 0 0; font-weight:600 !important; box-shadow:0 -2px 7px rgba(39,59,86,.06); }
+
+/* Favorites as a restrained bookmarks row, with no card clutter. */
+.shortcut-band { display:grid; grid-template-columns:88px minmax(0,1fr); align-items:center; column-gap:12px; row-gap:8px; }
+.shortcut-notice { grid-column:1/-1; margin:0 0 2px; }
+.favorites-heading { grid-column:1; margin:0; color:#718098; font-size:15px; font-weight:500 !important; }
+.shortcut-grid { grid-column:2; display:flex; flex-wrap:wrap; gap:2px 5px; padding:0; border:0; border-radius:0; background:transparent; box-shadow:none; }
+.shortcut,.shortcut:nth-child(even),.shortcut.add { flex:1 1 108px; width:auto; min-width:0; min-height:42px; height:42px; border:0; border-radius:6px; background:transparent; box-shadow:none; }
+.shortcut:not(.add) { border:0; }
+.shortcut a { display:flex; align-items:center; height:42px; padding:8px 28px 8px 9px; border-bottom:2px solid transparent; border-radius:5px; }
+.shortcut a b,.shortcut:nth-child(even) a b { color:#405675; font-weight:500 !important; letter-spacing:-.25px; }
+.shortcut:hover,.shortcut:nth-child(even):hover { background:#e9eef6; border:0; box-shadow:none; }
+.shortcut:hover a { border-bottom-color:#829abc; }
+.shortcut .shortcut-more { right:2px; width:23px; height:26px; border:0; background:transparent; color:#8395af; opacity:.55; }
+.shortcut:hover .shortcut-more,.shortcut:focus-within .shortcut-more { opacity:1; }
+.shortcut.add { flex:0 1 132px; display:flex; align-items:center; justify-content:flex-start; gap:6px; margin:0; padding:8px 9px; background:transparent; border:0; border-radius:6px; color:#8d9cb1; }
+.shortcut.add:hover { background:#e9eef6; color:#536f96; }
+.shortcut.add b { font-weight:400 !important; }
+@media(min-width:761px) and (max-width:1100px) { .main-scroll:has(#knowledgeBlock.hidden) .dash-cols { grid-template-columns:minmax(0,1.4fr) minmax(280px,1fr); } .notes-hub #memoPanel,.notes-hub #callNotesPanel,.main-scroll:has(#knowledgeBlock.hidden) .notes-hub #memoPanel,.main-scroll:has(#knowledgeBlock.hidden) .notes-hub #callNotesPanel { padding:16px; } }
+@media(max-width:760px) { .main-scroll:has(#knowledgeBlock.hidden) .dash-cols { grid-template-columns:minmax(0,1fr); grid-template-rows:560px 520px; grid-template-areas:'todo' 'notes'; overflow:auto; } .shortcut-band { grid-template-columns:minmax(0,1fr); row-gap:4px; } .favorites-heading { grid-column:1; } .shortcut-grid { grid-column:1; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); } .shortcut,.shortcut:nth-child(even),.shortcut.add { height:42px; min-height:42px; border:0 !important; width:100%; } .shortcut:nth-child(odd) { border:0; } .notes-hub { grid-template-rows:minmax(280px,1fr) minmax(180px,.7fr); } .workspace[data-view='할 일'] .main-scroll:has(#knowledgeBlock.hidden) .dash-cols { grid-template-rows:minmax(500px,1fr); } }
