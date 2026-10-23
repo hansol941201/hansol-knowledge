@@ -1242,3 +1242,55 @@ body,body:not(.overlay-mode) { background:radial-gradient(ellipse at 12% 12%,#c9
 .todo-list-search { background:rgba(255,255,255,.16) !important; }
 @media(max-width:760px) { .topbar .search-wrap { flex:1; width:auto; max-width:calc(100% - 54px); } .shortcut-grid { display:flex; } .shortcut,.shortcut:nth-child(even),.shortcut.add { width:auto; min-width:100px; height:36px; min-height:36px; } .workspace[data-view='특허'] .page-grid,.workspace[data-view='협력업체'] .page-grid,.workspace[data-view='연락처'] .page-grid { grid-template-columns:repeat(auto-fill,minmax(min(100%,240px),1fr)); } }
 .workspace .page-card footer button,.workspace .page-card .card-act { font-size:13px !important; line-height:1.4 !important; min-height:29px; padding:4px 8px; }
+
+/* User's water wallpaper, visible through smoked glass. */
+html { background:#33474e; }
+body,body:not(.overlay-mode) { background:linear-gradient(rgba(12,29,38,.18),rgba(12,29,38,.18)),url('theme-art/water-light.jpg') center center/cover fixed no-repeat; color:#f5f8fb; }
+.workspace { background:rgba(18,34,44,.08); border-color:#202a30; box-shadow:0 24px 65px rgba(0,0,0,.3),inset 0 0 0 1px rgba(255,255,255,.6); }
+.topnav,.topbar { background:rgba(24,40,49,.14); backdrop-filter:blur(10px); }
+.notes-hub,#todayPanel,.block,.page-card { background:rgba(22,38,48,.2) !important; backdrop-filter:blur(12px) saturate(110%); border-color:rgba(255,255,255,.4) !important; box-shadow:0 8px 25px rgba(0,0,0,.09),inset 0 1px rgba(255,255,255,.22) !important; }
+.workspace :is(h1,h2,h3,p,small,time,label,dt,dd,.card-kind,.card-time,.todo-line-text,.todo-mark,.todo-empty,.page-empty,.todo-count,.unified-memo-caption,.block-head p,.page-categories button,.todo-pagination,.shortcut-notice,.shortcut a b,.shortcut.add,.business-details,.sync-state) { color:#f2f6fa !important; }
+.workspace .b2b-brand { color:#fff !important; }
+.workspace input,.workspace textarea { color:#fff !important; background:transparent; caret-color:#fff; }
+.workspace input::placeholder,.workspace textarea::placeholder { color:rgba(244,249,255,.76) !important; font-weight:400 !important; }
+.topnav .top-item,.topnav .top-item:nth-of-type(even),.topnav .top-item:first-of-type { background:rgba(255,255,255,.08); color:#f1f6fb; border-color:rgba(255,255,255,.35); }
+.topnav .top-item.active,.topnav .top-item.active:hover { background:rgba(10,26,40,.65); color:#fff; }
+.shortcut,.shortcut:nth-child(even),.shortcut.add { background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.48) !important; }
+.shortcut:hover,.shortcut:nth-child(even):hover { background:rgba(255,255,255,.24); }
+.workspace .shortcut .shortcut-more { color:#e2edf8; }
+.workspace .page-card footer button,.workspace .page-card .card-act,.notes-hub #memoPanel .memo-tools button { color:#f3f8fd; background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.3); }
+.workspace .page-categories button { background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.3); }
+.todo-view-tabs,.todo-list-search,.topbar .page-search { background:rgba(255,255,255,.08) !important; }
+.todo-view-tabs button { color:#e9f2fc; }
+.todo-line { border-bottom-color:rgba(255,255,255,.2); }
+.todo-star { color:#d4e7ff; }
+.todo-box { border-color:#d9e8f4; }
+.notes-hub #memoPanel .memo-note-shell { background:rgba(255,255,255,.035); border-color:rgba(255,255,255,.35); }
+.todo-head { display:flex; flex-wrap:wrap; align-items:center; gap:12px; }
+.todo-head h2 { flex:none; margin:0; }
+.todo-quick-entry { display:flex; align-items:center; gap:8px; flex:1; min-width:170px; max-width:380px; padding:8px 11px; border:1px solid rgba(255,255,255,.45); border-radius:10px; background:rgba(255,255,255,.1); }
+.todo-quick-entry > span { font-size:21px; line-height:1; }
+.todo-quick-entry input { border:0; outline:none; width:100%; min-width:0; padding:0; box-shadow:none; }
+.todo-quick-entry:focus-within { border-color:#d6e9ff; box-shadow:0 0 0 3px rgba(204,229,255,.13); }
+.todo-head .todo-count { margin-left:auto; }
+.todo-quick-choice { margin:0 0 14px; padding:16px; border:1px solid rgba(255,255,255,.6); border-radius:13px; background:rgba(22,41,55,.83); box-shadow:0 8px 25px rgba(0,0,0,.15); }
+.todo-quick-choice strong { color:#fff; font-size:17px; }
+.todo-quick-choice p { margin:5px 0 12px; white-space:pre-wrap; overflow-wrap:anywhere; }
+.todo-quick-options { display:flex; flex-wrap:wrap; gap:8px; }
+.todo-quick-options button { flex:1; min-width:110px; display:flex; flex-direction:column; align-items:flex-start; gap:3px; padding:11px 13px; border:1px solid rgba(255,255,255,.35); border-radius:9px; background:rgba(255,255,255,.12); color:#fff; }
+.todo-quick-options button:hover { background:rgba(255,255,255,.25); }
+.todo-quick-options button span { font-size:12px; color:#d2e0ed; }
+.todo-quick-options [data-quick-cancel] { flex:0 1 auto; min-width:56px; justify-content:center; align-items:center; background:transparent; }
+@media(max-width:760px) { body,body:not(.overlay-mode) { background-attachment:scroll; } .todo-quick-entry { order:3; flex-basis:100%; max-width:none; } }
+/* Muted smoke, fine highlights and readable secondary controls. */
+.workspace { background:linear-gradient(160deg,rgba(29,40,45,.18),rgba(13,23,31,.28)); }
+.notes-hub,#todayPanel,.page-card { border-color:rgba(255,255,255,.3) !important; box-shadow:0 12px 30px rgba(0,0,0,.12),inset 0 1px rgba(255,255,255,.12) !important; }
+.topbar { border-color:rgba(255,255,255,.3); }
+.workspace .sync-state,.workspace .sync-state[data-state=offline],#todayPanel .todo-count,#pageCount { background:rgba(29,44,53,.45) !important; border-color:rgba(255,255,255,.28); color:#eef5fa !important; }
+.workspace .top-mini button,.workspace .top-actions button,.workspace .icon-btn { color:#e4edf6; }
+.workspace .todo-star { color:#e0efff; }
+.workspace .todo-line.star .todo-mark { background:rgba(217,187,115,.2); color:#fff !important; }
+dialog,.edit-box,#phoneArchiveDialog,#phoneArchiveDialog .phone-archive { background:rgba(25,39,48,.94) !important; color:#f3f7fa; border-color:rgba(255,255,255,.3); backdrop-filter:blur(24px); }
+dialog :is(h2,h3,p,small,label,time,button),.edit-box :is(h2,h3,p,small,label) { color:#eef5fb !important; }
+dialog :is(input,textarea,select),.edit-box :is(input,textarea,select) { background:rgba(255,255,255,.09); color:#f3f7fb !important; border-color:rgba(255,255,255,.25); }
+#phoneArchiveDialog button { background:rgba(255,255,255,.1) !important; color:#f3f7fa !important; }

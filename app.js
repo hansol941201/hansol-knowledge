@@ -610,6 +610,8 @@ function doneTodos() {
 let todoDisplayMode = 'all';
 let todoDisplayQuery = '';
 let todoDisplayPage = 1;
+let todoQuickDraft = '';
+let todoQuickChoosing = false;
 
 function renderTodos() {
   const panel = $('#todayPanel');
@@ -639,8 +641,10 @@ function renderTodos() {
   panel.innerHTML = `
     <div class="todo-head">
       <h2>할 일 목록</h2>
+      <label class="todo-quick-entry"><span aria-hidden="true">+</span><input id="todoQuickInput" autocomplete="off" aria-label="할 일 빠른 추가" placeholder="할 일 입력 후 Enter" value="${escapeHtml(todoQuickDraft)}" /></label>
       <span class="todo-count">미완료 ${allActive.length}개</span>
     </div>
+    ${todoQuickChoosing ? `<div class="todo-quick-choice" role="dialog" aria-label="할 일 종류 선택"><div><strong>어떤 할 일인가요?</strong><p>${escapeHtml(todoQuickDraft)}</p></div><div class="todo-quick-options"><button type="button" data-quick-kind="today">오늘<span>오늘 날짜로 등록</span></button><button type="button" data-quick-kind="star">중요<span>별표로 우선 표시</span></button><button type="button" data-quick-kind="all">일반 할 일<span>날짜 없이 등록</span></button><button type="button" data-quick-cancel>취소</button></div></div>` : ''}
     <div class="todo-controls">
       <div class="todo-view-tabs" aria-label="할 일 분류">${modes.map(([key, label, rows]) => `<button type="button" data-todo-view="${key}" class="${key === todoDisplayMode ? 'active' : ''}" aria-pressed="${key === todoDisplayMode}">${label}<span>${rows.length}</span></button>`).join('')}</div>
       <label class="todo-list-search"><span>검색</span><input id="todoListSearch" type="search" autocomplete="off" aria-label="할 일 목록 검색" placeholder="할 일 내용이나 날짜 검색" value="${escapeHtml(todoDisplayQuery)}" /></label>
@@ -652,6 +656,38 @@ function renderTodos() {
       <span>${matching.length ? (todoDisplayPage - 1) * pageSize + 1 : 0}–${Math.min(todoDisplayPage * pageSize, matching.length)} / ${matching.length}개</span>
       <div><button type="button" data-todo-prev ${todoDisplayPage === 1 ? 'disabled' : ''}>이전</button><span>${todoDisplayPage} / ${pages}</span><button type="button" data-todo-next ${todoDisplayPage === pages ? 'disabled' : ''}>다음</button></div>
     </div>`;
+  const quickInput = panel.querySelector('#todoQuickInput');
+  quickInput.oninput = () => { todoQuickDraft = quickInput.value; };
+  quickInput.onkeydown = event => {
+    if (event.key === 'Escape' && todoQuickChoosing) {
+      todoQuickChoosing = false; renderTodos(); panel.querySelector('#todoQuickInput').focus(); return;
+    }
+    if (event.key !== 'Enter' || event.isComposing || event.keyCode === 229) return;
+    event.preventDefault();
+    todoQuickDraft = quickInput.value.trim();
+    if (!todoQuickDraft) return;
+    todoQuickChoosing = true;
+    renderTodos();
+    panel.querySelector('[data-quick-kind]').focus();
+  };
+  panel.querySelectorAll('[data-quick-kind]').forEach(button => {
+    button.onclick = () => {
+      const kind = button.dataset.quickKind;
+      const todo = createTodo(todoQuickDraft);
+      if (!todo) return;
+      todo.date = kind === 'today' ? todayKey() : '';
+      todo.starred = kind === 'star';
+      todoQuickDraft = ''; todoQuickChoosing = false;
+      todoDisplayMode = kind; todoDisplayQuery = ''; todoDisplayPage = 1;
+      saveTodos(); renderTodos(); renderLibrary();
+      showToast('할 일을 추가했습니다');
+      panel.querySelector('#todoQuickInput').focus();
+    };
+  });
+  const quickCancel = panel.querySelector('[data-quick-cancel]');
+  if (quickCancel) quickCancel.onclick = () => {
+    todoQuickChoosing = false; renderTodos(); panel.querySelector('#todoQuickInput').focus();
+  };
   panel.querySelectorAll('[data-todo-view]').forEach(button => {
     button.onclick = () => { todoDisplayMode = button.dataset.todoView; todoDisplayPage = 1; renderTodos(); };
   });
