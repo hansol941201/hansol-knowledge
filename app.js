@@ -3275,9 +3275,9 @@ $('#syncForm').addEventListener('submit', async event => {
   finally { button.disabled = false; }
 });
 
-// 기한이 지난 미완료 항목도 완료할 때까지 유지한다. 날짜는 PC의 현지 날짜 기준.
+// PC의 현지 날짜와 같은 미완료 업무만 알린다. 지난 업무는 목록에만 남긴다.
 function renderTodoReminders() {
-  const due = activeTodos().filter(todo => todo.date && todo.date <= todayKey());
+  const due = activeTodos().filter(todo => todo.date === todayKey());
   if (window.knowledgeAPI?.updateReminders) {
     window.knowledgeAPI.updateReminders(due.map(todo => ({ id: todo.id, text: todo.text, date: todo.date })));
     return;
@@ -3293,7 +3293,7 @@ function renderTodoReminders() {
   const signature = JSON.stringify(due.map(todo => [todo.id, todo.text, todo.date]));
   if (panel.dataset.signature === signature) return;
   panel.dataset.signature = signature;
-  panel.innerHTML = `<h2>할 일 알림 · ${due.length}개</h2><small>완료 체크 전까지 유지됩니다.</small>` + due.map(todo =>
+  panel.innerHTML = `<h2>오늘 할 일 · ${due.length}개</h2><small>오늘 날짜의 미완료 업무만 표시합니다.</small>` + due.map(todo =>
     `<label><input type="checkbox" data-reminder-id="${escapeHtml(todo.id)}" aria-label="${escapeHtml(todo.text)} 완료" /><span>${escapeHtml(todo.text)}<time>${escapeHtml(todo.date)}</time></span></label>`).join('');
   panel.querySelectorAll('[data-reminder-id]').forEach(check => {
     check.onchange = () => completeReminder(check.dataset.reminderId);
