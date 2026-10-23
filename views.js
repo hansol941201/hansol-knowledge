@@ -31,7 +31,6 @@
       <div class="memo-character" aria-hidden="true"><img src="theme-art/potato-couple-transparent.png" alt="" /></div>
     </div>
     <div class="memo-tools">
-      <label class="memo-file">📷 사진/파일 첨부<input id="memoFile" type="file" accept="image/*" hidden /></label>
       <button type="button" id="memoQuickAdd" class="memo-add-btn">메모 저장</button>
       <button type="button" class="memo-add-btn" style="margin-left:auto" onclick="document.getElementById('phoneArchiveDialog').showModal()">메모 보관함 열기</button>
     </div>

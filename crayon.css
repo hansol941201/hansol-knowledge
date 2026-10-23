@@ -1195,3 +1195,50 @@ body,body:not(.overlay-mode) { background:radial-gradient(ellipse at 12% 12%,#c9
 .favorites-heading { color:#415c7a; }
 @media(min-width:1200px) { .shortcut-grid { grid-template-columns:repeat(8,minmax(0,1fr)); } }
 @media(max-width:760px) { .shortcut-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .notes-hub #memoPanel,.main-scroll:has(#knowledgeBlock.hidden) .notes-hub #memoPanel { padding:18px; } }
+
+/* Compact controls and clearer content on a more transparent glass surface. */
+.topnav { background:rgba(255,255,255,.1); }
+.topbar { background:rgba(255,255,255,.2); }
+.notes-hub,#todayPanel,.block,.page-card { background:rgba(255,255,255,.16) !important; backdrop-filter:blur(16px) saturate(135%); border-color:rgba(255,255,255,.8) !important; }
+.notes-hub #memoPanel .memo-note-shell { background:rgba(255,255,255,.08); }
+.topnav .top-item,.topnav .top-item:nth-of-type(even),.topnav .top-item:first-of-type { background:rgba(255,255,255,.2); color:#344c69; }
+.topnav .top-item.active,.topnav .top-item.active:hover { background:rgba(39,61,89,.84); color:#fff; }
+.topbar .search-wrap { flex:0 1 50%; width:50%; max-width:620px; min-width:0; }
+.topbar .page-search { width:100%; background:rgba(255,255,255,.18) !important; }
+.topbar .page-search input { width:100%; min-width:0; }
+#pageAdd { display:grid; place-items:center; width:42px; height:42px; min-width:42px; padding:0; border-radius:13px; margin-left:auto; }
+#pageAdd svg { width:22px; height:22px; }
+.shortcut-band { display:block; padding:9px 0 2px; }
+.shortcut-notice { margin-bottom:9px; background:rgba(255,255,255,.1); }
+.shortcut-grid { display:flex; flex-wrap:wrap; gap:7px; }
+.shortcut,.shortcut:nth-child(even),.shortcut.add { flex:0 1 auto; width:auto; min-width:105px; height:36px; min-height:36px; border-radius:9px; background:rgba(255,255,255,.22); }
+.shortcut:nth-child(even) { background:rgba(207,224,247,.18); }
+.shortcut a { height:36px; padding:6px 30px 6px 12px; }
+.shortcut a b,.shortcut:nth-child(even) a b { font-size:15px !important; font-weight:500 !important; }
+.shortcut.add { padding:6px 11px; font-size:14px; }
+.shortcut .shortcut-more { height:24px; width:22px; }
+.workspace[data-view='특허'] .page-grid,.workspace[data-view='협력업체'] .page-grid,.workspace[data-view='연락처'] .page-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,270px),1fr)); gap:12px; align-items:start; }
+.workspace[data-view='특허'] .page-card,.page-card.business-card,.workspace[data-view='연락처'] .page-card.business-card,.workspace[data-view='협력업체'] .page-card.business-card { min-height:0; height:auto; padding:17px; border-radius:14px; }
+.page-card.business-card .card-kind { margin-bottom:10px; }
+.page-card.business-card h3,.workspace[data-view='연락처'] .page-card.business-card h3,.workspace[data-view='협력업체'] .page-card.business-card h3 { font-size:19px !important; margin-bottom:9px; }
+.page-card.business-card p,.workspace[data-view='연락처'] .page-card.business-card p,.workspace[data-view='협력업체'] .page-card.business-card p { margin-bottom:12px; line-height:1.65 !important; }
+.page-card.business-card::after { top:18px; right:17px; font-size:12px; }
+.page-card.business-card .business-details { gap:5px; }
+.page-card.business-card footer,.workspace[data-view='연락처'] .page-card.business-card footer,.workspace[data-view='협력업체'] .page-card.business-card footer { padding-top:10px; gap:5px; }
+.page-card footer { gap:5px; flex-wrap:wrap; }
+.page-card footer button,.page-card .card-act,.page-card.business-card footer button { display:inline-flex; align-items:center; justify-content:center; min-height:29px; height:auto; padding:4px 8px; font-size:13px !important; line-height:1.4 !important; border-radius:7px; background:rgba(255,255,255,.24); border:1px solid rgba(255,255,255,.75); color:#365270; }
+.page-card footer button:hover { background:rgba(255,255,255,.65); }
+#todayPanel h2 { color:#183451; font-weight:700 !important; }
+.todo-view-tabs { background:rgba(255,255,255,.16) !important; padding:5px; gap:4px; }
+.todo-view-tabs button { color:#3c5675; font-size:15px !important; font-weight:600 !important; padding:8px 10px; }
+.todo-view-tabs button.active,.todo-view-tabs button[aria-pressed='true'] { background:#355879 !important; color:#fff !important; box-shadow:0 3px 8px rgba(39,66,100,.12); }
+.todo-view-tabs button[aria-pressed='true'] span { color:#fff; }
+.todo-line { min-height:52px; padding:11px 8px; border-bottom:1px solid rgba(72,105,145,.17); }
+.todo-line-text,.todo-mark { color:#1c3653; font-size:17px !important; font-weight:500 !important; line-height:1.6 !important; }
+.todo-line.star { background:rgba(255,255,255,.27); border-radius:8px; }
+.todo-line.done .todo-line-text { color:#60748a; }
+.todo-star { color:#496d96; }
+.todo-box { border-color:#6485a9; }
+.todo-list-search { background:rgba(255,255,255,.16) !important; }
+@media(max-width:760px) { .topbar .search-wrap { flex:1; width:auto; max-width:calc(100% - 54px); } .shortcut-grid { display:flex; } .shortcut,.shortcut:nth-child(even),.shortcut.add { width:auto; min-width:100px; height:36px; min-height:36px; } .workspace[data-view='특허'] .page-grid,.workspace[data-view='협력업체'] .page-grid,.workspace[data-view='연락처'] .page-grid { grid-template-columns:repeat(auto-fill,minmax(min(100%,240px),1fr)); } }
+.workspace .page-card footer button,.workspace .page-card .card-act { font-size:13px !important; line-height:1.4 !important; min-height:29px; padding:4px 8px; }

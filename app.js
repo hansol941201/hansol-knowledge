@@ -647,7 +647,7 @@ function renderTodos() {
     </div>
     <div class="todo-results">${list.length
       ? (todoDisplayMode === 'done' ? VIEWS.todoDoneSimpleList(list) : VIEWS.todoSimpleList(list))
-      : `<div class="todo-empty">${allActive.length || todoDisplayMode === 'done' ? '해당하는 할 일이 없습니다.' : '위의 지식 추가에서 할 일을 등록하세요.'}</div>`}</div>
+      : `<div class="todo-empty">${allActive.length || todoDisplayMode === 'done' ? '해당하는 할 일이 없습니다.' : '위의 + 버튼에서 할 일을 등록하세요.'}</div>`}</div>
     <div class="todo-pagination">
       <span>${matching.length ? (todoDisplayPage - 1) * pageSize + 1 : 0}–${Math.min(todoDisplayPage * pageSize, matching.length)} / ${matching.length}개</span>
       <div><button type="button" data-todo-prev ${todoDisplayPage === 1 ? 'disabled' : ''}>이전</button><span>${todoDisplayPage} / ${pages}</span><button type="button" data-todo-next ${todoDisplayPage === pages ? 'disabled' : ''}>다음</button></div>
@@ -1456,15 +1456,7 @@ function renderMemoPanel() {
   note.addEventListener('blur', saveDraft);
   renderCallNotes();
 
-  // 첨부한 사진은 파일 이름만 적어 둔다(자료를 통째로 넣지 않는다).
-  $('#memoFile').addEventListener('change', event => {
-    const file = event.target.files && event.target.files[0];
-    if (!file) return;
-    note.value = `${note.value}${note.value ? '\n' : ''}📷 ${file.name}`;
-    saveDraft();
-    event.target.value = '';
-    showToast('사진 이름을 메모에 적었습니다');
-  });
+
 }
 
 
