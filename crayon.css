@@ -708,3 +708,65 @@ body,body:not(.overlay-mode) {
 .page-card footer button,.memo-file,.cal-tools button,#todayPanel .todo-tab { background:rgba(255,255,255,.015); border-color:rgba(225,243,255,.22); }
 .page-card:hover { border-color:rgba(234,246,255,.48); box-shadow:inset 0 1px rgba(255,255,255,.14),0 10px 32px rgba(0,0,0,.10); }
 .edit-box,.search-preview,dialog { background:rgba(16,29,48,.64); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border-color:rgba(229,243,255,.32); }
+
+/* Unified readable typography. No content or records are changed. */
+body { font-size:16px; line-height:1.65; }
+body,button,input,textarea,select,option { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Apple SD Gothic Neo','Malgun Gothic',sans-serif !important; }
+.workspace :is(button,input,textarea,select,option,p,small,time,label,dt,dd,.card-kind,.card-time,.todo-line-text,.todo-empty,.page-empty,.nav-group-label,.sync-state,.schedule-date,.schedule-body b,.schedule-body small,.shortcut a b,.shortcut.add,.shortcut-notice,.memo-file,.todo-count),
+.edit-box :is(button,input,textarea,select,option,p,small,label),
+.messenger :is(button,input,textarea,p,small,.bubble,.label,.knowledge-item b,.knowledge-item span),
+dialog :is(button,input,textarea,select,p,small,label) { font-size:16px !important; line-height:1.6 !important; }
+.workspace :is(h2,h3),dialog :is(h2,h3),.edit-box > header strong { font-size:20px !important; line-height:1.5 !important; font-weight:600 !important; }
+#pageHeading { font-size:26px !important; }
+.topnav .top-item { min-height:46px; padding:10px 12px; gap:10px; }
+.nav-group-label { padding-top:20px; padding-bottom:8px; }
+.topnav .navigation-row .top-nav { scrollbar-width:thin; }
+.top-tools { gap:7px; }
+.sync-state { padding:7px 10px; }
+.topbar .page-search { min-height:50px; }
+.topbar .primary-btn { min-height:48px; }
+.shortcut,.shortcut.add { flex:0 0 108px; width:108px; height:114px; }
+.shortcut a b { white-space:normal; text-align:center; line-height:1.45 !important; }
+.shortcut-grid { gap:10px; }
+.memo-tools { flex-wrap:wrap; gap:8px; }
+.memo-add-btn,.memo-file { padding:10px 12px; }
+#memoPanel .memo-tools .memo-add-btn { margin-left:0 !important; }
+.page-categories button { padding:9px 14px; }
+.page-card { min-height:220px; }
+.page-card h3 { margin-top:0; }
+.page-card p { margin:10px 0 16px; }
+.page-card footer { gap:8px; }
+.page-card footer button { padding:8px 12px; min-height:42px; }
+#todayPanel .todo-line { padding:15px 2px; gap:10px; }
+#todayPanel .todo-line-text { line-height:1.75 !important; }
+#schedulePanel .schedule-row { grid-template-columns:64px minmax(0,1fr) 28px; }
+.workspace[data-view='연락처'] .page-card,.workspace[data-view='협력업체'] .page-card { grid-template-columns:100px minmax(160px,.9fr) minmax(190px,1.1fr); min-height:140px; gap:12px 18px; padding:20px; }
+.workspace[data-view='연락처'] .page-card footer,.workspace[data-view='협력업체'] .page-card footer { grid-column:2/-1; grid-row:2; justify-content:flex-start; flex-wrap:wrap; }
+.workspace[data-view='연락처'] .page-card .card-time { grid-column:2/-1; grid-row:3; }
+.workspace[data-view='연락처'] .page-card:has(.card-time) footer { grid-column:2/-1; grid-row:2; }
+@media(min-width:761px) and (max-width:1150px) {
+ .workspace[data-view='연락처'] .page-card,.workspace[data-view='협력업체'] .page-card { grid-template-columns:minmax(0,1fr) minmax(0,1fr); }
+ .workspace[data-view='연락처'] .page-card .card-kind,.workspace[data-view='협력업체'] .page-card .card-kind { grid-column:1/-1; }
+ .workspace[data-view='연락처'] .page-card footer,.workspace[data-view='협력업체'] .page-card footer,.workspace[data-view='연락처'] .page-card:has(.card-time) footer { grid-column:1/-1; grid-row:auto; }
+}
+@media(max-width:760px) {
+ .topnav .navigation-row .top-nav { grid-template-columns:repeat(2,minmax(0,1fr)); max-height:148px; }
+ .topnav .top-item { min-height:42px; padding:8px; gap:6px; }
+ .top-tools { flex-wrap:wrap; }
+ .sync-state { flex:1 0 100%; order:-1; }
+ .topbar { flex-wrap:wrap; }
+ .topbar .search-wrap { flex:1 0 100%; }
+ .topbar .primary-btn { margin-left:auto; }
+ .shortcut,.shortcut.add { flex:0 0 100px; width:100px; height:110px; }
+ .workspace[data-view='연락처'] .page-card,.workspace[data-view='협력업체'] .page-card { display:flex; min-height:0; padding:18px; }
+ .page-grid { grid-template-columns:minmax(0,1fr); }
+}
+#schedulePanel .block-head { flex-direction:column; align-items:flex-start; gap:12px; }
+#schedulePanel .cal-tools { display:flex; flex-wrap:wrap; gap:7px; width:100%; }
+#schedulePanel #crmMeetingConnect,#schedulePanel #scheduleAdd,#schedulePanel #schedulePast { width:auto; min-width:0; height:auto; padding:7px 9px; white-space:normal; }
+#schedulePanel #crmMeetingConnect::after,#schedulePanel #scheduleAdd::after { content:none; }
+#schedulePanel .todo-empty { font-size:16px !important; padding:8px 0; line-height:1.7 !important; }
+.shortcut.add span { font-size:16px !important; }
+.topnav .navigation-row .top-nav { gap:2px; }
+.topnav .top-item { min-height:40px; padding:6px 12px; }
+.nav-group-label { padding-top:12px; padding-bottom:5px; }
