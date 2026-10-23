@@ -364,3 +364,92 @@ input::placeholder, textarea::placeholder { font-weight: 600; }
 #app.messenger .quick-title strong { font-size: 15px; }
 #app.messenger .quick-add > input, #app.messenger .quick-add textarea, #app.messenger .quick-add select { font-size: 14px; }
 #app.messenger .quick-add > div:last-child button { font-size: 13px; }
+
+/* Professional glass theme. Presentation only; existing layout and data stay intact. */
+:root {
+ color-scheme: dark;
+ --bg:#0b1220; --card:#172235; --ink:#edf3fc; --ink-1:#edf3fc;
+ --ink-2:#b0bfd3; --ink-3:#91a3bb; --line:rgba(183,207,241,.16);
+ --line-soft:rgba(183,207,241,.09); --nav-line:var(--line);
+ --violet:#89b6ff; --violet-soft:rgba(87,147,244,.14); --violet-line:rgba(124,174,255,.3);
+ --nav-navy:#a5c8ff; --nav-text:#b0bfd3; --nav-soft:rgba(87,147,244,.14);
+ --shadow:0 12px 36px rgba(0,0,0,.15),inset 0 1px rgba(255,255,255,.04);
+ --shadow-hover:0 18px 44px rgba(0,0,0,.23);
+}
+html { background:#0b1220; }
+body { background:radial-gradient(ellipse at 12% 0%,rgba(49,99,167,.28),transparent 52%),radial-gradient(ellipse at 96% 80%,rgba(47,99,124,.18),transparent 50%),#0b1220; background-attachment:fixed; color:var(--ink); }
+body, body * { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Apple SD Gothic Neo','Malgun Gothic',sans-serif !important; font-weight:400 !important; }
+h1,h2,h3,strong,b,.primary-btn,.top-item.active { font-weight:600 !important; }
+.workspace::before,.header-check-art,.memo-character { display:none !important; }
+.today-panel::after,.page-card::after,.memo-head::after,.todo-head::after,.call-note::after,#todayPanel .todo-line::after,.schedule-panel .block-head::after,.topnav .top-item::after,.topbar .page-search::before { content:none !important; }
+.workspace,.main,.shortcut-band,.topbar,.main-scroll { background:transparent; }
+.topnav { height:auto; min-height:100px; grid-template-rows:30px 62px; background:rgba(17,28,46,.68); border-bottom:1px solid var(--line); backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px); }
+.navigation-row { gap:24px; }
+.hansol-story-logo { width:112px; height:55px; object-fit:contain; filter:grayscale(1) brightness(1.9); }
+.topnav .top-nav { padding:7px 0; gap:6px; }
+.topnav .top-item { height:40px; padding:0 17px; border:1px solid transparent; border-radius:10px; color:#b0bfd3; font-size:13px; text-decoration:none; }
+.topnav .top-item:hover { background:rgba(255,255,255,.05); color:#fff; }
+.topnav .top-item.active,.topnav .top-item.active:hover { color:#b7d4ff; border:1px solid rgba(132,180,255,.25); background:rgba(89,148,244,.14); text-decoration:none; }
+.top-mini,.sync-state { color:#a5b8d0; }
+.top-mini:hover { background:rgba(137,182,255,.12); color:#c8dfff; }
+.brand-avatar { border:1px solid var(--line); background:rgba(121,169,241,.12); color:#b9d5ff; }
+.shortcut,.shortcut.add { border:1px solid var(--line); border-radius:14px; background:rgba(25,40,63,.48); box-shadow:none; transform:none; }
+.shortcut:hover { transform:translateY(-2px); border-color:rgba(137,182,255,.4); }
+.shortcut-thumb,.shortcut:nth-child(n) .shortcut-thumb { border-color:var(--line); border-radius:10px; background:rgba(182,209,255,.08); }
+.character-icon { mix-blend-mode:normal; }
+.shortcut a b { color:#c0cde0; font-size:12px; }
+.topbar .page-search { border:1px solid var(--line); border-radius:12px; background:rgba(21,35,56,.65); padding:0 16px; color:#8cadd8; min-height:46px; }
+.topbar .page-search input { color:#edf3fc; font-size:14px; }
+.topbar .page-search input::placeholder { color:#93a6c0; opacity:1; }
+.topbar .page-search:focus-within { background:rgba(28,45,72,.85); border-color:#729fdf; box-shadow:0 0 0 3px rgba(114,159,223,.12); }
+.primary-btn,.memo-add-btn,.edit-box footer button[type=submit] { background:#3875cf; color:#fff; border:1px solid rgba(173,205,255,.25); border-radius:10px; font-size:13px; box-shadow:0 4px 16px rgba(29,84,166,.16); }
+.primary-btn:hover,.memo-add-btn:hover { background:#4585df; }
+.today-panel,#todayPanel,#callNotesPanel,#memoPanel,#schedulePanel,.page-card:nth-child(n) { background:linear-gradient(135deg,rgba(35,52,77,.65),rgba(19,32,52,.62)); background-image:linear-gradient(135deg,rgba(35,52,77,.65),rgba(19,32,52,.62)); border:1px solid var(--line); border-radius:18px; box-shadow:var(--shadow); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); }
+.memo-head,.todo-head,.schedule-panel .block-head { border-bottom:1px solid var(--line-soft); padding-bottom:14px; }
+#todayPanel .todo-head h2,#callNotesPanel h2,#memoPanel h2,#schedulePanel h2,.block-head h2 { color:#e4edfa; font-size:15px; letter-spacing:-.3px; }
+.memo-head small,.block-head p { color:#9aaec8; font-size:11px; }
+#todayPanel .todo-count,#todayPanel .todo-tab,.page-categories button,.cal-tools button,.memo-file { color:#b0c4e1; border:1px solid var(--line); background:rgba(155,188,239,.06); border-radius:8px; font-size:11px; }
+#todayPanel .todo-tab.active,#todayPanel .todo-tab.active span,.page-categories button.active { color:#bbd7ff; background:rgba(93,153,247,.16); border-color:rgba(137,182,255,.3); }
+#todayPanel .todo-line { border-bottom:1px solid var(--line-soft); padding:13px 2px; }
+#todayPanel .todo-line-text,.call-note p,.memory-item p { color:#dbe6f6; font-size:14px; line-height:1.75; }
+#todayPanel .todo-line:hover,.todo-line.star:hover { background:rgba(134,179,247,.05); }
+#todayPanel .todo-line.done .todo-line-text { color:#8094af; }
+#todayPanel .todo-box { border:1px solid #6e87a9; border-radius:5px; background:none; }
+#todayPanel .todo-box.done { background:#568bce; }
+#todayPanel .todo-star::before,#todayPanel .todo-star[aria-pressed]::before { content:'☆'; background:none; font:22px/1 sans-serif; color:#8da5c5; opacity:1; filter:none; transform:none; mix-blend-mode:normal; }
+#todayPanel .todo-star[aria-pressed=true]::before { content:'★'; color:#e7bd67; }
+#todayPanel .todo-line time,.call-note time,.page-card .card-time { color:#97adc8; font-size:10px; }
+#todayPanel .todo-line time.late { color:#f39a9a; }
+#todayPanel .todo-line time.today { color:#8bcab6; }
+#memoPanel .memo-note-shell { grid-template-rows:minmax(0,1fr); border:1px solid var(--line); border-radius:12px; background:rgba(7,17,33,.24); }
+#memoNote,#scratchNote { color:#dbe6f6; font-size:14px; line-height:1.85; background:transparent; }
+#memoPanel .memo-note-shell:focus-within { border-color:#729fdf; box-shadow:0 0 0 3px rgba(114,159,223,.1); }
+#memoNote::placeholder,#scratchNote::placeholder { color:#879db9; }
+.main-scroll:has(#knowledgeBlock.hidden) #callNotesPanel,.main-scroll:has(#knowledgeBlock.hidden) #schedulePanel { padding-bottom:20px; }
+#schedulePanel .schedule-list { padding-right:0; }
+#schedulePanel .schedule-row { background:rgba(127,174,243,.07); border:1px solid var(--line); border-radius:8px; }
+#schedulePanel .schedule-date,#schedulePanel .schedule-body b { color:#c7d8ef; }
+#schedulePanel .schedule-body small { color:#9aaec8; }
+#todayPanel .todo-empty,.page-empty,.phone-archive-empty { background:transparent; color:#9aaec8; border-color:var(--line); font-size:12px; }
+.page-card .card-kind { color:#91baff; }
+.page-card h3 { color:#e4edfa; font-size:17px; }
+.page-card p,.page-card .card-body { color:#afc0d7; font-size:14px; }
+.page-card footer { border-color:var(--line); }
+.edit-box,.search-preview,dialog,.messenger { background:rgba(20,33,53,.97); color:#e4edfa; border:1px solid var(--line); border-radius:16px; box-shadow:0 24px 80px rgba(0,0,0,.4); }
+.edit-box input,.edit-box textarea,.edit-box select,dialog input,dialog textarea,dialog select,.quick-add input,.quick-add textarea,.composer input { background:#122037; color:#e4edfa; border-color:var(--line); border-radius:8px; }
+option { background:#17253b; color:#e4edfa; }
+.preview-item:hover,.preview-item.on { background:rgba(137,182,255,.12); }
+.messenger .header,.messenger .composer,.messenger .quick-add { background:#16253c; border-color:var(--line); }
+.messenger .messages { background:#101c2e; }
+.messenger .bubble,.messenger .knowledge-item { color:#dbe6f6; background:#20334e; border-color:var(--line); }
+.orb { background:#3875cf; border-radius:50%; box-shadow:0 8px 28px rgba(0,0,0,.3); }
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible { outline:2px solid #91baff; outline-offset:3px; }
+::selection { background:#355c92; color:#fff; }
+* { scrollbar-color:#405675 transparent; scrollbar-width:thin; }
+@supports not (backdrop-filter:blur(18px)) { .today-panel,#todayPanel,#callNotesPanel,#memoPanel,#schedulePanel,.page-card:nth-child(n) { background:#19283e; } }
+@media (max-width:760px) { .topnav { padding:0 12px; } .navigation-row { gap:10px; } .hansol-story-logo { width:90px; height:48px; } .topnav .top-item { padding:0 12px; } .today-panel { border-radius:14px; } }
+@media (prefers-reduced-motion:reduce) { *,*::before,*::after { transition:none !important; animation:none !important; } }
+body:not(.overlay-mode) { background:radial-gradient(ellipse at 12% 0%,rgba(49,99,167,.28),transparent 52%),radial-gradient(ellipse at 96% 80%,rgba(47,99,124,.18),transparent 50%),#0b1220; background-attachment:fixed; }
+.main-scroll:has(#knowledgeBlock.hidden) #schedulePanel { background:linear-gradient(135deg,rgba(35,52,77,.65),rgba(19,32,52,.62)); }
+.shortcut-notice { color:#bed1ec; background:rgba(29,49,77,.85); border-color:var(--line); }
+.sync-state[data-state=offline] { background:rgba(184,154,97,.12); color:#d1bd93; }
