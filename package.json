@@ -28,6 +28,7 @@
       "reminder-preload.js",
       "crayon.css",
       "theme.css",
+      "crm-layout.css",
       "views.js",
       "store.js",
       "shortcuts.js",

@@ -24,7 +24,7 @@
   function memoPanel() {
     return `
     <div class="memo-head">
-      <h2>메모</h2>
+      <h2>메모장</h2>
     </div>
     <div class="memo-note-shell">
       <textarea id="memoNote" rows="20" aria-label="전화 및 업무 메모" placeholder="통화 내용이나 업무 메모를 자유롭게 적으세요."></textarea>

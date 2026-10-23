@@ -239,6 +239,7 @@ save();
 
 // ── 아이콘 (Lucide 계열 얇은 라인) ─────────────────────────────
 const ICONS = {
+  calendar: 'M5 5h14a1 1 0 011 1v14H4V6a1 1 0 011-1zM8 3v4M16 3v4M4 10h16M8 14h1M12 14h1M16 14h1M8 17h1M12 17h1',
   sparkle: 'M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z',
   grid: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',
   book: 'M5 4h11a2 2 0 012 2v14H7a2 2 0 01-2-2zM5 17h13',
@@ -351,8 +352,9 @@ function renderSideNav() {
   const navGroups = { '내 지식': '워크스페이스', '특허': '자료 · 사람', '업무지식': '업무 라이브러리' };
   $('#sideNav').innerHTML = NAV_ITEMS.filter(item => item.name !== '대시보드').map(item => {
     const target = item.category || item.name;
-    return `${navGroups[item.name] ? `<div class="nav-group-label">${navGroups[item.name]}</div>` : ''}<button type="button" class="top-item ${target === pageCategory ? 'active' : ''}" data-nav="${target}">${escapeHtml(item.name)}</button>`;
-  }).join('') + `<button type="button" class="top-item" id="memoryToggle">기억 저장소</button>`;
+    return `<button type="button" class="top-item ${target === pageCategory ? 'active' : ''}" data-nav="${target}" title="${escapeHtml(item.name)}" aria-label="${escapeHtml(item.name)}">${icon(item.icon, 20)}<span>${escapeHtml(item.name)}</span></button>`;
+  }).join('') + `<button type="button" class="top-item" id="memoryToggle" title="기억 저장소" aria-label="기억 저장소">${icon('bookmark', 20)}<span>저장소</span></button><button type="button" class="top-item" id="calendarNav" title="달력" aria-label="달력">${icon('calendar',20)}<span>달력</span></button>`;
+  $('#calendarNav').onclick = () => { goToView('대시보드'); $('#schedulePanel').scrollIntoView({ block:'nearest' }); };
   $('#sideNav').querySelectorAll('[data-nav]').forEach(button => {
     button.onclick = () => goToView(button.dataset.nav);
   });
@@ -490,7 +492,9 @@ function renderLibrary() {
   $('#pageHeading').textContent = term ? '검색 결과' : heading;
   $('#pageLead').textContent = term ? `“${term}” 으로 찾은 내용입니다.` : lead;
   const onDashboard = pageCategory === '대시보드' && !term;
-  $('#shortcutSection').classList.toggle('hidden', Boolean(term) || pageCategory !== '대시보드');
+  $('#shortcutSection').classList.remove('hidden');
+  $('.crm-overview').classList.toggle('hidden', !onDashboard);
+  $('.crm-page-title').textContent = onDashboard ? '대시보드' : heading;
   $('#dashCols').classList.toggle('hidden', !onDashboard && pageCategory !== '할 일');
   $('#schedulePanel').classList.toggle('hidden', !onDashboard);
   $('#knowledgeBlock').classList.toggle('hidden', onDashboard || (pageCategory === '할 일' && !term));
@@ -618,7 +622,7 @@ function renderTodos() {
   // 검색 중이거나 다른 화면이면 상단 할 일 카드는 접어 둔다.
   panel.classList.toggle('hidden', searching || !(pageCategory === '대시보드' || onTodoView));
 
-  const allActive = activeTodos();
+  const allActive = activeTodos().filter(todo => pageCategory !== '대시보드' || todo.date === todayKey());
   const modes = [
     ['all', '전체', allActive],
     ['star', '중요', allActive.filter(t => t.starred)],
@@ -638,7 +642,7 @@ function renderTodos() {
   const list = matching.slice((todoDisplayPage - 1) * pageSize, todoDisplayPage * pageSize);
   panel.innerHTML = `
     <div class="todo-head">
-      <h2>할 일 목록</h2>
+      <h2>${pageCategory === '대시보드' ? '오늘 할 일' : '할 일 목록'}</h2>
       <label class="todo-quick-entry"><span aria-hidden="true">+</span><input id="todoQuickInput" autocomplete="off" aria-label="할 일 빠른 추가" placeholder="예: 내일 자료 보내기 → Enter" value="${escapeHtml(todoQuickDraft)}" /></label>
       <span class="todo-count">미완료 ${allActive.length}개</span>
     </div>
@@ -1763,6 +1767,21 @@ $('#scriptModal').addEventListener('click', event => { if (event.target.id === '
 const dayKeyOf = (date) => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 let showPastSchedule = false;
+let calendarMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+let calendarSelected = todayKey();
+
+function renderMonthCalendar() {
+  const year = calendarMonth.getFullYear(), month = calendarMonth.getMonth();
+  const first = new Date(year, month, 1).getDay();
+  const days = new Date(year, month + 1, 0).getDate();
+  const cells = Array.from({ length:first }, () => '<span class="calendar-blank"></span>');
+  for (let day=1; day<=days; day++) {
+    const date = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const hasSchedule = alive(schedule).some(item => item.date === date) || ((window.CRM_MEETINGS?.items) || []).some(item => item.date === date);
+    cells.push(`<button type="button" data-calendar-date="${date}" class="${date === todayKey() ? 'is-today' : ''} ${date === calendarSelected ? 'is-selected' : ''} ${hasSchedule ? 'has-schedule' : ''}" aria-label="${year}년 ${month+1}월 ${day}일${hasSchedule ? ' 일정 있음' : ''}" aria-pressed="${date === calendarSelected}">${day}</button>`);
+  }
+  return `<div class="month-calendar"><div class="calendar-month"><button type="button" id="calendarPrev" aria-label="이전 달">‹</button><strong>${year}. ${String(month+1).padStart(2,'0')}</strong><button type="button" id="calendarNext" aria-label="다음 달">›</button><button type="button" id="calendarToday">오늘</button></div><div class="calendar-week">${['일','월','화','수','목','금','토'].map(day=>`<span>${day}</span>`).join('')}</div><div class="calendar-days">${cells.join('')}</div></div>`;
+}
 
 function scheduleBadge(dateKey) {
   const today = new Date();
@@ -1787,25 +1806,29 @@ function renderSchedule() {
   const all = [...alive(schedule), ...((window.CRM_MEETINGS && window.CRM_MEETINGS.items) || []).filter(item => item.date >= today)];
   const upcoming = sortedSchedule(all.filter(item => String(item.date) >= today));
   const past = sortedSchedule(all.filter(item => String(item.date) < today)).reverse();   // 최근 지난 일정부터
-  const rows = showPastSchedule ? past : upcoming;
+  const rows = all.filter(item => item.date === calendarSelected);
 
   $('#schedulePanel').innerHTML = `
     <div class="block-head">
-      <div><h2>일정</h2><p>${showPastSchedule ? `지난 일정 ${past.length}건` : `다가오는 일정 ${upcoming.length}건`}</p></div>
+      <div><h2>달력</h2></div>
       <div class="cal-tools">
         <button type="button" class="cal-nav" id="crmMeetingConnect">${escapeHtml(window.CRM_MEETINGS ? window.CRM_MEETINGS.status : '고객관리 미팅 연결')}</button>
-        ${past.length ? `<button type="button" class="cal-nav" id="schedulePast">${showPastSchedule ? '다가오는 일정' : '지난 일정'}</button>` : ''}
         <button type="button" class="ghost-btn" id="scheduleAdd">＋ 일정</button>
       </div>
     </div>
-    <div class="schedule-list">
+    ${renderMonthCalendar()}
+    <div class="calendar-selected-heading">${escapeHtml(calendarSelected)} 일정</div><div class="schedule-list">
       ${rows.length ? renderScheduleGroups(rows)
-        : `<div class="todo-empty">${showPastSchedule ? '지난 일정이 없습니다.' : '예정된 일정이 없습니다. ＋ 일정으로 추가하세요.'}</div>`}
+        : `<div class="todo-empty">등록된 일정이 없습니다.</div>`}
     </div>`;
 
   const pastButton = $('#schedulePast');
   if (pastButton) pastButton.onclick = () => { showPastSchedule = !showPastSchedule; renderSchedule(); };
-  $('#scheduleAdd').onclick = () => openScheduleModal(null, today);
+  $('#scheduleAdd').onclick = () => openScheduleModal(null, calendarSelected);
+  $('#calendarPrev').onclick = () => { calendarMonth = new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()-1,1); renderSchedule(); };
+  $('#calendarNext').onclick = () => { calendarMonth = new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()+1,1); renderSchedule(); };
+  $('#calendarToday').onclick = () => { calendarMonth = new Date(new Date().getFullYear(),new Date().getMonth(),1); calendarSelected=todayKey(); renderSchedule(); };
+  $('#schedulePanel').querySelectorAll('[data-calendar-date]').forEach(button => { button.onclick = () => { calendarSelected=button.dataset.calendarDate; renderSchedule(); }; });
   $('#crmMeetingConnect').onclick = () => { if (window.CRM_MEETINGS) window.CRM_MEETINGS.open(); };
   $('#schedulePanel').querySelectorAll('[data-schedule]').forEach(row => {
     const item = all.find(x => x.id === row.dataset.schedule);
@@ -2800,6 +2823,9 @@ if (searchOpenButton) searchOpenButton.onclick = () => {
 };
 
 function renderAll() {
+  const currentDate = new Date();
+  $('#crmTodayDate').textContent = `${currentDate.getFullYear()}. ${String(currentDate.getMonth()+1).padStart(2,'0')}. ${String(currentDate.getDate()).padStart(2,'0')}`;
+  $('#crmTodayWeekday').textContent = currentDate.toLocaleDateString('ko-KR', { weekday:'long' });
   renderSideNav();
   renderMemoPanel();
   renderCallNotes();
