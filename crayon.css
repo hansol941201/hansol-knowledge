@@ -1361,3 +1361,36 @@ dialog :is(input,textarea,select),.edit-box :is(input,textarea,select) { backgro
 #todoReminderPanel span { overflow-wrap:anywhere; }
 #todoReminderPanel time { display:block; font-size:12px; color:#e6c985; }
 @media(max-width:600px) { #todoReminderPanel { top:84px; bottom:auto; right:12px; width:min(300px,calc(100vw - 24px)); max-height:30vh; } }
+
+/* 컬러 포인트가 있는 내부 탭: 선택 상태와 메뉴 성격을 함께 구분한다. */
+.topnav .navigation-row .top-nav { height:64px; align-items:center; gap:9px; padding:6px 2px 10px; border-bottom:1px solid #ffffff24; }
+.topnav .top-item,.topnav .top-item:nth-of-type(even),.topnav .top-item:first-of-type {
+ --tab-accent:#97dace; position:relative; flex-shrink:0; height:43px; min-height:43px; margin:0; padding:10px 16px;
+ border:1px solid #ffffff25; border-bottom:1px solid #ffffff25; border-radius:13px;
+ background:linear-gradient(145deg,#203b47dd,#182a35d9); color:#e5edf2;
+ box-shadow:inset 0 1px #ffffff12,0 3px 8px #00000012; transition:background .18s,box-shadow .18s,transform .18s;
+}
+.topnav .top-item[data-nav='할 일'] { --tab-accent:#f6cc86; }
+.topnav .top-item[data-nav='기억'],.topnav #memoryToggle { --tab-accent:#c3b7fa; }
+.topnav .top-item[data-nav='특허'],.topnav .top-item[data-nav='기획'] { --tab-accent:#9fcafa; }
+.topnav .top-item[data-nav='협력업체'],.topnav .top-item[data-nav='연락처'] { --tab-accent:#a8ddbe; }
+.topnav .top-item[data-nav='계정'],.topnav .top-item[data-nav='대본'] { --tab-accent:#efb5bf; }
+.topnav .top-item::before { color:var(--tab-accent); }
+.topnav .top-item:hover { background:linear-gradient(145deg,#355462,#253b49); border-color:var(--tab-accent); transform:translateY(-2px); }
+.topnav .top-item.active,.topnav .top-item.active:hover,.topnav .top-item.active:first-of-type {
+ margin:0; height:43px; min-height:43px; padding:10px 16px; border:1px solid var(--tab-accent); border-bottom:1px solid var(--tab-accent); border-radius:13px;
+ background:linear-gradient(135deg,#3b5964,#223e4c); color:#fff; box-shadow:inset 0 3px var(--tab-accent),0 4px 15px #0003; font-weight:700 !important;
+}
+.topnav .top-item:focus-visible,.todo-view-tabs button:focus-visible { outline:2px solid #fff0c6; outline-offset:3px; }
+#todayPanel .todo-view-tabs { gap:6px; padding:7px; border-radius:16px; background:#10293699 !important; border:1px solid #ffffff18; }
+#todayPanel .todo-view-tabs button { --filter-accent:#badde7; gap:7px; padding:7px 10px; border:1px solid transparent; border-radius:10px; color:#d2e0e8; background:transparent; font-size:13px !important; transition:background .18s; }
+#todayPanel .todo-view-tabs button[data-todo-view='star'] { --filter-accent:#f4cc83; }
+#todayPanel .todo-view-tabs button[data-todo-view='today'] { --filter-accent:#97ddce; }
+#todayPanel .todo-view-tabs button[data-todo-view='late'] { --filter-accent:#efb0ab; }
+#todayPanel .todo-view-tabs button[data-todo-view='future'] { --filter-accent:#abcafa; }
+#todayPanel .todo-view-tabs button[data-todo-view='done'] { --filter-accent:#b9d8af; }
+#todayPanel .todo-view-tabs button span { display:inline-grid; place-items:center; min-width:20px; height:20px; padding:0 5px; border-radius:6px; background:#ffffff10; color:var(--filter-accent); font-size:11px !important; }
+#todayPanel .todo-view-tabs button:hover { background:#ffffff10; }
+#todayPanel .todo-view-tabs button.active,#todayPanel .todo-view-tabs button[aria-pressed='true'] { color:#142e39 !important; background:var(--filter-accent) !important; border-color:var(--filter-accent); box-shadow:0 2px 8px #0002; }
+#todayPanel .todo-view-tabs button[aria-pressed='true'] span { color:#173442; background:#ffffff5c; }
+@media(prefers-reduced-motion:reduce) { .topnav .top-item,#todayPanel .todo-view-tabs button { transition:none; transform:none; } }
