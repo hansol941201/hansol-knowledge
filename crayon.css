@@ -607,3 +607,77 @@ body,body:not(.overlay-mode) { background:linear-gradient(rgba(226,231,225,.12),
 .workspace[data-view='연락처'] .page-card,.workspace[data-view='협력업체'] .page-card { min-height:88px; height:auto; }
 .workspace[data-view='연락처'] .page-card p,.workspace[data-view='협력업체'] .page-card p { font-size:13px; }
 @media(max-width:1150px) { .workspace[data-view='연락처'] .page-card,.workspace[data-view='협력업체'] .page-card { min-height:0; } }
+
+/* B2B: ink navy backdrop, clear glass retained. */
+:root { color-scheme:dark; --bg:#080e1b; --card:#172239; --ink:#edf3fc; --ink-1:#edf3fc; --ink-2:#b3c2d8; --ink-3:#93a8c4; --line:rgba(255,255,255,.18); --line-soft:rgba(255,255,255,.1); --nav-navy:#b4d1ff; --nav-text:#b3c2d8; }
+html { background:#080e1b; }
+body,body:not(.overlay-mode) { background:radial-gradient(ellipse at 76% 17%,rgba(38,79,138,.30),transparent 48%),radial-gradient(ellipse at 12% 87%,rgba(21,54,91,.24),transparent 52%),linear-gradient(125deg,#111d32,#070b12 72%); background-attachment:fixed; color:#edf3fc; }
+body::before { content:'B2B'; position:fixed; right:4vw; bottom:-3vw; font:700 clamp(160px,28vw,520px)/1 sans-serif; letter-spacing:-.07em; color:rgba(163,193,236,.035); pointer-events:none; z-index:0; }
+.workspace { background:rgba(255,255,255,.015); border-color:rgba(210,229,255,.23); box-shadow:0 25px 90px rgba(0,0,0,.28); }
+.topnav { background:rgba(255,255,255,.025); border-right-color:rgba(255,255,255,.14); }
+.hansol-story-logo.b2b-brand { display:flex; align-items:center; height:62px; width:auto; margin-left:12px; color:#f4f8ff; font:700 35px/1 sans-serif !important; letter-spacing:-2px; filter:none; opacity:1; }
+.nav-group-label { color:#8ca2c1; }
+.topnav .top-item { color:#c3d1e5; }
+.topnav .top-item.active,.topnav .top-item.active:hover { color:#e2eeff; background:rgba(166,199,248,.10); border-color:rgba(180,211,255,.28); }
+.topnav .top-item:hover { color:#eff5ff; background:rgba(255,255,255,.055); }
+.top-tools { border-color:rgba(255,255,255,.14); }
+.top-mini { color:#a7bad4; }
+.top-mini:hover { color:#e2eeff; background:rgba(255,255,255,.08); }
+.brand-avatar { color:#c8dcfb; background:rgba(167,199,247,.08); border-color:rgba(255,255,255,.18); }
+.topbar { background:rgba(255,255,255,.015); border-bottom-color:rgba(255,255,255,.13); }
+.topbar .page-search { background:rgba(255,255,255,.035); border-color:rgba(255,255,255,.2); color:#a0b9dc; }
+.topbar .page-search input { color:#edf3fc; }
+.topbar .page-search input::placeholder { color:#93a8c4; }
+.topbar .page-search:focus-within { background:rgba(255,255,255,.065); border-color:#7c9fcc; }
+.topbar .primary-btn,.primary-btn,.memo-add-btn,#memoPanel .memo-add-btn { color:#edf5ff; background:rgba(66,112,174,.50); border-color:rgba(177,209,255,.3); }
+.shortcut,.shortcut.add { background:rgba(255,255,255,.025); border-color:rgba(255,255,255,.18); }
+.shortcut-thumb,.shortcut:nth-child(n) .shortcut-thumb { background:rgba(255,255,255,.025); }
+.shortcut a b { color:#c3d1e5; }
+.shortcut:hover { background:rgba(255,255,255,.07); border-color:rgba(196,221,255,.4); }
+.shortcut-notice { background:rgba(255,255,255,.04); color:#a9bdd9; border-color:rgba(255,255,255,.16); }
+.shortcut-notice button { background:rgba(255,255,255,.065); color:#c2d6f3; border-color:rgba(255,255,255,.2); }
+.sync-state[data-state=offline] { background:rgba(191,166,110,.10); color:#d1bd94; }
+.today-panel,#todayPanel,#callNotesPanel,#memoPanel,#schedulePanel,.page-card:nth-child(n),.main-scroll:has(#knowledgeBlock.hidden) #schedulePanel {
+ background:linear-gradient(135deg,rgba(255,255,255,.065),rgba(255,255,255,.015)); border-color:rgba(215,232,255,.22); box-shadow:0 9px 28px rgba(0,0,0,.10),inset 0 1px rgba(255,255,255,.055);
+}
+#todayPanel .todo-head h2,#callNotesPanel h2,#memoPanel h2,#schedulePanel h2,.block-head h2 { color:#e4edfb; }
+#todayPanel .todo-line-text,.call-note p,.memory-item p,#memoNote,#scratchNote { color:#dce7f7; }
+.memo-head small,.block-head p { color:#9aafcb; }
+#memoNote::placeholder,#scratchNote::placeholder { color:#8fa3bf; }
+#memoPanel .memo-note-shell { background:rgba(0,0,0,.035); border-color:rgba(255,255,255,.13); }
+#todayPanel .todo-count,#pageCount { color:#bbd1ef; background:rgba(155,191,247,.08); border-color:rgba(255,255,255,.16); }
+#todayPanel .todo-empty,.page-empty,.phone-archive-empty { color:#9aafcb; }
+#todayPanel .todo-tab,.cal-tools button,.memo-file { color:#b5c8e4; background:rgba(255,255,255,.035); border-color:rgba(255,255,255,.16); }
+#todayPanel .todo-tab.active,#todayPanel .todo-tab.active span { color:#cce1ff; background:rgba(99,150,223,.13); border-color:rgba(155,193,248,.25); }
+#todayPanel .todo-line time,.call-note time,.page-card .card-time { color:#94aac9; }
+#todayPanel .todo-line time.late { color:#eca6a6; }
+#todayPanel .todo-line time.today { color:#9acbbd; }
+#todayPanel .todo-line.done .todo-line-text { color:#879ab6; }
+#todayPanel .todo-line:hover,.todo-line.star:hover { background:rgba(255,255,255,.035); }
+#todayPanel .todo-box { border-color:#8ba5c9; }
+#todayPanel .todo-box.done { background:#6089bd; }
+#todayPanel .todo-star::before { color:#9ab1d3; }
+#schedulePanel .schedule-row { background:rgba(255,255,255,.035); border-color:rgba(255,255,255,.14); }
+#schedulePanel .schedule-date,#schedulePanel .schedule-body b { color:#c7daf5; }
+#schedulePanel .schedule-body small { color:#9eb2ce; }
+.page-categories button { background:rgba(255,255,255,.025); color:#adc1dd; border-color:rgba(255,255,255,.16); }
+.page-categories button.active { background:rgba(156,193,247,.1); color:#d3e5ff; border-color:rgba(166,203,255,.28); }
+.page-card .card-kind { color:#95b8ea; background:transparent; }
+.page-card h3 { color:#e2ecfb; }
+.page-card p,.page-card .card-body { color:#b6c8e1; }
+.page-card footer { border-color:rgba(255,255,255,.12); }
+.page-card footer button,.shortcut-menu,.edit-box header button,.edit-box footer button:not([type=submit]) { color:#bcd2f1; background:rgba(255,255,255,.045); border-color:rgba(255,255,255,.17); }
+.page-card footer button:hover { color:#eff6ff; background:rgba(255,255,255,.09); }
+.edit-box,.search-preview,dialog,#app.messenger { background:rgba(19,31,51,.92); color:#e4edfb; border-color:rgba(255,255,255,.18); }
+.edit-box input,.edit-box textarea,.edit-box select,dialog input,dialog textarea,dialog select { background:rgba(255,255,255,.045); color:#e4edfb; border-color:rgba(255,255,255,.18); }
+option { background:#19263c; color:#e4edfb; }
+#phoneArchiveDialog,#phoneArchiveDialog .phone-archive { background:rgba(19,31,51,.94) !important; }
+.preview-item:hover,.preview-item.on { background:rgba(255,255,255,.06); }
+.messenger .header,.messenger .composer,.messenger .quick-add { background:#142138; }
+.messenger .messages { background:#101b2d; }
+.messenger .bubble,.messenger .knowledge-item { background:rgba(255,255,255,.06); color:#dce7f7; }
+.orb { background:#426798; }
+::selection { background:#385d91; color:#fff; }
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible { outline-color:#91b9f2; }
+@supports not (backdrop-filter:blur(8px)) { .today-panel,#todayPanel,#callNotesPanel,#memoPanel,#schedulePanel,.page-card:nth-child(n) { background:#172239; } }
+@media(max-width:760px) { .hansol-story-logo.b2b-brand { width:62px; height:45px; margin:0; font-size:27px !important; } }
