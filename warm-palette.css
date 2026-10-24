@@ -1,0 +1,64 @@
+/* Color-only reference palette. Layout, sizes and interaction styles stay intact. */
+:root { --theme-blue:#c59528; --theme-ink:#383a40; --theme-muted:#85817c; --theme-line:rgba(204,190,167,.3); }
+html { background:#ece6de; }
+body,body:not(.overlay-mode) { color:#383a40; background:radial-gradient(ellipse at 7% 3%,#efb72b 0,rgba(239,183,43,.87) 20%,transparent 53%),radial-gradient(ellipse at 98% 100%,#f7d0c9 0,transparent 46%),#ece6de; }
+body::before { background:linear-gradient(140deg,transparent 48%,rgba(244,239,232,.6) 48%,rgba(244,239,232,.6) 72%,transparent 72%); }
+.workspace { background:linear-gradient(125deg,rgba(250,246,233,.7),rgba(244,241,237,.77) 58%,rgba(255,231,226,.65)); border-color:rgba(255,252,244,.88); box-shadow:0 24px 60px rgba(91,72,42,.1),inset 0 1px 2px #fffdf5; }
+.workspace #dashboardHome .glass-brand-text b { color:#5c5b56; text-shadow:0 1px 0 #fffdf7,0 2px 0 #d9d3c6,0 3px 0 #bcb5a7,0 6px 9px rgba(87,72,46,.15); }
+.workspace .topnav .top-mini { color:#7e7769; background:rgba(255,252,241,.38); border-color:rgba(255,255,255,.7); }
+.workspace .topnav .brand-avatar { color:#806d3f; background:#f1e3ba; }
+.workspace .topnav .sync-state,.workspace .topnav .sync-state[data-state=offline] { color:#8b8067 !important; background:rgba(255,250,235,.4) !important; border-color:rgba(255,255,255,.65); }
+.workspace .topnav #sideNav .top-item,.workspace .topnav #sideNav .top-item:first-of-type,.workspace .topnav #sideNav .top-item:nth-of-type(even) { color:#66645f; }
+.workspace .topnav #sideNav .top-item svg { color:#7f7b71 !important; }
+.workspace .topnav #sideNav .top-item.active { color:#8a630b; background:linear-gradient(110deg,rgba(248,226,166,.9),rgba(255,249,229,.7)); border-color:rgba(222,178,68,.33); box-shadow:inset -3px 0 #dfad2f,0 4px 12px rgba(139,107,37,.055); }
+.workspace .topnav #sideNav .top-item.active svg { color:#c8951f !important; }
+.workspace .topnav #sideNav .top-item:hover { background:rgba(255,249,228,.67); }
+.workspace .topnav #sideNav .top-item.active:hover { background:rgba(247,226,171,.85); }
+.workspace .topnav .shortcut,.workspace .topnav .shortcut:nth-child(even),.workspace .topnav .shortcut.add { background:rgba(255,252,244,.5); border-color:rgba(255,255,255,.84) !important; box-shadow:inset 0 1px #fffcf7,0 3px 9px rgba(117,94,48,.025); }
+.workspace .topnav .shortcut a b,.workspace .topnav .shortcut.add { color:#756f61 !important; }
+.workspace .topnav .shortcut a::before { background:rgba(246,233,197,.65); border-color:#eadcb8; color:#ae8733; }
+.workspace .topnav .shortcut .shortcut-more { color:#a29579; }
+.workspace .topnav > .topbar .page-search { background:rgba(255,250,237,.6) !important; border-color:rgba(255,255,255,.8); }
+.workspace .topnav > .topbar #pageSearch { color:#5b574e !important; }
+.workspace .topnav > .topbar #pageSearch::placeholder { color:#9a9080 !important; }
+.workspace .topnav > .topbar #pageAdd,.workspace .glass-footer .glass-home-btn { color:#fffdf5; background:linear-gradient(125deg,#e7b842,#d2a02a); border-color:#e8bd58; box-shadow:0 4px 12px rgba(171,123,24,.12); }
+.workspace #todayPanel,.workspace .notes-hub,.workspace #schedulePanel,.workspace .page-card,.workspace .block,.workspace #contractTodaySection .contract-today-card { background:rgba(255,253,249,.67) !important; border-color:rgba(255,255,255,.85) !important; box-shadow:0 8px 22px rgba(119,98,61,.035),inset 0 1px #ffffffc0 !important; }
+.workspace #contractTodaySection h2,.workspace :is(.todo-head h2,.memo-head h2,#schedulePanel h2),.workspace .page-card h3 { color:#45443f !important; }
+.workspace #contractTodaySection p,.workspace #contractTodaySection li { color:#888174 !important; }
+.workspace #contractTodaySection time { color:#a39b8c !important; }
+.workspace :is(.todo-head h2,.memo-head h2,#schedulePanel h2)::before { background:#d7ac42; }
+.workspace #todayPanel .todo-view-tabs button:not(.active) { color:#8b8067 !important; background:rgba(241,234,216,.35) !important; }
+.workspace #todayPanel .todo-view-tabs button.active { color:#76570e !important; background:#f1d990 !important; box-shadow:0 3px 9px rgba(175,133,26,.07); }
+.workspace #todayPanel .todo-view-tabs button span,.workspace #todayPanel .todo-view-tabs button:not(.active) span { color:#9a8b6a !important; background:rgba(229,216,182,.37) !important; }
+.workspace #todayPanel .todo-view-tabs button.active span { color:#8d6e23 !important; background:rgba(255,255,255,.4) !important; }
+.workspace #todayPanel .todo-quick-entry,.workspace #memoPanel .memo-note-shell { background:rgba(255,252,244,.49) !important; border-color:rgba(255,255,255,.82); box-shadow:inset 0 1px #fffdf9; }
+.workspace input,.workspace textarea { color:#625c50; }
+.workspace .todo-quick-entry input::placeholder,.workspace #memoNote::placeholder { color:#aba08f !important; }
+.workspace #todayPanel :is(.todo-line-text,.todo-mark) { color:#57534b !important; }
+.workspace #todayPanel .todo-line { border-bottom-color:rgba(192,180,156,.25); }
+.workspace #todayPanel .todo-line.star { background:rgba(245,221,153,.18); }
+.workspace #todayPanel .todo-star { color:#c49c36; }
+.workspace #todayPanel .todo-line time { color:#9a907c; }
+.workspace #todayPanel .todo-empty { color:#a19683 !important; }
+.workspace #todayPanel .todo-results { scrollbar-color:#c1b39366 transparent; }
+.workspace .notes-hub #memoPanel .memo-tools button,.workspace .page-card footer button { color:#8d7a50; background:rgba(246,239,222,.65); border-color:rgba(255,255,255,.7); }
+.workspace .page-card p,.workspace .page-card .card-kind,.workspace .page-card .card-time { color:#8b8375; }
+.workspace .page-card.business-card::before,.workspace .page-card.contact-card::before { background:linear-gradient(90deg,#e3bd65,#f4e7c8); }
+.workspace #schedulePanel .calendar-days button { color:#857f76; }
+.workspace #schedulePanel .calendar-days button.is-today { background:#f7e9bd !important; color:#a37b16 !important; outline-color:#ddbb60; }
+.workspace #schedulePanel .calendar-days button.is-selected { background:#d9ad38 !important; color:#fff !important; box-shadow:0 2px 7px rgba(168,124,24,.12); }
+.workspace #schedulePanel .calendar-days button.is-today.is-selected { background:#e0b12e !important; color:#fff !important; outline-color:#fff6d8; }
+.workspace #schedulePanel .calendar-month button { color:#a48c55; background:rgba(246,235,206,.5); }
+.workspace #schedulePanel .calendar-month #calendarToday { color:#b38b25; background:#f7eccb; }
+.workspace .glass-sidebar-foot i { background:#d9b659; }
+.workspace .glass-sidebar-foot span,.workspace .crm-favorites-label { color:#a49b87; }
+.workspace .glass-footer { border-color:rgba(255,255,255,.65); }
+.workspace .glass-footer-tools button { color:#9a8c6e; }
+.workspace .calendar-selected-heading,.workspace #schedulePanel .todo-empty { color:#9c8f75 !important; }
+.workspace .todo-quick-choice { background:rgba(255,250,234,.97); border-color:#ebd9aa; }
+.workspace .todo-quick-choice strong,.workspace .todo-quick-choice p { color:#72603b !important; }
+.workspace .todo-quick-options button { background:#f7edcf; color:#8a6b23; border-color:#e8d7a7; }
+.workspace .todo-quick-options button span { color:#a6956d; }
+.workspace .todo-quick-options button:hover { background:#f1dda6; }
+.workspace input:focus-visible,.workspace textarea:focus-visible,.workspace button:focus-visible,.workspace a:focus-visible { outline-color:#d5ad46; }
+::selection { color:#6d5318; background:#f7df9c; }
