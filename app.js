@@ -559,8 +559,9 @@ function renderLibrary() {
 }
 
 function todayKey() {
-  const date = new Date();
-  return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+  const parts = new Intl.DateTimeFormat('en-CA', { timeZone:'Asia/Seoul', year:'numeric', month:'2-digit', day:'2-digit' }).formatToParts(new Date());
+  const part = type => parts.find(item => item.type === type).value;
+  return `${part('year')}-${part('month')}-${part('day')}`;
 }
 const isTodoEntry = (item) => Boolean(item) && (!item.type || item.type === 'todo');
 let todoUndo = null;               // 실행 취소용 직전 상태
@@ -1766,7 +1767,7 @@ $('#scriptModal').addEventListener('click', event => { if (event.target.id === '
 const dayKeyOf = (date) => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 let showPastSchedule = false;
-let calendarMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+let calendarMonth = new Date(todayKey().slice(0, 7) + '-01T12:00:00');
 let calendarSelected = todayKey();
 
 function renderMonthCalendar() {
@@ -1777,7 +1778,7 @@ function renderMonthCalendar() {
   for (let day=1; day<=days; day++) {
     const date = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
     const hasSchedule = alive(schedule).some(item => item.date === date) || ((window.CRM_MEETINGS?.items) || []).some(item => item.date === date);
-    cells.push(`<button type="button" data-calendar-date="${date}" class="${date === todayKey() ? 'is-today' : ''} ${date === calendarSelected ? 'is-selected' : ''} ${hasSchedule ? 'has-schedule' : ''}" aria-label="${year}년 ${month+1}월 ${day}일${hasSchedule ? ' 일정 있음' : ''}" aria-pressed="${date === calendarSelected}">${day}</button>`);
+    cells.push(`<button type="button" data-calendar-date="${date}" class="${date === todayKey() ? 'is-today' : ''} ${date === calendarSelected ? 'is-selected' : ''} ${hasSchedule ? 'has-schedule' : ''}" aria-label="${year}년 ${month+1}월 ${day}일${hasSchedule ? ' 일정 있음' : ''}" aria-pressed="${date === calendarSelected}" ${date === todayKey() ? 'aria-current="date"' : ''}>${day}</button>`);
   }
   return `<div class="month-calendar"><div class="calendar-month"><button type="button" id="calendarPrev" aria-label="이전 달">‹</button><strong>${year}. ${String(month+1).padStart(2,'0')}</strong><button type="button" id="calendarNext" aria-label="다음 달">›</button><button type="button" id="calendarToday">오늘</button></div><div class="calendar-week">${['일','월','화','수','목','금','토'].map(day=>`<span>${day}</span>`).join('')}</div><div class="calendar-days">${cells.join('')}</div></div>`;
 }
@@ -1827,7 +1828,7 @@ function renderSchedule() {
   $('#scheduleAdd').onclick = () => openScheduleModal(null, calendarSelected);
   $('#calendarPrev').onclick = () => { calendarMonth = new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()-1,1); renderSchedule(); };
   $('#calendarNext').onclick = () => { calendarMonth = new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()+1,1); renderSchedule(); };
-  $('#calendarToday').onclick = () => { calendarMonth = new Date(new Date().getFullYear(),new Date().getMonth(),1); calendarSelected=todayKey(); renderSchedule(); };
+  $('#calendarToday').onclick = () => { calendarMonth = new Date(todayKey().slice(0,7) + '-01T12:00:00'); calendarSelected=todayKey(); renderSchedule(); };
   $('#schedulePanel').querySelectorAll('[data-calendar-date]').forEach(button => { button.onclick = () => { calendarSelected=button.dataset.calendarDate; renderSchedule(); }; });
   $('#crmMeetingConnect').onclick = () => { if (window.CRM_MEETINGS) window.CRM_MEETINGS.open(); };
   $('#schedulePanel').querySelectorAll('[data-schedule]').forEach(row => {

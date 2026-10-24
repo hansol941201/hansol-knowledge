@@ -80,3 +80,40 @@ body::before { content:''; position:fixed; inset:0; z-index:-1; pointer-events:n
 .workspace #todayPanel .todo-view-tabs { grid-row:1; grid-column:2; }
 .workspace #todayPanel .todo-quick-entry { grid-row:2; }
 @media(max-width:650px) { .workspace #todayPanel .todo-head { grid-template-columns:1fr; } .workspace #todayPanel .todo-view-tabs { grid-row:2; grid-column:1; } .workspace #todayPanel .todo-quick-entry { grid-row:3; } }
+
+/* Quiet slate, pearl and a restrained blue accent. */
+:root { --theme-blue:#57718c; --theme-ink:#283b4b; --theme-muted:#7c8a96; }
+html { background:#e0e4e8; }
+body,body:not(.overlay-mode) { background:radial-gradient(ellipse at 12% 12%,#dbe5e8,transparent 55%),radial-gradient(ellipse at 90% 85%,#c7d1dc,transparent 58%),linear-gradient(135deg,#e5e6e5,#c7d1db); }
+.workspace { background:linear-gradient(125deg,rgba(248,247,243,.67),rgba(220,228,235,.7)); border-color:rgba(255,255,255,.9); box-shadow:0 24px 60px rgba(47,61,77,.16),inset 0 1px 2px #fff; }
+.workspace #dashboardHome .glass-brand-text b { font-size:43px; line-height:1.1; letter-spacing:-1.7px; font-weight:800; color:#3b5367; text-shadow:0 1px 0 #fff,0 2px 0 #b8c6d0,0 3px 0 #a1b2c0,0 6px 9px rgba(31,52,71,.19); }
+.workspace #dashboardHome { top:25px; }
+.workspace .topnav #sideNav .top-item svg { color:#71879a !important; }
+.workspace .topnav #sideNav .top-item { color:#586e80; }
+.workspace .topnav #sideNav .top-item.active { background:linear-gradient(135deg,#6a8297,#455e75); border-color:#62798d; box-shadow:0 5px 13px rgba(42,65,87,.14); }
+.workspace .topnav #sideNav .top-item.active svg { color:#fff !important; }
+.workspace .topnav > .topbar #pageAdd,.workspace .glass-footer .glass-home-btn { background:linear-gradient(135deg,#73899c,#526b80); border-color:#7b91a2; box-shadow:0 4px 12px rgba(52,75,96,.12); }
+.workspace .topnav .shortcut,.workspace .topnav .shortcut:nth-child(even),.workspace .topnav .shortcut.add { background:rgba(255,255,255,.38); }
+.workspace #todayPanel,.workspace .notes-hub,.workspace #schedulePanel,.workspace .page-card,.workspace .block,.workspace #contractTodaySection .contract-today-card { background:rgba(250,251,251,.56) !important; box-shadow:0 8px 22px rgba(64,78,93,.045),inset 0 1px #ffffffb0 !important; }
+.workspace #todayPanel .todo-view-tabs button.active { background:#5c748a !important; }
+.workspace #todayPanel .todo-view-tabs button:not(.active) { background:rgba(214,223,231,.3) !important; color:#5e7385 !important; }
+.workspace #todayPanel .todo-view-tabs button:not(.active) span { background:rgba(200,211,221,.35) !important; }
+.workspace :is(.todo-head h2,.memo-head h2,#schedulePanel h2)::before { background:#8396a6; }
+.workspace .glass-sidebar-foot i { background:#8da0af; }
+/* Fixed dashboard surface; only the task results scroll when tasks accumulate. */
+.workspace[data-view='대시보드'] #dashCols,.workspace[data-view='대시보드'] .main-scroll:has(#knowledgeBlock.hidden) #dashCols { height:calc(100dvh - 280px); min-height:480px; grid-template-rows:100px minmax(0,1fr) minmax(0,1.1fr); align-items:stretch; }
+.workspace[data-view='대시보드'] #todayPanel,.workspace[data-view='할 일'] #todayPanel { display:flex; flex-direction:column; height:100%; min-height:0; max-height:100%; overflow:hidden; }
+.workspace[data-view='할 일'] #dashCols { height:calc(100dvh - 280px); min-height:400px; grid-template-rows:minmax(0,1fr); }
+.workspace #todayPanel .todo-head,.workspace #todayPanel .todo-quick-choice,.workspace #todayPanel .todo-controls { flex-shrink:0; }
+.workspace #todayPanel .todo-results { flex:1 1 auto; min-height:0; max-height:none; height:auto; overflow-y:auto; overflow-x:hidden; overscroll-behavior-y:contain; scrollbar-width:thin; scrollbar-color:#9caeba66 transparent; padding-right:7px; }
+.workspace[data-view='대시보드'] .notes-hub,.workspace[data-view='대시보드'] #schedulePanel { height:100%; min-height:0; }
+.workspace #schedulePanel { overflow:auto; }
+/* Today and selection use exact circles, independent of cell width. */
+.workspace #schedulePanel .calendar-days { justify-items:center; align-items:center; gap:4px 0; }
+.workspace #schedulePanel .calendar-days button,.workspace #schedulePanel .calendar-blank { width:29px; min-width:29px; max-width:29px; height:29px; min-height:29px; padding:0; margin:0; border-radius:50%; box-sizing:border-box; }
+.workspace #schedulePanel .calendar-days button.is-today { background:#e2e8ee !important; color:#3c5b75 !important; outline:1px solid #8199ad; outline-offset:-1px; font-weight:700 !important; box-shadow:none; }
+.workspace #schedulePanel .calendar-days button.is-selected { background:#6a8094 !important; color:#fff !important; outline:none; box-shadow:0 2px 7px rgba(62,84,105,.13); }
+.workspace #schedulePanel .calendar-days button.is-today.is-selected { background:#526d84 !important; color:#fff !important; outline:1px solid #edf3f8; outline-offset:-3px; }
+.workspace #schedulePanel .calendar-days button.has-schedule::after { bottom:3px; width:3px; height:3px; }
+@media(max-width:850px) and (min-width:651px) { .workspace #schedulePanel .calendar-days button,.workspace #schedulePanel .calendar-blank { width:25px; min-width:25px; max-width:25px; height:25px; min-height:25px; } }
+@media(max-width:650px) { .workspace #dashboardHome .glass-brand-text b { font-size:22px; letter-spacing:-1px; } .workspace[data-view='대시보드'] #dashCols,.workspace[data-view='대시보드'] .main-scroll:has(#knowledgeBlock.hidden) #dashCols { height:auto; min-height:0; grid-template-rows:420px auto 280px 350px; } .workspace[data-view='대시보드'] #todayPanel { height:420px; } .workspace[data-view='할 일'] #todayPanel { height:100%; } }
