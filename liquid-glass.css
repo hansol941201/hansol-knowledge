@@ -229,3 +229,33 @@ body.overlay-mode .alarm-dock { display:none; }
 .workspace .contract-today-card .contract-list-error { margin:0; color:#b3657a !important; font:400 11px/1.5 system-ui !important; }
 @media(max-width:650px) { .contract-today-grid { grid-template-columns:1fr; gap:10px; } }
 .workspace #contractTodaySection time { font-size:10px !important; line-height:1.4 !important; }
+
+/* Content-first spacing: navigation already identifies each page. */
+.workspace .crm-page-title,.workspace .glass-breadcrumb { display:none !important; }
+.workspace .main { gap:0; }
+.workspace .topbar { min-height:0; padding-top:12px; padding-bottom:10px; gap:10px; }
+.workspace .topbar .search-wrap { margin-left:0; }
+.workspace #knowledgeBlock { padding:12px 14px; }
+.workspace #knowledgeBlock:not(.has-page-search) > .block-head > div { display:none; }
+.workspace #knowledgeBlock > .block-head { min-height:0; margin:0 0 7px; padding:0; align-items:center; justify-content:flex-end; border:0; gap:8px; }
+.workspace #knowledgeBlock.has-page-search > .block-head { justify-content:space-between; }
+.workspace #knowledgeBlock.has-page-search #pageHeading { font-size:17px !important; margin:0; }
+.workspace #knowledgeBlock #pageLead { display:none; }
+.workspace #pageCategories { min-height:0; margin:0 0 12px; padding:0; gap:6px; }
+.workspace #pageCategories button { min-height:28px; padding:5px 10px; }
+.workspace .page-grid { align-items:start; gap:12px; }
+.workspace .page-card,.workspace .page-card.business-card,.workspace[data-view='연락처'] .page-card.business-card,.workspace[data-view='협력업체'] .page-card.business-card { min-height:0; height:auto; padding:15px 16px; }
+.workspace .page-card .card-kind { margin-bottom:7px; }
+.workspace .page-card h3 { margin:0 0 8px; }
+.workspace .page-card p { margin:0 0 10px; }
+.workspace .page-card footer { margin-top:10px; padding-top:8px; }
+.workspace .glass-footer { min-height:40px; padding-top:5px; padding-bottom:5px; }
+.workspace .glass-footer-caption { display:none; }
+.workspace .glass-footer .glass-home-btn { padding:7px 12px; }
+.workspace .contract-today-card { padding:10px 13px; }
+.workspace .contract-today-card header { margin-bottom:6px; }
+@media(max-width:650px) { .workspace .topbar { padding-top:9px; padding-bottom:9px; flex-wrap:nowrap; } .workspace #knowledgeBlock { padding:10px; } .workspace .glass-footer { min-height:38px; } }
+.workspace #knowledgeBlock { position:relative; }
+.workspace #knowledgeBlock:not(.has-page-search) > .block-head { height:0; margin:0; padding:0; }
+.workspace #knowledgeBlock:not(.has-page-search) #pageCount { position:absolute; top:13px; right:14px; margin:0; }
+.workspace #knowledgeBlock:not(.has-page-search) #pageCategories { padding-right:60px; }

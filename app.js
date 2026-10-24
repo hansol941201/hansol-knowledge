@@ -492,6 +492,7 @@ function renderLibrary() {
 
   // 화면별 제목과 영역 표시
   const [heading, lead] = VIEW_LEAD[pageCategory] || VIEW_LEAD['전체'];
+  $('#knowledgeBlock').classList.toggle('has-page-search', Boolean(term));
   $('#pageHeading').textContent = term ? '검색 결과' : heading;
   $('#pageLead').textContent = term ? `“${term}” 으로 찾은 내용입니다.` : lead;
   const onDashboard = pageCategory === '대시보드' && !term;
