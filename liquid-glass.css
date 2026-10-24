@@ -1,0 +1,138 @@
+/* Hansol Liquid Glass — reference palette and surfaces, existing business data. */
+:root { --theme-blue:#7364df; --theme-ink:#273343; --theme-muted:#79869a; --theme-line:#ffffff65; --glass-line:rgba(255,255,255,.76); --glass-surface:rgba(255,255,255,.46); }
+html { background:#ccd7e3; }
+body,body:not(.overlay-mode) { background:radial-gradient(ellipse at 27% 18%,#ffcee5 0,transparent 39%),radial-gradient(ellipse at 86% 94%,#b9defe 0,transparent 55%),linear-gradient(125deg,#dce3ed,#b6c9dc); color:var(--theme-ink); }
+.workspace { position:relative; width:calc(100% - 56px); max-width:1640px; height:calc(100dvh - 56px); margin:28px auto; display:grid; grid-template-columns:220px minmax(0,1fr); grid-template-rows:150px minmax(0,1fr); border:1px solid rgba(255,255,255,.8); border-radius:34px; padding:0; background:radial-gradient(ellipse at 22% 24%,rgba(255,209,232,.74),transparent 51%),linear-gradient(135deg,rgba(255,255,255,.4),rgba(192,225,255,.45)); box-shadow:0 24px 65px #4d617b28,inset 0 1px 2px #fff; backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px); overflow:hidden; }
+.workspace .topnav { grid-column:2; grid-row:1; display:grid; grid-template-columns:1fr auto; grid-template-rows:65px minmax(0,1fr); padding:12px 26px 0; gap:0 12px; background:transparent; border:0; border-radius:0; }
+.workspace #dashboardHome { position:absolute; top:30px; left:24px; width:174px; display:flex; gap:11px; align-items:center; color:var(--theme-ink) !important; background:transparent; }
+.workspace #dashboardHome .glass-brand-mark { flex-shrink:0; display:grid; place-items:center; width:39px; height:39px; color:#fff; border-radius:15px; background:linear-gradient(135deg,#b87be9,#ff728d 50%,#ffc86b); box-shadow:0 4px 9px #77849625,inset 0 1px 1px #ffffff90; }
+.workspace #dashboardHome .glass-brand-mark span { display:flex; }
+.workspace #dashboardHome .glass-brand-text { display:grid; gap:4px; text-align:left; opacity:1; }
+.workspace #dashboardHome .glass-brand-text b { font:700 20px/1.1 system-ui; letter-spacing:-.6px; }
+.workspace #dashboardHome .glass-brand-text small { font:600 9px/1.4 system-ui !important; letter-spacing:1.2px; color:#7d879b !important; }
+.workspace .glass-breadcrumb { grid-column:1; grid-row:1; display:flex; align-items:center; gap:10px; color:#7b8496; font:500 11px/1.4 system-ui; white-space:nowrap; }
+.glass-breadcrumb strong { font-weight:500; }
+.glass-version { padding:4px 10px; border:1px solid #ffffff70; border-radius:20px; background:#ffffff35; color:#536074; font-size:10px; }
+.workspace .topnav .top-tools { grid-column:2; grid-row:1; gap:6px; justify-self:end; }
+.workspace .topnav .top-mini { width:27px; min-width:27px; height:27px; min-height:27px; color:#6d7890; background:#ffffff25; border:1px solid #ffffff65; border-radius:10px; box-shadow:inset 0 1px #ffffff55; }
+.workspace .topnav .top-mini:hover { color:#5846c4; background:#ffffff70; }
+.workspace .sync-state,.workspace .sync-state[data-state=offline] { max-width:110px; color:#778097 !important; background:#ffffff25 !important; border:1px solid #ffffff50; font-size:9px !important; }
+.workspace .topnav .brand-avatar { width:29px; height:29px; color:#5e5bb5; background:linear-gradient(140deg,#c5c1fc,#d9ecfb); border:1px solid #ffffffa0; border-radius:11px; }
+.workspace .topnav #shortcutSection { grid-column:1/-1; grid-row:2; display:flex; padding:0 0 13px; gap:12px; border-bottom:1px solid #ffffff50; }
+.workspace .crm-favorites-label { color:#6c7790; font-size:10px; }
+.workspace .topnav #shortcutGrid { gap:7px; padding:4px 1px 7px; scrollbar-color:#ffffff88 transparent; }
+.workspace .topnav .shortcut,.workspace .topnav .shortcut:nth-child(even),.workspace .topnav .shortcut.add { background:#ffffff25; border:1px solid #ffffff85 !important; border-radius:13px; width:91px; height:48px; min-height:48px; box-shadow:inset 0 1px #ffffff6b; }
+.workspace .topnav .shortcut:hover { background:#ffffff75; }
+.workspace .topnav .shortcut a::before { background:#eee8fc; border-color:#d7ccef; color:#8a6cd0; width:16px; height:16px; font-size:11px; }
+.workspace .topnav .shortcut a b { color:#5e687f !important; font-size:10px !important; }
+.workspace .topnav .shortcut .shortcut-more { color:#8c94aa; }
+.workspace .topnav .shortcut.add { color:#6b708b !important; width:68px; }
+.workspace .topnav .navigation-row #sideNav { position:absolute; top:103px; bottom:75px; left:0; width:220px; height:auto; padding:8px 17px; gap:4px; border:0; background:transparent; align-items:stretch; grid-column:auto; grid-row:auto; }
+.workspace .topnav #sideNav .top-item,.workspace .topnav #sideNav .top-item:first-of-type,.workspace .topnav #sideNav .top-item:nth-of-type(even),.workspace .topnav #sideNav .top-item.active { width:100%; min-height:42px; height:42px; display:flex; flex-direction:row; justify-content:flex-start; gap:13px; padding:8px 15px; margin:0; border:1px solid transparent; border-radius:17px; color:#69738a; box-shadow:none; background:transparent; }
+.workspace .topnav #sideNav .top-item span { font:500 12px/1.4 system-ui !important; }
+.workspace .topnav #sideNav .top-item svg { flex-shrink:0; width:18px; height:18px; color:#6f61e8; stroke-width:2; }
+.workspace .topnav #sideNav .top-item:nth-of-type(4n+1) svg { color:#f36991; }
+.workspace .topnav #sideNav .top-item:nth-of-type(4n+2) svg { color:#efa62e; }
+.workspace .topnav #sideNav .top-item:nth-of-type(4n+3) svg { color:#6b67e8; }
+.workspace .topnav #sideNav .top-item:nth-of-type(4n) svg { color:#2bb49a; }
+.workspace .topnav #sideNav .top-item.active { color:#354154; background:#ffffff60; border-color:#ffffff9c; box-shadow:inset 0 1px #fff,0 4px 15px #a2a8c00b; }
+.workspace .topnav #sideNav .top-item:hover { background:#ffffff35; color:#3f425c; }
+.glass-sidebar-foot { position:absolute; bottom:20px; left:23px; width:174px; display:flex; align-items:center; gap:9px; border-top:1px solid #ffffff55; padding-top:20px; }
+.glass-sidebar-foot i { width:11px; height:11px; border:1px solid #fff; border-radius:50%; background:#ff759d; box-shadow:0 1px 3px #a7b7c51c; }
+.glass-sidebar-foot i:nth-child(2) { background:#b582ef; }
+.glass-sidebar-foot i:nth-child(3) { background:#47bde4; }
+.glass-sidebar-foot span { margin-left:auto; color:#8994a6; font-size:10px; }
+.workspace::after { content:''; position:absolute; display:block !important; left:219px; top:0; bottom:0; width:1px; background:#ffffff4d; pointer-events:none; }
+.workspace .main { grid-column:2; grid-row:2; background:transparent; display:flex; flex-direction:column; height:100%; min-height:0; border-radius:0; }
+.workspace .topbar { display:flex; align-items:center; gap:12px; flex-shrink:0; min-height:64px; padding:0 26px 18px; margin:0; background:transparent; border:0; box-shadow:none; }
+.workspace .crm-page-title { font:700 21px/1.3 system-ui; letter-spacing:-.5px; color:#293447; }
+.workspace .topbar .search-wrap { max-width:270px; }
+.workspace .topbar .page-search { height:33px; min-height:33px; background:#ffffff25 !important; border:1px solid #ffffffa0; border-radius:13px; box-shadow:inset 0 1px #ffffff40; }
+.workspace .topbar #pageSearch { color:#536379 !important; font-size:11px !important; }
+.workspace #pageAdd { min-height:33px; width:33px; height:33px; border:1px solid #ffffffc0; border-radius:12px; background:linear-gradient(145deg,#f8b2c1,#ff8f9a); color:#fff; box-shadow:0 3px 9px #e697b521; }
+.workspace .main-scroll,.workspace .main-scroll:has(#knowledgeBlock.hidden) { background:transparent; padding:0 26px 20px; display:flex; flex-direction:column; gap:19px; overflow-y:auto; overflow-x:hidden; scrollbar-color:#ffffff70 transparent; scrollbar-width:thin; }
+.workspace .crm-overview { order:2; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin:0; padding:0; background:transparent; border:0; border-radius:0; }
+.workspace .crm-overview article { background:var(--glass-surface); border:1px solid var(--glass-line); border-radius:24px; padding:15px; box-shadow:inset 0 1px 1px #ffffffc0,0 6px 18px #768baf08; backdrop-filter:blur(12px); }
+.workspace .crm-overview h2 { color:#536077 !important; font-size:11px !important; margin:0 0 10px; }
+.workspace .crm-overview .crm-overview-content { height:100px; min-height:100px; padding:0; gap:6px; background:transparent; }
+.workspace .crm-overview .crm-overview-content strong { color:#39445b; font-size:12px !important; }
+.workspace .crm-overview .crm-overview-content p { color:#7f8ba0 !important; font-size:10px !important; }
+.workspace .crm-overview .crm-quote>span { color:#ccb5e2; }
+.workspace .crm-date-badge { color:#7e69ca; background:#ebe4fb; }
+.workspace .dash-cols,.workspace .main-scroll:has(#knowledgeBlock.hidden) .dash-cols { order:1; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); grid-template-rows:410px; grid-template-areas:'todo notes calendar'; flex-shrink:0; height:auto; min-height:0; gap:18px; overflow:visible; }
+.workspace #todayPanel,.workspace .notes-hub,.workspace #schedulePanel { min-height:0; height:410px; padding:20px; border:1px solid var(--glass-line) !important; border-radius:28px !important; background:var(--glass-surface) !important; box-shadow:inset 0 1px 1px #ffffffd0,0 8px 24px #8293b00a !important; backdrop-filter:blur(15px); }
+.workspace #todayPanel { position:relative; }
+.workspace #todayPanel::before { content:''; display:block; width:35px; height:14px; flex-shrink:0; border:8px solid #e5d0fa; border-radius:20px; background:#ac61ed; box-sizing:content-box; margin-bottom:17px; }
+.workspace .notes-hub { padding:0; }
+.workspace .notes-hub #memoPanel,.workspace .main-scroll:has(#knowledgeBlock.hidden) .notes-hub #memoPanel { padding:20px; height:100%; gap:14px; background:transparent !important; }
+.workspace #memoPanel .memo-head::before { content:'≡'; display:grid; place-items:center; width:38px; height:38px; color:#7869eb; background:#dcdafa; border:1px solid #c6c2fa; border-radius:14px; font:bold 29px/1 system-ui; margin-bottom:3px; }
+.workspace #memoPanel .memo-head { flex-direction:column; align-items:flex-start; gap:14px; border:0; }
+.workspace :is(.todo-head h2,.memo-head h2,#schedulePanel h2) { font:700 15px/1.4 system-ui !important; color:#303c52 !important; }
+.workspace .todo-head { border-color:#ffffff70; }
+.workspace .todo-head .todo-count { background:#e7e6fd !important; color:#7770c0 !important; font-size:9px !important; }
+.workspace .todo-quick-entry { background:#ffffff35 !important; border:1px solid #ffffff90; border-radius:12px; padding:8px; }
+.workspace .todo-quick-entry input { font-size:11px !important; }
+.workspace .todo-line { border-color:#ffffff90; }
+.workspace .todo-line-text,.workspace .todo-mark { color:#4f5b70 !important; font-size:12px !important; }
+.workspace #todayPanel .todo-empty { color:#929cb0 !important; font-size:11px !important; }
+.workspace .todo-pagination { border-color:#ffffff65; }
+.workspace .todo-pagination button { border:1px solid #ffffffa0; background:#ffffff35; border-radius:9px; color:#7d88a0; }
+.workspace .notes-hub #memoPanel .memo-note-shell { background:#ffffff25 !important; border:1px solid #ffffff80; border-radius:15px; }
+.workspace .notes-hub #memoPanel #memoNote { color:#536176 !important; font-size:12px !important; }
+.workspace .notes-hub #memoPanel .memo-tools button { background:#ffffff40; border:1px solid #ffffff90; border-radius:12px; color:#6c7193; }
+.workspace #schedulePanel { padding:20px !important; }
+.workspace #schedulePanel .block-head { padding-bottom:12px !important; border-color:#ffffff85; }
+.workspace #schedulePanel .block-head>div:first-child::before { content:'▦'; display:grid; place-items:center; width:34px; height:34px; margin-bottom:13px; color:#259a8d; background:#c3eee6; border:1px solid #a7e2d9; border-radius:12px; font:25px/1 system-ui; }
+.workspace #schedulePanel .cal-tools { align-self:flex-end; gap:3px; }
+.workspace #schedulePanel .cal-tools button { background:#ffffff32; border:1px solid #ffffff70; color:#8a93a7; border-radius:8px; padding:3px 5px !important; }
+.workspace #crmMeetingConnect { max-width:65px; }
+.workspace .calendar-month { margin:10px 0; gap:7px; }
+.workspace .calendar-month strong { color:#546078; font-size:12px; }
+.workspace .calendar-month button { background:#ffffff45; border:1px solid #ffffff70; color:#7b85a0; }
+.workspace #calendarToday { color:#7a68bd; background:#e9e0fa; }
+.workspace #schedulePanel .calendar-days button { color:#7c8aa1; height:24px; }
+.workspace #schedulePanel .calendar-days button.is-selected { background:linear-gradient(145deg,#b47bef,#8b77de); color:#fff; box-shadow:0 2px 7px #a17bc333; }
+.workspace #schedulePanel .calendar-days button.is-today:not(.is-selected) { background:#e9e0fa; color:#8a6fc8; }
+.workspace .calendar-selected-heading { border-color:#ffffff80; color:#8b81ae; }
+.workspace #schedulePanel .schedule-list { max-height:70px; }
+.workspace .block,.workspace .page-card { border:1px solid var(--glass-line) !important; background:var(--glass-surface) !important; border-radius:25px; box-shadow:inset 0 1px #ffffffb0,0 7px 19px #8193af09 !important; backdrop-filter:blur(14px); }
+.workspace .block { padding:22px; }
+.workspace .page-card { padding:21px; }
+.workspace .page-card .card-kind { color:#8a78b8 !important; }
+.workspace .page-card footer { border-color:#ffffff85; }
+.workspace .page-card footer button,.workspace .page-card .card-act { background:#ffffff40; color:#777492; border-color:#ffffff80; border-radius:9px; }
+.workspace #pageCategories,#todayPanel .todo-view-tabs { background:#ffffff22 !important; border:1px solid #ffffff70; border-radius:16px; }
+.workspace #pageCategories button,#todayPanel .todo-view-tabs button { border-radius:12px; background:transparent; color:#737d94 !important; }
+.workspace #pageCategories button.active,#todayPanel .todo-view-tabs button.active,#todayPanel .todo-view-tabs button[aria-pressed='true'] { background:#ffffff90 !important; border-color:#ffffffb0; box-shadow:0 2px 7px #a0a8bc11; color:#3d465f !important; }
+#todayPanel .todo-view-tabs button[aria-pressed='true'] span { color:#8b76ba; background:#eee6fa; }
+.glass-footer { display:flex; flex-shrink:0; align-items:center; gap:15px; min-height:70px; margin:0 26px; padding:13px 0; border-top:1px solid #ffffff60; }
+.glass-footer-tools { display:flex; gap:3px; padding:4px; border:1px solid #ffffff80; border-radius:16px; background:#ffffff20; }
+.glass-footer button { color:#5d6982; border:1px solid #ffffff90; border-radius:12px; background:#ffffff38; }
+.glass-footer-tools button { display:grid; place-items:center; width:32px; height:30px; padding:3px; border:0; }
+.glass-footer button:hover { background:#ffffffa0; }
+.glass-footer-caption { font-size:10px; color:#8992a7; }
+.glass-footer .glass-home-btn { margin-left:auto; display:flex; align-items:center; gap:18px; padding:10px 18px; color:#fff; font:600 11px/1.4 system-ui; background:linear-gradient(135deg,#ffb0bf,#ff8799); border-color:#ffcad5; box-shadow:inset 0 1px #ffffff8c,0 4px 13px #ed94ad25; }
+dialog,.edit-box,#phoneArchiveDialog,#phoneArchiveDialog .phone-archive,#backgroundDialog { background:rgba(247,249,255,.88) !important; border:1px solid #ffffffce; border-radius:25px; box-shadow:0 20px 65px #69799535,inset 0 1px #fff; backdrop-filter:blur(28px); }
+dialog button,#phoneArchiveDialog button,.edit-box button { background:#ffffff55 !important; border-color:#ffffff90; color:#7e759e !important; border-radius:12px; }
+dialog :is(input,textarea,select),.edit-box :is(input,textarea,select),#backgroundForm :is(input,select) { background:#ffffff55; border:1px solid #d9deed; border-radius:12px; color:#536176 !important; }
+#todoReminderPanel { background:rgba(247,248,255,.88); border:1px solid #ffffffb0; border-top:3px solid #e2aacd; border-radius:24px; backdrop-filter:blur(25px); box-shadow:0 12px 35px #7a8ea62b; }
+.orb { background:linear-gradient(140deg,#c1b4f1,#a7cee9); box-shadow:0 4px 15px #8a99ac35; }
+.workspace :is(button,input,textarea):focus-visible { outline:2px solid #ad8edf; outline-offset:3px; }
+.workspace .hidden { display:none !important; }
+@media(min-width:1250px) { .workspace { grid-template-columns:245px minmax(0,1fr); } .workspace .topnav .navigation-row #sideNav { width:245px; padding-left:22px; padding-right:22px; } .workspace #dashboardHome { left:31px; } .workspace::after { left:244px; } .glass-sidebar-foot { left:30px; width:185px; } .workspace .main-scroll,.workspace .topbar { padding-left:32px; padding-right:32px; } .workspace .topnav { padding-left:32px; padding-right:32px; } .workspace .dash-cols,.workspace .main-scroll:has(#knowledgeBlock.hidden) .dash-cols { grid-template-rows:450px; gap:22px; } .workspace #todayPanel,.workspace .notes-hub,.workspace #schedulePanel { height:450px; } }
+@media(max-width:1100px) { .workspace { grid-template-columns:180px minmax(0,1fr); width:calc(100% - 30px); height:calc(100dvh - 30px); margin:15px; } .workspace #dashboardHome { left:18px; width:150px; } .workspace #dashboardHome .glass-brand-text b { font-size:18px; } .workspace #dashboardHome .glass-brand-text small { font-size:8px !important; letter-spacing:.8px; } .workspace .topnav .navigation-row #sideNav { width:180px; padding-left:12px; padding-right:12px; } .workspace::after { left:179px; } .glass-sidebar-foot { left:19px; width:142px; } .workspace .topnav { padding-left:20px; padding-right:20px; } .workspace .glass-breadcrumb { font-size:10px; gap:6px; } .glass-version { display:none; } .workspace .topnav .sync-state { display:none; } .workspace .topbar,.workspace .main-scroll { padding-left:20px; padding-right:20px; } .workspace .crm-page-title { font-size:18px; } .workspace .dash-cols,.workspace .main-scroll:has(#knowledgeBlock.hidden) .dash-cols { grid-template-columns:repeat(2,minmax(0,1fr)); grid-template-rows:380px auto; grid-template-areas:'todo notes' 'calendar calendar'; } .workspace #todayPanel,.workspace .notes-hub { height:380px; } .workspace #schedulePanel { height:auto; min-height:360px; } .workspace #schedulePanel .calendar-days button { height:31px; } .workspace .crm-overview { grid-template-columns:repeat(2,minmax(0,1fr)); } .glass-footer { margin:0 20px; } }
+@media(max-width:650px) { .workspace { grid-template-columns:65px minmax(0,1fr); grid-template-rows:135px minmax(0,1fr); width:calc(100% - 16px); height:calc(100dvh - 16px); margin:8px; border-radius:24px; } .workspace .topnav { grid-column:2; grid-template-columns:1fr; grid-template-rows:48px 73px; padding:7px 12px; } .workspace #dashboardHome { top:17px; left:14px; width:38px; padding:0; } .workspace #dashboardHome .glass-brand-mark { width:36px; height:36px; border-radius:13px; } .workspace #dashboardHome .glass-brand-text { display:none; } .workspace .glass-breadcrumb { grid-row:1; font-size:9px; gap:5px; } .workspace .topnav .top-tools { grid-column:1; grid-row:1; justify-self:end; gap:3px; } .workspace .topnav .top-mini { width:24px; min-width:24px; height:24px; min-height:24px; padding:4px; } .workspace .topnav #backgroundOpen,.workspace .topnav #resetBackupSide,.workspace .topnav #resetOpen,.workspace .topnav .brand-avatar { display:none; } .workspace .topnav #shortcutSection { grid-row:2; padding-bottom:5px; gap:7px; } .workspace .crm-favorites-label { font-size:8px; } .workspace .topnav .shortcut,.workspace .topnav .shortcut:nth-child(even) { width:80px; min-height:43px; height:43px; } .workspace .topnav .navigation-row #sideNav { top:75px; bottom:44px; width:65px; padding:4px 5px; gap:3px; } .workspace .topnav #sideNav .top-item,.workspace .topnav #sideNav .top-item:first-of-type,.workspace .topnav #sideNav .top-item:nth-of-type(even),.workspace .topnav #sideNav .top-item.active { width:54px; height:45px; min-height:45px; flex-direction:column; gap:3px; padding:5px 1px; border-radius:13px; } .workspace .topnav #sideNav .top-item span { font-size:8px !important; } .workspace .topnav #sideNav .top-item svg { width:17px; height:17px; } .workspace::after { left:64px; } .glass-sidebar-foot { left:12px; bottom:16px; width:40px; padding-top:8px; gap:4px; } .glass-sidebar-foot i { width:7px; height:7px; } .glass-sidebar-foot span { display:none; } .workspace .topbar { padding:0 12px 12px; gap:7px; flex-wrap:wrap; } .workspace .crm-page-title { font-size:16px; width:100%; } .workspace .topbar .search-wrap { max-width:none; margin:0; } .workspace .topbar .page-search { height:30px; min-height:30px; } .workspace .topbar #pageSearch { font-size:10px !important; } .workspace .main-scroll,.workspace .main-scroll:has(#knowledgeBlock.hidden) { padding:0 12px 16px; gap:12px; } .workspace .dash-cols,.workspace .main-scroll:has(#knowledgeBlock.hidden) .dash-cols { grid-template-columns:1fr; grid-template-rows:360px 360px auto; grid-template-areas:'todo' 'notes' 'calendar'; gap:14px; } .workspace #todayPanel,.workspace .notes-hub { height:360px; border-radius:23px !important; } .workspace #schedulePanel { min-height:370px; border-radius:23px !important; } .workspace .crm-overview { grid-template-columns:1fr; gap:12px; } .workspace .crm-overview .crm-overview-content { min-height:80px; height:80px; } .glass-footer { min-height:60px; margin:0 12px; padding:8px 0; gap:6px; } .glass-footer-caption { display:none; } .glass-footer-tools { padding:2px; gap:0; border-radius:12px; } .glass-footer-tools button { width:27px; height:28px; } .glass-footer .glass-home-btn { padding:9px 12px; gap:7px; font-size:10px; } }
+@media(prefers-reduced-transparency:reduce) { .workspace #todayPanel,.workspace .notes-hub,.workspace #schedulePanel,.workspace .page-card { background:#f2f5fc !important; } }
+.workspace .topbar { order:0; }
+.workspace .main-scroll,.workspace .main-scroll:has(#knowledgeBlock.hidden) { order:1; }
+.workspace .glass-footer { order:2; }
+@media(min-width:851px) and (max-width:1100px) { .workspace .dash-cols,.workspace .main-scroll:has(#knowledgeBlock.hidden) .dash-cols { grid-template-columns:repeat(3,minmax(0,1fr)); grid-template-rows:410px; grid-template-areas:'todo notes calendar'; gap:14px; } .workspace #todayPanel,.workspace .notes-hub,.workspace #schedulePanel { height:410px; min-height:0; padding:16px; } .workspace .notes-hub { padding:0; } .workspace .notes-hub #memoPanel,.workspace .main-scroll:has(#knowledgeBlock.hidden) .notes-hub #memoPanel { padding:16px; } .workspace #schedulePanel { padding:16px !important; } .workspace #schedulePanel .block-head { flex-wrap:wrap; gap:7px; } .workspace #schedulePanel .cal-tools { margin-left:0; } .workspace #schedulePanel .calendar-days button { height:22px; } }
+
+/* 검색 미리보기와 작은 지식창도 같은 유리 표면을 쓴다. */
+.search-preview,.row-menu { background:rgba(247,248,255,.92); border:1px solid #ffffffd0; border-radius:18px; box-shadow:0 12px 35px #7585a329; backdrop-filter:blur(22px); color:#566176; }
+#app.messenger { background:linear-gradient(145deg,rgba(255,227,240,.94),rgba(215,236,255,.94)); border:1px solid #ffffffbf; border-radius:25px; box-shadow:0 12px 40px #667c9c30; backdrop-filter:blur(24px); color:#48566d; }
+#app.messenger .header,#app.messenger .composer,#app.messenger .quick-add { background:rgba(255,255,255,.3); border-color:#ffffff88; }
+#app.messenger .bubble,#app.messenger .knowledge-item { background:rgba(255,255,255,.52); border:1px solid #ffffff9c; border-radius:17px; color:#526079; }
+#app.messenger .composer input,#app.messenger .quick-add input,#app.messenger .quick-add textarea { background:#ffffff50; color:#526079; border:1px solid #ffffff90; border-radius:12px; }
+#app.messenger button { color:#8d79b4; }
+#app.messenger .composer button { background:linear-gradient(135deg,#f5b4c8,#ea9cb8); color:#fff; border-radius:12px; }
