@@ -62,3 +62,17 @@ body::before { background:linear-gradient(140deg,transparent 48%,rgba(244,239,23
 .workspace .todo-quick-options button:hover { background:#f1dda6; }
 .workspace input:focus-visible,.workspace textarea:focus-visible,.workspace button:focus-visible,.workspace a:focus-visible { outline-color:#d5ad46; }
 ::selection { color:#6d5318; background:#f7df9c; }
+
+/* A very light soft-glass finish; existing palette, sizing and layout stay. */
+.workspace { box-shadow:0 24px 60px rgba(91,72,42,.1),inset 0 1px 3px rgba(255,255,255,.95),inset 0 -1px 2px rgba(189,169,124,.1); }
+.workspace #todayPanel,.workspace .notes-hub,.workspace #schedulePanel,.workspace .page-card,.workspace .block,.workspace #contractTodaySection .contract-today-card { border-radius:20px !important; border-top-color:rgba(255,255,255,.98) !important; box-shadow:0 6px 16px rgba(124,103,67,.035),0 1px 2px rgba(124,103,67,.035),inset 0 1px 2px rgba(255,255,255,.92),inset 0 -1px 1px rgba(218,204,177,.1) !important; }
+.workspace .topnav .shortcut,.workspace .topnav .shortcut:nth-child(even),.workspace .topnav .shortcut.add { border-radius:13px; box-shadow:0 3px 7px rgba(146,118,63,.035),inset 0 1px 2px rgba(255,255,255,.95),inset 0 -1px 1px rgba(209,191,149,.13); }
+.workspace .topnav > .topbar .page-search { box-shadow:inset 0 1px 3px rgba(155,129,77,.035),0 1px 0 rgba(255,255,255,.8); }
+.workspace #todayPanel .todo-quick-entry,.workspace #memoPanel .memo-note-shell { box-shadow:inset 0 1px 3px rgba(165,138,88,.045),0 1px 0 rgba(255,255,255,.8); }
+.workspace .topnav > .topbar #pageAdd,.workspace .glass-footer .glass-home-btn { box-shadow:inset 0 1px 1px rgba(255,255,255,.65),inset 0 -2px 1px rgba(157,110,15,.12),0 3px 7px rgba(171,123,24,.11); }
+.workspace #todayPanel .todo-view-tabs button { border-radius:11px; }
+.workspace #todayPanel .todo-view-tabs button.active { box-shadow:inset 0 1px 1px rgba(255,255,255,.7),inset 0 -1px 1px rgba(168,128,33,.1),0 2px 4px rgba(175,133,26,.06); }
+.workspace .notes-hub #memoPanel .memo-tools button,.workspace .page-card footer button { box-shadow:inset 0 1px rgba(255,255,255,.8),0 1px 2px rgba(143,118,67,.035); }
+.workspace .todo-head h2,.workspace .memo-head h2,.workspace #schedulePanel h2,.workspace #contractTodaySection h2 { letter-spacing:-.15px; font-weight:600 !important; }
+.workspace .topnav #sideNav .top-item.active { box-shadow:inset -3px 0 #dfad2f,inset 0 1px rgba(255,255,255,.75),0 3px 8px rgba(139,107,37,.045); }
+.workspace #schedulePanel .calendar-days button.is-selected { box-shadow:inset 0 1px 1px rgba(255,255,255,.55),0 2px 5px rgba(168,124,24,.12); }
