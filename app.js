@@ -350,7 +350,7 @@ function goToView(name) {
 function renderSideNav() {
   // 상단 가로 메뉴 — 마지막에 기억 저장소(모달)를 함께 둔다.
   const navGroups = { '내 지식': '워크스페이스', '특허': '자료 · 사람', '업무지식': '업무 라이브러리' };
-  $('#sideNav').innerHTML = NAV_ITEMS.map(item => {
+  $('#sideNav').innerHTML = NAV_ITEMS.filter(item => item.name !== '내 지식').map(item => {
     const target = item.category || item.name;
     return `<button type="button" class="top-item ${target === pageCategory ? 'active' : ''}" data-nav="${target}" title="${escapeHtml(item.name)}" aria-label="${escapeHtml(item.name)}">${icon(item.icon, 20)}<span>${escapeHtml(item.name)}</span></button>`;
   }).join('') + `<button type="button" class="top-item" id="memoryToggle" title="기억 저장소" aria-label="기억 저장소">${icon('bookmark', 20)}<span>저장소</span></button><button type="button" class="top-item" id="calendarNav" title="달력" aria-label="달력">${icon('calendar',20)}<span>달력</span></button>`;
