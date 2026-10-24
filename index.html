@@ -20,7 +20,7 @@
   <link rel="stylesheet" href="crayon.css?v=59" />
   <link rel="stylesheet" href="theme.css?v=1" />
   <link rel="stylesheet" href="crm-layout.css?v=1" />
-  <link rel="stylesheet" href="liquid-glass.css?v=6" />
+  <link rel="stylesheet" href="liquid-glass.css?v=8" />
   <script src="background.js?v=1" defer></script>
 </head>
 <body>
@@ -28,6 +28,15 @@
     <header class="topnav">
       <div class="header-check-art" aria-hidden="true"><span><img src="theme-art/header-check.png" alt="" /></span><span><img src="theme-art/header-check.png" alt="" /></span></div>
       <div class="navigation-row"><button type="button" id="dashboardHome" class="hansol-story-logo b2b-brand" aria-label="B2B 대시보드로 이동" title="대시보드로 이동"><i class="glass-brand-mark" aria-hidden="true"><span data-icon="grid" data-size="23"></span></i><span class="glass-brand-text"><b>Hansol</b><small>KNOWLEDGE KIT</small></span></button><nav id="sideNav" class="top-nav" aria-label="업무 메뉴"></nav></div>
+      <header class="topbar">
+        <strong class="crm-page-title">대시보드</strong>
+        <div class="search-wrap">
+          <label class="page-search"><span data-icon="search" data-size="18"></span><input id="pageSearch" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="searchPreview" placeholder="지식, 특허번호, 업체명, 연락처를 검색하세요" /></label>
+          <div id="searchPreview" class="search-preview hidden" role="listbox" aria-label="검색 미리보기"></div>
+        </div>
+        <button id="accountAdd" class="hidden" type="button" aria-hidden="true"></button>
+        <button id="pageAdd" class="primary-btn" type="button" aria-label="추가" title="추가"><span data-icon="plus"></span></button>
+      </header>
       <div class="glass-breadcrumb"><span>Home</span><span aria-hidden="true">›</span><strong>나의 업무 공간</strong><span class="glass-version">Glass</span></div>
       <section id="shortcutSection" class="shortcut-band" aria-label="즐겨찾기">
         <div class="crm-favorites-label"><span data-icon="star" data-size="15"></span>즐겨찾기</div>
@@ -46,21 +55,10 @@
     </header>
 
     <main class="main">
-      <header class="topbar">
-        <strong class="crm-page-title">대시보드</strong>
-        <div class="search-wrap">
-          <label class="page-search"><span data-icon="search" data-size="18"></span><input id="pageSearch" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="searchPreview" placeholder="지식, 특허번호, 업체명, 연락처를 검색하세요" /></label>
-          <div id="searchPreview" class="search-preview hidden" role="listbox" aria-label="검색 미리보기"></div>
-        </div>
-        <button id="accountAdd" class="hidden" type="button" aria-hidden="true"></button>
-        <button id="pageAdd" class="primary-btn" type="button" aria-label="추가" title="추가"><span data-icon="plus"></span></button>
-      </header>
+
 
       <div class="main-scroll">
-        <section id="contractTodaySection" class="contract-today-grid" aria-label="협약서 오늘의 아파트">
-          <article class="contract-today-card"><header><h2>오늘 현설 아파트</h2><time data-contract-today-date></time></header><div id="contractBriefingList" aria-live="polite"><p>불러오는 중…</p></div></article>
-          <article class="contract-today-card"><header><h2>오늘 D-DAY 아파트</h2><time data-contract-today-date></time></header><div id="contractDdayList" aria-live="polite"><p>불러오는 중…</p></div></article>
-        </section>
+
         <!-- 세 칸을 나란히 둔다. 좁은 화면에서는 이 차례(메모 → 할 일 → 일정)대로
              한 줄씩 쌓이고, 넓은 화면에서는 아래 grid-template-areas 가
              할 일을 왼쪽 넓은 자리로, 메모와 일정을 오른쪽 위·아래로 보낸다. -->
@@ -72,6 +70,11 @@
           <section id="todayPanel" class="today-panel todo-panel"></section>
           <section id="schedulePanel" class="today-panel schedule-panel"></section>
         </div>
+
+        <section id="contractTodaySection" class="contract-today-grid" aria-label="협약서 오늘의 아파트">
+          <article class="contract-today-card"><header><h2>현설 아파트</h2><time data-contract-today-date></time></header><div id="contractBriefingList" aria-live="polite"><p>불러오는 중…</p></div></article>
+          <article class="contract-today-card"><header><h2>D-DAY 아파트</h2><time data-contract-today-date></time></header><div id="contractDdayList" aria-live="polite"><p>불러오는 중…</p></div></article>
+        </section>
 
         <section id="knowledgeBlock" class="block">
           <div class="block-head">
@@ -308,7 +311,7 @@
   <script src="crm-meeting-model.js?v=1"></script>
   <script src="todo-dates.js?v=1"></script>
   <script src="contract-today-model.js?v=1"></script>
-  <script src="app.js?v=compact-20261024-124"></script>
+  <script src="app.js?v=20261024-task-tabs"></script>
   <script src="crm-meetings.js?v=2"></script>
   <script src="contract-today.js?v=1"></script>
   <script>

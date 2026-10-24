@@ -259,3 +259,36 @@ body.overlay-mode .alarm-dock { display:none; }
 .workspace #knowledgeBlock:not(.has-page-search) > .block-head { height:0; margin:0; padding:0; }
 .workspace #knowledgeBlock:not(.has-page-search) #pageCount { position:absolute; top:13px; right:14px; margin:0; }
 .workspace #knowledgeBlock:not(.has-page-search) #pageCategories { padding-right:60px; }
+
+/* Search occupies the unused header row above favorites. */
+.workspace .topnav > .topbar { grid-column:1; grid-row:1; display:flex; align-items:center; width:100%; margin:0; padding:0; border:0; background:transparent; box-shadow:none; min-width:0; }
+.workspace .topnav > .topbar .search-wrap { width:100%; max-width:none; flex:1; margin:0; min-width:0; }
+.workspace .topnav > .topbar .page-search { height:39px; min-height:39px; padding:0 13px; }
+.workspace .topnav > .topbar #pageSearch { height:100%; font-size:12px !important; }
+.workspace .topnav > .topbar #pageAdd { flex:none; width:34px; min-width:34px; height:34px; min-height:34px; }
+.workspace .topnav #sideNav .top-item span { font-size:13px !important; }
+.workspace .topnav #sideNav .top-item svg { width:22px; height:22px; }
+.workspace .topnav #sideNav .top-item { gap:12px; }
+/* Full task list first; notes and calendar follow. */
+.workspace[data-view='대시보드'] .dash-cols { order:0; }
+.workspace[data-view='대시보드'] #contractTodaySection { order:1; }
+.workspace[data-view='대시보드'] .dash-cols,.workspace[data-view='대시보드'] .main-scroll:has(#knowledgeBlock.hidden) .dash-cols { display:grid; flex:none; height:auto; min-height:0; grid-template-columns:repeat(2,minmax(0,1fr)); grid-template-rows:auto 370px; grid-template-areas:'todo todo' 'notes calendar'; gap:16px; }
+.workspace #todayPanel { display:flex; flex-direction:column; min-height:0; height:auto; padding:17px 19px; }
+.workspace[data-view='대시보드'] #todayPanel { min-height:160px; height:auto; max-height:none; }
+.workspace[data-view='대시보드'] .notes-hub,.workspace[data-view='대시보드'] #schedulePanel { height:370px; min-height:0; }
+.workspace #todayPanel .todo-head { display:grid; grid-template-columns:auto minmax(0,1fr); align-items:center; gap:10px 18px; padding:0 0 11px; }
+.workspace #todayPanel .todo-head h2 { white-space:nowrap; }
+.workspace #todayPanel .todo-view-tabs { display:flex; flex-wrap:wrap; gap:5px; padding:0; border:0; margin:0; background:transparent !important; justify-content:flex-start; }
+.workspace #todayPanel .todo-view-tabs button { padding:5px 10px; min-height:28px; font-size:12px !important; border-radius:10px; }
+.workspace #todayPanel .todo-view-tabs button span { margin-left:4px; font-size:10px; }
+.workspace #todayPanel .todo-quick-entry { grid-column:1/-1; width:100%; max-width:none; min-width:0; margin:0; }
+.workspace #todayPanel .todo-count { display:none; }
+.workspace #todayPanel .todo-controls { display:none; }
+.workspace #todayPanel .todo-results { flex:none; height:auto; max-height:none; overflow:visible; }
+.workspace #todayPanel .todo-empty { min-height:0; padding:15px 0; }
+.workspace #todayPanel .todo-line { min-height:39px; padding:8px 0; }
+.workspace[data-view='할 일'] .dash-cols { height:auto; min-height:0; grid-template-rows:auto; }
+@media(max-width:850px) { .workspace .topnav { grid-template-columns:minmax(0,1fr) auto; } .workspace .topnav > .topbar .page-search { height:37px; min-height:37px; } }
+@media(max-width:650px) { .workspace .topnav { grid-template-rows:53px 70px; } .workspace .topnav > .topbar { grid-column:1; grid-row:1; } .workspace .topnav > .topbar #pageSearch { font-size:10px !important; } .workspace .topnav #sideNav .top-item span { font-size:10px !important; } .workspace .topnav #sideNav .top-item svg { width:21px; height:21px; } .workspace[data-view='대시보드'] .dash-cols,.workspace[data-view='대시보드'] .main-scroll:has(#knowledgeBlock.hidden) .dash-cols { grid-template-columns:1fr; grid-template-rows:auto 320px 370px; grid-template-areas:'todo' 'notes' 'calendar'; } .workspace[data-view='대시보드'] .notes-hub { height:320px; } .workspace #todayPanel .todo-head { grid-template-columns:1fr; } .workspace #todayPanel .todo-view-tabs { grid-column:1; } }
+.workspace[data-view='대시보드'] #dashCols { order:0; }
+.workspace[data-view='대시보드'] #dashCols { order:0 !important; }

@@ -627,42 +627,38 @@ function renderTodos() {
   // 검색 중이거나 다른 화면이면 상단 할 일 카드는 접어 둔다.
   panel.classList.toggle('hidden', searching || !(pageCategory === '대시보드' || onTodoView));
 
-  const allActive = activeTodos().filter(todo => pageCategory !== '대시보드' || todo.date === todayKey());
+  const allActive = activeTodos();
+  const tomorrowDate = new Date(todayKey() + 'T12:00:00Z');
+  tomorrowDate.setUTCDate(tomorrowDate.getUTCDate() + 1);
+  const tomorrow = tomorrowDate.toISOString().slice(0, 10);
   const modes = [
     ['all', '전체', allActive],
-    ['star', '중요', allActive.filter(t => t.starred)],
     ['today', '오늘', allActive.filter(t => todoDateState(t) === 'today')],
-    ['late', '지연', allActive.filter(t => todoDateState(t) === 'late')],
-    ['future', '예정', allActive.filter(t => todoDateState(t) === 'future')],
-    ['none', '날짜 없음', allActive.filter(t => todoDateState(t) === 'none')],
+    ['tomorrow', '내일', allActive.filter(t => t.date === tomorrow)],
+    ['dated', '날짜 지정', allActive.filter(t => Boolean(String(t.date || '').trim()))],
+    ['star', '중요', allActive.filter(t => t.starred)],
     ['done', '완료', doneTodos()]
   ];
   const selected = modes.find(m => m[0] === todoDisplayMode) || modes[0];
   const taskNeedle = todoDisplayQuery.toLocaleLowerCase().replace(/\s+/g, '');
   const matching = selected[2].filter(t => !taskNeedle ||
     `${t.text} ${t.date || ''}`.toLocaleLowerCase().replace(/\s+/g, '').includes(taskNeedle));
-  const pageSize = 12;
-  const pages = Math.max(1, Math.ceil(matching.length / pageSize));
-  todoDisplayPage = Math.min(Math.max(1, todoDisplayPage), pages);
-  const list = matching.slice((todoDisplayPage - 1) * pageSize, todoDisplayPage * pageSize);
+  const list = matching;
   panel.innerHTML = `
     <div class="todo-head">
-      <h2>${pageCategory === '대시보드' ? '오늘 할 일' : '할 일 목록'}</h2>
+<h2>할 일</h2>
+      <div class="todo-view-tabs" aria-label="할 일 분류">${modes.map(([key, label, rows]) => `<button type="button" data-todo-view="${key}" class="${key === todoDisplayMode ? 'active' : ''}" aria-pressed="${key === todoDisplayMode}">${label}<span>${rows.length}</span></button>`).join('')}</div>
       <label class="todo-quick-entry"><span aria-hidden="true">+</span><input id="todoQuickInput" autocomplete="off" aria-label="할 일 빠른 추가" placeholder="예: 내일 자료 보내기 → Enter" value="${escapeHtml(todoQuickDraft)}" /></label>
       <span class="todo-count">미완료 ${allActive.length}개</span>
     </div>
     ${todoQuickChoosing ? `<div class="todo-quick-choice" role="dialog" aria-label="할 일 종류 선택"><div><strong>어떤 할 일인가요?</strong><p>${escapeHtml(todoQuickDraft)}</p></div><div class="todo-quick-options"><button type="button" data-quick-kind="today">오늘<span>오늘 날짜로 등록</span></button><button type="button" data-quick-kind="star">중요<span>별표로 우선 표시</span></button><button type="button" data-quick-kind="all">일반 할 일<span>날짜 없이 등록</span></button><button type="button" data-quick-cancel>취소</button></div></div>` : ''}
     <div class="todo-controls">
-      <div class="todo-view-tabs" aria-label="할 일 분류">${modes.map(([key, label, rows]) => `<button type="button" data-todo-view="${key}" class="${key === todoDisplayMode ? 'active' : ''}" aria-pressed="${key === todoDisplayMode}">${label}<span>${rows.length}</span></button>`).join('')}</div>
       <label class="todo-list-search"><span>검색</span><input id="todoListSearch" type="search" autocomplete="off" aria-label="할 일 목록 검색" placeholder="할 일 내용이나 날짜 검색" value="${escapeHtml(todoDisplayQuery)}" /></label>
     </div>
     <div class="todo-results">${list.length
       ? (todoDisplayMode === 'done' ? VIEWS.todoDoneSimpleList(list) : VIEWS.todoSimpleList(list))
       : `<div class="todo-empty">${allActive.length || todoDisplayMode === 'done' ? '해당하는 할 일이 없습니다.' : '위의 + 버튼에서 할 일을 등록하세요.'}</div>`}</div>
-    <div class="todo-pagination">
-      <span>${matching.length ? (todoDisplayPage - 1) * pageSize + 1 : 0}–${Math.min(todoDisplayPage * pageSize, matching.length)} / ${matching.length}개</span>
-      <div><button type="button" data-todo-prev ${todoDisplayPage === 1 ? 'disabled' : ''}>이전</button><span>${todoDisplayPage} / ${pages}</span><button type="button" data-todo-next ${todoDisplayPage === pages ? 'disabled' : ''}>다음</button></div>
-    </div>`;
+    `;
   const quickInput = panel.querySelector('#todoQuickInput');
   quickInput.oninput = () => { todoQuickDraft = quickInput.value; };
   quickInput.onkeydown = event => {
@@ -716,8 +712,6 @@ function renderTodos() {
     const input = panel.querySelector('#todoListSearch'); input.focus();
     if (input.type !== 'search') input.setSelectionRange(caret, caret);
   };
-  panel.querySelector('[data-todo-prev]').onclick = () => { todoDisplayPage--; renderTodos(); };
-  panel.querySelector('[data-todo-next]').onclick = () => { todoDisplayPage++; renderTodos(); };
 
   panel.querySelectorAll('[data-todo-id]').forEach(row => {
     const todo = todos.find(x => x.id === row.dataset.todoId);
