@@ -495,12 +495,14 @@ function renderLibrary() {
   $('#pageHeading').textContent = term ? '검색 결과' : heading;
   $('#pageLead').textContent = term ? `“${term}” 으로 찾은 내용입니다.` : lead;
   const onDashboard = pageCategory === '대시보드' && !term;
+  $('#dailyAlarmBoard').classList.toggle('hidden', !onDashboard);
   $('#shortcutSection').classList.remove('hidden');
   $('.crm-page-title').textContent = onDashboard ? '대시보드' : heading;
   $('#dashCols').classList.toggle('hidden', !onDashboard && pageCategory !== '할 일');
   $('#schedulePanel').classList.toggle('hidden', !onDashboard);
   $('#knowledgeBlock').classList.toggle('hidden', onDashboard || (pageCategory === '할 일' && !term));
   $('#pageCategories').classList.toggle('hidden', Boolean(term));
+  renderTodoReminders();
   paintIcons($('#pageGrid'));
   // 카드 본문을 누르면 상세로 연다(버튼 클릭은 제외).
   $('#pageGrid').querySelectorAll('.page-card').forEach(card => {
@@ -1804,6 +1806,7 @@ function sortedSchedule(list) {
 }
 
 function renderSchedule() {
+  renderDailyAlarmBoard();
   const today = todayKey();
   const all = [...alive(schedule), ...((window.CRM_MEETINGS && window.CRM_MEETINGS.items) || []).filter(item => item.date >= today)];
   const upcoming = sortedSchedule(all.filter(item => String(item.date) >= today));
@@ -3301,7 +3304,27 @@ $('#syncForm').addEventListener('submit', async event => {
 });
 
 // PC의 현지 날짜와 같은 미완료 업무만 알린다. 지난 업무는 목록에만 남긴다.
+function renderDailyAlarmBoard() {
+  const board = $('#dailyAlarmBoard');
+  if (!board) return;
+  const today = todayKey();
+  const tasks = activeTodos().filter(todo => todo.date === today);
+  const meetings = (window.CRM_MEETINGS?.items || []).filter(item => !item.deleted);
+  const events = sortedSchedule([...alive(schedule), ...meetings].filter(item => item.date === today));
+  const signature = JSON.stringify([today, tasks.map(item => [item.id,item.text]), events.map(item => [item.id,item.title,item.time,item.source])]);
+  if (board.dataset.signature === signature) return;
+  board.dataset.signature = signature;
+  board.innerHTML = `<article class="daily-alarm-card"><header><span class="daily-alarm-icon">${icon('calendar',17)}</span><h2>오늘 일정 알림</h2><b>${events.length}건</b></header><div class="daily-alarm-list">${events.length ? events.map((item,index) => `<button type="button" class="daily-event" data-alarm-event="${index}"><time>${escapeHtml(item.time || '종일')}</time><span>${escapeHtml(item.title || '일정')}</span><small>보기 ↗</small></button>`).join('') : '<p class="daily-alarm-empty">오늘 등록된 일정이 없습니다.</p>'}</div><footer>${escapeHtml(today)} · 달력의 오늘 일정만 표시</footer></article>
+    <article class="daily-alarm-card"><header><span class="daily-alarm-icon">${icon('check',17)}</span><h2>오늘 할 일 알림</h2><b>${tasks.length}개</b></header><div class="daily-alarm-list">${tasks.length ? tasks.map(item => `<label class="daily-task"><input type="checkbox" data-daily-task="${escapeHtml(item.id)}" aria-label="${escapeHtml(item.text)} 완료"/><span>${escapeHtml(item.text)}</span><small>완료</small></label>`).join('') : '<p class="daily-alarm-empty">오늘 남은 할 일이 없습니다.</p>'}</div><footer>오늘 날짜의 미완료 업무 · 완료하면 알림에서 사라집니다</footer></article>`;
+  board.querySelectorAll('[data-daily-task]').forEach(check => { check.onchange = () => completeReminder(check.dataset.dailyTask); });
+  board.querySelectorAll('[data-alarm-event]').forEach(button => { button.onclick = () => {
+    const item = events[Number(button.dataset.alarmEvent)];
+    if (item.source === 'crm-meeting') window.CRM_MEETINGS?.open();
+    else openScheduleModal(item);
+  }; });
+}
 function renderTodoReminders() {
+  renderDailyAlarmBoard();
   const due = activeTodos().filter(todo => todo.date === todayKey());
   if (window.knowledgeAPI?.updateReminders) {
     window.knowledgeAPI.updateReminders(due.map(todo => ({ id: todo.id, text: todo.text, date: todo.date })));
@@ -3314,7 +3337,7 @@ function renderTodoReminders() {
     panel.setAttribute('aria-label', '미완료 할 일 알림');
     document.body.append(panel);
   }
-  panel.hidden = !due.length;
+  panel.hidden = !due.length || (pageCategory === '대시보드' && !pageSearchCommitted.trim());
   const signature = JSON.stringify(due.map(todo => [todo.id, todo.text, todo.date]));
   if (panel.dataset.signature === signature) return;
   panel.dataset.signature = signature;

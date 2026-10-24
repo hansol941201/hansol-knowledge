@@ -157,3 +157,35 @@ dialog :is(input,textarea,select),.edit-box :is(input,textarea,select),#backgrou
 .workspace #schedulePanel .cal-tools { margin-left:auto; min-width:0; }
 .workspace #schedulePanel .cal-tools button { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .workspace #schedulePanel #crmMeetingConnect { max-width:54px; }
+/* 대시보드 하단의 당일 전용 빨간 유리 알림 카드 */
+.daily-alarm-board { order:2; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:15px; flex-shrink:0; }
+.daily-alarm-card { min-width:0; padding:15px 17px 12px; border:1px solid rgba(255,219,229,.94); border-radius:22px; background:linear-gradient(125deg,rgba(255,127,149,.23),rgba(255,194,207,.2)); box-shadow:inset 0 1px rgba(255,255,255,.8),0 5px 20px rgba(211,93,125,.06); backdrop-filter:blur(18px); }
+.daily-alarm-card header { display:flex; align-items:center; gap:8px; }
+.daily-alarm-icon { display:grid; place-items:center; width:27px; height:27px; color:#cb536e; background:rgba(255,255,255,.42); border:1px solid #ffffff88; border-radius:10px; }
+.workspace .daily-alarm-card h2 { margin:0; color:#9b425d !important; font:600 12px/1.4 system-ui !important; }
+.daily-alarm-card header b { margin-left:auto; color:#b66179; font:600 10px/1.4 system-ui; background:#ffffff55; border-radius:9px; padding:3px 7px; }
+.daily-alarm-list { max-height:140px; overflow-y:auto; margin-top:8px; }
+.daily-alarm-card .daily-event,.daily-alarm-card .daily-task { display:flex; align-items:center; gap:8px; width:100%; padding:9px 0; border:0; border-bottom:1px solid #ffffff65; border-radius:0; background:transparent; text-align:left; }
+.workspace .daily-alarm-card .daily-task { color:#7f5367 !important; cursor:pointer; }
+.daily-alarm-card .daily-event { cursor:pointer; }
+.daily-alarm-card .daily-event:hover { background:#ffffff24; }
+.daily-alarm-card .daily-event time { flex-shrink:0; color:#b1697d !important; font:500 10px/1.4 system-ui !important; }
+.daily-alarm-card .daily-event span,.daily-alarm-card .daily-task span { min-width:0; flex:1; color:#7f5367; overflow-wrap:anywhere; font:400 12px/1.5 system-ui; }
+.workspace .daily-alarm-card .daily-event small,.workspace .daily-alarm-card .daily-task small { color:#bb7a8e !important; font:400 9px/1.4 system-ui !important; white-space:nowrap; }
+.workspace .daily-alarm-card .daily-task input { width:16px; height:16px; flex-shrink:0; margin:0; accent-color:#d26887; }
+.workspace .daily-alarm-card .daily-alarm-empty { margin:8px 0 11px; color:#a87587 !important; font:400 11px/1.6 system-ui !important; }
+.daily-alarm-card footer { padding-top:9px; color:#ae7c8d; font:400 9px/1.4 system-ui; }
+@media(max-width:650px) { .daily-alarm-board { grid-template-columns:1fr; gap:12px; } .daily-alarm-card { border-radius:19px; padding:13px; } }
+/* 좁은 카드에서도 업무 제목이 한 글자씩 세로로 눌리지 않게 한다. */
+.workspace #todayPanel .todo-line { display:grid; grid-template-columns:16px 16px minmax(0,1fr) 30px 14px; align-items:start; gap:4px; padding:9px 0; }
+.workspace #todayPanel .todo-line-check,.workspace #todayPanel .todo-box { width:16px; height:16px; min-width:0; margin:0; }
+.workspace #todayPanel .todo-star,.workspace #todayPanel .todo-x { width:16px; min-width:0; height:20px; padding:0; font-size:13px !important; }
+.workspace #todayPanel .todo-line-text { min-width:0; white-space:normal; overflow-wrap:anywhere; }
+.workspace #todayPanel .todo-line time { font-size:9px !important; white-space:nowrap; }
+.workspace #schedulePanel .schedule-row { grid-template-columns:minmax(0,1fr) 20px; gap:5px; padding:7px 0; color:#65728b; background:transparent; }
+.workspace #schedulePanel .schedule-title { min-width:0; overflow-wrap:anywhere; font-size:11px !important; }
+.workspace #schedulePanel .schedule-row { grid-template-columns:28px minmax(0,1fr) 18px; }
+.workspace #schedulePanel .schedule-body { min-width:0; overflow-wrap:anywhere; }
+.workspace #schedulePanel .schedule-body b,.workspace #schedulePanel .schedule-group-head b { color:#65728b; font-size:11px !important; line-height:1.4 !important; }
+.workspace #schedulePanel .schedule-body small,.workspace #schedulePanel .schedule-date { color:#8b96a9 !important; font-size:9px !important; }
+.workspace #todayPanel .todo-line { grid-template-columns:16px 16px minmax(0,1fr) 30px 16px; }
