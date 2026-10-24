@@ -495,7 +495,6 @@ function renderLibrary() {
   $('#pageHeading').textContent = term ? '검색 결과' : heading;
   $('#pageLead').textContent = term ? `“${term}” 으로 찾은 내용입니다.` : lead;
   const onDashboard = pageCategory === '대시보드' && !term;
-  $('#dailyAlarmBoard').classList.toggle('hidden', !onDashboard);
   $('#shortcutSection').classList.remove('hidden');
   $('.crm-page-title').textContent = onDashboard ? '대시보드' : heading;
   $('#dashCols').classList.toggle('hidden', !onDashboard && pageCategory !== '할 일');
@@ -3311,6 +3310,10 @@ function renderDailyAlarmBoard() {
   const tasks = activeTodos().filter(todo => todo.date === today);
   const meetings = (window.CRM_MEETINGS?.items || []).filter(item => !item.deleted);
   const events = sortedSchedule([...alive(schedule), ...meetings].filter(item => item.date === today));
+  $('#calendarAlarmCount').textContent = events.length;
+  $('#todoAlarmCount').textContent = tasks.length;
+  $('#calendarAlarmOpen').classList.toggle('has-alert', events.length > 0);
+  $('#todoAlarmOpen').classList.toggle('has-alert', tasks.length > 0);
   const signature = JSON.stringify([today, tasks.map(item => [item.id,item.text]), events.map(item => [item.id,item.title,item.time,item.source])]);
   if (board.dataset.signature === signature) return;
   board.dataset.signature = signature;
@@ -3319,6 +3322,7 @@ function renderDailyAlarmBoard() {
   board.querySelectorAll('[data-daily-task]').forEach(check => { check.onchange = () => completeReminder(check.dataset.dailyTask); });
   board.querySelectorAll('[data-alarm-event]').forEach(button => { button.onclick = () => {
     const item = events[Number(button.dataset.alarmEvent)];
+    $('#dailyAlarmDialog').close();
     if (item.source === 'crm-meeting') window.CRM_MEETINGS?.open();
     else openScheduleModal(item);
   }; });
@@ -3337,7 +3341,7 @@ function renderTodoReminders() {
     panel.setAttribute('aria-label', '미완료 할 일 알림');
     document.body.append(panel);
   }
-  panel.hidden = !due.length || (pageCategory === '대시보드' && !pageSearchCommitted.trim());
+  panel.hidden = true;
   const signature = JSON.stringify(due.map(todo => [todo.id, todo.text, todo.date]));
   if (panel.dataset.signature === signature) return;
   panel.dataset.signature = signature;
@@ -3354,6 +3358,16 @@ function completeReminder(id) {
   saveTodos(); renderTodos(); renderLibrary();
 }
 window.knowledgeAPI?.onCompleteReminder?.(completeReminder);
+function openDailyAlarm(kind) {
+  renderDailyAlarmBoard();
+  $('#dailyAlarmBoard').dataset.active = kind;
+  $('#dailyAlarmTitle').textContent = kind === 'events' ? '오늘 일정 알림' : '오늘 할 일 알림';
+  $('#dailyAlarmDialog').showModal();
+}
+$('#calendarAlarmOpen').onclick = () => openDailyAlarm('events');
+$('#todoAlarmOpen').onclick = () => openDailyAlarm('tasks');
+$('#dailyAlarmClose').onclick = () => $('#dailyAlarmDialog').close();
+$('#dailyAlarmDialog').onclick = event => { if (event.target === event.currentTarget) event.currentTarget.close(); };
 let dashboardDay = todayKey();
 setInterval(() => {
   if (dashboardDay !== todayKey()) {

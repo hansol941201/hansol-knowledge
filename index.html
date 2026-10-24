@@ -20,7 +20,7 @@
   <link rel="stylesheet" href="crayon.css?v=59" />
   <link rel="stylesheet" href="theme.css?v=1" />
   <link rel="stylesheet" href="crm-layout.css?v=1" />
-  <link rel="stylesheet" href="liquid-glass.css?v=3" />
+  <link rel="stylesheet" href="liquid-glass.css?v=4" />
   <script src="background.js?v=1" defer></script>
 </head>
 <body>
@@ -68,7 +68,6 @@
           <section id="todayPanel" class="today-panel todo-panel"></section>
           <section id="schedulePanel" class="today-panel schedule-panel"></section>
         </div>
-        <section id="dailyAlarmBoard" class="daily-alarm-board" aria-label="오늘의 알림"></section>
 
         <section id="knowledgeBlock" class="block">
           <div class="block-head">
@@ -85,6 +84,11 @@
     <div class="glass-sidebar-foot" aria-hidden="true"><i></i><i></i><i></i><span>Hansol</span></div>
   </div>
 
+  <aside class="alarm-dock" aria-label="오늘 알림">
+    <button id="calendarAlarmOpen" type="button" aria-label="오늘 일정 알림 열기" title="오늘 일정 알림"><span data-icon="calendar" data-size="15"></span><span>일정</span><b id="calendarAlarmCount">0</b></button>
+    <button id="todoAlarmOpen" type="button" aria-label="오늘 할 일 알림 열기" title="오늘 할 일 알림"><span data-icon="check" data-size="15"></span><span>할 일</span><b id="todoAlarmCount">0</b></button>
+  </aside>
+  <dialog id="dailyAlarmDialog" aria-labelledby="dailyAlarmTitle"><header class="alarm-dialog-head"><h2 id="dailyAlarmTitle">오늘 알림</h2><button id="dailyAlarmClose" type="button" aria-label="알림 닫기">×</button></header><section id="dailyAlarmBoard" class="daily-alarm-board" aria-label="오늘의 알림" data-active="tasks"></section></dialog>
   <button id="orb" class="orb" aria-label="지식창 열기"><span></span></button>
 
   <main id="app" class="messenger hidden" aria-label="개인 지식 메신저">
@@ -299,7 +303,7 @@
   <script src="crm-partner-model.js?v=1"></script>
   <script src="crm-meeting-model.js?v=1"></script>
   <script src="todo-dates.js?v=1"></script>
-  <script src="app.js?v=122"></script>
+  <script src="app.js?v=123"></script>
   <script src="crm-meetings.js?v=2"></script>
   <script>
     // 홈 화면 앱(주소창 없는 standalone)으로 열리게 하는 등록. 저장은 하지 않는 워커라

@@ -189,3 +189,31 @@ dialog :is(input,textarea,select),.edit-box :is(input,textarea,select),#backgrou
 .workspace #schedulePanel .schedule-body b,.workspace #schedulePanel .schedule-group-head b { color:#65728b; font-size:11px !important; line-height:1.4 !important; }
 .workspace #schedulePanel .schedule-body small,.workspace #schedulePanel .schedule-date { color:#8b96a9 !important; font-size:9px !important; }
 .workspace #todayPanel .todo-line { grid-template-columns:16px 16px minmax(0,1fr) 30px 16px; }
+/* 본문은 넓게, 알림은 프레임 밖 작은 버튼으로만 표시한다. */
+.workspace { height:calc(100dvh - 82px); }
+.workspace .dash-cols,.workspace .main-scroll:has(#knowledgeBlock.hidden) .dash-cols { flex:1; height:100%; min-height:440px; grid-template-rows:minmax(440px,1fr); }
+.workspace #todayPanel,.workspace .notes-hub,.workspace #schedulePanel { height:100%; min-height:0; }
+.workspace #schedulePanel .calendar-days button { height:31px; font-size:11px !important; }
+.workspace #schedulePanel .schedule-list { max-height:130px; }
+.alarm-dock { position:fixed; bottom:12px; right:22px; z-index:1000; display:flex; gap:7px; }
+.alarm-dock button { display:flex; align-items:center; gap:5px; padding:6px 9px; min-height:30px; border:1px solid #ffdce6c7; border-radius:12px; background:rgba(249,157,179,.2); color:#a3576e; box-shadow:inset 0 1px #ffffff75; backdrop-filter:blur(16px); font:500 11px/1.3 system-ui; cursor:pointer; }
+.alarm-dock button.has-alert { color:#a13f5d; background:rgba(255,105,139,.31); border-color:#ffc0d0; }
+.alarm-dock button:hover { background:rgba(255,156,181,.45); }
+.alarm-dock b { display:grid; place-items:center; min-width:17px; height:17px; padding:0 3px; border-radius:7px; background:#ffffff60; font-size:10px; }
+#dailyAlarmDialog { width:min(360px,calc(100vw - 30px)); max-height:min(460px,80dvh); padding:16px; overflow:auto; }
+#dailyAlarmDialog::backdrop { background:rgba(89,91,119,.16); }
+#dailyAlarmDialog .alarm-dialog-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:11px; }
+#dailyAlarmDialog .alarm-dialog-head h2 { margin:0; font:600 14px/1.4 system-ui !important; color:#9b536c !important; }
+#dailyAlarmClose { display:grid; place-items:center; width:26px; height:26px; padding:0; border:1px solid #fff; border-radius:9px; font-size:20px !important; }
+#dailyAlarmDialog .daily-alarm-board { display:block; }
+#dailyAlarmBoard[data-active='events'] .daily-alarm-card:nth-child(2),#dailyAlarmBoard[data-active='tasks'] .daily-alarm-card:nth-child(1) { display:none; }
+#dailyAlarmDialog .daily-alarm-card { padding:12px; border-radius:16px; }
+#dailyAlarmDialog .daily-alarm-card h2 { margin:0; color:#9b425d !important; font:600 12px/1.4 system-ui !important; }
+#dailyAlarmDialog .daily-alarm-list { max-height:245px; }
+#dailyAlarmDialog .daily-alarm-empty { font-size:12px !important; color:#a87587 !important; }
+#dailyAlarmDialog .daily-event small,#dailyAlarmDialog .daily-task small { font-size:10px !important; color:#b16f86 !important; }
+body.overlay-mode .alarm-dock { display:none; }
+@media(min-width:651px) and (max-width:850px) { .workspace .dash-cols,.workspace .main-scroll:has(#knowledgeBlock.hidden) .dash-cols { height:auto; grid-template-rows:390px 400px; } }
+@media(max-width:650px) { .workspace { height:calc(100dvh - 58px); } .workspace .dash-cols,.workspace .main-scroll:has(#knowledgeBlock.hidden) .dash-cols { height:auto; min-height:0; grid-template-rows:370px 370px 400px; } .workspace #todayPanel,.workspace .notes-hub,.workspace #schedulePanel { height:100%; } .alarm-dock { right:12px; bottom:9px; } .alarm-dock button { padding:5px 8px; } }
+#dailyAlarmDialog .daily-alarm-card>header { display:none; }
+#dailyAlarmDialog .daily-task input { width:16px; min-width:16px; height:16px; flex:0 0 16px; margin:0; padding:0; accent-color:#d26887; }
