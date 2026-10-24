@@ -360,7 +360,6 @@ function renderSideNav() {
   });
   $('#memoryToggle').onclick = openMemoryLibrary;
   $('#dashboardHome').onclick = () => goToView('대시보드');
-  $('#glassHome').onclick = () => { goToView('대시보드'); $('.main-scroll').scrollTop = 0; };
   $('#glassSearch').onclick = () => $('#searchOpen').click();
   $('#glassAppearance').onclick = () => $('#backgroundOpen').click();
   // 좁은 화면에서 선택한 메뉴가 가려져 있으면 보이는 위치까지 메뉴 줄만 움직인다(페이지는 그대로).

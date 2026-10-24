@@ -76,3 +76,7 @@ body::before { background:linear-gradient(140deg,transparent 48%,rgba(244,239,23
 .workspace .todo-head h2,.workspace .memo-head h2,.workspace #schedulePanel h2,.workspace #contractTodaySection h2 { letter-spacing:-.15px; font-weight:600 !important; }
 .workspace .topnav #sideNav .top-item.active { box-shadow:inset -3px 0 #dfad2f,inset 0 1px rgba(255,255,255,.75),0 3px 8px rgba(139,107,37,.045); }
 .workspace #schedulePanel .calendar-days button.is-selected { box-shadow:inset 0 1px 1px rgba(255,255,255,.55),0 2px 5px rgba(168,124,24,.12); }
+
+/* Daily alert launchers at the lower left. */
+.alarm-dock { left:22px; right:auto; }
+@media(max-width:650px) { .alarm-dock { left:12px; right:auto; } }
