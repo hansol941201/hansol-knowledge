@@ -496,7 +496,6 @@ function renderLibrary() {
   $('#pageLead').textContent = term ? `“${term}” 으로 찾은 내용입니다.` : lead;
   const onDashboard = pageCategory === '대시보드' && !term;
   $('#shortcutSection').classList.remove('hidden');
-  $('.crm-overview').classList.toggle('hidden', !onDashboard);
   $('.crm-page-title').textContent = onDashboard ? '대시보드' : heading;
   $('#dashCols').classList.toggle('hidden', !onDashboard && pageCategory !== '할 일');
   $('#schedulePanel').classList.toggle('hidden', !onDashboard);
@@ -2826,9 +2825,6 @@ if (searchOpenButton) searchOpenButton.onclick = () => {
 };
 
 function renderAll() {
-  const currentDate = new Date();
-  $('#crmTodayDate').textContent = `${currentDate.getFullYear()}. ${String(currentDate.getMonth()+1).padStart(2,'0')}. ${String(currentDate.getDate()).padStart(2,'0')}`;
-  $('#crmTodayWeekday').textContent = currentDate.toLocaleDateString('ko-KR', { weekday:'long' });
   renderSideNav();
   renderMemoPanel();
   renderCallNotes();
