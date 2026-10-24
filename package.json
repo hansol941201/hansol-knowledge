@@ -24,6 +24,8 @@
       "index.html",
       "background.js",
       "todo-dates.js",
+      "contract-today-model.js",
+      "contract-today.js",
       "reminder.html",
       "reminder-preload.js",
       "crayon.css",

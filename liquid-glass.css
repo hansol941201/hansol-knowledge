@@ -217,3 +217,15 @@ body.overlay-mode .alarm-dock { display:none; }
 @media(max-width:650px) { .workspace { height:calc(100dvh - 58px); } .workspace .dash-cols,.workspace .main-scroll:has(#knowledgeBlock.hidden) .dash-cols { height:auto; min-height:0; grid-template-rows:370px 370px 400px; } .workspace #todayPanel,.workspace .notes-hub,.workspace #schedulePanel { height:100%; } .alarm-dock { right:12px; bottom:9px; } .alarm-dock button { padding:5px 8px; } }
 #dailyAlarmDialog .daily-alarm-card>header { display:none; }
 #dailyAlarmDialog .daily-task input { width:16px; min-width:16px; height:16px; flex:0 0 16px; margin:0; padding:0; accent-color:#d26887; }
+/* 협약서 원본의 이름만 읽어서 표시하는 당일 전용 두 목록. */
+.contract-today-grid { order:0; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; flex-shrink:0; }
+.contract-today-card { padding:13px 15px; border:1px solid #ffffffa6; border-radius:19px; background:rgba(255,255,255,.38); box-shadow:inset 0 1px #ffffffb0; backdrop-filter:blur(15px); min-width:0; }
+.contract-today-card header { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:5px; margin-bottom:9px; }
+.workspace .contract-today-card h2 { margin:0; color:#75628e !important; font:600 12px/1.4 system-ui !important; }
+.workspace .contract-today-card time { color:#9496ad !important; font:400 9px/1.4 system-ui !important; }
+.contract-today-card ul { list-style:none; padding:0; margin:0; display:grid; gap:6px; }
+.contract-today-card li { color:#536176; overflow-wrap:anywhere; font:500 12px/1.5 system-ui; }
+.workspace .contract-today-card .contract-list-message { margin:0; color:#929aad !important; font:400 11px/1.5 system-ui !important; }
+.workspace .contract-today-card .contract-list-error { margin:0; color:#b3657a !important; font:400 11px/1.5 system-ui !important; }
+@media(max-width:650px) { .contract-today-grid { grid-template-columns:1fr; gap:10px; } }
+.workspace #contractTodaySection time { font-size:10px !important; line-height:1.4 !important; }

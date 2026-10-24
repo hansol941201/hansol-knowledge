@@ -495,6 +495,7 @@ function renderLibrary() {
   $('#pageHeading').textContent = term ? '검색 결과' : heading;
   $('#pageLead').textContent = term ? `“${term}” 으로 찾은 내용입니다.` : lead;
   const onDashboard = pageCategory === '대시보드' && !term;
+  $('#contractTodaySection').classList.toggle('hidden', !onDashboard);
   $('#shortcutSection').classList.remove('hidden');
   $('.crm-page-title').textContent = onDashboard ? '대시보드' : heading;
   $('#dashCols').classList.toggle('hidden', !onDashboard && pageCategory !== '할 일');
