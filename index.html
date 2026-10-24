@@ -21,13 +21,14 @@
   <link rel="stylesheet" href="theme.css?v=1" />
   <link rel="stylesheet" href="crm-layout.css?v=1" />
   <link rel="stylesheet" href="liquid-glass.css?v=8" />
+  <link rel="stylesheet" href="blue-glass.css?v=2" />
   <script src="background.js?v=1" defer></script>
 </head>
 <body>
   <div class="workspace">
     <header class="topnav">
       <div class="header-check-art" aria-hidden="true"><span><img src="theme-art/header-check.png" alt="" /></span><span><img src="theme-art/header-check.png" alt="" /></span></div>
-      <div class="navigation-row"><button type="button" id="dashboardHome" class="hansol-story-logo b2b-brand" aria-label="B2B 대시보드로 이동" title="대시보드로 이동"><i class="glass-brand-mark" aria-hidden="true"><span data-icon="grid" data-size="23"></span></i><span class="glass-brand-text"><b>Hansol</b><small>KNOWLEDGE KIT</small></span></button><nav id="sideNav" class="top-nav" aria-label="업무 메뉴"></nav></div>
+      <div class="navigation-row"><button type="button" id="dashboardHome" class="hansol-story-logo b2b-brand" aria-label="B2B 대시보드로 이동" title="대시보드로 이동"><i class="glass-brand-mark" aria-hidden="true"><span data-icon="grid" data-size="23"></span></i><span class="glass-brand-text"><b>B2B</b></span></button><nav id="sideNav" class="top-nav" aria-label="업무 메뉴"></nav></div>
       <header class="topbar">
         <strong class="crm-page-title">대시보드</strong>
         <div class="search-wrap">
@@ -63,6 +64,10 @@
              한 줄씩 쌓이고, 넓은 화면에서는 아래 grid-template-areas 가
              할 일을 왼쪽 넓은 자리로, 메모와 일정을 오른쪽 위·아래로 보낸다. -->
         <div id="dashCols" class="dash-cols">
+        <section id="contractTodaySection" class="contract-today-grid" aria-label="협약서 오늘의 아파트">
+          <article class="contract-today-card"><header><h2>현설 아파트</h2><time data-contract-today-date></time></header><div id="contractBriefingList" aria-live="polite"><p>불러오는 중…</p></div></article>
+          <article class="contract-today-card"><header><h2>D-DAY 아파트</h2><time data-contract-today-date></time></header><div id="contractDdayList" aria-live="polite"><p>불러오는 중…</p></div></article>
+        </section>
           <aside id="notesHub" class="notes-hub" aria-label="통합 메모">
             <section id="memoPanel" class="today-panel memo-panel"></section>
             <section id="callNotesPanel" class="today-panel call-notes-panel"></section>
@@ -71,10 +76,7 @@
           <section id="schedulePanel" class="today-panel schedule-panel"></section>
         </div>
 
-        <section id="contractTodaySection" class="contract-today-grid" aria-label="협약서 오늘의 아파트">
-          <article class="contract-today-card"><header><h2>현설 아파트</h2><time data-contract-today-date></time></header><div id="contractBriefingList" aria-live="polite"><p>불러오는 중…</p></div></article>
-          <article class="contract-today-card"><header><h2>D-DAY 아파트</h2><time data-contract-today-date></time></header><div id="contractDdayList" aria-live="polite"><p>불러오는 중…</p></div></article>
-        </section>
+
 
         <section id="knowledgeBlock" class="block">
           <div class="block-head">
