@@ -136,3 +136,24 @@ dialog :is(input,textarea,select),.edit-box :is(input,textarea,select),#backgrou
 #app.messenger .composer input,#app.messenger .quick-add input,#app.messenger .quick-add textarea { background:#ffffff50; color:#526079; border:1px solid #ffffff90; border-radius:12px; }
 #app.messenger button { color:#8d79b4; }
 #app.messenger .composer button { background:linear-gradient(135deg,#f5b4c8,#ea9cb8); color:#fff; border-radius:12px; }
+/* 제목 위의 장식 공간을 없애고 실제 내용에 자리를 돌려준다. */
+.workspace #todayPanel::before,.workspace #memoPanel .memo-head::before,.workspace #schedulePanel .block-head>div:first-child::before { display:none; }
+.workspace #todayPanel,.workspace #schedulePanel { padding:16px !important; }
+.workspace .notes-hub #memoPanel,.workspace .main-scroll:has(#knowledgeBlock.hidden) .notes-hub #memoPanel { padding:16px; gap:10px; }
+.workspace #memoPanel .memo-head { flex-direction:row; gap:7px; padding:0; margin:0; }
+.workspace :is(.todo-head h2,.memo-head h2,#schedulePanel h2) { display:flex; align-items:center; gap:8px; margin:0; font-size:14px !important; line-height:1.4 !important; }
+.workspace :is(.todo-head h2,.memo-head h2,#schedulePanel h2)::before { content:''; flex-shrink:0; width:7px; height:7px; background:#ae77df; border-radius:50%; }
+.workspace .memo-head h2::before { background:#8c83e7; }
+.workspace #schedulePanel h2::before { background:#62bdb0; }
+.workspace .todo-head { padding:0 0 9px; gap:9px; }
+.workspace #schedulePanel .block-head { padding:0 0 9px !important; margin:0 0 8px !important; gap:6px; }
+.workspace #schedulePanel .calendar-month { margin:6px 0 8px; }
+.workspace .dash-cols,.workspace .main-scroll:has(#knowledgeBlock.hidden) .dash-cols { grid-template-rows:330px; }
+.workspace #todayPanel,.workspace .notes-hub,.workspace #schedulePanel { height:330px; min-height:0; }
+.workspace[data-view='할 일'] #todayPanel { height:100%; }
+@media(min-width:651px) and (max-width:850px) { .workspace .dash-cols,.workspace .main-scroll:has(#knowledgeBlock.hidden) .dash-cols { grid-template-rows:330px auto; } .workspace #schedulePanel { height:340px; } }
+@media(max-width:650px) { .workspace .dash-cols,.workspace .main-scroll:has(#knowledgeBlock.hidden) .dash-cols { grid-template-rows:290px 290px auto; } .workspace #todayPanel,.workspace .notes-hub { height:290px; } .workspace #schedulePanel { height:350px; min-height:0; } }
+.workspace #schedulePanel .block-head { flex-wrap:nowrap; }
+.workspace #schedulePanel .cal-tools { margin-left:auto; min-width:0; }
+.workspace #schedulePanel .cal-tools button { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.workspace #schedulePanel #crmMeetingConnect { max-width:54px; }
