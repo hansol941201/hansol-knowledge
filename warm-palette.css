@@ -80,3 +80,31 @@ body::before { background:linear-gradient(140deg,transparent 48%,rgba(244,239,23
 /* Daily alert launchers at the lower left. */
 .alarm-dock { left:22px; right:auto; }
 @media(max-width:650px) { .alarm-dock { left:12px; right:auto; } }
+
+/* Rounded cream surfaces and glossy primary blue, preserving all geometry. */
+:root { --theme-blue:#0868c8; --theme-ink:#36424a; --theme-muted:#8a8c83; }
+html { background:#f0e9d9; }
+body,body:not(.overlay-mode) { background:radial-gradient(ellipse at 10% 5%,#fbf3d7,transparent 58%),radial-gradient(ellipse at 98% 100%,#e3ead6,transparent 45%),#f4eddc; }
+body::before { background:none; }
+.workspace { background:linear-gradient(130deg,rgba(255,252,241,.82),rgba(243,238,218,.82)); border-color:#fffdf1; box-shadow:0 16px 35px rgba(112,95,49,.14),inset 0 1px 2px #fff; }
+.workspace .topnav { background:linear-gradient(180deg,rgba(19,137,229,.98),rgba(0,93,190,.98)); box-shadow:inset 0 2px 2px rgba(255,255,255,.6),0 3px 7px rgba(20,74,121,.17); }
+.workspace .topnav .top-mini,.workspace .topnav .sync-state,.workspace .topnav .sync-state[data-state=offline] { color:#f6fbff !important; background:rgba(0,68,157,.17) !important; border-color:rgba(255,255,255,.32); }
+.workspace .topnav > .topbar .page-search { background:#fffdf5 !important; border-color:#fff; box-shadow:inset 0 2px 3px rgba(33,92,139,.1),0 1px 1px rgba(255,255,255,.5); }
+.workspace .topnav > .topbar #pageSearch { color:#4b6578 !important; }
+.workspace .topnav > .topbar #pageSearch::placeholder { color:#8394a1 !important; }
+.workspace .topnav .shortcut,.workspace .topnav .shortcut:nth-child(even),.workspace .topnav .shortcut.add { background:rgba(253,252,242,.95); border-color:#fff !important; box-shadow:inset 0 2px 1px #fff,0 2px 3px rgba(0,49,113,.14); }
+.workspace .topnav .shortcut a b,.workspace .topnav .shortcut.add { color:#4a6480 !important; }
+.workspace .topnav #sideNav .top-item { color:#6b736d; }
+.workspace .topnav #sideNav .top-item svg { color:#6c939f !important; }
+.workspace .topnav #sideNav .top-item.active { color:#fff; background:linear-gradient(#2693e9,#0069ce); border-color:#398cd5; box-shadow:inset 0 2px 1px rgba(255,255,255,.55),0 3px 5px rgba(12,95,162,.19); }
+.workspace .topnav #sideNav .top-item.active svg { color:#fff !important; }
+.workspace .topnav > .topbar #pageAdd,.workspace .glass-footer .glass-home-btn { background:linear-gradient(#379be8,#006bcc); color:#fff; border-color:#1379cf; box-shadow:inset 0 2px 1px rgba(255,255,255,.5),inset 0 -2px 1px rgba(0,55,119,.15),0 3px 5px rgba(25,82,130,.15); }
+.workspace #todayPanel,.workspace .notes-hub,.workspace #schedulePanel,.workspace .page-card,.workspace .block,.workspace #contractTodaySection .contract-today-card { background:linear-gradient(145deg,#fffef8,rgba(251,249,233,.96)) !important; border-color:#fffdf2 !important; box-shadow:inset 0 2px 2px #fff,0 3px 1px rgba(201,187,143,.25),0 5px 10px rgba(125,108,63,.08) !important; }
+.workspace #todayPanel .todo-view-tabs button.active { background:linear-gradient(#409be1,#0972c9) !important; color:#fff !important; box-shadow:inset 0 1px 1px #9fd3fc,0 2px 3px rgba(25,82,130,.12); }
+.workspace #todayPanel .todo-view-tabs button.active span { color:#fff !important; background:rgba(255,255,255,.18) !important; }
+.workspace :is(.todo-head h2,.memo-head h2,#schedulePanel h2)::before { background:#eca631; }
+.workspace #schedulePanel .calendar-days button.is-selected,.workspace #schedulePanel .calendar-days button.is-today.is-selected { background:linear-gradient(#46a6e9,#0873c9) !important; color:#fff !important; outline-color:#c3e5fd; }
+.workspace .todo-quick-entry,.workspace #memoPanel .memo-note-shell { background:#fcfaf0 !important; box-shadow:inset 0 2px 4px rgba(135,117,68,.04); }
+#orb.orb { width:46px; height:46px; display:grid; place-items:center; z-index:2147483647; background:linear-gradient(145deg,#56b5f2,#0571cc); border:2px solid #e3f4ff; box-shadow:inset 0 2px 2px #bce5ff,0 5px 14px rgba(22,82,130,.26); }
+#orb.orb span { width:14px; height:14px; margin:0; border-radius:50%; background:#fff7cf; box-shadow:inset 0 1px 1px #fff; }
+#app.messenger { z-index:2147483646; }

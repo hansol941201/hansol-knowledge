@@ -59,13 +59,14 @@ function loadBundledCopy() {
 function createWindow() {
   const area = screen.getPrimaryDisplay().workArea;
   win = new BrowserWindow({
-    width: 56, height: 56,
-    x: area.x + area.width - 70, y: area.y + area.height - 70,
+    width: 80, height: 80,
+    x: area.x + area.width - 94, y: area.y + area.height - 94,
     frame: false, transparent: true, alwaysOnTop: true, skipTaskbar: true,
     resizable: false, show: true,
     webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false, backgroundThrottling: false }
   });
   win.setAlwaysOnTop(true, 'screen-saver');
+  win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
   win.webContents.on('did-fail-load', (_event, _code, _desc, _url, isMainFrame) => { if (isMainFrame) loadBundledCopy(); });
   // 창을 닫아도 앱이 꺼지지 않고 점(orb)으로 접힌다. 트레이 메뉴의 "종료" 로만 완전히 끝난다.
   win.on('close', (event) => {
@@ -103,10 +104,11 @@ function createTray() {
 function setExpanded(expanded) {
   if (!win) return;
   const area = screen.getPrimaryDisplay().workArea;
-  const width = expanded ? 360 : 56;
-  const height = expanded ? 460 : 56;
+  const width = expanded ? 360 : 80;
+  const height = expanded ? 460 : 80;
   win.setBounds({ x: area.x + area.width - width - 14, y: area.y + area.height - height - 14, width, height }, true);
   win.setAlwaysOnTop(true, 'screen-saver');
+  win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
 }
 
 app.whenReady().then(() => {
