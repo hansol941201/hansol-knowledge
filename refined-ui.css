@@ -1,125 +1,156 @@
 /* A bright lavender system with a consistent type and spacing hierarchy. */
-:root { --ref-ink:#353046; --ref-body:#635c73; --ref-muted:#958ca5; --ref-accent:#8c7ab5; }
-html { background:#e2ddeb; }
-body,body:not(.overlay-mode) { color:var(--ref-ink); background:radial-gradient(ellipse at 15% 5%,#e9e4f2,transparent 58%),linear-gradient(145deg,#d6cee6,#eae3eb); }
+:root { --ref-ink:#3b4148; --ref-body:#676d75; --ref-muted:#989ea5; --ref-accent:#8f9dad; }
+html { background:#e7eaed; }
+body,body:not(.overlay-mode) { color:var(--ref-ink); background:radial-gradient(ellipse at 15% 5%,#eff1f4,transparent 58%),linear-gradient(145deg,#dbe0e6,#ecedef); }
 .workspace { border:1px solid rgba(255,255,255,.8); background:linear-gradient(140deg,rgba(215,207,233,.94),rgba(226,217,235,.94) 65%,rgba(237,225,234,.94)); box-shadow:0 18px 60px rgba(88,69,119,.1),inset 0 1px 2px #fff; }
 body,button,input,textarea,select { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Apple SD Gothic Neo','Malgun Gothic',sans-serif !important; -webkit-font-smoothing:antialiased; }
-.workspace #dashboardHome .glass-brand-text b { color:#675a80; text-shadow:0 1px 0 #fff,0 3px 8px rgba(103,85,136,.07); font-size:38px; letter-spacing:-1.3px; font-weight:750; }
+.workspace #dashboardHome .glass-brand-text b { color:#68727e; text-shadow:0 1px 0 #fff,0 3px 8px rgba(103,85,136,.07); font-size:38px; letter-spacing:-1.3px; font-weight:750; }
 .workspace .topnav { padding-top:12px; }
-.workspace .topnav #sideNav .top-item,.workspace .topnav #sideNav .top-item:first-of-type,.workspace .topnav #sideNav .top-item:nth-of-type(even) { min-height:43px; height:43px; padding:10px 15px; border-radius:13px; color:#746884; gap:12px; }
+.workspace .topnav #sideNav .top-item,.workspace .topnav #sideNav .top-item:first-of-type,.workspace .topnav #sideNav .top-item:nth-of-type(even) { min-height:43px; height:43px; padding:10px 15px; border-radius:13px; color:#747c84; gap:12px; }
 .workspace .topnav #sideNav .top-item span { font-size:14px !important; line-height:1.4 !important; letter-spacing:-.2px; font-weight:500 !important; }
-.workspace .topnav #sideNav .top-item svg { width:20px; height:20px; color:#a094b3 !important; }
-.workspace .topnav #sideNav .top-item.active { color:#5c4e78; background:rgba(255,255,255,.8); border-color:rgba(255,255,255,.6); box-shadow:0 3px 10px rgba(107,88,143,.045); }
-.workspace .topnav #sideNav .top-item.active svg { color:#8e7aaf !important; }
+.workspace .topnav #sideNav .top-item svg { width:20px; height:20px; color:#a2a9b2 !important; }
+.workspace .topnav #sideNav .top-item.active { color:#5d6876; background:rgba(255,255,255,.8); border-color:rgba(255,255,255,.6); box-shadow:0 3px 10px rgba(107,88,143,.045); }
+.workspace .topnav #sideNav .top-item.active svg { color:#8d9aa9 !important; }
 .workspace .topnav #sideNav .top-item.active span { font-weight:600 !important; }
 .workspace .topnav #sideNav .top-item:hover { background:rgba(255,255,255,.42); }
-.workspace .topnav .top-mini,.workspace .topnav .sync-state,.workspace .topnav .sync-state[data-state=offline] { color:#8c7b9e !important; background:rgba(255,255,255,.25) !important; border-color:rgba(255,255,255,.45); }
+.workspace .topnav .top-mini,.workspace .topnav .sync-state,.workspace .topnav .sync-state[data-state=offline] { color:#8a929c !important; background:rgba(255,255,255,.25) !important; border-color:rgba(255,255,255,.45); }
 .workspace .topnav > .topbar .page-search { height:42px; min-height:42px; background:rgba(255,255,255,.72) !important; border-color:rgba(255,255,255,.85); padding-left:15px; }
-.workspace .topnav > .topbar #pageSearch { font-size:13px !important; color:#70617f !important; }
-.workspace .topnav > .topbar #pageSearch::placeholder { color:#a89ab8 !important; }
+.workspace .topnav > .topbar #pageSearch { font-size:13px !important; color:#6e767f !important; }
+.workspace .topnav > .topbar #pageSearch::placeholder { color:#a8afb7 !important; }
 .workspace .topnav #shortcutSection { gap:12px; padding-bottom:12px; }
-.workspace .crm-favorites-label { color:#9384a4; font-size:11px !important; }
+.workspace .crm-favorites-label { color:#929aa3; font-size:11px !important; }
 .workspace .topnav .shortcut,.workspace .topnav .shortcut:nth-child(even),.workspace .topnav .shortcut.add { min-width:90px; width:auto; height:43px; min-height:43px; background:rgba(255,255,255,.4); border-color:rgba(255,255,255,.55) !important; border-radius:12px; box-shadow:inset 0 1px #ffffff70; }
 .workspace .topnav .shortcut a { padding-left:12px; padding-right:25px; }
-.workspace .topnav .shortcut a b,.workspace .topnav .shortcut.add { color:#8c7b9f !important; font-size:11px !important; font-weight:500 !important; letter-spacing:-.15px; }
-.workspace .topnav .shortcut .shortcut-more { color:#b0a1c2; }
-.workspace .topnav .shortcut a::before { color:#b09cc9; background:#eee7f6; border-color:#e6dbf0; }
+.workspace .topnav .shortcut a b,.workspace .topnav .shortcut.add { color:#8a939d !important; font-size:11px !important; font-weight:500 !important; letter-spacing:-.15px; }
+.workspace .topnav .shortcut .shortcut-more { color:#b0b7c0; }
+.workspace .topnav .shortcut a::before { color:#aeb8c4; background:#f2f5f7; border-color:#e8ecf0; }
 .workspace .topnav .shortcut.add { min-width:70px; width:70px; }
 .workspace .topnav .shortcut.add b { white-space:nowrap; }
 .workspace #todayPanel,.workspace .notes-hub,.workspace #schedulePanel,.workspace .page-card,.workspace .block,.workspace #contractTodaySection .contract-today-card { border:1px solid rgba(255,255,255,.85) !important; border-radius:21px !important; box-shadow:0 6px 22px rgba(98,79,133,.035),inset 0 1px rgba(255,255,255,.95) !important; background:rgba(255,255,255,.9) !important; }
 .workspace .notes-hub { background:rgba(244,239,250,.8) !important; }
 .workspace #contractTodaySection .contract-today-card { background:rgba(242,237,249,.78) !important; padding:16px 17px; }
-.workspace #contractTodaySection h2 { font-size:14px !important; line-height:1.4 !important; font-weight:600 !important; color:#75618e !important; letter-spacing:-.2px; }
-.workspace #contractTodaySection time { color:#b0a0c1 !important; font-size:10px !important; }
-.workspace #contractTodaySection p,.workspace #contractTodaySection li { color:#a08bb5 !important; font-size:12px !important; line-height:1.65 !important; }
+.workspace #contractTodaySection h2 { font-size:14px !important; line-height:1.4 !important; font-weight:600 !important; color:#717d8b !important; letter-spacing:-.2px; }
+.workspace #contractTodaySection time { color:#afb6bf !important; font-size:10px !important; }
+.workspace #contractTodaySection p,.workspace #contractTodaySection li { color:#9ca6b1 !important; font-size:12px !important; line-height:1.65 !important; }
 .workspace #todayPanel { padding:21px 22px; }
-.workspace #todayPanel .todo-head { column-gap:15px; row-gap:13px; padding-bottom:16px; margin-bottom:4px; border-bottom-color:#f0eaf5; }
-.workspace .todo-head h2,.workspace .memo-head h2,.workspace #schedulePanel h2 { font-size:16px !important; line-height:1.5 !important; font-weight:600 !important; letter-spacing:-.3px; color:#645476 !important; }
-.workspace :is(.todo-head h2,.memo-head h2,#schedulePanel h2)::before { width:5px; height:5px; background:#beaad3; }
+.workspace #todayPanel .todo-head { column-gap:15px; row-gap:13px; padding-bottom:16px; margin-bottom:4px; border-bottom-color:#f4f6f8; }
+.workspace .todo-head h2,.workspace .memo-head h2,.workspace #schedulePanel h2 { font-size:16px !important; line-height:1.5 !important; font-weight:600 !important; letter-spacing:-.3px; color:#616b75 !important; }
+.workspace :is(.todo-head h2,.memo-head h2,#schedulePanel h2)::before { width:5px; height:5px; background:#bbc4cf; }
 .workspace #todayPanel .todo-view-tabs { gap:5px; align-items:center; }
 .workspace #todayPanel .todo-view-tabs button { min-height:29px; padding:6px 9px; border-radius:9px; font-size:12px !important; font-weight:500 !important; line-height:1.4 !important; }
-.workspace #todayPanel .todo-view-tabs button:not(.active) { background:#f5f1fa !important; color:#a08cb3 !important; }
-.workspace #todayPanel .todo-view-tabs button.active { background:#b09ac9 !important; color:#fff !important; }
-.workspace #todayPanel .todo-quick-entry { padding:10px 12px; background:#faf8fc !important; border:1px solid #f0eaf5; border-radius:12px; }
+.workspace #todayPanel .todo-view-tabs button:not(.active) { background:#fbfcfd !important; color:#9ca5b0 !important; }
+.workspace #todayPanel .todo-view-tabs button.active { background:#acb7c4 !important; color:#fff !important; }
+.workspace #todayPanel .todo-quick-entry { padding:10px 12px; background:#ffffff !important; border:1px solid #f4f6f8; border-radius:12px; }
 .workspace #todayPanel .todo-quick-entry input { font-size:13px !important; line-height:1.5 !important; }
-.workspace #todayPanel .todo-line { min-height:45px; padding:11px 0; column-gap:8px; border-bottom-color:#f1ecf6; }
-.workspace #todayPanel :is(.todo-line-text,.todo-mark) { font-size:14px !important; line-height:1.6 !important; font-weight:400 !important; letter-spacing:-.12px; color:#766683 !important; }
-.workspace #todayPanel .todo-line time { color:#b6a2c6; font-size:11px !important; }
-.workspace #todayPanel .todo-star { color:#c0a7d1; }
-.workspace #todayPanel .todo-empty { font-size:13px !important; color:#bca9ca !important; padding:20px 0; line-height:1.7 !important; }
+.workspace #todayPanel .todo-line { min-height:45px; padding:11px 0; column-gap:8px; border-bottom-color:#f6f7f9; }
+.workspace #todayPanel :is(.todo-line-text,.todo-mark) { font-size:14px !important; line-height:1.6 !important; font-weight:400 !important; letter-spacing:-.12px; color:#727a83 !important; }
+.workspace #todayPanel .todo-line time { color:#b1bac3; font-size:11px !important; }
+.workspace #todayPanel .todo-star { color:#b8c2cd; }
+.workspace #todayPanel .todo-empty { font-size:13px !important; color:#b8bfc8 !important; padding:20px 0; line-height:1.7 !important; }
 .workspace .notes-hub #memoPanel { padding:21px 22px; }
 .workspace .notes-hub .memo-head { margin-bottom:12px; }
-.workspace .notes-hub #memoPanel .memo-head h2 { color:#8e74a5 !important; }
+.workspace .notes-hub #memoPanel .memo-head h2 { color:#8692a0 !important; }
 .workspace .notes-hub #memoPanel .memo-note-shell { background:rgba(255,255,255,.4) !important; border-color:rgba(255,255,255,.55); border-radius:12px; }
-.workspace .notes-hub #memoPanel #memoNote { color:#9c83ae !important; font-size:14px !important; line-height:1.8 !important; padding:13px 14px; }
-.workspace .notes-hub #memoPanel #memoNote::placeholder { color:#c4b0d1 !important; }
+.workspace .notes-hub #memoPanel #memoNote { color:#949eaa !important; font-size:14px !important; line-height:1.8 !important; padding:13px 14px; }
+.workspace .notes-hub #memoPanel #memoNote::placeholder { color:#bfc6cf !important; }
 .workspace .notes-hub #memoPanel .memo-tools { gap:7px; margin-top:12px; }
-.workspace .notes-hub #memoPanel .memo-tools button { padding:7px 10px; min-height:30px; color:#ad94bd; background:rgba(255,255,255,.45); border:1px solid #eee5f4; border-radius:9px; font-size:11px !important; }
+.workspace .notes-hub #memoPanel .memo-tools button { padding:7px 10px; min-height:30px; color:#a4aeb9; background:rgba(255,255,255,.45); border:1px solid #f0f3f6; border-radius:9px; font-size:11px !important; }
 .workspace #schedulePanel { padding:20px !important; }
 .workspace #schedulePanel .calendar-month { margin:12px 0; }
-.workspace #schedulePanel .calendar-month strong { font-size:13px; font-weight:600; color:#9b85ad; }
-.workspace #schedulePanel .calendar-days button { font-size:12px !important; color:#b2a0bd; }
-.workspace #schedulePanel .calendar-week { font-size:10px; color:#c1aecb; }
-.workspace .page-card h3 { font-size:18px !important; line-height:1.5 !important; font-weight:600 !important; color:#705c82 !important; letter-spacing:-.3px; }
-.workspace .page-card p { font-size:14px !important; line-height:1.75 !important; color:#a08aac; }
-.workspace .page-card .card-kind,.workspace .page-card .card-time { font-size:11px !important; color:#baa6c7; }
+.workspace #schedulePanel .calendar-month strong { font-size:13px; font-weight:600; color:#959faa; }
+.workspace #schedulePanel .calendar-days button { font-size:12px !important; color:#aeb4bc; }
+.workspace #schedulePanel .calendar-week { font-size:10px; color:#bcc2ca; }
+.workspace .page-card h3 { font-size:18px !important; line-height:1.5 !important; font-weight:600 !important; color:#6a7480 !important; letter-spacing:-.3px; }
+.workspace .page-card p { font-size:14px !important; line-height:1.75 !important; color:#99a1aa; }
+.workspace .page-card .card-kind,.workspace .page-card .card-time { font-size:11px !important; color:#b5bcc5; }
 .workspace .page-card footer button { font-size:12px !important; padding:5px 8px; line-height:1.4 !important; min-height:27px; }
 .workspace .glass-footer { border-color:rgba(255,255,255,.28); }
-.workspace .glass-footer-tools button { color:#a890b8; }
-.workspace .glass-sidebar-foot span { color:#ae98bc; }
-.workspace .glass-sidebar-foot i { background:#ccb9db; }
+.workspace .glass-footer-tools button { color:#a0aab5; }
+.workspace .glass-sidebar-foot span { color:#a7b0ba; }
+.workspace .glass-sidebar-foot i { background:#c8d0d9; }
 @media(max-width:650px) { .workspace .topnav #sideNav .top-item span { font-size:10px !important; } .workspace .topnav > .topbar .page-search { height:38px; min-height:38px; } .workspace #dashboardHome .glass-brand-text b { font-size:23px; } .workspace #todayPanel,.workspace .notes-hub #memoPanel { padding:17px; } .workspace #schedulePanel { padding:17px !important; } }
 /* Keep text crisp against the brighter surfaces. */
-.workspace .topnav #sideNav .top-item,.workspace .topnav #sideNav .top-item:first-of-type,.workspace .topnav #sideNav .top-item:nth-of-type(even) { color:#675a76; }
-.workspace .topnav .shortcut a b,.workspace .topnav .shortcut.add { color:#82708f !important; }
-.workspace .topnav .top-mini,.workspace .topnav .sync-state,.workspace .topnav .sync-state[data-state=offline] { color:#80708e !important; }
-.workspace #todayPanel .todo-head h2 { font-size:17px !important; color:#5e4f70 !important; }
-.workspace #todayPanel .todo-view-tabs button:not(.active) { color:#8a749f !important; }
-.workspace #todayPanel .todo-quick-entry input::placeholder { color:#a08bab !important; }
-.workspace #todayPanel .todo-empty { color:#9b84aa !important; }
-.workspace .notes-hub #memoPanel #memoNote { color:#786087 !important; }
-.workspace .notes-hub #memoPanel #memoNote::placeholder { color:#a28bb0 !important; }
-.workspace .notes-hub #memoPanel .memo-tools button { color:#9477a7; }
-.workspace #contractTodaySection p,.workspace #contractTodaySection li { color:#8d74a0 !important; }
-.workspace #schedulePanel .calendar-days button { color:#93809f; }
-.workspace #schedulePanel .calendar-week { color:#aa95b6; }
-.workspace .page-card p { color:#8a719a; }
+.workspace .topnav #sideNav .top-item,.workspace .topnav #sideNav .top-item:first-of-type,.workspace .topnav #sideNav .top-item:nth-of-type(even) { color:#666e77; }
+.workspace .topnav .shortcut a b,.workspace .topnav .shortcut.add { color:#7e858e !important; }
+.workspace .topnav .top-mini,.workspace .topnav .sync-state,.workspace .topnav .sync-state[data-state=offline] { color:#7d858d !important; }
+.workspace #todayPanel .todo-head h2 { font-size:17px !important; color:#5c6570 !important; }
+.workspace #todayPanel .todo-view-tabs button:not(.active) { color:#858f9b !important; }
+.workspace #todayPanel .todo-quick-entry input::placeholder { color:#99a1aa !important; }
+.workspace #todayPanel .todo-empty { color:#949da7 !important; }
+.workspace .notes-hub #memoPanel #memoNote { color:#6f7985 !important; }
+.workspace .notes-hub #memoPanel #memoNote::placeholder { color:#9aa3ad !important; }
+.workspace .notes-hub #memoPanel .memo-tools button { color:#8994a2; }
+.workspace #contractTodaySection p,.workspace #contractTodaySection li { color:#858f9c !important; }
+.workspace #schedulePanel .calendar-days button { color:#8e959e; }
+.workspace #schedulePanel .calendar-week { color:#a3abb4; }
+.workspace .page-card p { color:#818b97; }
 
 /* Final interior finish: pearl surfaces, precise contrast and quiet controls. */
 .workspace #todayPanel,.workspace #schedulePanel,.workspace .page-card,.workspace .block { background:linear-gradient(155deg,rgba(255,255,255,.97),rgba(251,249,253,.96)) !important; border-color:rgba(255,255,255,.95) !important; box-shadow:0 8px 24px rgba(74,54,105,.045),inset 0 1px #fff !important; }
 .workspace .notes-hub,.workspace #contractTodaySection .contract-today-card { background:linear-gradient(145deg,rgba(245,240,251,.92),rgba(235,227,246,.83)) !important; box-shadow:0 5px 20px rgba(74,54,105,.03),inset 0 1px rgba(255,255,255,.85) !important; }
-.workspace #todayPanel .todo-head { border-bottom:1px solid #efeaf4; padding-bottom:16px; }
-.workspace #todayPanel .todo-head h2,.workspace .notes-hub #memoPanel .memo-head h2,.workspace #schedulePanel h2 { color:#51435f !important; font-weight:650 !important; letter-spacing:-.4px; }
-.workspace #contractTodaySection h2 { color:#68517f !important; font-weight:600 !important; }
-.workspace #contractTodaySection p,.workspace #contractTodaySection li { color:#89719b !important; }
-.workspace #contractTodaySection time { color:#a18bb4 !important; }
-.workspace #todayPanel .todo-view-tabs button:not(.active) { background:transparent !important; color:#8d799e !important; border:1px solid transparent; }
-.workspace #todayPanel .todo-view-tabs button:not(.active):hover { background:#f0eaf6 !important; }
-.workspace #todayPanel .todo-view-tabs button.active { background:#947db3 !important; color:#fff !important; box-shadow:0 2px 6px rgba(111,83,149,.12); }
+.workspace #todayPanel .todo-head { border-bottom:1px solid #f4f5f7; padding-bottom:16px; }
+.workspace #todayPanel .todo-head h2,.workspace .notes-hub #memoPanel .memo-head h2,.workspace #schedulePanel h2 { color:#4f5760 !important; font-weight:650 !important; letter-spacing:-.4px; }
+.workspace #contractTodaySection h2 { color:#616d7c !important; font-weight:600 !important; }
+.workspace #contractTodaySection p,.workspace #contractTodaySection li { color:#818b97 !important; }
+.workspace #contractTodaySection time { color:#9ba5b0 !important; }
+.workspace #todayPanel .todo-view-tabs button:not(.active) { background:transparent !important; color:#88919b !important; border:1px solid transparent; }
+.workspace #todayPanel .todo-view-tabs button:not(.active):hover { background:#f4f6f8 !important; }
+.workspace #todayPanel .todo-view-tabs button.active { background:#909dac !important; color:#fff !important; box-shadow:0 2px 6px rgba(111,83,149,.12); }
 .workspace #todayPanel .todo-view-tabs button span { font-size:10px !important; font-weight:500; }
-.workspace #todayPanel .todo-quick-entry { border-color:#ebe4f2; background:#fbf9fd !important; transition:border-color .15s ease,box-shadow .15s ease; }
-.workspace #todayPanel .todo-quick-entry:focus-within { border-color:#c5b2db; box-shadow:0 0 0 3px rgba(185,161,214,.1); }
-.workspace #todayPanel .todo-line { border-bottom-color:#f0ecf5; }
-.workspace #todayPanel :is(.todo-line-text,.todo-mark) { color:#63536f !important; }
+.workspace #todayPanel .todo-quick-entry { border-color:#eff1f4; background:#ffffff !important; transition:border-color .15s ease,box-shadow .15s ease; }
+.workspace #todayPanel .todo-quick-entry:focus-within { border-color:#c3ccd7; box-shadow:0 0 0 3px rgba(185,161,214,.1); }
+.workspace #todayPanel .todo-line { border-bottom-color:#f5f7f8; }
+.workspace #todayPanel :is(.todo-line-text,.todo-mark) { color:#5f6770 !important; }
 .workspace #todayPanel .todo-line:hover { background:rgba(239,232,247,.3); }
 .workspace #todayPanel .todo-line.star { background:rgba(234,223,245,.43); }
-.workspace #todayPanel .todo-box { border-color:#c8b9d6; background:transparent; }
-.workspace #todayPanel .todo-line.done .todo-line-text { color:#b2a3bf !important; }
-.workspace #todayPanel .todo-star { color:#b39bc7; }
-.workspace #todayPanel .todo-empty { color:#a38bae !important; }
-.workspace .notes-hub #memoPanel #memoNote { color:#786087 !important; line-height:1.9 !important; }
+.workspace #todayPanel .todo-box { border-color:#c7cdd5; background:transparent; }
+.workspace #todayPanel .todo-line.done .todo-line-text { color:#b0b7be !important; }
+.workspace #todayPanel .todo-star { color:#acb6c2; }
+.workspace #todayPanel .todo-empty { color:#9aa2ac !important; }
+.workspace .notes-hub #memoPanel #memoNote { color:#6f7985 !important; line-height:1.9 !important; }
 .workspace .notes-hub #memoPanel .memo-note-shell { background:rgba(255,255,255,.4) !important; border-color:rgba(255,255,255,.65); }
-.workspace .notes-hub #memoPanel .memo-tools button,.workspace .page-card footer button { background:rgba(245,240,250,.72); border-color:#ece3f4; color:#90709f; font-weight:500 !important; box-shadow:none; }
-.workspace .notes-hub #memoPanel .memo-tools button:hover,.workspace .page-card footer button:hover { background:#e9ddf3; border-color:#d6c5e6; color:#76518c; }
+.workspace .notes-hub #memoPanel .memo-tools button,.workspace .page-card footer button { background:rgba(245,240,250,.72); border-color:#eff2f5; color:#828d9a; font-weight:500 !important; box-shadow:none; }
+.workspace .notes-hub #memoPanel .memo-tools button:hover,.workspace .page-card footer button:hover { background:#eaeef3; border-color:#d4dbe4; color:#647486; }
 .workspace .page-card { padding:18px 19px; }
-.workspace .page-card h3 { color:#5f486f !important; font-weight:600 !important; letter-spacing:-.35px; }
-.workspace .page-card p { color:#8c729b !important; }
-.workspace .page-card footer { border-top-color:#f0e9f6; padding-top:11px; margin-top:12px; }
-.workspace .page-card .card-kind,.workspace .page-card .card-time { color:#b29cc1 !important; font-weight:400 !important; }
-.workspace .page-card.business-card::before,.workspace .page-card.contact-card::before { background:linear-gradient(90deg,#cbb8dd,#f2edf7); }
-.workspace #schedulePanel .calendar-month strong { color:#8a70a0; font-weight:600; letter-spacing:.15px; }
-.workspace #schedulePanel .calendar-days button { color:#927aa1; }
-.workspace #schedulePanel .calendar-days button.is-selected { background:#a18abf !important; color:#fff !important; box-shadow:0 2px 6px rgba(122,94,157,.12); }
+.workspace .page-card h3 { color:#56616d !important; font-weight:600 !important; letter-spacing:-.35px; }
+.workspace .page-card p { color:#828c98 !important; }
+.workspace .page-card footer { border-top-color:#f4f6f8; padding-top:11px; margin-top:12px; }
+.workspace .page-card .card-kind,.workspace .page-card .card-time { color:#acb4be !important; font-weight:400 !important; }
+.workspace .page-card.business-card::before,.workspace .page-card.contact-card::before { background:linear-gradient(90deg,#c8d0da,#f7f8fa); }
+.workspace #schedulePanel .calendar-month strong { color:#828d9b; font-weight:600; letter-spacing:.15px; }
+.workspace #schedulePanel .calendar-days button { color:#8a939e; }
+.workspace #schedulePanel .calendar-days button.is-selected { background:#9daab8 !important; color:#fff !important; box-shadow:0 2px 6px rgba(122,94,157,.12); }
 .workspace .topnav .shortcut { transition:background-color .15s ease; }
 .workspace .topnav .shortcut:hover { background:rgba(255,255,255,.66); }
 @media(prefers-reduced-motion:reduce) { .workspace .todo-quick-entry,.workspace .topnav .shortcut { transition:none; } }
+
+/* Bright navy glass: translucent neutral surfaces and calm ink. */
+:root { --ref-ink:#24394f; --ref-body:#4e657b; --ref-muted:#8597a8; --ref-accent:#486985; }
+html { background:#e4ecf1; }
+body,body:not(.overlay-mode) { background:radial-gradient(ellipse at 15% 0%,#f6fbff,transparent 65%),linear-gradient(135deg,#dce8ef,#edf2f5); color:#24394f; }
+.workspace { background:linear-gradient(145deg,rgba(231,240,247,.72),rgba(244,248,251,.65)); border-color:#ffffffd9; box-shadow:0 20px 70px #233b5214,inset 0 1px #fff; backdrop-filter:blur(24px); }
+.workspace #todayPanel,.workspace #schedulePanel,.workspace .page-card,.workspace .block { background:linear-gradient(145deg,rgba(255,255,255,.78),rgba(247,251,254,.63)) !important; backdrop-filter:blur(18px); }
+.workspace .notes-hub,.workspace #contractTodaySection .contract-today-card { background:linear-gradient(145deg,rgba(239,247,252,.72),rgba(217,231,242,.46)) !important; backdrop-filter:blur(18px); }
+.workspace #todayPanel .todo-view-tabs button.active,.workspace #schedulePanel .calendar-days button.is-selected,.workspace #schedulePanel .calendar-days button.is-today.is-selected { background:#486782 !important; color:white !important; }
+.workspace #schedulePanel .calendar-days button.is-today { background:#e2edf5 !important; color:#294b68 !important; outline-color:#8ca6ba; }
+.workspace #orb.orb { background:#526f88 !important; }
+.workspace[data-view='대시보드'] #dashCols,.workspace[data-view='대시보드'] .main-scroll:has(#knowledgeBlock.hidden) #dashCols { grid-template-rows:110px minmax(0,1fr); grid-template-areas:'todo contracts' 'todo notes'; }
+.workspace[data-view='달력'] #dashCols { display:block !important; height:auto; min-height:0; }
+.workspace[data-view='달력'] #todayPanel,.workspace[data-view='달력'] .notes-hub { display:none !important; }
+.workspace[data-view='달력'] #schedulePanel { display:block; height:auto; min-height:calc(100dvh - 285px); max-height:none; overflow:visible; padding:28px 32px !important; }
+.workspace[data-view='달력'] #schedulePanel .month-calendar { width:100%; }
+.workspace[data-view='달력'] #schedulePanel .calendar-month { margin:20px 0 24px; }
+.workspace[data-view='달력'] #schedulePanel .calendar-month strong { font-size:23px; color:#304c65; }
+.workspace[data-view='달력'] #schedulePanel .calendar-week { font-size:13px; color:#687f94; margin-bottom:12px; }
+.workspace[data-view='달력'] #schedulePanel .calendar-days { grid-auto-rows:minmax(62px,9vh); gap:3px; }
+.workspace[data-view='달력'] #schedulePanel .calendar-days button,.workspace[data-view='달력'] #schedulePanel .calendar-blank { width:44px; min-width:44px; max-width:44px; height:44px; min-height:44px; font-size:16px !important; }
+.workspace[data-view='달력'] #schedulePanel .calendar-selected-heading { margin-top:25px; color:#49647b !important; }
+@media(max-width:650px) { .workspace[data-view='대시보드'] #dashCols,.workspace[data-view='대시보드'] .main-scroll:has(#knowledgeBlock.hidden) #dashCols { grid-template-areas:'todo' 'contracts' 'notes'; grid-template-rows:420px auto 280px; } .workspace[data-view='달력'] #schedulePanel { padding:18px !important; } .workspace[data-view='달력'] #schedulePanel .calendar-days { grid-auto-rows:52px; } .workspace[data-view='달력'] #schedulePanel .calendar-days button,.workspace[data-view='달력'] #schedulePanel .calendar-blank { width:34px; min-width:34px; max-width:34px; height:34px; min-height:34px; } }
+#orb.orb { background:linear-gradient(145deg,#738fa7,#385b79) !important; box-shadow:0 5px 20px #36577638,inset 0 1px #ffffffa6 !important; }
+.workspace #schedulePanel .calendar-month button,.workspace #schedulePanel .calendar-month #calendarToday { color:#4f6b83; background:#e7eff5; }
+.workspace #schedulePanel .block-head { display:flex; justify-content:space-between; align-items:center; }
+.workspace #schedulePanel .cal-tools { display:flex; gap:8px; }
+.workspace #schedulePanel .cal-tools button { color:#526c82; background:#eef4f8; padding:7px 11px; border-radius:9px; font-size:12px !important; }
+.workspace #todayPanel .todo-view-tabs button span { background:#e8eff5; color:#627b91; }
+.workspace #todayPanel .todo-view-tabs button.active span { background:#ffffff26; color:#fff; }
+.workspace .topnav .brand-avatar,.workspace .topnav #pageAdd { color:#486782 !important; background:#edf4f8 !important; }

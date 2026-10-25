@@ -353,8 +353,8 @@ function renderSideNav() {
   $('#sideNav').innerHTML = NAV_ITEMS.filter(item => item.name !== '내 지식').map(item => {
     const target = item.category || item.name;
     return `<button type="button" class="top-item ${target === pageCategory ? 'active' : ''}" data-nav="${target}" title="${escapeHtml(item.name)}" aria-label="${escapeHtml(item.name)}">${icon(item.icon, 20)}<span>${escapeHtml(item.name)}</span></button>`;
-  }).join('') + `<button type="button" class="top-item" id="memoryToggle" title="기억 저장소" aria-label="기억 저장소">${icon('bookmark', 20)}<span>저장소</span></button><button type="button" class="top-item" id="calendarNav" title="달력" aria-label="달력">${icon('calendar',20)}<span>달력</span></button>`;
-  $('#calendarNav').onclick = () => { goToView('대시보드'); $('#schedulePanel').scrollIntoView({ block:'nearest' }); };
+  }).join('') + `<button type="button" class="top-item" id="memoryToggle" title="기억 저장소" aria-label="기억 저장소">${icon('bookmark', 20)}<span>저장소</span></button><button type="button" class="top-item ${pageCategory === '달력' ? 'active' : ''}" id="calendarNav" title="달력" aria-label="달력">${icon('calendar',20)}<span>달력</span></button>`;
+  $('#calendarNav').onclick = () => { goToView('달력'); };
   $('#sideNav').querySelectorAll('[data-nav]').forEach(button => {
     button.onclick = () => goToView(button.dataset.nav);
   });
@@ -498,9 +498,9 @@ function renderLibrary() {
   $('#contractTodaySection').classList.toggle('hidden', !onDashboard);
   $('#shortcutSection').classList.remove('hidden');
   $('.crm-page-title').textContent = onDashboard ? '대시보드' : heading;
-  $('#dashCols').classList.toggle('hidden', !onDashboard && pageCategory !== '할 일');
-  $('#schedulePanel').classList.toggle('hidden', !onDashboard);
-  $('#knowledgeBlock').classList.toggle('hidden', onDashboard || (pageCategory === '할 일' && !term));
+  $('#dashCols').classList.toggle('hidden', Boolean(term) || (!onDashboard && pageCategory !== '할 일' && pageCategory !== '달력'));
+  $('#schedulePanel').classList.toggle('hidden', pageCategory !== '달력' || Boolean(term));
+  $('#knowledgeBlock').classList.toggle('hidden', onDashboard || ((pageCategory === '할 일' || pageCategory === '달력') && !term));
   $('#pageCategories').classList.toggle('hidden', Boolean(term));
   renderTodoReminders();
   paintIcons($('#pageGrid'));
