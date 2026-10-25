@@ -84,3 +84,42 @@ body,button,input,textarea,select { font-family:-apple-system,BlinkMacSystemFont
 .workspace #schedulePanel .calendar-days button { color:#93809f; }
 .workspace #schedulePanel .calendar-week { color:#aa95b6; }
 .workspace .page-card p { color:#8a719a; }
+
+/* Final interior finish: pearl surfaces, precise contrast and quiet controls. */
+.workspace #todayPanel,.workspace #schedulePanel,.workspace .page-card,.workspace .block { background:linear-gradient(155deg,rgba(255,255,255,.97),rgba(251,249,253,.96)) !important; border-color:rgba(255,255,255,.95) !important; box-shadow:0 8px 24px rgba(74,54,105,.045),inset 0 1px #fff !important; }
+.workspace .notes-hub,.workspace #contractTodaySection .contract-today-card { background:linear-gradient(145deg,rgba(245,240,251,.92),rgba(235,227,246,.83)) !important; box-shadow:0 5px 20px rgba(74,54,105,.03),inset 0 1px rgba(255,255,255,.85) !important; }
+.workspace #todayPanel .todo-head { border-bottom:1px solid #efeaf4; padding-bottom:16px; }
+.workspace #todayPanel .todo-head h2,.workspace .notes-hub #memoPanel .memo-head h2,.workspace #schedulePanel h2 { color:#51435f !important; font-weight:650 !important; letter-spacing:-.4px; }
+.workspace #contractTodaySection h2 { color:#68517f !important; font-weight:600 !important; }
+.workspace #contractTodaySection p,.workspace #contractTodaySection li { color:#89719b !important; }
+.workspace #contractTodaySection time { color:#a18bb4 !important; }
+.workspace #todayPanel .todo-view-tabs button:not(.active) { background:transparent !important; color:#8d799e !important; border:1px solid transparent; }
+.workspace #todayPanel .todo-view-tabs button:not(.active):hover { background:#f0eaf6 !important; }
+.workspace #todayPanel .todo-view-tabs button.active { background:#947db3 !important; color:#fff !important; box-shadow:0 2px 6px rgba(111,83,149,.12); }
+.workspace #todayPanel .todo-view-tabs button span { font-size:10px !important; font-weight:500; }
+.workspace #todayPanel .todo-quick-entry { border-color:#ebe4f2; background:#fbf9fd !important; transition:border-color .15s ease,box-shadow .15s ease; }
+.workspace #todayPanel .todo-quick-entry:focus-within { border-color:#c5b2db; box-shadow:0 0 0 3px rgba(185,161,214,.1); }
+.workspace #todayPanel .todo-line { border-bottom-color:#f0ecf5; }
+.workspace #todayPanel :is(.todo-line-text,.todo-mark) { color:#63536f !important; }
+.workspace #todayPanel .todo-line:hover { background:rgba(239,232,247,.3); }
+.workspace #todayPanel .todo-line.star { background:rgba(234,223,245,.43); }
+.workspace #todayPanel .todo-box { border-color:#c8b9d6; background:transparent; }
+.workspace #todayPanel .todo-line.done .todo-line-text { color:#b2a3bf !important; }
+.workspace #todayPanel .todo-star { color:#b39bc7; }
+.workspace #todayPanel .todo-empty { color:#a38bae !important; }
+.workspace .notes-hub #memoPanel #memoNote { color:#786087 !important; line-height:1.9 !important; }
+.workspace .notes-hub #memoPanel .memo-note-shell { background:rgba(255,255,255,.4) !important; border-color:rgba(255,255,255,.65); }
+.workspace .notes-hub #memoPanel .memo-tools button,.workspace .page-card footer button { background:rgba(245,240,250,.72); border-color:#ece3f4; color:#90709f; font-weight:500 !important; box-shadow:none; }
+.workspace .notes-hub #memoPanel .memo-tools button:hover,.workspace .page-card footer button:hover { background:#e9ddf3; border-color:#d6c5e6; color:#76518c; }
+.workspace .page-card { padding:18px 19px; }
+.workspace .page-card h3 { color:#5f486f !important; font-weight:600 !important; letter-spacing:-.35px; }
+.workspace .page-card p { color:#8c729b !important; }
+.workspace .page-card footer { border-top-color:#f0e9f6; padding-top:11px; margin-top:12px; }
+.workspace .page-card .card-kind,.workspace .page-card .card-time { color:#b29cc1 !important; font-weight:400 !important; }
+.workspace .page-card.business-card::before,.workspace .page-card.contact-card::before { background:linear-gradient(90deg,#cbb8dd,#f2edf7); }
+.workspace #schedulePanel .calendar-month strong { color:#8a70a0; font-weight:600; letter-spacing:.15px; }
+.workspace #schedulePanel .calendar-days button { color:#927aa1; }
+.workspace #schedulePanel .calendar-days button.is-selected { background:#a18abf !important; color:#fff !important; box-shadow:0 2px 6px rgba(122,94,157,.12); }
+.workspace .topnav .shortcut { transition:background-color .15s ease; }
+.workspace .topnav .shortcut:hover { background:rgba(255,255,255,.66); }
+@media(prefers-reduced-motion:reduce) { .workspace .todo-quick-entry,.workspace .topnav .shortcut { transition:none; } }
