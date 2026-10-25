@@ -1,0 +1,86 @@
+/* A bright lavender system with a consistent type and spacing hierarchy. */
+:root { --ref-ink:#353046; --ref-body:#635c73; --ref-muted:#958ca5; --ref-accent:#8c7ab5; }
+html { background:#e2ddeb; }
+body,body:not(.overlay-mode) { color:var(--ref-ink); background:radial-gradient(ellipse at 15% 5%,#e9e4f2,transparent 58%),linear-gradient(145deg,#d6cee6,#eae3eb); }
+.workspace { border:1px solid rgba(255,255,255,.8); background:linear-gradient(140deg,rgba(215,207,233,.94),rgba(226,217,235,.94) 65%,rgba(237,225,234,.94)); box-shadow:0 18px 60px rgba(88,69,119,.1),inset 0 1px 2px #fff; }
+body,button,input,textarea,select { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Apple SD Gothic Neo','Malgun Gothic',sans-serif !important; -webkit-font-smoothing:antialiased; }
+.workspace #dashboardHome .glass-brand-text b { color:#675a80; text-shadow:0 1px 0 #fff,0 3px 8px rgba(103,85,136,.07); font-size:38px; letter-spacing:-1.3px; font-weight:750; }
+.workspace .topnav { padding-top:12px; }
+.workspace .topnav #sideNav .top-item,.workspace .topnav #sideNav .top-item:first-of-type,.workspace .topnav #sideNav .top-item:nth-of-type(even) { min-height:43px; height:43px; padding:10px 15px; border-radius:13px; color:#746884; gap:12px; }
+.workspace .topnav #sideNav .top-item span { font-size:14px !important; line-height:1.4 !important; letter-spacing:-.2px; font-weight:500 !important; }
+.workspace .topnav #sideNav .top-item svg { width:20px; height:20px; color:#a094b3 !important; }
+.workspace .topnav #sideNav .top-item.active { color:#5c4e78; background:rgba(255,255,255,.8); border-color:rgba(255,255,255,.6); box-shadow:0 3px 10px rgba(107,88,143,.045); }
+.workspace .topnav #sideNav .top-item.active svg { color:#8e7aaf !important; }
+.workspace .topnav #sideNav .top-item.active span { font-weight:600 !important; }
+.workspace .topnav #sideNav .top-item:hover { background:rgba(255,255,255,.42); }
+.workspace .topnav .top-mini,.workspace .topnav .sync-state,.workspace .topnav .sync-state[data-state=offline] { color:#8c7b9e !important; background:rgba(255,255,255,.25) !important; border-color:rgba(255,255,255,.45); }
+.workspace .topnav > .topbar .page-search { height:42px; min-height:42px; background:rgba(255,255,255,.72) !important; border-color:rgba(255,255,255,.85); padding-left:15px; }
+.workspace .topnav > .topbar #pageSearch { font-size:13px !important; color:#70617f !important; }
+.workspace .topnav > .topbar #pageSearch::placeholder { color:#a89ab8 !important; }
+.workspace .topnav #shortcutSection { gap:12px; padding-bottom:12px; }
+.workspace .crm-favorites-label { color:#9384a4; font-size:11px !important; }
+.workspace .topnav .shortcut,.workspace .topnav .shortcut:nth-child(even),.workspace .topnav .shortcut.add { min-width:90px; width:auto; height:43px; min-height:43px; background:rgba(255,255,255,.4); border-color:rgba(255,255,255,.55) !important; border-radius:12px; box-shadow:inset 0 1px #ffffff70; }
+.workspace .topnav .shortcut a { padding-left:12px; padding-right:25px; }
+.workspace .topnav .shortcut a b,.workspace .topnav .shortcut.add { color:#8c7b9f !important; font-size:11px !important; font-weight:500 !important; letter-spacing:-.15px; }
+.workspace .topnav .shortcut .shortcut-more { color:#b0a1c2; }
+.workspace .topnav .shortcut a::before { color:#b09cc9; background:#eee7f6; border-color:#e6dbf0; }
+.workspace .topnav .shortcut.add { min-width:70px; width:70px; }
+.workspace .topnav .shortcut.add b { white-space:nowrap; }
+.workspace #todayPanel,.workspace .notes-hub,.workspace #schedulePanel,.workspace .page-card,.workspace .block,.workspace #contractTodaySection .contract-today-card { border:1px solid rgba(255,255,255,.85) !important; border-radius:21px !important; box-shadow:0 6px 22px rgba(98,79,133,.035),inset 0 1px rgba(255,255,255,.95) !important; background:rgba(255,255,255,.9) !important; }
+.workspace .notes-hub { background:rgba(244,239,250,.8) !important; }
+.workspace #contractTodaySection .contract-today-card { background:rgba(242,237,249,.78) !important; padding:16px 17px; }
+.workspace #contractTodaySection h2 { font-size:14px !important; line-height:1.4 !important; font-weight:600 !important; color:#75618e !important; letter-spacing:-.2px; }
+.workspace #contractTodaySection time { color:#b0a0c1 !important; font-size:10px !important; }
+.workspace #contractTodaySection p,.workspace #contractTodaySection li { color:#a08bb5 !important; font-size:12px !important; line-height:1.65 !important; }
+.workspace #todayPanel { padding:21px 22px; }
+.workspace #todayPanel .todo-head { column-gap:15px; row-gap:13px; padding-bottom:16px; margin-bottom:4px; border-bottom-color:#f0eaf5; }
+.workspace .todo-head h2,.workspace .memo-head h2,.workspace #schedulePanel h2 { font-size:16px !important; line-height:1.5 !important; font-weight:600 !important; letter-spacing:-.3px; color:#645476 !important; }
+.workspace :is(.todo-head h2,.memo-head h2,#schedulePanel h2)::before { width:5px; height:5px; background:#beaad3; }
+.workspace #todayPanel .todo-view-tabs { gap:5px; align-items:center; }
+.workspace #todayPanel .todo-view-tabs button { min-height:29px; padding:6px 9px; border-radius:9px; font-size:12px !important; font-weight:500 !important; line-height:1.4 !important; }
+.workspace #todayPanel .todo-view-tabs button:not(.active) { background:#f5f1fa !important; color:#a08cb3 !important; }
+.workspace #todayPanel .todo-view-tabs button.active { background:#b09ac9 !important; color:#fff !important; }
+.workspace #todayPanel .todo-quick-entry { padding:10px 12px; background:#faf8fc !important; border:1px solid #f0eaf5; border-radius:12px; }
+.workspace #todayPanel .todo-quick-entry input { font-size:13px !important; line-height:1.5 !important; }
+.workspace #todayPanel .todo-line { min-height:45px; padding:11px 0; column-gap:8px; border-bottom-color:#f1ecf6; }
+.workspace #todayPanel :is(.todo-line-text,.todo-mark) { font-size:14px !important; line-height:1.6 !important; font-weight:400 !important; letter-spacing:-.12px; color:#766683 !important; }
+.workspace #todayPanel .todo-line time { color:#b6a2c6; font-size:11px !important; }
+.workspace #todayPanel .todo-star { color:#c0a7d1; }
+.workspace #todayPanel .todo-empty { font-size:13px !important; color:#bca9ca !important; padding:20px 0; line-height:1.7 !important; }
+.workspace .notes-hub #memoPanel { padding:21px 22px; }
+.workspace .notes-hub .memo-head { margin-bottom:12px; }
+.workspace .notes-hub #memoPanel .memo-head h2 { color:#8e74a5 !important; }
+.workspace .notes-hub #memoPanel .memo-note-shell { background:rgba(255,255,255,.4) !important; border-color:rgba(255,255,255,.55); border-radius:12px; }
+.workspace .notes-hub #memoPanel #memoNote { color:#9c83ae !important; font-size:14px !important; line-height:1.8 !important; padding:13px 14px; }
+.workspace .notes-hub #memoPanel #memoNote::placeholder { color:#c4b0d1 !important; }
+.workspace .notes-hub #memoPanel .memo-tools { gap:7px; margin-top:12px; }
+.workspace .notes-hub #memoPanel .memo-tools button { padding:7px 10px; min-height:30px; color:#ad94bd; background:rgba(255,255,255,.45); border:1px solid #eee5f4; border-radius:9px; font-size:11px !important; }
+.workspace #schedulePanel { padding:20px !important; }
+.workspace #schedulePanel .calendar-month { margin:12px 0; }
+.workspace #schedulePanel .calendar-month strong { font-size:13px; font-weight:600; color:#9b85ad; }
+.workspace #schedulePanel .calendar-days button { font-size:12px !important; color:#b2a0bd; }
+.workspace #schedulePanel .calendar-week { font-size:10px; color:#c1aecb; }
+.workspace .page-card h3 { font-size:18px !important; line-height:1.5 !important; font-weight:600 !important; color:#705c82 !important; letter-spacing:-.3px; }
+.workspace .page-card p { font-size:14px !important; line-height:1.75 !important; color:#a08aac; }
+.workspace .page-card .card-kind,.workspace .page-card .card-time { font-size:11px !important; color:#baa6c7; }
+.workspace .page-card footer button { font-size:12px !important; padding:5px 8px; line-height:1.4 !important; min-height:27px; }
+.workspace .glass-footer { border-color:rgba(255,255,255,.28); }
+.workspace .glass-footer-tools button { color:#a890b8; }
+.workspace .glass-sidebar-foot span { color:#ae98bc; }
+.workspace .glass-sidebar-foot i { background:#ccb9db; }
+@media(max-width:650px) { .workspace .topnav #sideNav .top-item span { font-size:10px !important; } .workspace .topnav > .topbar .page-search { height:38px; min-height:38px; } .workspace #dashboardHome .glass-brand-text b { font-size:23px; } .workspace #todayPanel,.workspace .notes-hub #memoPanel { padding:17px; } .workspace #schedulePanel { padding:17px !important; } }
+/* Keep text crisp against the brighter surfaces. */
+.workspace .topnav #sideNav .top-item,.workspace .topnav #sideNav .top-item:first-of-type,.workspace .topnav #sideNav .top-item:nth-of-type(even) { color:#675a76; }
+.workspace .topnav .shortcut a b,.workspace .topnav .shortcut.add { color:#82708f !important; }
+.workspace .topnav .top-mini,.workspace .topnav .sync-state,.workspace .topnav .sync-state[data-state=offline] { color:#80708e !important; }
+.workspace #todayPanel .todo-head h2 { font-size:17px !important; color:#5e4f70 !important; }
+.workspace #todayPanel .todo-view-tabs button:not(.active) { color:#8a749f !important; }
+.workspace #todayPanel .todo-quick-entry input::placeholder { color:#a08bab !important; }
+.workspace #todayPanel .todo-empty { color:#9b84aa !important; }
+.workspace .notes-hub #memoPanel #memoNote { color:#786087 !important; }
+.workspace .notes-hub #memoPanel #memoNote::placeholder { color:#a28bb0 !important; }
+.workspace .notes-hub #memoPanel .memo-tools button { color:#9477a7; }
+.workspace #contractTodaySection p,.workspace #contractTodaySection li { color:#8d74a0 !important; }
+.workspace #schedulePanel .calendar-days button { color:#93809f; }
+.workspace #schedulePanel .calendar-week { color:#aa95b6; }
+.workspace .page-card p { color:#8a719a; }
