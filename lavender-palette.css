@@ -1,0 +1,70 @@
+/* Lavender tablet palette — keeps all existing dimensions, layout and behavior. */
+:root { --theme-blue:#7264c7; --theme-ink:#363341; --theme-muted:#96919f; }
+html { background:#a39dbb; }
+body,body:not(.overlay-mode) { color:#363341; background:linear-gradient(155deg,#9290ba,#aca5bc 55%,#dfd1da); }
+body::before { background:none; }
+.workspace { background:linear-gradient(140deg,rgba(150,144,184,.92),rgba(173,161,186,.91) 65%,rgba(203,183,197,.9)); border-color:#292531; box-shadow:0 23px 55px rgba(48,39,69,.18),inset 0 0 0 1px rgba(255,255,255,.18); }
+.workspace #dashboardHome .glass-brand-text b { color:#fff; text-shadow:0 2px 3px rgba(62,49,91,.12); }
+.workspace .topnav { background:rgba(255,255,255,.025); box-shadow:none; }
+.workspace .topnav .top-mini,.workspace .topnav .sync-state,.workspace .topnav .sync-state[data-state=offline] { color:#f9f7ff !important; background:rgba(105,95,142,.15) !important; border-color:rgba(255,255,255,.2); }
+.workspace .topnav .brand-avatar { background:#e1d9f1; color:#8170b5; }
+.workspace .topnav > .topbar .page-search { background:rgba(255,255,255,.72) !important; border-color:rgba(255,255,255,.55); box-shadow:none; }
+.workspace .topnav > .topbar #pageSearch { color:#5c526e !important; }
+.workspace .topnav > .topbar #pageSearch::placeholder { color:#9a90a8 !important; }
+.workspace .topnav .shortcut,.workspace .topnav .shortcut:nth-child(even),.workspace .topnav .shortcut.add { background:rgba(255,255,255,.23); border-color:rgba(255,255,255,.3) !important; box-shadow:none; }
+.workspace .topnav .shortcut a b,.workspace .topnav .shortcut.add { color:#fff !important; }
+.workspace .topnav .shortcut a::before { color:#e5ddff; background:rgba(115,99,160,.2); border-color:rgba(255,255,255,.15); }
+.workspace .topnav .shortcut .shortcut-more { color:#f7f3ff; }
+.workspace .crm-favorites-label { color:#f2ecf8; }
+.workspace .topnav #sideNav .top-item,.workspace .topnav #sideNav .top-item:first-of-type,.workspace .topnav #sideNav .top-item:nth-of-type(even) { color:#f5f0fb; }
+.workspace .topnav #sideNav .top-item svg { color:#fff !important; }
+.workspace .topnav #sideNav .top-item:hover { background:rgba(255,255,255,.12); }
+.workspace .topnav #sideNav .top-item.active,.workspace .topnav #sideNav .top-item.active:hover { background:rgba(255,255,255,.93); color:#5c4d80; border-color:rgba(255,255,255,.7); box-shadow:0 3px 9px rgba(65,49,98,.09); }
+.workspace .topnav #sideNav .top-item.active svg { color:#7867a8 !important; }
+.workspace .topnav > .topbar #pageAdd { background:#f8f5ff; color:#7663bd; border-color:#e9e1fb; box-shadow:0 2px 5px rgba(58,43,90,.1); }
+.workspace #todayPanel,.workspace .notes-hub,.workspace #schedulePanel,.workspace .page-card,.workspace .block,.workspace #contractTodaySection .contract-today-card { background:rgba(255,255,255,.94) !important; border-color:rgba(255,255,255,.75) !important; box-shadow:0 5px 15px rgba(68,50,98,.06) !important; }
+.workspace #contractTodaySection h2,.workspace :is(.todo-head h2,.memo-head h2,#schedulePanel h2),.workspace .page-card h3 { color:#3b3547 !important; }
+.workspace #contractTodaySection p,.workspace #contractTodaySection li { color:#91869f !important; }
+.workspace #contractTodaySection time { color:#b2a9bd !important; }
+.workspace :is(.todo-head h2,.memo-head h2,#schedulePanel h2)::before { background:#a798cf; }
+.workspace #todayPanel .todo-view-tabs button:not(.active) { color:#8b7ca4 !important; background:#f1edf8 !important; }
+.workspace #todayPanel .todo-view-tabs button.active { color:#fff !important; background:#8170bc !important; box-shadow:none; }
+.workspace #todayPanel .todo-view-tabs button span,.workspace #todayPanel .todo-view-tabs button:not(.active) span { color:#9a8cb1 !important; background:rgba(215,204,237,.4) !important; }
+.workspace #todayPanel .todo-view-tabs button.active span { color:#fff !important; background:rgba(255,255,255,.18) !important; }
+.workspace #todayPanel .todo-quick-entry,.workspace #memoPanel .memo-note-shell { background:#f8f6fb !important; border-color:#efebf5; box-shadow:none; }
+.workspace input,.workspace textarea { color:#61546f; }
+.workspace .todo-quick-entry input::placeholder,.workspace #memoNote::placeholder { color:#b0a6ba !important; }
+.workspace #todayPanel :is(.todo-line-text,.todo-mark) { color:#62596d !important; }
+.workspace #todayPanel .todo-line { border-bottom-color:#eeebf3; }
+.workspace #todayPanel .todo-line.star { background:#f7eff8; }
+.workspace #todayPanel .todo-star { color:#ab92c4; }
+.workspace #todayPanel .todo-line time { color:#a99db5; }
+.workspace #todayPanel .todo-empty { color:#b2a7bd !important; }
+.workspace #todayPanel .todo-results { scrollbar-color:#b7aaca77 transparent; }
+.workspace .notes-hub #memoPanel .memo-tools button,.workspace .page-card footer button { color:#9582af; background:#f3eff9; border-color:#eee8f5; box-shadow:none; }
+.workspace .page-card p,.workspace .page-card .card-kind,.workspace .page-card .card-time { color:#9c8eac; }
+.workspace .page-card.business-card::before,.workspace .page-card.contact-card::before { background:linear-gradient(90deg,#b6a3d5,#e9e0f5); }
+.workspace #schedulePanel .calendar-days button { color:#9b91a8; }
+.workspace #schedulePanel .calendar-days button.is-today { background:#eae3f5 !important; color:#8a70b4 !important; outline-color:#c6b3e2; }
+.workspace #schedulePanel .calendar-days button.is-selected,.workspace #schedulePanel .calendar-days button.is-today.is-selected { background:#8774bd !important; color:#fff !important; outline-color:#eee7fa; box-shadow:none; }
+.workspace #schedulePanel .calendar-month button,.workspace #schedulePanel .calendar-month #calendarToday { color:#a28dbd; background:#f1edf8; }
+.workspace .glass-sidebar-foot i { background:#e5d8f2; }
+.workspace .glass-sidebar-foot span { color:#f3ebf8; }
+.workspace .glass-footer { border-color:rgba(255,255,255,.15); }
+.workspace .glass-footer-tools button { color:#f5efff; }
+.workspace .calendar-selected-heading,.workspace #schedulePanel .todo-empty { color:#a394b5 !important; }
+.workspace .todo-quick-choice { background:#f9f6ff; border-color:#e5dcf3; }
+.workspace .todo-quick-choice strong,.workspace .todo-quick-choice p { color:#7d669b !important; }
+.workspace .todo-quick-options button { color:#8d74ad; background:#eee5fa; border-color:#e0d1f2; }
+.workspace .todo-quick-options button span { color:#ae9ac4; }
+.workspace .todo-quick-options button:hover { background:#e1d3f4; }
+#orb.orb { background:linear-gradient(145deg,#b39bd8,#7e68b8); border-color:#efe5ff; box-shadow:inset 0 2px 2px #dbc9f6,0 5px 14px rgba(67,44,105,.22); }
+#orb.orb span { background:#fff; }
+.workspace input:focus-visible,.workspace textarea:focus-visible,.workspace button:focus-visible,.workspace a:focus-visible { outline-color:#baa3db; }
+::selection { color:#6a4e8d; background:#e3d5f5; }
+.workspace .notes-hub,.workspace #contractTodaySection .contract-today-card { background:rgba(115,103,146,.38) !important; border-color:rgba(255,255,255,.08) !important; box-shadow:none !important; }
+.workspace #contractTodaySection h2,.workspace #contractTodaySection p,.workspace #contractTodaySection li,.workspace #contractTodaySection time,.workspace .notes-hub .memo-head h2 { color:#f7f3ff !important; }
+.workspace .notes-hub #memoPanel .memo-note-shell { background:rgba(255,255,255,.055) !important; border-color:rgba(255,255,255,.12); }
+.workspace .notes-hub #memoPanel #memoNote { color:#fff !important; }
+.workspace .notes-hub #memoPanel #memoNote::placeholder { color:rgba(255,255,255,.65) !important; }
+.workspace .notes-hub #memoPanel .memo-tools button { color:#eee5fa; background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.13); }
