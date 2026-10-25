@@ -154,3 +154,7 @@ body,body:not(.overlay-mode) { background:radial-gradient(ellipse at 15% 0%,#f6f
 .workspace #todayPanel .todo-view-tabs button span { background:#e8eff5; color:#627b91; }
 .workspace #todayPanel .todo-view-tabs button.active span { background:#ffffff26; color:#fff; }
 .workspace .topnav .brand-avatar,.workspace .topnav #pageAdd { color:#486782 !important; background:#edf4f8 !important; }
+/* Separate the luminous tablet from its surrounding backdrop. */
+html { background:#647b90; }
+body,body:not(.overlay-mode) { background:radial-gradient(ellipse at 18% 0%,#a8bbc9 0%,transparent 60%),linear-gradient(135deg,#788fa2 0%,#526b82 65%,#415b73 100%); }
+.workspace { background:linear-gradient(145deg,rgba(239,247,252,.90),rgba(231,241,248,.85)); border:1px solid rgba(255,255,255,.95); box-shadow:0 28px 75px rgba(20,42,63,.24),0 4px 15px rgba(20,42,63,.12),inset 0 1px 2px #fff; }
