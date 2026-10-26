@@ -31,6 +31,11 @@
       node.textContent = result.today;
       node.dateTime = result.today;
     });
+    [['Briefing',result.briefing],['Dday',result.dday]].forEach(([kind,names]) => {
+      const count = document.getElementById('contract' + kind + 'Count');
+      count.textContent = state === 'ready' ? String(names.length) : state === 'loading' ? '…' : '—';
+      count.title = state === 'error' ? '정보를 불러오지 못했습니다' : '목록 보기';
+    });
     fill('contractBriefingList', result.briefing);
     fill('contractDdayList', result.dday);
   }
@@ -81,6 +86,16 @@
   window.addEventListener('focus', () => { checkDay(); refresh(); });
   document.addEventListener('visibilitychange', () => { if (!document.hidden) { checkDay(); refresh(); } });
   setInterval(() => { checkDay(); refresh(); }, 30000);
+  document.querySelectorAll('[data-contract-open]').forEach(button => {
+    button.addEventListener('click', () => document.getElementById('contract' + button.dataset.contractOpen + 'Dialog').showModal());
+  });
+  document.querySelectorAll('.contract-list-dialog').forEach(dialog => {
+    dialog.querySelector('[data-contract-close]').addEventListener('click', () => dialog.close());
+    dialog.addEventListener('click', event => { if (event.target === dialog) {
+      const rect = dialog.getBoundingClientRect();
+      if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) dialog.close();
+    } });
+  });
   scheduleMidnight();
   render();
   refresh();

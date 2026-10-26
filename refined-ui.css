@@ -158,3 +158,22 @@ body,body:not(.overlay-mode) { background:radial-gradient(ellipse at 15% 0%,#f6f
 html { background:#647b90; }
 body,body:not(.overlay-mode) { background:radial-gradient(ellipse at 18% 0%,#a8bbc9 0%,transparent 60%),linear-gradient(135deg,#788fa2 0%,#526b82 65%,#415b73 100%); }
 .workspace { background:linear-gradient(145deg,rgba(239,247,252,.90),rgba(231,241,248,.85)); border:1px solid rgba(255,255,255,.95); box-shadow:0 28px 75px rgba(20,42,63,.24),0 4px 15px rgba(20,42,63,.12),inset 0 1px 2px #fff; }
+/* Compact apartment summaries; complete lists live in small dialogs. */
+.workspace #contractTodaySection .contract-summary { display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%; min-height:64px; text-align:left; cursor:pointer; padding:16px 18px; font:inherit; }
+.workspace #contractTodaySection .contract-summary h2 { margin:0; color:#3c566c !important; }
+.workspace #contractTodaySection .contract-summary b { display:grid; place-items:center; min-width:30px; height:30px; padding:0 8px; border-radius:10px; color:#355873; background:rgba(255,255,255,.8); font-size:15px; font-weight:650; }
+.workspace #contractTodaySection .contract-summary:hover { border-color:#a4bacb !important; background:rgba(255,255,255,.85) !important; }
+.workspace #contractTodaySection .contract-summary:focus-visible { outline:2px solid #547a99; outline-offset:3px; }
+.workspace[data-view='대시보드'] #dashCols,.workspace[data-view='대시보드'] .main-scroll:has(#knowledgeBlock.hidden) #dashCols { grid-template-rows:68px minmax(0,1fr); }
+.contract-list-dialog { width:min(400px,calc(100vw - 40px)); max-height:min(560px,80dvh); box-sizing:border-box; padding:22px; border:1px solid #ffffffd9; border-radius:22px; background:linear-gradient(145deg,rgba(250,253,255,.98),rgba(232,242,249,.97)); color:#304b62; box-shadow:0 24px 80px #152e4652; }
+.contract-list-dialog::backdrop { background:rgba(24,43,61,.28); backdrop-filter:blur(4px); }
+.contract-list-dialog > header { display:flex; align-items:flex-start; justify-content:space-between; gap:20px; margin-bottom:18px; }
+.contract-list-dialog h2 { margin:0 0 5px; font-size:18px; font-weight:650; }
+.contract-list-dialog time { font-size:12px; color:#7e93a4; }
+.contract-list-dialog [data-contract-close] { width:30px; height:30px; border:0; border-radius:50%; background:#dfeaf2; color:#516e85; font-size:22px; cursor:pointer; }
+.contract-popup-list { overflow-y:auto; max-height:380px; overscroll-behavior:contain; }
+.contract-popup-list ul { list-style:none; padding:0; margin:0; }
+.contract-popup-list li { padding:13px 2px; border-bottom:1px solid #dbe6ee; font-size:15px; line-height:1.6; overflow-wrap:anywhere; }
+.contract-popup-list li:last-child { border-bottom:0; }
+.contract-popup-list p { font-size:14px; color:#71879a; padding:12px 0; }
+@media(max-width:650px) { .workspace[data-view='대시보드'] #dashCols,.workspace[data-view='대시보드'] .main-scroll:has(#knowledgeBlock.hidden) #dashCols { grid-template-rows:420px auto 280px; } }
