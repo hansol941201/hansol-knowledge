@@ -34,6 +34,7 @@
   <link rel="stylesheet" href="todo-vertical-categories.css?v=1" />
   <link rel="stylesheet" href="theme-hris-lavender.css?v=2" />
   <link rel="stylesheet" href="sidebar-position-fix.css?v=1" />
+  <link rel="stylesheet" href="calendar-single-view-fix.css?v=1" />
   <script src="background.js?v=1" defer></script>
   <script src="phone-memo-editor.js?v=2" defer></script>
 </head>
@@ -78,10 +79,7 @@
              한 줄씩 쌓이고, 넓은 화면에서는 아래 grid-template-areas 가
              할 일을 왼쪽 넓은 자리로, 메모와 일정을 오른쪽 위·아래로 보낸다. -->
         <div id="dashCols" class="dash-cols">
-        <section id="contractTodaySection" class="contract-today-grid" aria-label="협약서 오늘의 아파트">
-          <button type="button" class="contract-today-card contract-summary" data-contract-open="Briefing" aria-haspopup="dialog"><h2>현설 아파트</h2><b id="contractBriefingCount" aria-live="polite">…</b></button>
-          <button type="button" class="contract-today-card contract-summary" data-contract-open="Dday" aria-haspopup="dialog"><h2>D-DAY 아파트</h2><b id="contractDdayCount" aria-live="polite">…</b></button>
-        </section>
+        <section id="contractTodaySection" class="hidden" aria-hidden="true"></section>
           <aside id="notesHub" class="notes-hub" aria-label="통합 메모">
             <section id="memoPanel" class="today-panel memo-panel"></section>
             <section id="callNotesPanel" class="today-panel call-notes-panel"></section>
@@ -329,9 +327,7 @@
   <script src="contract-today-model.js?v=1"></script>
   <script src="app.js?v=20261025-floating"></script>
   <script src="crm-meetings.js?v=2"></script>
-<dialog id="contractBriefingDialog" class="contract-list-dialog" aria-labelledby="contractBriefingTitle"><header><div><h2 id="contractBriefingTitle">현설 아파트</h2><time data-contract-today-date></time></div><button type="button" data-contract-close aria-label="닫기">×</button></header><div id="contractBriefingList" class="contract-popup-list" aria-live="polite"><p>불러오는 중…</p></div></dialog>
-<dialog id="contractDdayDialog" class="contract-list-dialog" aria-labelledby="contractDdayTitle"><header><div><h2 id="contractDdayTitle">D-DAY 아파트</h2><time data-contract-today-date></time></div><button type="button" data-contract-close aria-label="닫기">×</button></header><div id="contractDdayList" class="contract-popup-list" aria-live="polite"><p>불러오는 중…</p></div></dialog>
-  <script src="contract-today.js?v=2"></script>
+
   <script>
     // 홈 화면 앱(주소창 없는 standalone)으로 열리게 하는 등록. 저장은 하지 않는 워커라
     // 사이트를 고치면 항상 최신 파일을 받는다. 실패해도 사이트 동작에는 영향이 없다.
