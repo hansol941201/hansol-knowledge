@@ -1,0 +1,15 @@
+/* The navigation must be a direct workspace child: header clipping hid it before. */
+@media(min-width:701px){
+ body:not(.overlay-mode) .workspace{grid-template-columns:164px minmax(0,1fr)!important}
+ .workspace > #sideNav{position:relative!important;grid-column:1!important;grid-row:2!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:flex-start!important;width:164px!important;height:100%!important;min-height:0!important;max-height:none!important;overflow-y:auto!important;overflow-x:hidden!important;box-sizing:border-box!important;padding:12px 10px!important;margin:0!important;inset:auto!important;background:#fff!important;border-right:1px solid #e7e9f5!important;z-index:4!important;gap:5px!important}
+ .workspace > #sideNav .top-item{flex:0 0 auto!important;display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;gap:10px!important;width:100%!important;height:43px!important;min-height:43px!important;max-height:none!important;padding:8px 12px!important;margin:0!important;border:0!important;border-radius:11px!important;color:#465474!important;background:transparent!important;box-shadow:none!important;transform:none!important}
+ .workspace > #sideNav .top-item span{display:inline!important;visibility:visible!important;opacity:1!important;font-size:12px!important;line-height:1.4!important;font-weight:600!important;color:#394a69!important;white-space:nowrap!important}
+ .workspace > #sideNav .top-item svg{display:block!important;flex:0 0 18px!important;width:18px!important;height:18px!important;color:#6b75ab!important}
+ .workspace > #sideNav .top-item.active,.workspace > #sideNav .top-item:hover{background:#edf0ff!important}
+ .workspace > #sideNav .top-item.active span,.workspace > #sideNav .top-item.active svg{color:#4c5bdb!important}
+ .workspace .main{grid-column:2!important;grid-row:2!important}
+}
+@media(max-width:700px){
+ .workspace > #sideNav{position:relative!important;grid-column:1!important;grid-row:2!important;display:flex!important;overflow-x:auto!important;overflow-y:hidden!important;min-height:48px!important;background:#fff!important}
+ .workspace > #sideNav .top-item span{display:inline!important;opacity:1!important}
+}
