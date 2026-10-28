@@ -1,0 +1,28 @@
+/* Compact edge-to-edge dashboard corrections — keep existing data and interactions */
+body:not(.overlay-mode) .workspace{width:calc(100% - 12px)!important;height:calc(100dvh - 12px)!important;margin:6px!important;border-width:2px!important;border-radius:20px!important;grid-template-columns:48px minmax(0,1fr)!important}
+.workspace .topnav{padding:8px 12px!important}
+.workspace .topnav #sideNav{left:0!important;width:48px!important}
+.workspace .topnav #sideNav .top-item{width:42px!important;min-width:42px!important;padding:5px 2px!important}
+.workspace .main{min-width:0!important;margin:0!important;padding:0!important}
+.workspace .main-scroll{min-width:0!important;width:100%!important;box-sizing:border-box!important;padding:6px 10px 16px!important;margin:0!important}
+.workspace .dash-cols,.workspace .main-scroll:has(#knowledgeBlock.hidden) .dash-cols{width:100%!important;max-width:none!important;gap:10px!important;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr) minmax(0,1fr)!important}
+.workspace #todayPanel,.workspace #memoPanel,.workspace #callNotesPanel{padding:15px!important}
+/* All task filters and their counters in one compact unbroken row */
+.workspace #todayPanel .todo-head{display:flex!important;flex-wrap:nowrap!important;align-items:center!important;gap:7px!important;min-width:0!important}
+.workspace #todayPanel .todo-head h2{font-size:15px!important;white-space:nowrap!important;flex:0 0 auto!important}
+.workspace #todayPanel .todo-view-tabs{display:flex!important;flex-wrap:nowrap!important;align-items:center!important;justify-content:flex-start!important;gap:2px!important;min-width:0!important;overflow-x:auto!important;scrollbar-width:none!important;white-space:nowrap!important}
+.workspace #todayPanel .todo-view-tabs::-webkit-scrollbar{display:none}
+.workspace #todayPanel .todo-view-tabs button{display:inline-flex!important;flex:0 0 auto!important;align-items:center!important;gap:3px!important;white-space:nowrap!important;min-width:0!important;min-height:26px!important;font-size:11px!important;padding:4px 6px!important;border-radius:8px!important}
+.workspace #todayPanel .todo-view-tabs button :is(b,small,span){font-size:10px!important}
+.workspace #todayPanel .todo-head .todo-count{display:none!important}
+/* Remove only the circular controls BEFORE the stars; retain their underlying data. */
+.workspace #todayPanel .todo-line-check,.workspace #todayPanel .todo-box,.workspace #todayPanel .todo-mark,.workspace #todayPanel .todo-line > input[type=checkbox]{display:none!important}
+.workspace #todayPanel .todo-line{padding-left:8px!important;gap:8px!important}
+/* Phone memo presents the same clean, full-height writing field as the general memo. */
+.workspace #callNotesPanel .phone-editor-help,.workspace #callNotesPanel .phone-editor-label,.workspace #callNotesPanel .phone-editor-contact{display:none!important}
+.workspace #callNotesPanel .phone-editor-header{min-height:39px!important;gap:10px!important}
+.workspace #callNotesPanel .phone-editor-icon{width:35px!important;height:35px!important;flex-basis:35px!important;font-size:17px!important}
+.workspace #callNotesPanel .phone-editor-textarea{flex:1 1 auto!important;width:100%!important;min-height:0!important;height:100%!important;resize:none!important;border-radius:13px!important;background:rgba(255,255,255,.9)!important;line-height:1.8!important}
+.workspace #callNotesPanel .phone-editor-footer{margin-top:auto!important}
+@media(max-width:1100px){.workspace .dash-cols,.workspace .main-scroll:has(#knowledgeBlock.hidden) .dash-cols{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)!important}}
+@media(max-width:700px){body:not(.overlay-mode) .workspace{width:100%!important;height:100dvh!important;margin:0!important;border-width:0!important;border-radius:0!important}.workspace .main-scroll{padding:5px 7px 12px!important}.workspace .dash-cols,.workspace .main-scroll:has(#knowledgeBlock.hidden) .dash-cols{grid-template-columns:minmax(0,1fr)!important}}
