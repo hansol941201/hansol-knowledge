@@ -16,7 +16,7 @@
   <label class="phone-editor-label" for="phoneMemoText">통화 내용</label>
   <textarea id="phoneMemoText" class="phone-editor-textarea" rows="10" placeholder="통화 내용을 자유롭게 입력하세요.&#10;Enter를 누르면 다음 줄에 이어서 작성됩니다."></textarea>
   <footer class="phone-editor-footer"><span id="phoneMemoStatus" role="status">작성 중 자동 임시저장</span><button type="button" id="phoneMemoSave" class="phone-editor-save">전화메모 저장</button></footer>
-  <div id="phoneMemoHistory" class="phone-editor-records hidden" aria-label="저장된 전화메모"></div>`;
+  <dialog id="phoneMemoHistoryDialog" class="phone-records-dialog" aria-label="전화메모 기록"><header class="phone-records-heading"><strong>전화메모 기록</strong><button type="button" id="phoneRecordsClose" aria-label="닫기">닫기</button></header><div id="phoneMemoHistory" class="phone-editor-records" aria-label="저장된 전화메모"></div></dialog>`;
   const contact=panel.querySelector('#phoneMemoContact'),area=panel.querySelector('#phoneMemoText'),status=panel.querySelector('#phoneMemoStatus'),history=panel.querySelector('#phoneMemoHistory');
   const draft=read(DRAFT,{}); contact.value=draft.contact||'';area.value=draft.text||'';
   const stash=()=>{write(DRAFT,{contact:contact.value,text:area.value});status.textContent='임시저장됨'};
@@ -36,7 +36,8 @@
    area.value='';contact.value='';write(DRAFT,{contact:'',text:''});status.textContent='저장 완료 · 이 브라우저에 보관됨';paint();
   }
   panel.querySelector('#phoneMemoSave').addEventListener('click',save);
-  panel.querySelector('#phoneMemoShowHistory').addEventListener('click',()=>{history.classList.toggle('hidden');paint();});
+  panel.querySelector('#phoneMemoShowHistory').addEventListener('click',()=>{paint();panel.querySelector('#phoneMemoHistoryDialog').showModal();});
+  panel.querySelector('#phoneRecordsClose').addEventListener('click',()=>panel.querySelector('#phoneMemoHistoryDialog').close());
   paint();
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
