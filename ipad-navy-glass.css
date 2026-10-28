@@ -1,0 +1,49 @@
+/* iPad-inspired white / deep navy glass skin. Presentation only; no application data or behavior changes. */
+:root{color-scheme:light;--ref-ink:#152a47;--ref-body:#405570;--ref-muted:#778aa0;--ref-accent:#284d80;--glass-ink:#162c4a;--glass-navy:#163657;--glass-soft:#e8f0fa}
+html{background:#edf3f9!important}
+body,body:not(.overlay-mode){color:#203650!important;background:radial-gradient(ellipse at 0% 0%,rgba(200,220,241,.78),transparent 47%),radial-gradient(ellipse at 100% 100%,rgba(210,227,246,.68),transparent 52%),linear-gradient(135deg,#f8fbff 0%,#e8f0fa 100%)!important;background-attachment:fixed!important}
+body,button,input,textarea,select{font-family:Inter,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif!important}
+.workspace{background:linear-gradient(135deg,rgba(255,255,255,.77),rgba(241,247,255,.7))!important;border:1px solid rgba(255,255,255,.96)!important;box-shadow:0 24px 85px rgba(21,48,85,.1),inset 0 1px 0 #fff!important;backdrop-filter:blur(26px) saturate(140%);-webkit-backdrop-filter:blur(26px) saturate(140%)}
+.workspace .topnav{background:linear-gradient(165deg,rgba(246,250,255,.81),rgba(232,241,251,.66))!important;border-color:rgba(255,255,255,.92)!important;backdrop-filter:blur(25px);-webkit-backdrop-filter:blur(25px)}
+.workspace #dashboardHome .glass-brand-text b{color:#173758!important;text-shadow:none!important;letter-spacing:-1.1px}
+.workspace .topnav #sideNav .top-item,.workspace .topnav #sideNav .top-item:nth-of-type(even){color:#52708e!important;border:1px solid transparent!important;background:transparent!important;transition:background .2s,border-color .2s,transform .2s}
+.workspace .topnav #sideNav .top-item svg{color:#6484a4!important}
+.workspace .topnav #sideNav .top-item:hover{background:rgba(255,255,255,.64)!important;transform:translateY(-1px)}
+.workspace .topnav #sideNav .top-item.active{background:rgba(255,255,255,.94)!important;color:#163b65!important;border-color:rgba(255,255,255,.95)!important;box-shadow:0 5px 17px rgba(32,70,115,.1)!important}
+.workspace .topnav #sideNav .top-item.active svg{color:#224f83!important}
+.workspace .crm-page-title,.workspace #pageHeading{color:#163656!important;letter-spacing:-.6px!important;font-weight:750!important}
+.workspace #pageLead,.workspace .glass-breadcrumb,.workspace .crm-favorites-label{color:#71849a!important}
+.workspace .glass-breadcrumb strong{color:#274c76!important}
+.workspace .glass-version{color:#567ca1!important;background:rgba(255,255,255,.6)!important}
+.workspace .topnav > .topbar .page-search,.workspace .topnav .shortcut,.workspace .topnav .shortcut:nth-child(even),.workspace .topnav .shortcut.add,.workspace .topnav .top-mini,.workspace .topnav .sync-state,.workspace .topnav .sync-state[data-state=offline]{background:rgba(255,255,255,.66)!important;border:1px solid rgba(255,255,255,.92)!important;color:#4b6887!important;box-shadow:0 3px 12px rgba(34,65,103,.045),inset 0 1px rgba(255,255,255,.94)!important;backdrop-filter:blur(14px)}
+.workspace .topnav > .topbar #pageSearch{color:#24405f!important;font-size:14px!important}
+.workspace .topnav > .topbar #pageSearch::placeholder{color:#8b9eaf!important}
+.workspace .topnav .shortcut a b,.workspace .topnav .shortcut.add{color:#3b597b!important}
+.workspace .topnav .shortcut:hover{background:#fff!important}
+.workspace #todayPanel,.workspace .notes-hub,.workspace #schedulePanel,.workspace .page-card,.workspace .block,.workspace #contractTodaySection .contract-today-card{background:rgba(255,255,255,.74)!important;border:1px solid rgba(255,255,255,.94)!important;border-radius:22px!important;box-shadow:0 8px 32px rgba(34,66,106,.065),inset 0 1px 0 rgba(255,255,255,.98)!important;backdrop-filter:blur(20px) saturate(125%);-webkit-backdrop-filter:blur(20px) saturate(125%)}
+.workspace .notes-hub{background:rgba(237,245,255,.63)!important}
+.workspace #contractTodaySection .contract-today-card{background:linear-gradient(145deg,rgba(255,255,255,.82),rgba(228,240,254,.78))!important}
+.workspace #contractTodaySection h2,.workspace .todo-head h2,.workspace .memo-head h2,.workspace #schedulePanel h2{color:#1b3d62!important;font-weight:700!important}
+.workspace #contractTodaySection b{color:#173b65!important}
+.workspace :is(.todo-head h2,.memo-head h2,#schedulePanel h2)::before{background:#386a9c!important}
+.workspace #todayPanel .todo-view-tabs button.active,.workspace .page-categories button.active{background:#204775!important;color:white!important;box-shadow:0 3px 12px rgba(29,67,114,.16)!important}
+.workspace #todayPanel .todo-view-tabs button:not(.active){background:rgba(236,244,254,.8)!important;color:#57728d!important}
+.workspace #todayPanel .todo-quick-entry,.workspace .notes-hub #memoPanel .memo-note-shell{background:rgba(255,255,255,.82)!important;border:1px solid rgba(209,224,241,.78)!important}
+.workspace #todayPanel :is(.todo-line-text,.todo-mark),.workspace .notes-hub #memoPanel #memoNote{color:#324f6b!important}
+.workspace #todayPanel .todo-line{border-bottom-color:#e7eff8!important}
+.workspace .notes-hub #memoPanel .memo-head h2,.workspace .page-card h3{color:#1e4166!important}
+.workspace .page-card p{color:#627990!important}
+.workspace .page-card .card-kind,.workspace .page-card .card-time{color:#7890a7!important}
+.workspace .page-card:hover{box-shadow:0 12px 38px rgba(29,67,114,.12)!important}
+.workspace #schedulePanel .calendar-month strong,.workspace #schedulePanel .calendar-days button{color:#365979!important}
+.workspace .topbar #pageAdd,.workspace .primary-btn{background:linear-gradient(135deg,#173c67,#315f90)!important;color:#fff!important;border-color:rgba(255,255,255,.18)!important;box-shadow:0 7px 18px rgba(20,58,103,.2)!important}
+.workspace .topbar #pageAdd:hover,.workspace .primary-btn:hover{filter:brightness(1.1)}
+.workspace .glass-footer{border-color:rgba(100,135,172,.17)!important}
+.workspace .glass-footer-tools button,.workspace .glass-sidebar-foot span{color:#6d89a6!important}
+.workspace .glass-sidebar-foot i{background:#98afc7!important}
+.brand-avatar{background:linear-gradient(140deg,#2c5681,#173655)!important;color:white!important}
+.modal .edit-box,dialog,.messenger{background:rgba(248,251,255,.95)!important;border:1px solid rgba(255,255,255,.95)!important;box-shadow:0 25px 75px rgba(20,49,83,.17)!important;backdrop-filter:blur(22px)}
+.modal .edit-box input,.modal .edit-box textarea,.modal .edit-box select{background:rgba(255,255,255,.87)!important;border-color:#d7e4f2!important;color:#244361!important}
+input:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid #4279af!important;outline-offset:2px}
+@media(max-width:780px){.workspace{border-radius:18px!important}.workspace #todayPanel,.workspace .notes-hub,.workspace #schedulePanel,.workspace .page-card,.workspace .block{border-radius:17px!important}.workspace .topnav #sideNav .top-item{transform:none!important}}
+@media(prefers-reduced-motion:reduce){.workspace .topnav #sideNav .top-item{transition:none!important}}
