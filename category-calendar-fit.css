@@ -1,0 +1,14 @@
+/* Remove duplicate page category strip; preserve left navigation */
+.workspace #knowledgeBlock #pageCategories{display:none!important}
+.workspace #knowledgeBlock .block-head{margin-top:0!important}
+/* Calendar: fit complete month in the available viewport, no inner scrolling */
+.workspace[data-view="달력"] .main-scroll{height:100%!important;overflow:hidden!important;padding:8px 12px!important}
+.workspace[data-view="달력"] #dashCols,.workspace[data-view="달력"] .main-scroll:has(#knowledgeBlock.hidden) #dashCols{height:100%!important;min-height:0!important;max-height:100%!important;overflow:hidden!important}
+.workspace[data-view="달력"] #schedulePanel,.workspace[data-view="달력"] #schedulePanel.hidden{display:flex!important;flex-direction:column!important;gap:7px!important;width:100%!important;height:100%!important;min-height:0!important;max-height:100%!important;overflow:hidden!important;padding:12px 18px!important}
+.workspace[data-view="달력"] #schedulePanel .block-head{flex:0 0 auto!important;margin:0!important;padding:0 0 4px!important}
+.workspace[data-view="달력"] #schedulePanel .calendar-month{flex:1 1 auto!important;display:flex!important;flex-direction:column!important;min-height:0!important;height:auto!important;margin:0!important}
+.workspace[data-view="달력"] #schedulePanel .calendar-days{flex:1 1 auto!important;display:grid!important;grid-template-columns:repeat(7,minmax(0,1fr))!important;grid-auto-rows:minmax(0,1fr)!important;min-height:0!important;height:100%!important;align-content:stretch!important}
+.workspace[data-view="달력"] #schedulePanel .calendar-days button,.workspace[data-view="달력"] #schedulePanel .calendar-blank{height:100%!important;min-height:0!important;width:100%!important;min-width:0!important;max-width:none!important;border-radius:8px!important}
+.workspace[data-view="달력"] #schedulePanel .calendar-selected-heading{flex:0 0 auto!important;margin:1px 0!important}
+.workspace[data-view="달력"] #schedulePanel .schedule-list{flex:0 0 auto!important;max-height:62px!important;min-height:0!important;overflow-y:auto!important}
+@media(max-width:700px){.workspace[data-view="달력"] #schedulePanel{padding:7px!important}.workspace[data-view="달력"] .main-scroll{padding:4px!important}}
