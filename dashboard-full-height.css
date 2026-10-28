@@ -1,0 +1,13 @@
+/* Dashboard: fill vertical space previously left unused above and beneath the 3 work cards. */
+.workspace[data-view="대시보드"] .main-scroll{height:100%!important;min-height:0!important;display:flex!important;flex-direction:column!important;gap:0!important;overflow:hidden!important;padding-top:8px!important;padding-bottom:10px!important}
+.workspace[data-view="대시보드"] #dashCols,
+.workspace[data-view="대시보드"] .main-scroll:has(#knowledgeBlock.hidden) #dashCols{flex:1 1 auto!important;width:100%!important;height:100%!important;min-height:0!important;max-height:none!important;display:grid!important;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr) minmax(0,1fr)!important;grid-template-rows:minmax(0,1fr)!important;grid-template-areas:"todo memo phone"!important;gap:12px!important;align-items:stretch!important}
+.workspace[data-view="대시보드"] #contractTodaySection{display:none!important}
+.workspace[data-view="대시보드"] #todayPanel,
+.workspace[data-view="대시보드"] #memoPanel,
+.workspace[data-view="대시보드"] #callNotesPanel{height:100%!important;max-height:none!important;min-height:0!important;align-self:stretch!important}
+.workspace[data-view="대시보드"] #todayPanel>.todo-results{min-height:0!important;overflow-y:auto!important}
+.workspace[data-view="대시보드"] #memoPanel .memo-note-shell{min-height:0!important;height:100%!important}
+.workspace[data-view="대시보드"] #callNotesPanel .phone-editor-textarea{min-height:0!important;flex:1 1 auto!important}
+@media(max-width:1100px){.workspace[data-view="대시보드"] .main-scroll{overflow-y:auto!important}.workspace[data-view="대시보드"] #dashCols,.workspace[data-view="대시보드"] .main-scroll:has(#knowledgeBlock.hidden) #dashCols{height:auto!important;min-height:850px!important;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr)!important;grid-template-rows:minmax(440px,1fr) minmax(350px,.8fr)!important;grid-template-areas:"todo memo" "phone phone"!important}}
+@media(max-width:700px){.workspace[data-view="대시보드"] #dashCols,.workspace[data-view="대시보드"] .main-scroll:has(#knowledgeBlock.hidden) #dashCols{min-height:1200px!important;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:440px 350px 350px!important;grid-template-areas:"todo" "memo" "phone"!important}}
