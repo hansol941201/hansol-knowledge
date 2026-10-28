@@ -1,0 +1,20 @@
+/* Calendar only view and de-duplicated category navigation */
+.workspace[data-view="특허"] #pageCategories,
+.workspace[data-view="협력업체"] #pageCategories{display:none!important}
+.workspace #contractTodaySection{display:none!important}
+.workspace[data-view="달력"] .main-scroll{display:block!important;overflow-y:auto!important;height:100%!important;padding:12px!important}
+.workspace[data-view="달력"] #dashCols,
+.workspace[data-view="달력"] .main-scroll:has(#knowledgeBlock.hidden) #dashCols{display:block!important;width:100%!important;height:auto!important;min-height:calc(100% - 4px)!important;max-width:none!important;overflow:visible!important}
+.workspace[data-view="달력"] #todayPanel,
+.workspace[data-view="달력"] #notesHub,
+.workspace[data-view="달력"] #memoPanel,
+.workspace[data-view="달력"] #callNotesPanel,
+.workspace[data-view="달력"] #contractTodaySection,
+.workspace[data-view="달력"] #knowledgeBlock{display:none!important}
+.workspace[data-view="달력"] #schedulePanel,
+.workspace[data-view="달력"] #schedulePanel.hidden{display:flex!important;flex-direction:column!important;grid-area:auto!important;width:100%!important;height:calc(100dvh - 245px)!important;min-height:530px!important;max-height:none!important;overflow-y:auto!important;margin:0!important;padding:24px!important;box-sizing:border-box!important;border:1px solid #e9ebfa!important;border-radius:19px!important;background:#fff!important;box-shadow:0 8px 24px #4e5da116!important}
+.workspace[data-view="달력"] #schedulePanel .calendar-month{width:100%!important;flex:1 0 auto!important;min-height:380px!important}
+.workspace[data-view="달력"] #schedulePanel .calendar-days{width:100%!important;grid-auto-rows:minmax(55px,1fr)!important}
+.workspace[data-view="달력"] #schedulePanel .calendar-days button{width:100%!important;min-width:0!important;max-width:none!important;height:100%!important;min-height:48px!important;border-radius:11px!important}
+.workspace[data-view="달력"] #schedulePanel .calendar-week{width:100%!important}
+@media(max-width:700px){.workspace[data-view="달력"] #schedulePanel{min-height:550px!important;height:calc(100dvh - 220px)!important;padding:12px!important}.workspace[data-view="달력"] #schedulePanel .calendar-days button{min-height:40px!important}}
