@@ -1,0 +1,31 @@
+/* Final white and navy layout: correct main grid column and enforce readable contrast. */
+:root{--theme-blue:#183b66!important;--theme-ink:#182d48!important;--theme-muted:#64758b!important;--theme-line:#e4eaf2!important;--ref-ink:#162c49!important;--ref-body:#344e6b!important;--ref-muted:#62758e!important}
+html,body,body:not(.overlay-mode){background:#f4f7fb!important;color:#192f4d!important}
+body:not(.overlay-mode) .workspace{grid-template-columns:48px minmax(0,1fr)!important;grid-template-rows:194px minmax(0,1fr)!important;max-width:none!important;width:calc(100% - 8px)!important;height:calc(100dvh - 8px)!important;margin:4px!important;background:#f7f9fc!important;border:1px solid #e4eaf2!important;box-shadow:0 8px 28px #16375b12!important}
+.workspace .topnav{grid-column:1/-1!important;grid-row:1!important;background:#f8faff!important}
+.workspace .main{grid-column:2!important;grid-row:2!important;width:100%!important;min-width:0!important;max-width:none!important;justify-self:stretch!important;box-sizing:border-box!important;overflow:hidden!important;background:#f7f9fc!important}
+.workspace .main-scroll{width:100%!important;max-width:none!important;min-width:0!important;box-sizing:border-box!important;padding:5px 8px 16px!important}
+.workspace #dashCols,.workspace .main-scroll:has(#knowledgeBlock.hidden) #dashCols{width:100%!important;max-width:none!important;min-width:0!important;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr)!important;column-gap:10px!important}
+.workspace #knowledgeBlock{max-width:none!important;width:100%!important;box-sizing:border-box!important}
+.workspace .topnav #shortcutSection{background:#fff!important;border:1px solid #e2e9f3!important;box-shadow:0 5px 18px #1c3c620b!important;border-radius:18px!important;padding:9px 13px!important}
+.workspace .topnav #shortcutGrid{gap:8px!important}
+.workspace .topnav .shortcut,.workspace .topnav .shortcut:nth-child(even),.workspace .topnav .shortcut.add{background:#f9fbff!important;border:1px solid #dfe8f3!important;box-shadow:0 2px 7px #1e406312!important;border-radius:13px!important;transition:background .15s ease,box-shadow .15s ease}
+.workspace .topnav .shortcut:hover{background:#edf3fb!important;box-shadow:0 5px 13px #1e406320!important}
+.workspace .topnav .shortcut a::before{background:#eaf1fb!important;color:#234a77!important;border:0!important}
+.workspace .topnav .shortcut a b,.workspace .topnav .shortcut.add,.workspace .crm-favorites-label{color:#173657!important;opacity:1!important}
+.workspace #todayPanel,.workspace #memoPanel,.workspace #callNotesPanel,.workspace #contractTodaySection .contract-today-card,.workspace .page-card,.workspace .block{background:#fff!important;border:1px solid #e3eaf3!important;box-shadow:0 4px 17px #1f42600d!important;backdrop-filter:none!important}
+.workspace :is(h1,h2,h3,h4,.todo-line-text,.memo-head,.phone-editor-header,.todo-head,.page-card h3){color:#173454!important;opacity:1!important;text-shadow:none!important}
+.workspace #todayPanel .todo-line-text,.workspace #todayPanel .todo-mark,.workspace #todayPanel .todo-line,.workspace #memoPanel #memoNote,.workspace #callNotesPanel #phoneMemoText,.workspace .page-card p{color:#213e5d!important;opacity:1!important;font-size:14px!important}
+.workspace :is(input,textarea,select){color:#1d3855!important;opacity:1!important;-webkit-text-fill-color:currentColor!important}
+.workspace :is(input,textarea)::placeholder{color:#7a899a!important;opacity:1!important}
+.workspace :is(.todo-line time,.card-time,.card-kind,.phone-editor-footer span){color:#60758d!important;opacity:1!important}
+.workspace #todayPanel .todo-view-tabs button:not(.active){color:#355473!important;background:#eef3f9!important;opacity:1!important}
+.workspace #todayPanel .todo-view-tabs button.active{color:#fff!important;background:#183c66!important;opacity:1!important}
+.workspace #todayPanel .todo-line{background:#f6f9fd!important;border-bottom:1px solid #e6edf5!important}
+.workspace #todayPanel .todo-line.star{background:#eef3fb!important}
+.workspace #memoPanel #memoNote,.workspace #callNotesPanel #phoneMemoText{background:#fff!important;border:1px solid #dce6f2!important}
+.workspace #callNotesPanel .phone-editor-save{background:#183b66!important;color:#fff!important}
+.workspace #schedulePanel{display:none!important}
+.workspace[data-view='달력'] #schedulePanel{display:block!important}
+@media(max-width:1100px){.workspace #dashCols,.workspace .main-scroll:has(#knowledgeBlock.hidden) #dashCols{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr)!important}}
+@media(max-width:700px){body:not(.overlay-mode) .workspace{grid-template-columns:minmax(0,1fr)!important;grid-template-rows:185px minmax(0,1fr)!important}.workspace .main{grid-column:1!important}.workspace #dashCols,.workspace .main-scroll:has(#knowledgeBlock.hidden) #dashCols{grid-template-columns:minmax(0,1fr)!important}}
