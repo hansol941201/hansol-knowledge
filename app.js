@@ -89,6 +89,25 @@ let memories = STORE.readList('memories');
 let accountMeta = STORE.readList('accountMeta');
 let schedule = STORE.readList('schedule');
 let shortcuts = STORE.readList('shortcuts');
+// Keep deletion tombstones separately so older cloud snapshots cannot resurrect shortcuts.
+const SHORTCUT_DELETIONS_KEY = 'knowledge-shortcut-deletions-v1';
+function readShortcutDeletions() {
+  try { const value=JSON.parse(localStorage.getItem(SHORTCUT_DELETIONS_KEY)||'{}'); return value && typeof value==='object' && !Array.isArray(value) ? value : {}; }
+  catch { return {}; }
+}
+const shortcutDeletions = readShortcutDeletions();
+function persistShortcutDeletions() {
+  try { localStorage.setItem(SHORTCUT_DELETIONS_KEY,JSON.stringify(shortcutDeletions)); } catch(error) { console.warn('즐겨찾기 삭제기록 저장 실패',error); }
+}
+function preserveDeletedShortcuts(list) {
+  return list.map(item => {
+    if (!item || !item.id || !shortcutDeletions[item.id]) return item;
+    return { ...item, deleted:true, updatedAt: new Date(Math.max(
+      Date.parse(item.updatedAt)||0, Date.parse(shortcutDeletions[item.id])||0
+    )).toISOString() };
+  });
+}
+shortcuts=preserveDeletedShortcuts(shortcuts);
 // 협력업체 원본은 partners.js(288곳) — 빌드 파일이라 여기서 고치지 않는다.
 // 대신 고친 내용만 따로 저장해 두고(knowledge-partner-edits) 화면에 보여 줄 때
 // 원본 위에 덮어씌운다. 그래서 원본 파일이 나중에 갱신돼도 고친 내용이 살아 있고,
@@ -2206,6 +2225,8 @@ $('#shortcutForm').addEventListener('submit', event => {
 function deleteShortcut(item) {
   if (!item || !confirm(`「${item.name}」 바로가기를 지울까요?`)) return false;
   item.deleted = true; touch(item);
+  shortcutDeletions[item.id] = item.updatedAt;
+  persistShortcutDeletions();
   saveLocalState(); queueCloudSave(); renderShortcuts();
   showToast('사이트 삭제됨');
   return true;
@@ -3146,7 +3167,7 @@ async function saveCloudState({ verifyIds = [] } = {}) {
         todos: mergeById(todos, remote.todos),
         memories: mergeById(memories, remote.memories),
         accountMeta: mergeById(accountMeta, remote.accountMeta),
-        shortcuts: mergeById(shortcuts, remote.shortcuts),
+        shortcuts: preserveDeletedShortcuts(mergeById(shortcuts, remote.shortcuts)),
         schedule: mergeById(schedule, remote.schedule),
         partnerEdits: mergeById(partnerEdits, remote.partnerEdits),
         ...keepMailFields(remote),   // 없앤 메일함 자료는 건드리지 않고 그대로 둔다
@@ -3205,7 +3226,7 @@ async function applyCloudState(state) {
   todos = mergeById(todos, state.todos);
   memories = mergeById(memories, state.memories);
   accountMeta = mergeById(accountMeta, state.accountMeta);
-  shortcuts = mergeById(shortcuts, state.shortcuts);
+  shortcuts = preserveDeletedShortcuts(mergeById(shortcuts, state.shortcuts));
   schedule = mergeById(schedule, state.schedule);
   partnerEdits = mergeById(partnerEdits, state.partnerEdits);
   rebuildPartners();
