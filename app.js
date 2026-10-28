@@ -1828,7 +1828,24 @@ function renderSchedule() {
   $('#calendarPrev').onclick = () => { calendarMonth = new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()-1,1); renderSchedule(); };
   $('#calendarNext').onclick = () => { calendarMonth = new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()+1,1); renderSchedule(); };
   $('#calendarToday').onclick = () => { calendarMonth = new Date(todayKey().slice(0,7) + '-01T12:00:00'); calendarSelected=todayKey(); renderSchedule(); };
-  $('#schedulePanel').querySelectorAll('[data-calendar-date]').forEach(button => { button.onclick = () => { calendarSelected=button.dataset.calendarDate; renderSchedule(); }; });
+  $('#schedulePanel').querySelectorAll('[data-calendar-date]').forEach(button => { button.onclick = () => {
+    calendarSelected=button.dataset.calendarDate;
+    renderSchedule();
+    const rowsForDay = [...alive(schedule), ...((window.CRM_MEETINGS && window.CRM_MEETINGS.items) || [])].filter(item => String(item.date) === calendarSelected);
+    let dialog = document.getElementById('calendarDayDetailDialog');
+    if (!dialog) {
+      dialog=document.createElement('dialog'); dialog.id='calendarDayDetailDialog'; dialog.className='calendar-day-detail-dialog'; document.body.appendChild(dialog);
+      dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close();});
+    }
+    dialog.innerHTML='<header class="calendar-day-detail-head"><strong>'+escapeHtml(calendarSelected)+' 일정</strong><button type="button" data-calendar-close>닫기</button></header><div class="calendar-day-detail-list">'+(rowsForDay.length?rowsForDay.map((item,i)=>'<button type="button" data-calendar-item="'+i+'"><strong>'+escapeHtml(item.title||item.text||'일정')+'</strong><span>'+escapeHtml(item.time||'시간 미정')+'</span></button>').join(''):'<p>등록된 일정이 없습니다.</p>')+'</div>';
+    dialog.querySelector('[data-calendar-close]').onclick=()=>dialog.close();
+    dialog.querySelectorAll('[data-calendar-item]').forEach(row=>row.onclick=()=>{
+      const item=rowsForDay[Number(row.dataset.calendarItem)];dialog.close();
+      if (item?.source==='crm-meeting') window.open('https://bridgeone-m.github.io/card/','_blank','noopener');
+      else if(item) openScheduleModal(item);
+    });
+    dialog.showModal();
+  }; });
   $('#crmMeetingConnect').onclick = () => { if (window.CRM_MEETINGS) window.CRM_MEETINGS.open(); };
   $('#schedulePanel').querySelectorAll('[data-schedule]').forEach(row => {
     const item = all.find(x => x.id === row.dataset.schedule);
