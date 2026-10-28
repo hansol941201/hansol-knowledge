@@ -41,3 +41,17 @@ body:not(.overlay-mode) .workspace{background:#f7f8ff!important;border:1px solid
 .workspace :is(input,textarea)::placeholder{color:#818ba7!important;opacity:1!important}
 .workspace :is(button,input,textarea,select):focus-visible{outline:2px solid #697bff!important;outline-offset:2px!important}
 @media(prefers-reduced-motion:reduce){.workspace .topnav .shortcut{transition:none!important}}
+
+/* Restore the complete left navigation, including contact/account labels. */
+@media(min-width:701px){
+ body:not(.overlay-mode) .workspace{grid-template-columns:154px minmax(0,1fr)!important}
+ .workspace .topnav #sideNav,.workspace .topnav .navigation-row #sideNav{position:absolute!important;top:194px!important;left:0!important;bottom:0!important;width:154px!important;box-sizing:border-box!important;padding:12px 9px!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:5px!important;overflow-y:auto!important;overflow-x:hidden!important;background:#fff!important;border-right:1px solid #e9ebfa!important}
+ .workspace .topnav #sideNav .top-item,.workspace .topnav #sideNav .top-item:first-of-type,.workspace .topnav #sideNav .top-item:nth-of-type(even){display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;width:100%!important;min-width:0!important;height:42px!important;min-height:42px!important;gap:10px!important;padding:9px 11px!important;margin:0!important;border-radius:11px!important}
+ .workspace .topnav #sideNav .top-item span{display:inline!important;visibility:visible!important;opacity:1!important;color:#4b5572!important;font-size:12px!important;font-weight:600!important;white-space:nowrap!important}
+ .workspace .topnav #sideNav .top-item.active span{color:#4e61dc!important}
+ .workspace .topnav #sideNav .top-item svg{flex:0 0 18px!important;width:18px!important;height:18px!important}
+ .workspace .main{grid-column:2!important}
+}
+@media(max-width:700px){
+ .workspace .topnav #sideNav .top-item span{display:inline!important;visibility:visible!important;opacity:1!important;font-size:11px!important}
+}
