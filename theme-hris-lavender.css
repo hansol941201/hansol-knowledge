@@ -1,0 +1,43 @@
+/* HRIS-inspired premium white / lavender / cobalt visual skin.
+   Theme only: retain layout, data, and event handlers. */
+:root{--theme-blue:#5367ed!important;--theme-ink:#202846!important;--theme-muted:#707b99!important;--theme-line:#e6e9fa!important;--ref-ink:#1b2442!important;--ref-body:#3b4665!important;--ref-muted:#77819c!important}
+html,body,body:not(.overlay-mode){background:#eae9ff!important;color:#202844!important}
+body:not(.overlay-mode) .workspace{background:#f7f8ff!important;border:1px solid #ffffff!important;box-shadow:0 18px 50px rgba(68,75,157,.14)!important;border-radius:23px!important}
+.workspace .topnav{background:#f8f9ff!important;border-color:#edf0fd!important}
+.workspace #dashboardHome .glass-brand-text b{color:#252c63!important;text-shadow:none!important}
+.workspace .main{background:#f7f8ff!important}
+.workspace .main-scroll{background:transparent!important}
+.workspace .topnav .topbar .page-search{background:#fff!important;border:1px solid #e6e9f8!important;border-radius:13px!important;box-shadow:0 5px 15px #5463ad12!important}
+.workspace .topnav #pageSearch,.workspace .topnav #pageSearch::placeholder{opacity:1!important;color:#515e80!important}
+.workspace .topnav .top-mini,.workspace .topnav .sync-state,.workspace .topnav .sync-state[data-state=offline]{background:#fff!important;border:1px solid #e5e9fb!important;border-radius:12px!important;color:#444f75!important;box-shadow:0 4px 11px #4957a315!important}
+.workspace .topbar #pageAdd,.workspace .primary-btn{background:linear-gradient(160deg,#7681ff,#4e63ea)!important;color:#fff!important;border:1px solid #6977ef!important;border-radius:12px!important;box-shadow:0 6px 14px #4f63e938!important}
+.workspace .topnav #sideNav{background:#fff!important;border-color:#edeefa!important}
+.workspace .topnav #sideNav .top-item,.workspace .topnav #sideNav .top-item span,.workspace .topnav #sideNav .top-item svg{color:#717b9d!important}
+.workspace .topnav #sideNav .top-item.active,.workspace .topnav #sideNav .top-item:hover{background:#edf0ff!important;border-color:#e7eaff!important}
+.workspace .topnav #sideNav .top-item.active span,.workspace .topnav #sideNav .top-item.active svg{color:#4e61dc!important}
+.workspace .topnav #shortcutSection{background:#fff!important;border:1px solid #e9ebf9!important;border-radius:18px!important;box-shadow:0 9px 26px #4f5ba714!important}
+.workspace .crm-favorites-label{color:#2b3462!important}
+.workspace .topnav .shortcut,.workspace .topnav .shortcut:nth-child(even),.workspace .topnav .shortcut.add{background:linear-gradient(160deg,#ffffff,#f6f7ff)!important;border:1px solid #e7eaf9!important;border-radius:14px!important;box-shadow:0 4px 10px #4756a213!important;transition:transform .18s,box-shadow .18s!important}
+.workspace .topnav .shortcut:hover{transform:translateY(-2px)!important;box-shadow:0 8px 19px #4756a225!important}
+.workspace .topnav .shortcut a::before{background:#eeefff!important;color:#5267ea!important;border:1px solid #e3e7ff!important}
+.workspace .topnav .shortcut a b,.workspace .topnav .shortcut.add{color:#303958!important;opacity:1!important}
+.workspace #todayPanel,.workspace #memoPanel,.workspace #callNotesPanel,.workspace #contractTodaySection .contract-today-card,.workspace .block,.workspace .page-card{background:#fff!important;border:1px solid #e9ebfa!important;border-radius:19px!important;box-shadow:0 10px 25px #515ea416!important;backdrop-filter:none!important}
+.workspace #todayPanel h2,.workspace #memoPanel h2,.workspace #callNotesPanel h2,.workspace #pageHeading,.workspace .page-card h3{color:#222b4b!important;opacity:1!important}
+.workspace #todayPanel .todo-view-tabs{background:#f6f7ff!important;border-color:#e7e9f8!important}
+.workspace #todayPanel .todo-view-tabs button:not(.active){background:transparent!important;color:#394463!important;opacity:1!important}
+.workspace #todayPanel .todo-view-tabs button.active{background:linear-gradient(160deg,#7581ff,#5265e9)!important;color:#fff!important;box-shadow:0 6px 15px #5264e32e!important}
+.workspace #todayPanel .todo-view-tabs button span{background:#e8ebfb!important;color:#4a5475!important}
+.workspace #todayPanel .todo-view-tabs button.active span{background:#ffffff35!important;color:#fff!important}
+.workspace #todayPanel .todo-line,.workspace #todayPanel .todo-line.star{background:#f8f9ff!important;border:1px solid #edf0fb!important;border-radius:11px!important;box-shadow:0 2px 7px #40529708!important}
+.workspace #todayPanel .todo-line-text,.workspace #todayPanel .todo-mark{color:#22283b!important;-webkit-text-fill-color:#22283b!important;opacity:1!important;font-weight:550!important}
+.workspace #todayPanel .todo-quick-entry,.workspace #memoPanel .memo-note-shell,.workspace #callNotesPanel #phoneMemoText{background:#fff!important;border:1px solid #e3e8f7!important;border-radius:14px!important;color:#242a42!important}
+.workspace #memoPanel textarea,.workspace #callNotesPanel textarea{color:#22283b!important;-webkit-text-fill-color:#22283b!important;font-size:14px!important}
+.workspace #memoPanel .memo-head h2::before,.workspace #callNotesPanel .phone-editor-icon{background:#edefff!important;color:#5264e9!important;border-radius:12px!important}
+.workspace .memo-add-btn,.workspace #callNotesPanel .phone-editor-save{background:linear-gradient(150deg,#7984ff,#5366ec)!important;color:#fff!important;border:0!important;box-shadow:0 7px 16px #5264e332!important;border-radius:12px!important}
+.workspace #callNotesPanel .phone-editor-history{background:#f1f2ff!important;border-color:#e4e8fa!important;color:#4d5ebd!important}
+.workspace .phone-records-dialog{background:#fff!important;border-color:#e9eafa!important;box-shadow:0 22px 64px #3d428c32!important}
+.workspace .phone-records-heading button{background:#edf0ff!important;color:#4f61d6!important}
+.workspace .page-card p,.workspace #pageLead{color:#56617e!important;opacity:1!important}
+.workspace :is(input,textarea)::placeholder{color:#818ba7!important;opacity:1!important}
+.workspace :is(button,input,textarea,select):focus-visible{outline:2px solid #697bff!important;outline-offset:2px!important}
+@media(prefers-reduced-motion:reduce){.workspace .topnav .shortcut{transition:none!important}}
