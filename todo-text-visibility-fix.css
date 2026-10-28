@@ -9,3 +9,18 @@
 .workspace #todayPanel .todo-line .todo-star{flex:0 0 auto!important}
 .workspace #todayPanel .todo-line time{flex:0 0 auto!important;color:#536176!important;opacity:1!important}
 .workspace #todayPanel .todo-results{overflow-x:hidden!important;overflow-y:auto!important}
+
+
+/* Critical: active todos wrap their actual text in .todo-mark.
+   Earlier "remove circle" CSS accidentally hid this TEXT element. */
+.workspace #todayPanel .todo-line .todo-line-text .todo-mark,
+.workspace #todayPanel .todo-results .todo-mark{
+ display:inline!important;visibility:visible!important;opacity:1!important;
+ color:#111827!important;-webkit-text-fill-color:#111827!important;
+ font-size:inherit!important;font-weight:inherit!important;line-height:inherit!important;
+ background:transparent!important;clip:auto!important;clip-path:none!important;
+ position:static!important;width:auto!important;height:auto!important;
+ overflow:visible!important;text-indent:0!important;
+}
+/* Hide only the checkbox control, not its sibling text. */
+.workspace #todayPanel .todo-line-check{display:none!important}
