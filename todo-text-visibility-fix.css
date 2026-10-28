@@ -1,0 +1,11 @@
+/* Restore legible task text and remove legacy clipping. */
+.workspace #todayPanel .todo-results,
+.workspace #todayPanel .todo-list,
+.workspace #todayPanel .todo-line{min-width:0!important}
+.workspace #todayPanel .todo-line{display:flex!important;align-items:center!important;gap:8px!important;overflow:visible!important}
+.workspace #todayPanel .todo-line-text,
+.workspace #todayPanel .todo-line .todo-line-text,
+.workspace #todayPanel .todo-results .todo-line-text{display:block!important;position:static!important;flex:1 1 auto!important;width:auto!important;max-width:none!important;min-width:0!important;margin:0!important;padding:0!important;visibility:visible!important;opacity:1!important;color:#111827!important;-webkit-text-fill-color:#111827!important;text-shadow:none!important;font-size:14px!important;font-weight:600!important;line-height:1.5!important;white-space:normal!important;overflow-wrap:anywhere!important;overflow:visible!important;text-overflow:clip!important;transform:none!important;clip:auto!important;clip-path:none!important}
+.workspace #todayPanel .todo-line .todo-star{flex:0 0 auto!important}
+.workspace #todayPanel .todo-line time{flex:0 0 auto!important;color:#536176!important;opacity:1!important}
+.workspace #todayPanel .todo-results{overflow-x:hidden!important;overflow-y:auto!important}
