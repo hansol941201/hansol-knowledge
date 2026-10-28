@@ -11,3 +11,26 @@
 .workspace[data-view="대시보드"] #callNotesPanel .phone-editor-textarea{min-height:0!important;flex:1 1 auto!important}
 @media(max-width:1100px){.workspace[data-view="대시보드"] .main-scroll{overflow-y:auto!important}.workspace[data-view="대시보드"] #dashCols,.workspace[data-view="대시보드"] .main-scroll:has(#knowledgeBlock.hidden) #dashCols{height:auto!important;min-height:850px!important;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr)!important;grid-template-rows:minmax(440px,1fr) minmax(350px,.8fr)!important;grid-template-areas:"todo memo" "phone phone"!important}}
 @media(max-width:700px){.workspace[data-view="대시보드"] #dashCols,.workspace[data-view="대시보드"] .main-scroll:has(#knowledgeBlock.hidden) #dashCols{min-height:1200px!important;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:440px 350px 350px!important;grid-template-areas:"todo" "memo" "phone"!important}}
+
+
+/* Fix task scrolling: reserve a finite row for the list instead of overlapping search and list. */
+.workspace[data-view="대시보드"] #todayPanel{
+  min-height:0!important;max-height:100%!important;overflow:hidden!important;
+  grid-template-rows:36px 44px minmax(0,1fr)!important;
+  align-content:stretch!important;
+}
+.workspace[data-view="대시보드"] #todayPanel>.todo-controls{
+  grid-column:2!important;grid-row:3!important;align-self:start!important;
+  z-index:2!important;min-height:0!important;margin:0!important;
+}
+.workspace[data-view="대시보드"] #todayPanel>.todo-results{
+  grid-column:2!important;grid-row:3!important;align-self:stretch!important;
+  height:auto!important;max-height:none!important;min-height:0!important;
+  margin:44px 0 0!important;padding:0 4px 8px 0!important;
+  overflow-y:auto!important;overflow-x:hidden!important;
+  overscroll-behavior:contain!important;scrollbar-width:thin!important;
+  scrollbar-color:#abb3d8 transparent!important;touch-action:pan-y!important;
+}
+.workspace[data-view="대시보드"] #todayPanel .todo-list{
+  height:auto!important;max-height:none!important;overflow:visible!important;
+}
