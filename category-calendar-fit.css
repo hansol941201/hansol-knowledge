@@ -12,3 +12,27 @@
 .workspace[data-view="달력"] #schedulePanel .calendar-selected-heading{flex:0 0 auto!important;margin:1px 0!important}
 .workspace[data-view="달력"] #schedulePanel .schedule-list{flex:0 0 auto!important;max-height:62px!important;min-height:0!important;overflow-y:auto!important}
 @media(max-width:700px){.workspace[data-view="달력"] #schedulePanel{padding:7px!important}.workspace[data-view="달력"] .main-scroll{padding:4px!important}}
+
+
+/* One-month grid; text-free compact date cells prevent label overlaps. */
+.workspace[data-view="달력"] #schedulePanel .month-calendar{display:flex!important;flex:1 1 auto!important;flex-direction:column!important;min-height:0!important;overflow:hidden!important}
+.workspace[data-view="달력"] #schedulePanel .calendar-month{display:flex!important;flex:0 0 44px!important;align-items:center!important;justify-content:center!important;gap:14px!important;min-height:0!important;margin:0!important}
+.workspace[data-view="달력"] #schedulePanel .calendar-week{display:grid!important;grid-template-columns:repeat(7,minmax(0,1fr))!important;flex:0 0 28px!important;align-items:center!important;text-align:center!important}
+.workspace[data-view="달력"] #schedulePanel .calendar-days{display:grid!important;grid-template-columns:repeat(7,minmax(0,1fr))!important;grid-template-rows:repeat(6,minmax(0,1fr))!important;grid-auto-rows:minmax(0,1fr)!important;flex:1 1 auto!important;min-height:0!important;gap:3px!important;overflow:hidden!important}
+.workspace[data-view="달력"] #schedulePanel .calendar-days button,.workspace[data-view="달력"] #schedulePanel .calendar-days .calendar-blank{display:flex!important;align-items:center!important;justify-content:center!important;overflow:hidden!important;white-space:nowrap!important;text-overflow:clip!important;font-size:13px!important;font-weight:550!important;line-height:1!important;padding:0!important;min-height:0!important;border:1px solid #e9ecf6!important;border-radius:7px!important;background:#fff!important}
+.workspace[data-view="달력"] #schedulePanel .calendar-days button.has-schedule{background:#f3f2ff!important;position:relative!important}
+.workspace[data-view="달력"] #schedulePanel .calendar-days button.has-schedule::after{content:"";position:absolute;bottom:5px;left:calc(50% - 2px);width:4px;height:4px;border-radius:50%;background:#6270d9}
+.workspace[data-view="달력"] #schedulePanel .calendar-days button.is-selected{background:#5968e9!important;color:#fff!important}
+.workspace[data-view="달력"] #schedulePanel .calendar-days button.is-selected::after{background:#fff}
+.workspace[data-view="달력"] #schedulePanel .calendar-selected-heading,.workspace[data-view="달력"] #schedulePanel .schedule-list{display:none!important}
+.workspace > #sideNav .top-item::before,.workspace > #sideNav .top-item::after{content:none!important;display:none!important}
+.workspace > #sideNav .top-item svg ~ svg,.workspace > #sideNav .top-item i ~ svg{display:none!important}
+.calendar-day-detail-dialog{position:fixed;inset:0;margin:auto;width:min(470px,calc(100vw - 28px));max-height:75dvh;padding:0;border:1px solid #e3e6f5;border-radius:17px;background:#fff;color:#18243b;box-shadow:0 20px 70px #1d225c45;overflow:hidden}
+.calendar-day-detail-dialog::backdrop{background:#131d3b66}
+.calendar-day-detail-head{display:flex;justify-content:space-between;align-items:center;padding:17px 20px;border-bottom:1px solid #edf0f8}
+.calendar-day-detail-head strong{font-size:17px;color:#18243b}
+.calendar-day-detail-head button{background:#edf0ff;color:#4057c4;border-radius:9px;padding:7px 12px}
+.calendar-day-detail-list{padding:12px 18px;max-height:60dvh;overflow-y:auto;display:grid;gap:8px}
+.calendar-day-detail-list>button{display:flex;align-items:center;justify-content:space-between;text-align:left;gap:12px;border:1px solid #e6e9f6;border-radius:12px;background:#f8f9ff;padding:12px;color:#202943}
+.calendar-day-detail-list>button strong{font-size:13px;font-weight:650}
+.calendar-day-detail-list>button span{white-space:nowrap;color:#68718a;font-size:11px}
