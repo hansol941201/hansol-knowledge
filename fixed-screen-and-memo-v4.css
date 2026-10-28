@@ -1,0 +1,30 @@
+/* Fixed viewport, matching insets, high contrast and aligned memo headers */
+html,body{height:100%!important;overflow:hidden!important}
+body:not(.overlay-mode) .workspace{position:relative!important;box-sizing:border-box!important;width:calc(100% - 12px)!important;height:calc(100dvh - 12px)!important;margin:6px!important;overflow:hidden!important;grid-template-columns:48px minmax(0,1fr)!important;grid-template-rows:194px minmax(0,1fr)!important}
+.workspace .main{min-height:0!important;overflow:hidden!important}
+.workspace .main-scroll{height:100%!important;min-height:0!important;overflow-y:auto!important;overscroll-behavior:contain!important;box-sizing:border-box!important;padding:8px 12px 18px!important}
+.workspace #dashCols,.workspace .main-scroll:has(#knowledgeBlock.hidden) #dashCols{grid-template-columns:minmax(0,1.55fr) minmax(0,1fr) minmax(0,1fr)!important;grid-template-rows:48px minmax(0,1fr)!important;height:min(640px,calc(100dvh - 290px))!important;min-height:370px!important;gap:12px!important}
+.workspace #todayPanel,.workspace #memoPanel,.workspace #callNotesPanel{min-width:0!important;min-height:0!important;height:100%!important;overflow:hidden!important}
+.workspace #todayPanel .todo-list,.workspace #todayPanel .todo-list-wrap,.workspace #todayPanel .todo-scroll,.workspace #todayPanel .todo-lines{overflow-y:auto!important;min-height:0!important}
+.workspace #memoPanel .memo-note-shell{min-height:0!important;overflow:hidden!important}
+.workspace #memoPanel #memoNote{height:100%!important;min-height:0!important;overflow-y:auto!important}
+.workspace #callNotesPanel #phoneMemoText{min-height:0!important;overflow-y:auto!important}
+.workspace #memoPanel .memo-head,.workspace #callNotesPanel .phone-editor-header{display:flex!important;align-items:center!important;height:43px!important;min-height:43px!important;margin:0 0 8px!important;padding:0!important;gap:10px!important}
+.workspace #memoPanel .memo-head h2::before{content:"✎";display:inline-grid;place-items:center;width:34px;height:34px;margin-right:10px;border-radius:10px;background:#eaf1f9;color:#183b66;font-size:19px;font-weight:600}
+.workspace #callNotesPanel .phone-editor-icon{background:#eaf1f9!important;color:#183b66!important;box-shadow:none!important}
+.workspace #memoPanel .memo-head h2,.workspace #callNotesPanel .phone-editor-header h2{font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif!important;font-size:18px!important;font-weight:750!important;line-height:1.5!important;letter-spacing:-.3px!important;color:#111!important;opacity:1!important}
+.workspace #todayPanel,.workspace #todayPanel *:not(button):not(svg),.workspace #memoPanel :is(h2,textarea),.workspace #callNotesPanel :is(h2,textarea){color:#111!important;opacity:1!important;text-shadow:none!important}
+.workspace #todayPanel .todo-line-text{color:#111!important;-webkit-text-fill-color:#111!important;font-weight:500!important}
+.workspace #todayPanel .todo-view-tabs button:not(.active){color:#111!important;-webkit-text-fill-color:#111!important}
+.workspace #todayPanel .todo-view-tabs button.active{color:#fff!important;-webkit-text-fill-color:#fff!important}
+.workspace #memoPanel textarea,.workspace #callNotesPanel textarea{font-family:inherit!important;font-size:14px!important;line-height:1.8!important;color:#111!important;-webkit-text-fill-color:#111!important}
+.workspace #memoPanel textarea::placeholder,.workspace #callNotesPanel textarea::placeholder{color:#68768a!important;opacity:1!important}
+.phone-records-dialog{position:fixed!important;inset:0!important;margin:auto!important;width:min(720px,calc(100vw - 32px))!important;max-height:min(78dvh,780px)!important;padding:0!important;border:1px solid #d9e3ef!important;border-radius:18px!important;background:#fff!important;color:#111!important;box-shadow:0 22px 90px #112c4a38!important;overflow:hidden!important;z-index:99999!important}
+.phone-records-dialog[open]{display:flex!important;flex-direction:column!important}
+.phone-records-dialog::backdrop{background:#102d4a75!important}
+.phone-records-heading{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid #e1e8f1;font-size:18px;color:#111}
+.phone-records-heading button{padding:8px 13px;border-radius:9px;background:#eaf1f9;color:#153a65}
+.phone-records-dialog .phone-editor-records{display:block!important;max-height:none!important;flex:1!important;overflow-y:auto!important;padding:12px 22px!important}
+.phone-records-dialog .phone-editor-record p,.phone-records-dialog .phone-editor-record strong{color:#111!important;opacity:1!important}
+@media(max-width:1100px){.workspace #dashCols,.workspace .main-scroll:has(#knowledgeBlock.hidden) #dashCols{height:auto!important;min-height:0!important;grid-template-rows:48px 450px 350px!important}}
+@media(max-width:700px){body:not(.overlay-mode) .workspace{width:100%!important;height:100dvh!important;margin:0!important}.workspace .main-scroll{padding:8px!important}.workspace #dashCols,.workspace .main-scroll:has(#knowledgeBlock.hidden) #dashCols{grid-template-rows:48px 420px 350px 350px!important}}
