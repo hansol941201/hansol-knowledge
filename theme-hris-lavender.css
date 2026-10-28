@@ -55,3 +55,21 @@ body:not(.overlay-mode) .workspace{background:#f7f8ff!important;border:1px solid
 @media(max-width:700px){
  .workspace .topnav #sideNav .top-item span{display:inline!important;visibility:visible!important;opacity:1!important;font-size:11px!important}
 }
+
+
+/* Favorite tiles: text-first treatment; keep the edit pencil functional. */
+.workspace .topnav #shortcutGrid .shortcut:not(.add){
+ border:1.5px solid #9caeea!important;
+ box-shadow:0 3px 10px rgba(71,86,162,.13)!important;
+}
+.workspace .topnav #shortcutGrid .shortcut:not(.add) a::before,
+.workspace .topnav #shortcutGrid .shortcut:not(.add) a::after{
+ content:none!important;display:none!important;
+}
+.workspace .topnav #shortcutGrid .shortcut:not(.add) a{
+ gap:0!important;
+}
+.workspace .topnav #shortcutGrid .shortcut:not(.add) a b{
+ font-size:14px!important;line-height:1.4!important;
+ font-weight:650!important;color:#283653!important;
+}
