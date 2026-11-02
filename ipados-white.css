@@ -1,0 +1,1794 @@
+/* ─────────────────────────────────────────────────────────────
+   iPadOS Premium White — 최종 테마 (단일 파일)
+
+   styles.css(기본 구조·부품) 위에 이 파일 하나만 얹는다.
+   예전의 크레용·글래스·라벤더·민트 등 테마 층 22개를 이 파일로 대신한다.
+   자료 저장·불러오기와 클릭 동작은 건드리지 않고, 보이는 모양만 정한다.
+
+   순서: 1 토큰 · 2 기본 · 3 아이패드 틀 · 4 헤더 · 5 사이드바 · 6 즐겨찾기
+         7 대시보드 3칸 · 8 할 일 · 9 메모장·전화메모 · 10 달력 · 11 자료 화면
+         12 팝업·모달 · 13 떠 있는 요소 · 14 반응형
+   ───────────────────────────────────────────────────────────── */
+
+/* 기본 부품(styles.css)은 아래 base 층에 넣는다. 층에 들어간 규칙은 이 파일의 규칙보다
+   항상 약하므로, 예전처럼 !important 나 긴 선택자를 겹겹이 쌓지 않아도 된다. */
+@layer base;
+@import url("styles.css?v=83") layer(base);
+
+/* 1. 디자인 토큰 ─────────────────────────────────────────────── */
+:root {
+  --ip-canvas: #EDF0F4;
+  --ip-frame: #FFFFFF;
+  --ip-content: #F7F8FA;
+  --ip-card: #FFFFFF;
+  --ip-text: #17212B;
+  --ip-title: #111827;
+  --ip-sub: #667085;
+  --ip-muted: #98A2B3;
+  --ip-menu: #475467;
+  --ip-icon: #536173;
+  --ip-border: #E4E8EE;
+  --ip-card-border: #E5E9EF;
+  --ip-chrome-border: #E8ECF0;
+  --ip-divider: #EEF1F5;
+  --ip-hover: #F4F6F9;
+  --ip-field: #F9FAFB;
+  --ip-note: #FBFCFD;
+  --ip-navy: #253B59;
+  --ip-navy-hover: #334E72;
+  --ip-navy-soft: #EDF2F8;
+  --ip-navy-line: #CAD5E3;
+  --ip-focus: #8499B5;
+  --ip-mint: #2AA875;
+  --ip-mint-soft: #EAF7F0;
+  --ip-danger: #D94B54;
+  --ip-danger-soft: #FFF0F1;
+  --ip-star: #E9A23B;
+
+  /* 아이패드 베젤: 검은 테두리 + 가장자리 하이라이트 + 부드러운 그림자 */
+  --ip-bezel: #1B1E23;
+  --ip-bezel-w: 11px;
+  --ip-inset-x: 56px;
+  --ip-inset-y: 34px;
+  --ip-shadow-frame: 0 0 0 1px #3A3F47, 0 18px 48px rgba(23, 33, 43, .16), 0 4px 14px rgba(23, 33, 43, .08);
+  --ip-shadow-card: 0 2px 8px rgba(23, 33, 43, .035), 0 8px 24px rgba(23, 33, 43, .025);
+  --ip-shadow-btn: 0 2px 5px rgba(23, 33, 43, .06);
+  --ip-shadow-hover: 0 5px 18px rgba(23, 33, 43, .07);
+  --ip-shadow-modal: 0 24px 70px rgba(23, 33, 43, .18);
+  --ip-ease: 160ms cubic-bezier(.4, 0, .2, 1);
+  --ip-font: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+
+  /* styles.css 가 쓰는 옛 이름을 새 색으로 잇는다 — 손대지 않은 부품도 같은 색을 따른다. */
+  --bg: var(--ip-content);
+  --card: var(--ip-card);
+  --line: var(--ip-border);
+  --line-soft: var(--ip-divider);
+  --ink: var(--ip-text);
+  --ink-2: var(--ip-sub);
+  --ink-3: var(--ip-muted);
+  --violet: var(--ip-navy);
+  --violet-soft: var(--ip-navy-soft);
+  --violet-line: var(--ip-navy-line);
+  --nav-navy: var(--ip-navy);
+  --nav-text: var(--ip-menu);
+  --nav-line: var(--ip-chrome-border);
+  --nav-soft: var(--ip-navy-soft);
+  --shadow: var(--ip-shadow-card);
+  --shadow-hover: var(--ip-shadow-hover);
+  --ease: var(--ip-ease);
+}
+
+/* 2. 기본 ─────────────────────────────────────────────────────── */
+html, body { background: var(--ip-canvas); }
+body {
+  color: var(--ip-text);
+  font-family: var(--ip-font);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+button, input, textarea, select { font-family: inherit; }
+h1, h2, h3 { color: var(--ip-title); letter-spacing: -.3px; }
+/* 글씨가 흐려 보이게 하던 효과를 쓰지 않는다. */
+body:not(.overlay-mode) .workspace :is(h2, h3, p, span, b, strong, small, time, label, li, a, button) {
+  text-shadow: none;
+  -webkit-text-fill-color: currentColor;
+}
+:focus-visible { outline: 2px solid var(--ip-focus); outline-offset: 2px; }
+:focus:not(:focus-visible) { outline: none; }
+body:not(.overlay-mode) * { scrollbar-width: thin; scrollbar-color: #D5DBE3 transparent; }
+body:not(.overlay-mode) *::-webkit-scrollbar { width: 6px; height: 6px; }
+body:not(.overlay-mode) *::-webkit-scrollbar-thumb { background: #D5DBE3; border-radius: 3px; }
+body:not(.overlay-mode) *::-webkit-scrollbar-track { background: transparent; }
+/* 장식용 그림·중복 도구는 그리지 않는다(기능은 상단 도구에 그대로 있다). */
+.header-check-art, .glass-breadcrumb, .glass-brand-mark, .crm-page-title,
+.glass-footer, .glass-sidebar-foot, .memo-character, #contractTodaySection { display: none !important; }
+
+/* 3. 아이패드 틀 ──────────────────────────────────────────────── */
+body:not(.overlay-mode) .workspace {
+  position: fixed;
+  inset: var(--ip-inset-y) var(--ip-inset-x);
+  width: auto;
+  height: auto;
+  display: grid;
+  grid-template-columns: 164px minmax(0, 1fr) auto;
+  grid-template-rows: 62px auto minmax(0, 1fr);
+  grid-template-areas:
+    "brand search tools"
+    "side  fav    fav"
+    "side  main   main";
+  overflow: hidden;
+  background: var(--ip-content);
+  border: var(--ip-bezel-w) solid var(--ip-bezel);
+  border-radius: 36px;
+  box-shadow: var(--ip-shadow-frame);
+}
+/* 헤더 묶음은 틀의 칸에 바로 놓이도록 풀어 둔다. */
+body:not(.overlay-mode) .topnav,
+body:not(.overlay-mode) .navigation-row { display: contents; }
+
+/* 4. 상단 헤더 ────────────────────────────────────────────────── */
+body:not(.overlay-mode) #dashboardHome,
+body:not(.overlay-mode) .topbar,
+body:not(.overlay-mode) .top-tools {
+  position: relative;
+  inset: auto;
+  height: 62px;
+  min-width: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--ip-frame);
+  border: 0;
+  border-bottom: 1px solid var(--ip-chrome-border);
+  border-radius: 0;
+  box-shadow: none;
+  transform: none;
+}
+body:not(.overlay-mode) #dashboardHome {
+  grid-area: brand;
+  justify-content: flex-start;
+  width: auto;
+  padding: 0 20px;
+  cursor: pointer;
+}
+body:not(.overlay-mode) #dashboardHome .glass-brand-text,
+body:not(.overlay-mode) #dashboardHome .glass-brand-text b {
+  color: var(--ip-navy);
+  font-size: 20px;
+  font-weight: 750;
+  letter-spacing: -.3px;
+  line-height: 1;
+}
+body:not(.overlay-mode) .topbar { grid-area: search; z-index: 30; padding: 0 12px 0 20px; }
+body:not(.overlay-mode) .search-wrap { position: relative; flex: 1 1 auto; min-width: 0; max-width: 560px; margin: 0; }
+body:not(.overlay-mode) .page-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 12px;
+  background: var(--ip-content);
+  border: 1px solid #E5E9EF;
+  border-radius: 10px;
+  box-shadow: none;
+  color: var(--ip-muted);
+  transition: border-color var(--ip-ease);
+}
+body:not(.overlay-mode) .page-search:focus-within { border-color: #8397B1; }
+body:not(.overlay-mode) .page-search svg { width: 16px; height: 16px; }
+body:not(.overlay-mode) #pageSearch {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--ip-text);
+  font-size: 13px;
+}
+body:not(.overlay-mode) #pageSearch::placeholder { color: var(--ip-sub); -webkit-text-fill-color: var(--ip-sub); opacity: 1; }
+body:not(.overlay-mode) #pageAdd {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: var(--ip-navy);
+  color: #fff;
+  box-shadow: var(--ip-shadow-btn);
+  transition: background var(--ip-ease);
+}
+body:not(.overlay-mode) #pageAdd:hover { background: var(--ip-navy-hover); }
+body:not(.overlay-mode) #pageAdd svg { width: 16px; height: 16px; stroke-width: 2; }
+
+body:not(.overlay-mode) .top-tools { grid-area: tools; justify-content: flex-end; gap: 8px; padding: 0 20px 0 8px; }
+body:not(.overlay-mode) .top-tools .top-mini,
+body:not(.overlay-mode) .top-tools .sync-state,
+body:not(.overlay-mode) .top-tools .brand-avatar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  min-width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid #E7EBF0;
+  border-radius: 10px;
+  background: #fff;
+  color: var(--ip-icon);
+  box-shadow: none;
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background var(--ip-ease), color var(--ip-ease);
+}
+body:not(.overlay-mode) .top-tools .top-mini svg { width: 16px; height: 16px; }
+body:not(.overlay-mode) .top-tools #backgroundOpen { padding: 0 11px; }
+body:not(.overlay-mode) .top-tools .sync-state {
+  display: block;
+  max-width: 168px;
+  padding: 0 12px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  line-height: 32px;
+  color: var(--ip-sub);
+  font-size: 11.5px;
+  font-weight: 500;
+}
+body:not(.overlay-mode) .top-tools .sync-state[data-state="live"] { color: var(--ip-mint); background: var(--ip-mint-soft); border-color: #CDEBDD; }
+body:not(.overlay-mode) .top-tools .top-mini:hover,
+body:not(.overlay-mode) .top-tools .sync-state:hover { background: var(--ip-hover); color: var(--ip-navy); }
+body:not(.overlay-mode) .top-tools .brand-avatar { background: var(--ip-navy-soft); border-color: transparent; color: var(--ip-navy); border-radius: 50%; }
+
+/* 검색 미리보기 */
+.search-preview {
+  border: 1px solid var(--ip-card-border);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: var(--ip-shadow-modal);
+}
+
+/* 5. 왼쪽 사이드바 ───────────────────────────────────────────── */
+body:not(.overlay-mode) #sideNav {
+  grid-area: side;
+  position: static;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 5px;
+  width: auto;
+  height: auto;
+  min-height: 0;
+  margin: 0;
+  padding: 14px 10px 112px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background: var(--ip-frame);
+  border: 0;
+  border-right: 1px solid var(--ip-chrome-border);
+  border-radius: 0;
+  box-shadow: none;
+}
+body:not(.overlay-mode) #sideNav .top-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 11px;
+  flex: none;
+  width: 100%;
+  height: 40px;
+  min-height: 40px;
+  margin: 0;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  box-shadow: none;
+  color: var(--ip-menu);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  transform: none;
+  transition: background 150ms ease, color 150ms ease;
+}
+/* 메뉴당 아이콘은 SVG 하나만 — 가상 요소로 그리던 두 번째 아이콘·밑줄을 없앤다. */
+body:not(.overlay-mode) #sideNav .top-item::before,
+body:not(.overlay-mode) #sideNav .top-item::after { content: none; display: none; }
+body:not(.overlay-mode) #sideNav .top-item svg { width: 17px; height: 17px; stroke-width: 1.8; color: var(--ip-sub); }
+body:not(.overlay-mode) #sideNav .top-item span { color: inherit; font: inherit; }
+body:not(.overlay-mode) #sideNav .top-item:hover { background: var(--ip-hover); }
+body:not(.overlay-mode) #sideNav .top-item.active {
+  background: var(--ip-navy-soft);
+  color: var(--ip-navy);
+  font-weight: 650;
+  box-shadow: none;
+}
+body:not(.overlay-mode) #sideNav .top-item.active svg { color: var(--ip-navy); }
+
+/* 6. 즐겨찾기 ─────────────────────────────────────────────────── */
+body:not(.overlay-mode) #shortcutSection {
+  grid-area: fav;
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  min-width: 0;
+  height: auto;
+  margin: 16px 20px 0;
+  padding: 12px;
+  background: var(--ip-card);
+  border: 1px solid var(--ip-card-border);
+  border-radius: 15px;
+  box-shadow: var(--ip-shadow-card);
+}
+body:not(.overlay-mode) .crm-favorites-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  margin: 0;
+  padding: 0 4px;
+  color: var(--ip-navy);
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+body:not(.overlay-mode) .crm-favorites-label svg { width: 15px; height: 15px; }
+body:not(.overlay-mode) #shortcutGrid {
+  display: flex;
+  flex: 1 1 0;
+  flex-wrap: nowrap;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  padding: 2px 2px 4px;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+body:not(.overlay-mode) #shortcutGrid .shortcut {
+  position: relative;
+  display: flex;
+  flex: none;
+  width: 105px;
+  height: 62px;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid var(--ip-navy-line);
+  border-radius: 11px;
+  box-shadow: 0 2px 5px rgba(23, 33, 43, .045);
+  transform: none;
+  transition: border-color var(--ip-ease), box-shadow var(--ip-ease), transform var(--ip-ease);
+}
+body:not(.overlay-mode) #shortcutGrid .shortcut::before,
+body:not(.overlay-mode) #shortcutGrid .shortcut::after,
+body:not(.overlay-mode) #shortcutGrid .shortcut a::before,
+body:not(.overlay-mode) #shortcutGrid .shortcut a::after { content: none; display: none; }
+body:not(.overlay-mode) #shortcutGrid .shortcut:hover {
+  border-color: #9FB0C6;
+  box-shadow: 0 5px 12px rgba(23, 33, 43, .08);
+  transform: translateY(-1px);
+}
+body:not(.overlay-mode) #shortcutGrid .shortcut a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 8px 14px;
+  color: var(--ip-navy);
+  text-decoration: none;
+  background: none;
+}
+body:not(.overlay-mode) #shortcutGrid .shortcut a b {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  max-width: 100%;
+  color: var(--ip-navy);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.3;
+  text-align: center;
+  white-space: normal;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+body:not(.overlay-mode) #shortcutGrid .shortcut-more {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ip-muted);
+  opacity: 1;
+  box-shadow: none;
+}
+body:not(.overlay-mode) #shortcutGrid .shortcut-more svg { width: 12px; height: 12px; }
+body:not(.overlay-mode) #shortcutGrid .shortcut-more:hover { background: var(--ip-hover); color: var(--ip-navy); }
+body:not(.overlay-mode) #shortcutGrid .shortcut.add {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  border-style: dashed;
+  border-color: var(--ip-navy-line);
+  background: var(--ip-content);
+  color: var(--ip-sub);
+  box-shadow: none;
+}
+body:not(.overlay-mode) #shortcutGrid .shortcut.add svg { width: 16px; height: 16px; }
+body:not(.overlay-mode) #shortcutGrid .shortcut.add b { color: var(--ip-sub); font-size: 12.5px; font-weight: 600; }
+body:not(.overlay-mode) #shortcutGrid .shortcut.add:hover { color: var(--ip-navy); border-color: #9FB0C6; }
+body:not(.overlay-mode) #shortcutGrid .shortcut.add:hover b { color: var(--ip-navy); }
+/* 동기화 안내 줄은 지금 운영 화면과 같이 숨겨 둔다. */
+body:not(.overlay-mode) #shortcutNotice { display: none; }
+
+/* 7. 메인 영역 · 대시보드 3칸 ─────────────────────────────────── */
+body:not(.overlay-mode) .main {
+  grid-area: main;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: var(--ip-content);
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+body:not(.overlay-mode) .main-scroll {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+  margin: 0;
+  padding: 16px 20px 20px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background: transparent;
+}
+body:not(.overlay-mode) #dashCols {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  grid-template-areas: "todo memo phone";
+  gap: 14px;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+body:not(.overlay-mode) #dashCols.hidden { display: none; }
+body:not(.overlay-mode) #notesHub { display: contents; }
+body:not(.overlay-mode) .workspace[data-view="할 일"] #dashCols { grid-template-columns: minmax(0, 1fr); grid-template-areas: "todo"; }
+body:not(.overlay-mode) .workspace[data-view="달력"] #dashCols { grid-template-columns: minmax(0, 1fr); grid-template-areas: "calendar"; }
+
+/* 카드 공통 */
+body:not(.overlay-mode) #dashCols .today-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  height: auto;
+  max-height: none;
+  margin: 0;
+  padding: 18px;
+  overflow: hidden;
+  background: var(--ip-card);
+  border: 1px solid var(--ip-card-border);
+  border-radius: 16px;
+  box-shadow: var(--ip-shadow-card);
+  backdrop-filter: none;
+}
+body:not(.overlay-mode) #dashCols .today-panel.hidden { display: none; }
+body:not(.overlay-mode) #todayPanel { grid-area: todo; }
+body:not(.overlay-mode) #memoPanel { grid-area: memo; }
+body:not(.overlay-mode) #callNotesPanel { grid-area: phone; }
+body:not(.overlay-mode) #schedulePanel { grid-area: calendar; }
+body:not(.overlay-mode) #dashCols .today-panel h2 {
+  margin: 0;
+  color: var(--ip-text);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -.3px;
+}
+body:not(.overlay-mode) #dashCols .today-panel h2::before,
+body:not(.overlay-mode) #dashCols .today-panel h2::after { content: none; display: none; }
+/* 카드 제목 아이콘 상자 */
+body:not(.overlay-mode) .panel-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  margin: 0;
+  border-radius: 10px;
+  background: var(--ip-navy-soft);
+  color: var(--ip-navy);
+  font-size: 0;
+}
+body:not(.overlay-mode) .panel-icon svg { width: 18px; height: 18px; stroke-width: 1.8; }
+
+/* 버튼 공통(카드 안) */
+body:not(.overlay-mode) .memo-add-btn,
+body:not(.overlay-mode) #callNotesPanel .phone-editor-save,
+body:not(.overlay-mode) #callNotesPanel .phone-editor-history {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+  margin: 0;
+  padding: 0 14px;
+  border: 1px solid #E5E9EF;
+  border-radius: 9px;
+  background: #fff;
+  color: var(--ip-navy);
+  box-shadow: var(--ip-shadow-btn);
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background var(--ip-ease), border-color var(--ip-ease);
+}
+body:not(.overlay-mode) .memo-add-btn:hover,
+body:not(.overlay-mode) #callNotesPanel .phone-editor-history:hover { background: var(--ip-hover); border-color: #D5DCE5; }
+body:not(.overlay-mode) #memoQuickAdd,
+body:not(.overlay-mode) #callNotesPanel .phone-editor-save { background: var(--ip-navy); border-color: var(--ip-navy); color: #fff; }
+body:not(.overlay-mode) #memoQuickAdd:hover,
+body:not(.overlay-mode) #callNotesPanel .phone-editor-save:hover { background: var(--ip-navy-hover); border-color: var(--ip-navy-hover); }
+
+/* 8. 할 일 카드 ───────────────────────────────────────────────── */
+body:not(.overlay-mode) #dashCols #todayPanel {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  /* 1 제목(+분류) · 2 분류(좁을 때) · 3 입력 · 4 종류 고르기 · 5 목록 */
+  grid-template-rows: auto auto auto auto minmax(0, 1fr);
+  column-gap: 16px;
+  row-gap: 0;
+  align-content: stretch;
+}
+body:not(.overlay-mode) #todayPanel { container-type: inline-size; }
+body:not(.overlay-mode) #todayPanel .todo-head { display: contents; }
+/* 제목 오른쪽에 분류를 가로 한 줄로 두고, 입력창과 목록은 카드 너비 전체를 쓴다. */
+body:not(.overlay-mode) #todayPanel .todo-head h2 { grid-column: 1; grid-row: 1; align-self: center; margin-bottom: 14px; white-space: nowrap; }
+body:not(.overlay-mode) #todayPanel .todo-count,
+body:not(.overlay-mode) #todayPanel .todo-controls { display: none; }
+body:not(.overlay-mode) #todayPanel .todo-view-tabs {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: center;
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+  min-width: 0;
+  margin: 0 0 14px;
+  padding: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  background: none;
+  border: 0;
+}
+body:not(.overlay-mode) #todayPanel .todo-view-tabs::-webkit-scrollbar { display: none; }
+body:not(.overlay-mode) #todayPanel .todo-view-tabs button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  gap: 5px;
+  flex: none;
+  width: auto;
+  height: 34px;
+  margin: 0;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  box-shadow: none;
+  color: var(--ip-menu);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background 150ms ease, color 150ms ease;
+}
+body:not(.overlay-mode) #todayPanel .todo-view-tabs button:hover { background: var(--ip-hover); }
+body:not(.overlay-mode) #todayPanel .todo-view-tabs button.active { background: var(--ip-navy-soft); color: var(--ip-navy); }
+body:not(.overlay-mode) #todayPanel .todo-view-tabs button span {
+  display: grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  margin: 0;
+  padding: 0 4px;
+  border-radius: 9px;
+  background: #F2F4F7;
+  color: var(--ip-sub);
+  font-size: 10px;
+  font-weight: 600;
+}
+body:not(.overlay-mode) #todayPanel .todo-view-tabs button.active span { background: #fff; color: var(--ip-navy); }
+body:not(.overlay-mode) #todayPanel .todo-quick-entry {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  margin: 0;
+  padding: 0 12px;
+  background: var(--ip-field);
+  border: 1px solid #E5E9EF;
+  border-radius: 10px;
+  box-shadow: none;
+  transition: border-color var(--ip-ease);
+}
+body:not(.overlay-mode) #todayPanel .todo-quick-entry:focus-within { border-color: #8397B1; }
+body:not(.overlay-mode) #todayPanel .todo-quick-entry > span { color: var(--ip-muted); font-size: 16px; font-weight: 500; line-height: 1; }
+body:not(.overlay-mode) #todoQuickInput {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  box-shadow: none;
+  color: var(--ip-text);
+  font-size: 13.5px;
+}
+body:not(.overlay-mode) #todoQuickInput::placeholder { color: var(--ip-sub); -webkit-text-fill-color: var(--ip-sub); opacity: 1; }
+body:not(.overlay-mode) #todayPanel .todo-quick-choice {
+  grid-column: 1 / -1;
+  grid-row: 4;
+  display: grid;
+  gap: 10px;
+  margin: 10px 0 0;
+  padding: 12px;
+  background: #fff;
+  border: 1px solid var(--ip-card-border);
+  border-radius: 12px;
+  box-shadow: var(--ip-shadow-card);
+}
+body:not(.overlay-mode) .todo-quick-choice strong { color: var(--ip-title); font-size: 13.5px; font-weight: 700; }
+body:not(.overlay-mode) .todo-quick-choice p { margin: 2px 0 0; color: var(--ip-sub); font-size: 12.5px; overflow-wrap: anywhere; }
+body:not(.overlay-mode) .todo-quick-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(92px, 1fr)); gap: 6px; }
+body:not(.overlay-mode) .todo-quick-options button {
+  display: grid;
+  gap: 2px;
+  min-height: 44px;
+  padding: 7px 10px;
+  border: 1px solid #E5E9EF;
+  border-radius: 9px;
+  background: #fff;
+  color: var(--ip-navy);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-align: left;
+  transition: background var(--ip-ease), border-color var(--ip-ease);
+}
+body:not(.overlay-mode) .todo-quick-options button:hover { background: var(--ip-navy-soft); border-color: var(--ip-navy-line); }
+body:not(.overlay-mode) .todo-quick-options button span { color: var(--ip-sub); font-size: 11px; font-weight: 400; }
+body:not(.overlay-mode) .todo-quick-options [data-quick-cancel] { place-items: center; color: var(--ip-sub); }
+body:not(.overlay-mode) #todayPanel .todo-results {
+  grid-column: 1 / -1;
+  grid-row: 5;
+  min-height: 0;
+  margin: 12px 0 0;
+  padding: 0 2px 0 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+/* 목록 자체는 스크롤 상자가 아니다 — 안쪽에 또 스크롤 상자가 있으면 휠이 바깥 목록(.todo-results)까지 전달되지 않는다. */
+body:not(.overlay-mode) #todayPanel .todo-list { display: flex; flex-direction: column; gap: 6px; height: auto; max-height: none; margin: 0; padding: 0; overflow: visible; overscroll-behavior: auto; list-style: none; }
+body:not(.overlay-mode) #todayPanel .todo-line {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 45px;
+  margin: 0;
+  padding: 10px 11px;
+  background: #fff;
+  border: 1px solid var(--ip-divider);
+  border-radius: 9px;
+  box-shadow: none;
+  opacity: 1;
+  transition: border-color var(--ip-ease), background var(--ip-ease);
+}
+body:not(.overlay-mode) #todayPanel .todo-line::before,
+body:not(.overlay-mode) #todayPanel .todo-line::after { content: none; display: none; }
+body:not(.overlay-mode) #todayPanel .todo-line:hover { border-color: var(--ip-border); background: #FCFCFD; }
+body:not(.overlay-mode) .todo-line-check { position: relative; display: grid; place-items: center; flex: none; width: 20px; height: 20px; margin: 0; cursor: pointer; }
+body:not(.overlay-mode) .todo-line-check input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+body:not(.overlay-mode) .todo-box {
+  position: relative;
+  display: block;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  border: 1.5px solid #C5CDD8;
+  border-radius: 5px;
+  background: #fff;
+  box-shadow: none;
+  transition: background var(--ip-ease), border-color var(--ip-ease);
+}
+body:not(.overlay-mode) .todo-box::before { content: none; }
+body:not(.overlay-mode) .todo-line-check:hover .todo-box { border-color: var(--ip-mint); }
+body:not(.overlay-mode) .todo-box.done { background: var(--ip-mint); border-color: var(--ip-mint); }
+body:not(.overlay-mode) .todo-box.done::after {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 1.5px;
+  width: 5px;
+  height: 9px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  background: none;
+}
+body:not(.overlay-mode) .todo-star {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #C0C7D2;
+  font-size: 16px;
+  line-height: 1;
+}
+body:not(.overlay-mode) .todo-star:hover,
+body:not(.overlay-mode) .todo-line.star .todo-star { color: var(--ip-star); }
+body:not(.overlay-mode) #todayPanel .todo-line-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--ip-text);
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1.45;
+  opacity: 1;
+}
+/* 미완료 할 일 글씨는 항상 또렷하게 보인다. */
+body:not(.overlay-mode) #todayPanel .todo-line-text .todo-mark {
+  display: inline;
+  visibility: visible;
+  color: var(--ip-text);
+  opacity: 1;
+  background: none;
+  font: inherit;
+}
+body:not(.overlay-mode) #todayPanel .todo-line.star .todo-mark { background: linear-gradient(transparent 62%, #FBEBC4 62%); }
+body:not(.overlay-mode) #todayPanel .todo-line time {
+  flex: none;
+  margin: 0;
+  padding: 0;
+  background: none;
+  color: var(--ip-sub);
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+body:not(.overlay-mode) #todayPanel .todo-line time.today { color: var(--ip-mint); font-weight: 600; }
+body:not(.overlay-mode) #todayPanel .todo-line time.late { color: var(--ip-danger); font-weight: 600; }
+body:not(.overlay-mode) #todayPanel .todo-x {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ip-muted);
+  font-size: 12px;
+  opacity: 1;
+}
+body:not(.overlay-mode) #todayPanel .todo-x:hover { background: var(--ip-danger-soft); color: var(--ip-danger); }
+body:not(.overlay-mode) #todayPanel .todo-line.done { background: #FAFBFC; }
+body:not(.overlay-mode) #todayPanel .todo-line.done .todo-line-text { color: var(--ip-sub); text-decoration: line-through; text-decoration-color: #B8C0CC; }
+body:not(.overlay-mode) #todayPanel .todo-line.done time { color: var(--ip-muted); }
+body:not(.overlay-mode) #todayPanel .todo-empty {
+  display: grid;
+  place-items: center;
+  min-height: 120px;
+  padding: 20px;
+  color: var(--ip-sub);
+  font-size: 13px;
+  text-align: center;
+  background: none;
+  border: 1px dashed var(--ip-border);
+  border-radius: 10px;
+}
+
+/* 할 일 카드가 좁아 분류가 제목 옆에 다 들어가지 않으면 제목 아래 줄로 내린다. */
+@container (max-width: 540px) {
+  body:not(.overlay-mode) #todayPanel .todo-view-tabs { grid-column: 1 / -1; grid-row: 2; flex-wrap: wrap; margin-top: -4px; overflow: visible; }
+}
+
+/* 9. 메모장 · 전화메모 — 같은 규격 ───────────────────────────── */
+body:not(.overlay-mode) #memoPanel .memo-head,
+body:not(.overlay-mode) #callNotesPanel .phone-editor-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  text-align: left;
+  flex: none;
+  margin: 0 0 14px;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+body:not(.overlay-mode) #memoPanel .memo-head::before,
+body:not(.overlay-mode) #memoPanel .memo-head::after,
+body:not(.overlay-mode) #callNotesPanel .phone-editor-header::before,
+body:not(.overlay-mode) #callNotesPanel .phone-editor-header::after { content: none; display: none; }
+body:not(.overlay-mode) #callNotesPanel .phone-editor-header h2 { flex: 1; min-width: 0; }
+body:not(.overlay-mode) #callNotesPanel .phone-editor-history { height: 32px; padding: 0 12px; box-shadow: none; }
+/* 지금 운영 화면과 같이 안내·업체명 칸은 접어 두고 통화 내용 칸만 넓게 쓴다. */
+body:not(.overlay-mode) #callNotesPanel .phone-editor-help,
+body:not(.overlay-mode) #callNotesPanel .phone-editor-label,
+body:not(.overlay-mode) #callNotesPanel #phoneMemoContact { display: none; }
+body:not(.overlay-mode) #memoPanel .memo-note-shell {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: 0;
+}
+body:not(.overlay-mode) #memoNote,
+body:not(.overlay-mode) #callNotesPanel .phone-editor-textarea {
+  display: block;
+  flex: 1 1 auto;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  margin: 0;
+  padding: 14px;
+  resize: none;
+  background: var(--ip-note);
+  border: 1px solid #E5E9EF;
+  border-radius: 12px;
+  box-shadow: none;
+  outline: none;
+  color: var(--ip-text);
+  font-family: var(--ip-font);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.7;
+  transition: border-color var(--ip-ease);
+}
+body:not(.overlay-mode) #memoNote:focus,
+body:not(.overlay-mode) #callNotesPanel .phone-editor-textarea:focus { border-color: #8397B1; }
+body:not(.overlay-mode) #memoNote::placeholder,
+body:not(.overlay-mode) #callNotesPanel .phone-editor-textarea::placeholder { color: var(--ip-menu); -webkit-text-fill-color: var(--ip-menu); opacity: 1; }
+body:not(.overlay-mode) #memoPanel .memo-tools,
+body:not(.overlay-mode) #callNotesPanel .phone-editor-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+  margin: 12px 0 0;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+body:not(.overlay-mode) #memoPanel .memo-archive-open { margin-left: auto; }
+body:not(.overlay-mode) #callNotesPanel #phoneMemoStatus {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--ip-sub);
+  font-size: 11.5px;
+}
+
+/* 메모 보관함 · 전화메모 기록 팝업 */
+.memo-archive-dialog,
+.phone-records-dialog {
+  width: min(560px, calc(100vw - 32px));
+  max-height: 78vh;
+  padding: 0;
+  overflow: hidden;
+  color: var(--ip-text);
+  background: #fff;
+  border: 1px solid var(--ip-card-border);
+  border-radius: 18px;
+  box-shadow: var(--ip-shadow-modal);
+}
+.memo-archive-dialog .phone-archive { display: flex; flex-direction: column; max-height: 78vh; background: #fff; }
+.memo-archive-head,
+.phone-records-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 22px 14px;
+  border-bottom: 1px solid var(--ip-divider);
+}
+.memo-archive-head h3,
+.phone-records-heading strong { margin: 0; color: var(--ip-title); font-size: 17px; font-weight: 700; letter-spacing: -.3px; }
+.memo-archive-head small { display: block; margin-top: 4px; color: var(--ip-sub); font-size: 11.5px; }
+.memo-archive-dialog .dialog-close,
+.phone-records-heading button {
+  display: grid;
+  place-items: center;
+  flex: none;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid #E7EBF0;
+  border-radius: 9px;
+  background: #fff;
+  color: var(--ip-icon);
+  font-size: 18px;
+  line-height: 1;
+}
+.phone-records-heading button { font-size: 12.5px; font-weight: 600; }
+.memo-archive-dialog .dialog-close:hover,
+.phone-records-heading button:hover { background: var(--ip-hover); }
+.memo-archive-dialog .call-notes-list,
+.phone-records-dialog .phone-editor-records {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 200px;
+  max-height: 60vh;
+  padding: 16px 22px 22px;
+  overflow: auto;
+}
+.call-note,
+.phone-editor-record {
+  position: relative;
+  margin: 0;
+  padding: 12px 64px 12px 14px;
+  background: #fff;
+  border: 1px solid var(--ip-divider);
+  border-radius: 10px;
+}
+.call-note::after, .phone-editor-record::after { content: none; }
+.call-note p,
+.phone-editor-record p { margin: 0; color: var(--ip-text); font-size: 14px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
+.call-note time { display: block; margin-top: 6px; color: var(--ip-sub); font-size: 11px; font-weight: 500; }
+.phone-editor-record header { display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px; }
+.phone-editor-record header strong { color: var(--ip-title); font-size: 13.5px; font-weight: 700; }
+.phone-editor-record header time { color: var(--ip-sub); font-size: 11px; font-weight: 500; }
+.call-note [data-note-delete],
+.phone-editor-record [data-phone-delete] {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid #F3D3D6;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ip-danger);
+  font-size: 12px;
+  font-weight: 600;
+}
+.call-note [data-note-delete]:hover,
+.phone-editor-record [data-phone-delete]:hover { background: var(--ip-danger-soft); }
+.phone-archive-empty, .phone-editor-empty { margin: 24px 0; color: var(--ip-sub); font-size: 13px; text-align: center; }
+
+/* 10. 달력 ───────────────────────────────────────────────────── */
+body:not(.overlay-mode) #dashCols #schedulePanel { padding: 20px; gap: 12px; }
+body:not(.overlay-mode) #schedulePanel .block-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex: none;
+  margin: 0;
+  padding: 0;
+}
+body:not(.overlay-mode) #schedulePanel .block-head h2 { font-size: 17px; }
+body:not(.overlay-mode) #schedulePanel .cal-tools { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+body:not(.overlay-mode) #schedulePanel .cal-tools button {
+  display: inline-flex;
+  align-items: center;
+  height: 34px;
+  padding: 0 13px;
+  border: 1px solid #E5E9EF;
+  border-radius: 9px;
+  background: #fff;
+  color: var(--ip-navy);
+  box-shadow: var(--ip-shadow-btn);
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+body:not(.overlay-mode) #schedulePanel .cal-tools #scheduleAdd { background: var(--ip-navy); border-color: var(--ip-navy); color: #fff; }
+body:not(.overlay-mode) #schedulePanel .cal-tools #scheduleAdd:hover { background: var(--ip-navy-hover); }
+body:not(.overlay-mode) #schedulePanel .cal-tools #crmMeetingConnect:hover { background: var(--ip-hover); }
+body:not(.overlay-mode) #schedulePanel .month-calendar {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: none;
+  border: 0;
+}
+body:not(.overlay-mode) #schedulePanel .calendar-month {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  flex: none;
+  margin: 0 0 10px;
+  padding: 0;
+}
+body:not(.overlay-mode) #schedulePanel .calendar-month strong {
+  order: -1;
+  margin-right: 8px;
+  color: var(--ip-title);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -.3px;
+}
+body:not(.overlay-mode) #schedulePanel .calendar-month button {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid #E7EBF0;
+  border-radius: 9px;
+  background: #fff;
+  color: var(--ip-icon);
+  font-size: 18px;
+  line-height: 1;
+  transition: background var(--ip-ease);
+}
+body:not(.overlay-mode) #schedulePanel .calendar-month #calendarToday {
+  width: auto;
+  height: 32px;
+  margin-left: 4px;
+  padding: 0 12px;
+  color: var(--ip-navy);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+body:not(.overlay-mode) #schedulePanel .calendar-month button:hover { background: var(--ip-hover); }
+body:not(.overlay-mode) #schedulePanel .calendar-week {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 5px;
+  flex: none;
+  height: 34px;
+  margin: 0;
+  align-items: center;
+  text-align: center;
+}
+body:not(.overlay-mode) #schedulePanel .calendar-week span { color: var(--ip-sub); font-size: 12px; font-weight: 600; }
+body:not(.overlay-mode) #schedulePanel .calendar-week span:first-child { color: var(--ip-danger); }
+body:not(.overlay-mode) #schedulePanel .calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-auto-rows: minmax(0, 1fr);
+  gap: 5px;
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 0;
+  overflow: hidden;
+}
+body:not(.overlay-mode) #schedulePanel .calendar-days button,
+body:not(.overlay-mode) #schedulePanel .calendar-days .calendar-blank {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--ip-divider);
+  border-radius: 9px;
+  background: #fff;
+  box-shadow: none;
+  color: var(--ip-text);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  transition: background var(--ip-ease), border-color var(--ip-ease);
+}
+body:not(.overlay-mode) #schedulePanel .calendar-days .calendar-blank { border-color: transparent; background: transparent; }
+body:not(.overlay-mode) #schedulePanel .calendar-days button:hover { background: var(--ip-hover); border-color: var(--ip-border); }
+body:not(.overlay-mode) #schedulePanel .calendar-days button.is-today { background: #F1F5FA; border-color: #DCE4EF; color: var(--ip-navy); }
+body:not(.overlay-mode) #schedulePanel .calendar-days button.is-selected { background: var(--ip-navy); border-color: var(--ip-navy); color: #fff; }
+body:not(.overlay-mode) #schedulePanel .calendar-days button::before { content: none; }
+body:not(.overlay-mode) #schedulePanel .calendar-days button::after { content: none; }
+body:not(.overlay-mode) #schedulePanel .calendar-days button.has-schedule::after {
+  content: "";
+  position: absolute;
+  left: calc(50% - 2.5px);
+  bottom: 18%;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--ip-mint);
+}
+body:not(.overlay-mode) #schedulePanel .calendar-days button.is-selected.has-schedule::after { background: #fff; }
+/* 날짜 칸에는 일정 제목을 쓰지 않고, 날짜를 누르면 팝업으로 보여 준다. */
+body:not(.overlay-mode) #schedulePanel .calendar-selected-heading,
+body:not(.overlay-mode) #schedulePanel .schedule-list { display: none; }
+
+.calendar-day-detail-dialog {
+  width: min(440px, calc(100vw - 32px));
+  max-width: 440px;
+  padding: 20px;
+  color: var(--ip-text);
+  background: #fff;
+  border: 1px solid var(--ip-card-border);
+  border-radius: 16px;
+  box-shadow: var(--ip-shadow-modal);
+}
+.calendar-day-detail-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 14px; }
+.calendar-day-detail-head strong { color: var(--ip-title); font-size: 17px; font-weight: 700; letter-spacing: -.3px; }
+.calendar-day-detail-head button {
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid #E7EBF0;
+  border-radius: 9px;
+  background: #fff;
+  color: var(--ip-icon);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.calendar-day-detail-head button:hover { background: var(--ip-hover); }
+.calendar-day-detail-list { display: flex; flex-direction: column; gap: 6px; max-height: 60vh; overflow: auto; }
+.calendar-day-detail-list button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 46px;
+  padding: 10px 12px;
+  border: 1px solid var(--ip-divider);
+  border-radius: 10px;
+  background: #fff;
+  text-align: left;
+  transition: background var(--ip-ease), border-color var(--ip-ease);
+}
+.calendar-day-detail-list button:hover { background: var(--ip-navy-soft); border-color: var(--ip-navy-line); }
+.calendar-day-detail-list button strong { min-width: 0; overflow: hidden; color: var(--ip-text); font-size: 14px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.calendar-day-detail-list button span { flex: none; color: var(--ip-sub); font-size: 11px; font-weight: 500; }
+.calendar-day-detail-list p { margin: 16px 0; color: var(--ip-sub); font-size: 13px; text-align: center; }
+
+/* 11. 자료 화면(특허·협력업체·계정·연락처·업무지식·대본·기획·기억 등) ─── */
+body:not(.overlay-mode) #knowledgeBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  flex: 0 0 auto;
+  min-height: 0;
+  margin: 0;
+  padding: 20px;
+  background: var(--ip-card);
+  border: 1px solid var(--ip-card-border);
+  border-radius: 16px;
+  box-shadow: var(--ip-shadow-card);
+}
+body:not(.overlay-mode) #knowledgeBlock.hidden { display: none; }
+body:not(.overlay-mode) #knowledgeBlock .block-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin: 0; }
+body:not(.overlay-mode) #knowledgeBlock .block-head h2 { margin: 0; color: var(--ip-title); font-size: 20px; font-weight: 700; letter-spacing: -.3px; }
+body:not(.overlay-mode) #knowledgeBlock .block-head p { margin: 4px 0 0; color: var(--ip-sub); font-size: 13px; }
+body:not(.overlay-mode) #pageCount {
+  flex: none;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--ip-navy-soft);
+  color: var(--ip-navy);
+  font-size: 12px;
+  font-weight: 600;
+}
+body:not(.overlay-mode) #crmPartnerConnect {
+  height: 34px;
+  padding: 0 13px;
+  border: 1px solid #E5E9EF;
+  border-radius: 9px;
+  background: #fff;
+  color: var(--ip-navy);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+body:not(.overlay-mode) #pageCategories { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; background: none; border: 0; }
+body:not(.overlay-mode) .workspace[data-view="협력업체"] #pageCategories { display: none; }
+body:not(.overlay-mode) #pageCategories button {
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid #E5E9EF;
+  border-radius: 9px;
+  background: #fff;
+  color: var(--ip-menu);
+  box-shadow: none;
+  font-size: 12.5px;
+  font-weight: 600;
+  transition: background 150ms ease, color 150ms ease;
+}
+body:not(.overlay-mode) #pageCategories button:hover { background: var(--ip-hover); }
+body:not(.overlay-mode) #pageCategories button.active { background: var(--ip-navy-soft); border-color: var(--ip-navy-line); color: var(--ip-navy); }
+body:not(.overlay-mode) #pageGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+body:not(.overlay-mode) .workspace:is([data-view="대본"], [data-view="기획"], [data-view="특허"]) #pageGrid { grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); }
+body:not(.overlay-mode) .workspace:is([data-view="연락처"], [data-view="협력업체"]) #pageGrid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+body:not(.overlay-mode) #pageGrid .page-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  margin: 0;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid var(--ip-card-border);
+  border-radius: 14px;
+  box-shadow: none;
+  color: var(--ip-text);
+  cursor: pointer;
+  transform: none;
+  transition: border-color var(--ip-ease), box-shadow var(--ip-ease);
+}
+body:not(.overlay-mode) #pageGrid .page-card::before,
+body:not(.overlay-mode) #pageGrid .page-card::after { content: none; display: none; }
+body:not(.overlay-mode) #pageGrid .page-card:hover { border-color: #D5DCE5; box-shadow: var(--ip-shadow-hover); transform: none; }
+body:not(.overlay-mode) #pageGrid .page-card .card-kind {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 10px;
+  color: var(--ip-sub);
+  font-size: 11.5px;
+  font-weight: 600;
+}
+body:not(.overlay-mode) #pageGrid .page-card .card-kind svg { width: 14px; height: 14px; color: var(--ip-navy); stroke-width: 1.8; }
+body:not(.overlay-mode) #pageGrid .page-card h3 {
+  margin: 0 0 6px;
+  color: var(--ip-title);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: -.3px;
+  overflow-wrap: anywhere;
+}
+body:not(.overlay-mode) #pageGrid .page-card p {
+  margin: 0;
+  color: var(--ip-sub);
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1.6;
+  opacity: 1;
+}
+body:not(.overlay-mode) #pageGrid .page-card .card-body { color: var(--ip-text); }
+body:not(.overlay-mode) #pageGrid .page-card .card-time { display: block; margin-top: 10px; color: var(--ip-sub); font-size: 11px; font-weight: 500; }
+body:not(.overlay-mode) #pageGrid .page-card footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 0;
+}
+body:not(.overlay-mode) #pageGrid .page-card footer button,
+body:not(.overlay-mode) #pageGrid .page-card footer a {
+  display: inline-flex;
+  align-items: center;
+  height: 30px;
+  padding: 0 11px;
+  border: 1px solid #E5E9EF;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ip-navy);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background var(--ip-ease), border-color var(--ip-ease);
+}
+body:not(.overlay-mode) #pageGrid .page-card footer button:hover,
+body:not(.overlay-mode) #pageGrid .page-card footer a:hover { background: var(--ip-navy-soft); border-color: var(--ip-navy-line); }
+body:not(.overlay-mode) #pageGrid .page-card footer :is(.card-del, [data-account-delete], [data-delete]) { color: var(--ip-danger); border-color: #F3D3D6; }
+body:not(.overlay-mode) #pageGrid .page-card footer :is(.card-del, [data-account-delete], [data-delete]):hover { background: var(--ip-danger-soft); }
+body:not(.overlay-mode) #pageGrid .page-card .todo-state { margin-right: auto; padding: 3px 9px; border-radius: 999px; background: var(--ip-navy-soft); color: var(--ip-navy); font-size: 11px; font-weight: 600; }
+body:not(.overlay-mode) #pageGrid .page-card .todo-state.done { background: var(--ip-mint-soft); color: var(--ip-mint); }
+body:not(.overlay-mode) #pageGrid .patent-meta { display: grid; gap: 4px; margin: 10px 0 0; }
+body:not(.overlay-mode) #pageGrid .patent-meta div { display: flex; gap: 8px; }
+body:not(.overlay-mode) #pageGrid .patent-meta dt { flex: none; min-width: 56px; color: var(--ip-muted); font-size: 11.5px; font-weight: 500; }
+body:not(.overlay-mode) #pageGrid .patent-meta dd { margin: 0; color: var(--ip-sub); font-size: 12.5px; font-weight: 500; }
+body:not(.overlay-mode) #pageGrid .tag-row { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+body:not(.overlay-mode) #pageGrid .tag-row span { padding: 2px 8px; border-radius: 999px; background: #F2F4F7; color: var(--ip-sub); font-size: 11px; font-weight: 500; }
+body:not(.overlay-mode) #pageGrid mark { padding: 0 2px; border-radius: 3px; background: #FBEBC4; color: inherit; }
+body:not(.overlay-mode) #pageEmpty {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 36px 16px;
+  border: 1px dashed var(--ip-border);
+  border-radius: 12px;
+  color: var(--ip-sub);
+  font-size: 13.5px;
+  text-align: center;
+}
+body:not(.overlay-mode) #pageEmpty.hidden { display: none; }
+body:not(.overlay-mode) #pageEmpty b { color: var(--ip-text); }
+body:not(.overlay-mode) #pageEmpty button {
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 9px;
+  background: var(--ip-navy);
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+/* 12. 팝업 · 모달 공통 ────────────────────────────────────────── */
+.modal {
+  z-index: 60;
+  padding: 16px;
+  background: rgba(16, 24, 40, .38);
+  backdrop-filter: none;
+}
+dialog::backdrop { background: rgba(16, 24, 40, .38); }
+.modal .edit-box {
+  position: relative;
+  width: min(480px, calc(100vw - 32px));
+  max-width: 480px;
+  max-height: calc(100dvh - 32px);
+  margin: 0;
+  padding: 22px;
+  overflow: auto;
+  color: var(--ip-text);
+  background: #fff;
+  border: 1px solid var(--ip-card-border);
+  border-radius: 18px;
+  box-shadow: var(--ip-shadow-modal);
+  backdrop-filter: none;
+}
+.modal .edit-box:is(.memory-library-box, .script-box, .detail-box) { width: min(640px, calc(100vw - 32px)); max-width: 640px; }
+.modal .edit-box::before, .modal .edit-box::after { content: none; }
+.modal .edit-box > header,
+.modal .edit-box form > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 16px;
+  padding: 0;
+  border: 0;
+}
+.modal .edit-box header strong { color: var(--ip-title); font-size: 17px; font-weight: 700; letter-spacing: -.3px; }
+.modal .edit-box header small { display: block; margin-top: 2px; color: var(--ip-sub); font-size: 11.5px; }
+.modal .edit-box header > button {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid #E7EBF0;
+  border-radius: 9px;
+  background: #fff;
+  color: var(--ip-icon);
+  font-size: 18px;
+  line-height: 1;
+}
+.modal .edit-box header > button:hover { background: var(--ip-hover); }
+.modal .edit-box label {
+  display: block;
+  margin: 0 0 12px;
+  color: var(--ip-menu);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.modal .edit-box :is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="color"]), select) {
+  display: block;
+  width: 100%;
+  height: 40px;
+  margin-top: 6px;
+  padding: 0 12px;
+  border: 1px solid #E5E9EF;
+  border-radius: 10px;
+  background: var(--ip-field);
+  box-shadow: none;
+  color: var(--ip-text);
+  font-size: 14px;
+  font-weight: 400;
+  outline: none;
+}
+.modal .edit-box textarea {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  padding: 10px 12px;
+  border: 1px solid #E5E9EF;
+  border-radius: 10px;
+  background: var(--ip-field);
+  box-shadow: none;
+  color: var(--ip-text);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.6;
+  outline: none;
+  resize: vertical;
+}
+.modal .edit-box :is(input, select, textarea):focus { border-color: #8397B1; background: #fff; }
+.modal .edit-box :is(input, textarea)::placeholder { color: var(--ip-sub); -webkit-text-fill-color: var(--ip-sub); opacity: 1; }
+.modal .edit-box footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin: 18px 0 0;
+  padding: 0;
+  border: 0;
+}
+.modal .edit-box footer button {
+  height: 36px;
+  min-width: 64px;
+  padding: 0 14px;
+  border: 1px solid #E5E9EF;
+  border-radius: 9px;
+  background: #fff;
+  color: var(--ip-menu);
+  box-shadow: none;
+  font-size: 13px;
+  font-weight: 600;
+  transition: background var(--ip-ease);
+}
+.modal .edit-box footer button:hover { background: var(--ip-hover); }
+.modal .edit-box footer button[type="submit"],
+.modal .edit-box footer .detail-primary { background: var(--ip-navy); border-color: var(--ip-navy); color: #fff; box-shadow: var(--ip-shadow-btn); }
+.modal .edit-box footer button[type="submit"]:hover,
+.modal .edit-box footer .detail-primary:hover { background: var(--ip-navy-hover); }
+.modal .edit-box footer .danger-text { margin-right: auto; border-color: #F3D3D6; color: var(--ip-danger); }
+.modal .edit-box footer .danger-text:hover { background: var(--ip-danger-soft); }
+.modal .edit-box .edit-help, .modal .edit-box .partner-origin, .modal .edit-box .vault-hint, .modal .edit-box .sync-help { color: var(--ip-sub); font-size: 11.5px; font-weight: 400; line-height: 1.6; }
+.modal .edit-box .sync-error { color: var(--ip-danger); font-size: 12px; }
+.modal .edit-box .vault-show { display: flex; align-items: center; gap: 8px; }
+
+/* 추가 종류 고르기 */
+.modal .add-kinds { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.modal .add-kinds button {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: 10px;
+  min-height: 56px;
+  padding: 10px 12px;
+  border: 1px solid #E5E9EF;
+  border-radius: 12px;
+  background: #fff;
+  color: var(--ip-text);
+  text-align: left;
+  transition: background var(--ip-ease), border-color var(--ip-ease);
+}
+.modal .add-kinds button:hover { background: var(--ip-navy-soft); border-color: var(--ip-navy-line); }
+.modal .add-kinds button > span { grid-row: 1 / 3; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; background: var(--ip-navy-soft); color: var(--ip-navy); }
+.modal .add-kinds button svg { width: 18px; height: 18px; stroke-width: 1.8; }
+.modal .add-kinds button b { color: var(--ip-title); font-size: 14px; font-weight: 700; }
+.modal .add-kinds button small { color: var(--ip-sub); font-size: 11.5px; }
+
+/* 기억 저장소 */
+.modal .memory-search { height: 40px; margin: 0 0 14px; border: 1px solid #E5E9EF; border-radius: 10px; background: var(--ip-field); }
+.modal .memory-search input { height: 38px; margin: 0; background: transparent; }
+
+/* 상세·대본 */
+.modal .detail-box h3 { margin: 0 0 10px; color: var(--ip-title); font-size: 17px; font-weight: 700; }
+.modal .detail-box pre,
+.modal .script-body { color: var(--ip-text); font-family: var(--ip-font); font-size: 14px; line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; }
+.modal .detail-meta { color: var(--ip-sub); font-size: 11.5px; }
+
+/* 초기화 */
+.modal .reset-box .reset-choice { margin-top: 12px; padding: 14px; border: 1px solid var(--ip-card-border); border-radius: 12px; }
+.modal .reset-box .reset-choice.danger { border-color: #F3D3D6; background: #FFFBFB; }
+.modal .reset-box .reset-choice strong { display: block; color: var(--ip-title); font-size: 14px; }
+.modal .reset-box .reset-choice small { display: block; margin: 4px 0 10px; color: var(--ip-sub); font-size: 12px; line-height: 1.6; }
+.modal .reset-box button { height: 36px; padding: 0 14px; border: 1px solid #E5E9EF; border-radius: 9px; background: #fff; color: var(--ip-navy); font-size: 13px; font-weight: 600; }
+.modal .reset-box .danger button { border-color: var(--ip-danger); background: var(--ip-danger); color: #fff; }
+.modal .reset-box .danger button:disabled { border-color: #F3D3D6; background: var(--ip-danger-soft); color: #C98A8F; cursor: not-allowed; }
+.modal .reset-box .danger input { margin: 0 0 10px; }
+
+/* <dialog> 로 여는 창(배경 설정·오늘 알림) */
+#backgroundDialog,
+#dailyAlarmDialog {
+  width: min(480px, calc(100vw - 32px));
+  padding: 22px;
+  color: var(--ip-text);
+  background: #fff;
+  border: 1px solid var(--ip-card-border);
+  border-radius: 18px;
+  box-shadow: var(--ip-shadow-modal);
+}
+#backgroundDialog h2, #dailyAlarmDialog h2 { margin: 0; color: var(--ip-title); font-size: 17px; font-weight: 700; letter-spacing: -.3px; }
+#backgroundDialog p, #backgroundDialog small { color: var(--ip-sub); font-size: 12px; }
+#backgroundDialog label { display: block; margin: 0 0 12px; color: var(--ip-menu); font-size: 12.5px; font-weight: 600; }
+#backgroundDialog select, #backgroundDialog input[type="file"] { display: block; width: 100%; margin-top: 6px; }
+#backgroundDialog select { height: 40px; padding: 0 12px; border: 1px solid #E5E9EF; border-radius: 10px; background: var(--ip-field); font-size: 14px; }
+#backgroundDialog footer { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+#backgroundDialog footer button { height: 36px; padding: 0 14px; border: 1px solid #E5E9EF; border-radius: 9px; background: #fff; color: var(--ip-menu); font-size: 13px; font-weight: 600; }
+#backgroundDialog footer button[type="submit"] { background: var(--ip-navy); border-color: var(--ip-navy); color: #fff; }
+#dailyAlarmDialog .alarm-dialog-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+#dailyAlarmDialog .alarm-dialog-head button { display: grid; place-items: center; width: 32px; height: 32px; border: 1px solid #E7EBF0; border-radius: 9px; background: #fff; color: var(--ip-icon); font-size: 18px; }
+
+/* 13. 떠 있는 요소(행 메뉴·알림·토스트·메신저 버튼) ─────────────── */
+.row-menu {
+  min-width: 120px;
+  padding: 6px;
+  background: #fff;
+  border: 1px solid var(--ip-card-border);
+  border-radius: 12px;
+  box-shadow: var(--ip-shadow-modal);
+}
+.row-menu button { display: block; width: 100%; height: 34px; padding: 0 12px; border-radius: 8px; color: var(--ip-text); font-size: 13px; font-weight: 500; text-align: left; }
+.row-menu button:hover { background: var(--ip-hover); }
+.row-menu button.danger { color: var(--ip-danger); }
+.row-menu button.danger:hover { background: var(--ip-danger-soft); }
+
+.toast { border-radius: 10px; background: var(--ip-navy); color: #fff; box-shadow: var(--ip-shadow-modal); font-size: 13px; font-weight: 500; }
+
+body:not(.overlay-mode) .alarm-dock {
+  position: fixed;
+  left: calc(var(--ip-inset-x) + var(--ip-bezel-w) + 12px);
+  bottom: calc(var(--ip-inset-y) + var(--ip-bezel-w) + 12px);
+  z-index: 40;
+  display: flex;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: 0;
+  box-shadow: none;
+}
+body:not(.overlay-mode) .alarm-dock button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 30px;
+  padding: 0 9px;
+  border: 1px solid #E7EBF0;
+  border-radius: 9px;
+  background: #fff;
+  color: var(--ip-menu);
+  box-shadow: none;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+body:not(.overlay-mode) .alarm-dock button svg { width: 14px; height: 14px; color: var(--ip-sub); }
+body:not(.overlay-mode) .alarm-dock button b {
+  min-width: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: var(--ip-navy-soft);
+  color: var(--ip-navy);
+  font-size: 10.5px;
+  line-height: 18px;
+  text-align: center;
+}
+body:not(.overlay-mode) .alarm-dock button:hover { background: var(--ip-hover); }
+
+/* 메신저 버튼은 카드 버튼을 가리지 않도록 사이드바 아래쪽(알림 위)에 둔다. */
+body:not(.overlay-mode) #orb {
+  position: fixed;
+  left: calc(var(--ip-inset-x) + var(--ip-bezel-w) + 12px);
+  right: auto;
+  bottom: calc(var(--ip-inset-y) + var(--ip-bezel-w) + 52px);
+  z-index: 40;
+  width: 36px;
+  height: 36px;
+  border: 1px solid #E7EBF0;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: var(--ip-shadow-hover);
+}
+body:not(.overlay-mode) #orb span { width: 12px; height: 12px; border-radius: 50%; background: var(--ip-navy); box-shadow: none; }
+body:not(.overlay-mode) #orb::before, body:not(.overlay-mode) #orb::after { content: none; }
+
+/* 데스크톱 앱 작은 창(?overlay=1): 알림 줄은 감추고 메신저 버튼만 남긴다. */
+body.overlay-mode { background: var(--ip-canvas); color: var(--ip-text); }
+body.overlay-mode .alarm-dock { display: none; }
+body.overlay-mode .orb { background: var(--ip-navy); box-shadow: var(--ip-shadow-hover); }
+body.overlay-mode .orb span { background: #C9D6E6; }
+
+/* 14. 반응형 ─────────────────────────────────────────────────── */
+@media (max-width: 1439px) {
+  :root { --ip-inset-x: 36px; --ip-inset-y: 26px; }
+  body:not(.overlay-mode) .workspace { grid-template-columns: 156px minmax(0, 1fr) auto; }
+}
+/* 세 칸이 비좁아지면 할 일·메모장 2열, 전화메모는 아래 줄 전체 */
+@media (max-width: 1199px) {
+  body:not(.overlay-mode) #dashCols {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    /* 첫 줄(할 일·메모장)은 보이는 높이를 꽉 채우고, 전화메모는 스크롤해서 아래에서 본다. */
+    grid-template-rows: max(420px, calc(100dvh - 2 * var(--ip-inset-y) - 2 * var(--ip-bezel-w) - 206px)) 380px;
+    grid-template-areas: "todo memo" "phone phone";
+    flex: none;
+  }
+  body:not(.overlay-mode) .workspace[data-view="할 일"] #dashCols,
+  body:not(.overlay-mode) .workspace[data-view="달력"] #dashCols { grid-template-rows: minmax(0, 1fr); flex: 1 1 auto; }
+}
+@media (max-width: 1099px) {
+  :root { --ip-inset-x: 18px; --ip-inset-y: 16px; --ip-bezel-w: 9px; }
+  body:not(.overlay-mode) .workspace { border-radius: 30px; grid-template-columns: 148px minmax(0, 1fr) auto; }
+  body:not(.overlay-mode) .top-tools .sync-state { max-width: 120px; }
+}
+/* 창 높이가 낮으면 메뉴 간격을 줄여 아래 알림·메신저 버튼과 겹치지 않게 한다. */
+@media (max-height: 860px) and (min-width: 701px) {
+  body:not(.overlay-mode) #sideNav { gap: 2px; padding-top: 10px; }
+  body:not(.overlay-mode) #sideNav .top-item { height: 36px; min-height: 36px; }
+}
+/* 좁은 화면: 동기화 상태는 글자 대신 색 점으로(누르면 그대로 동기화 창이 열린다). */
+@media (max-width: 960px) and (min-width: 701px) {
+  body:not(.overlay-mode) .top-tools .sync-state { position: relative; width: 34px; max-width: 34px; padding: 0; font-size: 0; }
+  body:not(.overlay-mode) .top-tools .sync-state::before { content: ''; position: absolute; inset: 0; margin: auto; width: 9px; height: 9px; border-radius: 50%; background: var(--ip-muted); }
+  body:not(.overlay-mode) .top-tools .sync-state[data-state='live']::before { background: var(--ip-mint); }
+  body:not(.overlay-mode) .top-tools .sync-state[data-state='pending']::before { background: var(--ip-star); }
+}
+@media (max-width: 860px) {
+  body:not(.overlay-mode) .top-tools #searchOpen,
+  body:not(.overlay-mode) .top-tools .brand-avatar { display: none; }
+}
+/* 휴대폰: 틀 여백 없이 화면 전체, 한 열로 쌓고 페이지 전체가 스크롤된다. */
+@media (max-width: 700px) {
+  body:not(.overlay-mode) .workspace {
+    position: static;
+    inset: auto;
+    min-height: 100dvh;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: 56px auto auto auto auto;
+    grid-template-areas:
+      "brand  tools"
+      "search search"
+      "side   side"
+      "fav    fav"
+      "main   main";
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  body:not(.overlay-mode) #dashboardHome,
+  body:not(.overlay-mode) .top-tools { height: 56px; }
+  body:not(.overlay-mode) #dashboardHome { padding: 0 16px; }
+  body:not(.overlay-mode) .top-tools { gap: 6px; padding: 0 16px 0 0; }
+  body:not(.overlay-mode) .top-tools .sync-state { max-width: 96px; padding: 0 9px; font-size: 11px; }
+  body:not(.overlay-mode) .topbar { height: auto; padding: 10px 16px; }
+  body:not(.overlay-mode) .search-wrap { max-width: none; }
+  body:not(.overlay-mode) .page-search { height: 42px; }
+  body:not(.overlay-mode) #pageSearch { font-size: 16px; }
+  body:not(.overlay-mode) #pageAdd { width: 42px; height: 42px; }
+
+  body:not(.overlay-mode) #sideNav {
+    flex-direction: row;
+    gap: 4px;
+    padding: 8px 12px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border-right: 0;
+    border-bottom: 1px solid var(--ip-chrome-border);
+  }
+  body:not(.overlay-mode) #sideNav .top-item { width: auto; height: 40px; padding: 0 12px; gap: 7px; }
+
+  body:not(.overlay-mode) #shortcutSection { margin: 12px 16px 0; padding: 10px; gap: 8px; }
+  body:not(.overlay-mode) .crm-favorites-label { flex-basis: 100%; }
+  body:not(.overlay-mode) #shortcutGrid { flex-basis: 100%; }
+  body:not(.overlay-mode) #shortcutGrid .shortcut { width: 96px; height: 58px; }
+  body:not(.overlay-mode) #shortcutGrid .shortcut-more { width: 28px; height: 28px; top: 1px; right: 1px; }
+
+  body:not(.overlay-mode) .main { overflow: visible; }
+  body:not(.overlay-mode) .main-scroll { overflow: visible; padding: 12px 16px 88px; gap: 12px; }
+  body:not(.overlay-mode) #dashCols,
+  body:not(.overlay-mode) .workspace[data-view="할 일"] #dashCols {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto;
+    grid-template-areas: "todo" "memo" "phone";
+    gap: 12px;
+    flex: none;
+  }
+  body:not(.overlay-mode) .workspace[data-view="할 일"] #dashCols { grid-template-areas: "todo"; }
+  body:not(.overlay-mode) .workspace[data-view="달력"] #dashCols { grid-template-rows: auto; flex: none; }
+  body:not(.overlay-mode) #dashCols .today-panel { padding: 16px; }
+  body:not(.overlay-mode) #dashCols #todayPanel { height: 560px; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto auto auto minmax(0, 1fr); }
+  body:not(.overlay-mode) .workspace[data-view="할 일"] #dashCols #todayPanel { height: calc(100dvh - 250px); min-height: 480px; }
+  body:not(.overlay-mode) #todayPanel .todo-view-tabs {
+    grid-column: 1;
+    grid-row: 2;
+    flex-direction: row;
+    margin: 0 0 10px;
+    padding-bottom: 2px;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+  body:not(.overlay-mode) #todayPanel .todo-view-tabs button { width: auto; height: 36px; padding: 0 10px; gap: 6px; }
+  body:not(.overlay-mode) #todayPanel .todo-quick-entry { grid-column: 1; grid-row: 3; height: 44px; }
+  body:not(.overlay-mode) #todoQuickInput { font-size: 16px; }
+  body:not(.overlay-mode) #todayPanel .todo-quick-choice { grid-column: 1; grid-row: 4; }
+  body:not(.overlay-mode) #todayPanel .todo-results { grid-column: 1; grid-row: 5; }
+  body:not(.overlay-mode) #todayPanel .todo-line { min-height: 48px; }
+  body:not(.overlay-mode) .todo-star, body:not(.overlay-mode) #todayPanel .todo-x { width: 32px; height: 32px; }
+  body:not(.overlay-mode) #memoPanel { height: 360px; }
+  body:not(.overlay-mode) #callNotesPanel { height: 400px; }
+  body:not(.overlay-mode) #memoNote,
+  body:not(.overlay-mode) #callNotesPanel .phone-editor-textarea { font-size: 16px; }
+  body:not(.overlay-mode) .memo-add-btn,
+  body:not(.overlay-mode) #callNotesPanel .phone-editor-save { height: 40px; }
+  body:not(.overlay-mode) #memoPanel .memo-tools { flex-wrap: wrap; }
+
+  body:not(.overlay-mode) #dashCols #schedulePanel { height: min(620px, calc(100dvh - 120px)); min-height: 460px; padding: 16px; }
+  body:not(.overlay-mode) #schedulePanel .block-head { flex-wrap: wrap; }
+  body:not(.overlay-mode) #schedulePanel .calendar-days { gap: 4px; }
+  body:not(.overlay-mode) #schedulePanel .calendar-days button { font-size: 13px; border-radius: 8px; }
+  body:not(.overlay-mode) #schedulePanel .cal-tools button,
+  body:not(.overlay-mode) #schedulePanel .calendar-month button { height: 40px; min-width: 40px; }
+
+  body:not(.overlay-mode) #knowledgeBlock { padding: 16px; }
+  body:not(.overlay-mode) #knowledgeBlock .block-head { flex-wrap: wrap; align-items: flex-start; }
+  body:not(.overlay-mode) #pageGrid,
+  body:not(.overlay-mode) .workspace:is([data-view="대본"], [data-view="기획"], [data-view="특허"], [data-view="연락처"], [data-view="협력업체"]) #pageGrid { grid-template-columns: minmax(0, 1fr); }
+  body:not(.overlay-mode) #pageCategories { flex-wrap: nowrap; overflow-x: auto; }
+  body:not(.overlay-mode) #pageCategories button { flex: none; height: 40px; }
+  body:not(.overlay-mode) #pageGrid .page-card footer button,
+  body:not(.overlay-mode) #pageGrid .page-card footer a { height: 36px; }
+
+  .modal { align-items: end; padding: 12px; }
+  .modal .edit-box, .modal .edit-box:is(.memory-library-box, .script-box, .detail-box) { width: 100%; max-height: calc(100dvh - 24px); }
+  .modal .edit-box :is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="color"]), select, textarea) { font-size: 16px; }
+  .modal .add-kinds { grid-template-columns: minmax(0, 1fr); }
+
+  body:not(.overlay-mode) .alarm-dock { left: 16px; bottom: 16px; }
+  body:not(.overlay-mode) .alarm-dock button { height: 36px; }
+  body:not(.overlay-mode) #orb { left: auto; right: 16px; bottom: 16px; width: 44px; height: 44px; }
+}

@@ -7,7 +7,7 @@
 
   <!-- 홈 화면에 추가했을 때 앱처럼 보이게 하는 설정(PWA). 화면·기능·데이터에는 영향이 없다. -->
   <link rel="manifest" href="manifest.json?v=3" />
-  <meta name="theme-color" content="#edf3f9" />
+  <meta name="theme-color" content="#EDF0F4" />
   <meta name="application-name" content="한솔 Knowledge" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -16,31 +16,11 @@
   <link rel="icon" type="image/png" sizes="32x32" href="icons/hansol-story-32.png?v=2" />
   <link rel="apple-touch-icon" sizes="192x192" href="icons/hansol-story-192.png?v=2" />
 
-  <link rel="stylesheet" href="styles.css?v=83" />
-  <link rel="stylesheet" href="crayon.css?v=59" />
-  <link rel="stylesheet" href="theme.css?v=1" />
-  <link rel="stylesheet" href="crm-layout.css?v=1" />
-  <link rel="stylesheet" href="liquid-glass.css?v=8" />
-  <link rel="stylesheet" href="blue-glass.css?v=3" />
-  <link rel="stylesheet" href="warm-palette.css?v=4" />
-  <link rel="stylesheet" href="lavender-palette.css?v=1" />
-  <link rel="stylesheet" href="refined-ui.css?v=5" />
-  <link rel="stylesheet" href="ipad-navy-glass.css?v=1" />
-  <link rel="stylesheet" href="ipad-layout-v2.css?v=1" />
-  <link rel="stylesheet" href="phone-memo-editor.css?v=1" />
-  <link rel="stylesheet" href="compact-dashboard-v3.css?v=1" />
-  <link rel="stylesheet" href="navy-white-final.css?v=1" />
-  <link rel="stylesheet" href="fixed-screen-and-memo-v4.css?v=1" />
-  <link rel="stylesheet" href="todo-vertical-categories.css?v=1" />
-  <link rel="stylesheet" href="theme-hris-lavender.css?v=3" />
-  <link rel="stylesheet" href="sidebar-position-fix.css?v=1" />
-  <link rel="stylesheet" href="calendar-single-view-fix.css?v=1" />
-  <link rel="stylesheet" href="category-calendar-fit.css?v=2" />
-  <link rel="stylesheet" href="dashboard-full-height.css?v=2" />
-  <link rel="stylesheet" href="todo-text-visibility-fix.css?v=2" />
-  <link rel="stylesheet" href="healthcare-saas-theme.css?v=1" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+  <!-- 화면 모양: ipados-white.css(최종 테마) 하나. 기본 부품 styles.css 는 이 파일이 아래 층으로 불러온다. -->
+  <link rel="stylesheet" href="ipados-white.css?v=1" />
   <script src="background.js?v=1" defer></script>
-  <script src="phone-memo-editor.js?v=2" defer></script>
+  <script src="phone-memo-editor.js?v=3" defer></script>
 </head>
 <body>
   <div class="workspace">
@@ -314,7 +294,7 @@
   </dialog>
   <script src="store.js?v=2"></script>
   <script src="shortcuts.js?v=1"></script>
-  <script src="views.js?v=22"></script>
+  <script src="views.js?v=23"></script>
   <script src="partners.js?v=1"></script>
   <script src="patents.js?v=1"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>

@@ -9,7 +9,7 @@
  function mount(){
   const panel=document.getElementById('callNotesPanel');
   if(!panel || panel.querySelector('#phoneMemoText'))return;
-  panel.innerHTML=`<header class="phone-editor-header"><span class="phone-editor-icon" aria-hidden="true">☎</span><h2>전화메모</h2><button type="button" id="phoneMemoShowHistory" class="phone-editor-history">기록 보기</button></header>
+  panel.innerHTML=`<header class="phone-editor-header"><span class="phone-editor-icon panel-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h3l2 5-2.5 1.5a12 12 0 005 5L16 12l5 2v3a2 2 0 01-2 2A16 16 0 015 5a2 2 0 012-2z"/></svg></span><h2>전화메모</h2><button type="button" id="phoneMemoShowHistory" class="phone-editor-history">기록 보기</button></header>
   <p class="phone-editor-help">통화 내용과 중요한 사항을 기록하세요.</p>
   <label class="phone-editor-label" for="phoneMemoContact">업체명 · 연락처 (선택)</label>
   <input id="phoneMemoContact" class="phone-editor-contact" autocomplete="off" placeholder="예: ○○건설 / 담당자 / 전화번호" />

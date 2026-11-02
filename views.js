@@ -24,6 +24,7 @@
   function memoPanel() {
     return `
     <div class="memo-head">
+      <span class="panel-icon" aria-hidden="true">${helper.icon('pencil', 18)}</span>
       <h2>메모장</h2>
     </div>
     <div class="memo-note-shell">
@@ -32,17 +33,16 @@
     </div>
     <div class="memo-tools">
       <button type="button" id="memoQuickAdd" class="memo-add-btn">메모 저장</button>
-      <button type="button" class="memo-add-btn" style="margin-left:auto" onclick="document.getElementById('phoneArchiveDialog').showModal()">메모 보관함 열기</button>
+      <button type="button" class="memo-add-btn memo-archive-open" onclick="document.getElementById('phoneArchiveDialog').showModal()">메모 보관함 열기</button>
     </div>
-    <dialog id="phoneArchiveDialog" aria-label="메모 보관함"
-      onclick="if(event.target===this)this.close()"
-      style="width:min(760px,92vw);max-height:78vh;padding:0;border:1px solid #e5dfe3;border-radius:18px;background:#fffafc;box-shadow:0 24px 70px rgba(80,55,68,.22);overflow:hidden">
-      <section class="phone-archive" style="display:flex;flex-direction:column;max-height:78vh;background:#fffafc">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 20px 14px;border-bottom:1px solid #eee0e6">
-          <div><h3 style="margin:0;font-size:18px">메모 보관함</h3><small style="display:block;margin-top:4px;color:#9a8390">저장한 메모를 한곳에서 확인하고 삭제할 수 있어요.</small></div>
-          <button type="button" aria-label="닫기" onclick="this.closest('dialog').close()" style="width:34px;height:34px;border-radius:10px;font-size:21px;background:#f6e9ed;color:#796976">×</button>
+    <dialog id="phoneArchiveDialog" class="memo-archive-dialog" aria-label="메모 보관함"
+      onclick="if(event.target===this)this.close()">
+      <section class="phone-archive">
+        <div class="memo-archive-head">
+          <div><h3>메모 보관함</h3><small>저장한 메모를 한곳에서 확인하고 삭제할 수 있어요.</small></div>
+          <button type="button" class="dialog-close" aria-label="닫기" onclick="this.closest('dialog').close()">×</button>
         </div>
-        <div id="phoneArchiveList" class="call-notes-list" style="min-height:260px;max-height:58vh;overflow:auto;padding:16px 20px 22px"></div>
+        <div id="phoneArchiveList" class="call-notes-list"></div>
       </section>
     </dialog>`;
   }
