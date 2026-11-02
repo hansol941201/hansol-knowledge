@@ -734,11 +734,18 @@ function renderTodos() {
 
   panel.querySelectorAll('[data-todo-id]').forEach(row => {
     const todo = todos.find(x => x.id === row.dataset.todoId);
-    // 체크박스: 완료 상태만 바꾼다(카드 클릭으로 번지지 않게 막는다).
+    // 체크박스: 진행 중 목록에서는 중요 표시를 켜고 끄고, 완료 목록에서는 완료를 되돌린다
+    // (카드 클릭으로 번지지 않게 막는다).
     const checkBox = row.querySelector('.todo-check-box, .todo-line-check');
     if (checkBox) checkBox.addEventListener('click', event => event.stopPropagation());
     const check = row.querySelector('input');
     if (check) check.onchange = () => {
+      if (!todo.done) {
+        todo.starred = check.checked; touch(todo);
+        saveTodos(); renderTodos(); renderLibrary();
+        showToast(todo.starred ? '중요 할 일로 표시했습니다' : '중요 표시를 뗐습니다');
+        return;
+      }
       if (check.checked) return completeTodo(todo, row);
       setTodoDone(todo, false);
       saveTodos(); renderTodos(); renderLibrary();

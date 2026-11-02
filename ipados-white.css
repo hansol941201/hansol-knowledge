@@ -100,7 +100,9 @@ body:not(.overlay-mode) * { scrollbar-width: thin; scrollbar-color: #D5DBE3 tran
 body:not(.overlay-mode) *::-webkit-scrollbar { width: 6px; height: 6px; }
 body:not(.overlay-mode) *::-webkit-scrollbar-thumb { background: #D5DBE3; border-radius: 3px; }
 body:not(.overlay-mode) *::-webkit-scrollbar-track { background: transparent; }
-/* 장식용 그림·중복 도구는 그리지 않는다(기능은 상단 도구에 그대로 있다). */
+/* 장식용 그림·중복 도구는 그리지 않는다(기능은 상단 도구에 그대로 있다).
+   상단의 배경 설정·자료 백업 버튼도 쓰지 않는다 — 백업은 초기화 창과 통합 검색의 '백업'으로 할 수 있다. */
+#backgroundOpen, #resetBackupSide,
 .header-check-art, .glass-breadcrumb, .glass-brand-mark, .crm-page-title,
 .glass-footer, .glass-sidebar-foot, .memo-character, #contractTodaySection { display: none !important; }
 
@@ -741,8 +743,11 @@ body:not(.overlay-mode) .todo-box {
   transition: background var(--ip-ease), border-color var(--ip-ease);
 }
 body:not(.overlay-mode) .todo-box::before { content: none; }
-body:not(.overlay-mode) .todo-line-check:hover .todo-box { border-color: var(--ip-mint); }
+body:not(.overlay-mode) .todo-line-check:hover .todo-box { border-color: var(--ip-navy); }
 body:not(.overlay-mode) .todo-box.done { background: var(--ip-mint); border-color: var(--ip-mint); }
+/* 중요 할 일: 네모 칸이 남색으로 체크된다. */
+body:not(.overlay-mode) .todo-box.star { background: var(--ip-navy); border-color: var(--ip-navy); }
+body:not(.overlay-mode) .todo-box.star::after,
 body:not(.overlay-mode) .todo-box.done::after {
   content: "";
   position: absolute;
