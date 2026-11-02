@@ -89,6 +89,22 @@ let memories = STORE.readList('memories');
 let accountMeta = STORE.readList('accountMeta');
 let schedule = STORE.readList('schedule');
 let shortcuts = STORE.readList('shortcuts');
+let shortcutsInitialized = localStorage.getItem('knowledge-shortcuts-initialized-v1') === '1' || shortcuts.length > 0;
+let shortcutChangeVersion = 0;
+function rememberShortcutInitialization() {
+  shortcutsInitialized = true;
+  localStorage.setItem('knowledge-shortcuts-initialized-v1', '1');
+}
+function touchShortcut(item) {
+  SHORTCUT_STORE.touch(item, shortcuts);
+  shortcutChangeVersion += 1;
+  rememberShortcutInitialization();
+  return item;
+}
+function mergeShortcuts(mine, theirs) {
+  return SHORTCUT_STORE.merge(mine, theirs, [...DEFAULT_SHORTCUTS,
+    { id: 'shortcut-card', name: '고객관리', url: 'https://hansol941201.github.io/card/' }]);
+}
 // Keep deletion tombstones separately so older cloud snapshots cannot resurrect shortcuts.
 const SHORTCUT_DELETIONS_KEY = 'knowledge-shortcut-deletions-v1';
 function readShortcutDeletions() {
@@ -1955,7 +1971,7 @@ $('#scheduleDelete').addEventListener('click', () => {
 const DEFAULT_SHORTCUTS = [
   { id: 'shortcut-pour-contract', name: 'POUR 협약서', url: 'https://poursolution.github.io/pour-contract/', badge: 'POUR' },
   { id: 'shortcut-pour-support', name: '기술지원', url: 'https://pour-support.web.app/login', badge: 'SUPPORT' },
-  { id: 'shortcut-card', name: '고객관리', url: 'https://hansol941201.github.io/card/', badge: '고객관리' },
+  { id: 'shortcut-card', name: '고객관리', url: 'https://bridgeone-m.github.io/card/', badge: '고객관리' },
   { id: 'shortcut-knowledge', name: '한솔지식', url: 'https://hansol941201.github.io/hansol-knowledge/', badge: 'HS' },
   { id: 'shortcut-team-schedule', name: '팀일정', url: 'https://hansol941201.github.io/shin/team-schedule/', badge: '일정' },
   { id: 'shortcut-qna', name: 'Q&A', url: 'https://hansol941201.github.io/Q-A/', badge: 'Q&A' },
@@ -1981,7 +1997,7 @@ function fillDefaultShortcutIcons() {
     if (!url || item.image === url) continue;          // 어울리는 아이콘이 없으면 그대로 둔다
     item.image = url;
     item.imageFit = SHORTCUT_FIT;
-    touch(item);
+    // 아이콘 마이그레이션은 사용자 내용의 수정 시간을 바꾸지 않는다.
     changed = true;
   }
   localStorage.setItem('knowledge-shortcut-icons', SHORTCUT_ICON_VERSION);
@@ -1989,22 +2005,15 @@ function fillDefaultShortcutIcons() {
 }
 
 function seedShortcuts() {
-  let changed = false;
-  for (const [id, url] of Object.entries(LEGACY_DEFAULTS)) {
-    const old = shortcuts.find(item => item.id === id && !item.deleted);
-    if (old && old.url === url) { old.deleted = true; touch(old); changed = true; }
-  }
-  let order = Math.min(0, ...shortcuts.map(item => Number(item.order) || 0));
-  for (const preset of DEFAULT_SHORTCUTS) {
-    if (shortcuts.some(item => item.id === preset.id)) continue;          // 지운 것도 다시 만들지 않는다
-    if (shortcuts.some(item => !item.deleted && item.url === preset.url)) continue;
-    shortcuts.push(newEntry({
-      type: 'shortcut', image: builtinIconUrl(iconForShortcut(preset)), imageFit: SHORTCUT_FIT, order: order++, ...preset
-    }, '기본'));
-    changed = true;
-  }
-  if (fillDefaultShortcutIcons()) changed = true;
-  if (changed) { saveLocalState(); queueCloudSave(); }
+  // 서버를 처음 확인한 뒤에만 호출한다. 빈 목록도 사용자의 저장 상태다.
+  if (shortcutsInitialized || shortcuts.length) return;
+  rememberShortcutInitialization();
+  shortcuts = DEFAULT_SHORTCUTS.map((preset, order) => ({
+    ...preset, type: 'shortcut', source: '기본', autoDefault: true,
+    image: builtinIconUrl(iconForShortcut(preset)), imageFit: SHORTCUT_FIT,
+    order, createdAt: 0, updatedAt: 0
+  }));
+  saveLocalState();
 }
 
 const shortcutHref = (url) => SHORTCUT_STORE.href(url);
@@ -2126,7 +2135,7 @@ function moveShortcut(fromId, toId) {
   if (from < 0 || to < 0) return;
   const [moved] = list.splice(from, 1);
   list.splice(to, 0, moved);
-  list.forEach((item, index) => { item.order = index; touch(item); });
+  list.forEach((item, index) => { item.order = index; touchShortcut(item); });
   saveLocalState(); queueCloudSave(); renderShortcuts();
 }
 
@@ -2227,21 +2236,23 @@ $('#shortcutForm').addEventListener('submit', event => {
   const url = $('#shortcutUrl').value.trim();
   if (!name || !url) return;
   const existing = shortcuts.find(x => x.id === editingShortcutId);
-  if (existing) { Object.assign(existing, { name, url, image: shortcutImage, imageFit: SHORTCUT_FIT }); touch(existing); }
+  if (existing) { Object.assign(existing, { name, url, image: shortcutImage, imageFit: SHORTCUT_FIT }); touchShortcut(existing); }
   else {
     const last = Math.max(-1, ...sortedShortcuts().map(item => Number(item.order) || 0));
-    shortcuts.push(newEntry({ type: 'shortcut', name, url, image: shortcutImage, imageFit: SHORTCUT_FIT, order: last + 1 }));
+    const added = newEntry({ type: 'shortcut', name, url, image: shortcutImage, imageFit: SHORTCUT_FIT, order: last + 1 });
+    touchShortcut(added);
+    shortcuts.push(added);
   }
   saveLocalState(); queueCloudSave(); renderShortcuts(); closeShortcutModal();
-  showToast(existing ? '사이트 수정됨' : '사이트 추가됨');
+  showToast(cloudReady ? '이 기기에 저장됨 · 서버 저장 확인 중' : '이 기기에 저장됨 · 동기화 대기 중');
 });
 function deleteShortcut(item) {
   if (!item || !confirm(`「${item.name}」 바로가기를 지울까요?`)) return false;
-  item.deleted = true; touch(item);
+  item.deleted = true; touchShortcut(item);
   shortcutDeletions[item.id] = item.updatedAt;
   persistShortcutDeletions();
   saveLocalState(); queueCloudSave(); renderShortcuts();
-  showToast('사이트 삭제됨');
+  showToast('이 기기에서 삭제됨 · 서버 동기화 대기 중');
   return true;
 }
 $('#shortcutDelete').addEventListener('click', () => {
@@ -2284,7 +2295,7 @@ $('#resetBackup').addEventListener('click', () => {
 $('#resetLocal').addEventListener('click', () => {
   if (!confirm('이 컴퓨터에 저장된 사본을 지웁니다.\n클라우드 자료는 그대로 남고, 다시 내려받습니다.\n진행할까요?')) return;
   // 자료 열쇠 목록은 store.js 한 곳에만 있다. 금고와 동기화 표시만 여기서 덧붙인다.
-  STORE.clearKeys(['knowledge-vault-data', 'knowledge-sync-pending']);
+  STORE.clearKeys(['knowledge-vault-data', 'knowledge-sync-pending', SHORTCUT_DELETIONS_KEY, 'knowledge-shortcuts-initialized-v1']);
   location.reload();
 });
 
@@ -3151,7 +3162,7 @@ function clearPending() {
 }
 
 function queueCloudSave() {
-  if (cloudApplying) return;
+  markPending();
   if (!cloudReady || !window.HANSOL_FIRESTORE) { markPending(); return; }
   clearTimeout(cloudSaveTimer);
   cloudSaveTimer = setTimeout(() => { saveCloudState(); }, 350);
@@ -3168,6 +3179,7 @@ async function saveCloudState({ verifyIds = [] } = {}) {
   }
   while (cloudSyncing) await new Promise(resolve => setTimeout(resolve, 60));
   cloudSyncing = true;
+  const savingShortcutVersion = shortcutChangeVersion;
   setCloudStatus('syncing');
   try {
     await unlockDeviceVault();
@@ -3180,7 +3192,8 @@ async function saveCloudState({ verifyIds = [] } = {}) {
         todos: mergeById(todos, remote.todos),
         memories: mergeById(memories, remote.memories),
         accountMeta: mergeById(accountMeta, remote.accountMeta),
-        shortcuts: preserveDeletedShortcuts(mergeById(shortcuts, remote.shortcuts)),
+        shortcuts: preserveDeletedShortcuts(mergeShortcuts(shortcuts, remote.shortcuts)),
+        shortcutsInitialized: shortcutsInitialized || remote.shortcutsInitialized === true || Array.isArray(remote.shortcuts),
         schedule: mergeById(schedule, remote.schedule),
         partnerEdits: mergeById(partnerEdits, remote.partnerEdits),
         ...keepMailFields(remote),   // 없앤 메일함 자료는 건드리지 않고 그대로 둔다
@@ -3193,8 +3206,9 @@ async function saveCloudState({ verifyIds = [] } = {}) {
 
     // 저장된 문서를 서버에서 직접 다시 읽어 확인한다(캐시가 아니라 서버).
     let saved = null;
-    try { saved = (await stateDoc.get({ source: 'server' })).data(); }
-    catch { saved = (await stateDoc.get()).data(); }
+    saved = (await stateDoc.get({ source: 'server' })).data();
+    // ID만 같고 주소/삭제 상태가 다르면 저장 완료로 표시하지 않는다.
+    const shortcutsVerified = SHORTCUT_STORE.same(saved?.shortcuts || [], merged.shortcuts);
     const storedIds = new Set([
       ...((saved && saved.knowledge) || []),
       ...((saved && saved.todos) || []),
@@ -3209,10 +3223,11 @@ async function saveCloudState({ verifyIds = [] } = {}) {
 
     cloudSyncing = false;
     await applyCloudState(merged);
-    if (missing.length) {
+    if (missing.length || !shortcutsVerified || savingShortcutVersion !== shortcutChangeVersion) {
       console.error('Firebase 저장 확인 실패', missing);
       markPending();
-      return { ok: true, verified: false, reason: 'not-found', missing };
+      queueCloudSave();
+      return { ok: true, verified: false, reason: 'changed-or-not-found', missing };
     }
     clearPending();
     return { ok: true, verified: true };
@@ -3228,6 +3243,7 @@ async function saveCloudState({ verifyIds = [] } = {}) {
 async function applyCloudState(state) {
   if (!state) return;
   cloudApplying = true;
+  if (state.shortcutsInitialized === true || Array.isArray(state.shortcuts)) rememberShortcutInitialization();
   const missingOnServer = hasLocalOnlyItems(knowledge, state.knowledge)
     || hasLocalOnlyItems(todos, state.todos)
     || hasLocalOnlyItems(memories, state.memories)
@@ -3239,7 +3255,7 @@ async function applyCloudState(state) {
   todos = mergeById(todos, state.todos);
   memories = mergeById(memories, state.memories);
   accountMeta = mergeById(accountMeta, state.accountMeta);
-  shortcuts = preserveDeletedShortcuts(mergeById(shortcuts, state.shortcuts));
+  shortcuts = preserveDeletedShortcuts(mergeShortcuts(shortcuts, state.shortcuts));
   schedule = mergeById(schedule, state.schedule);
   partnerEdits = mergeById(partnerEdits, state.partnerEdits);
   rebuildPartners();
@@ -3263,9 +3279,13 @@ async function startCloudSync() {
   const stateDoc = window.HANSOL_FIRESTORE.doc('shared/state');
   cloudReady = true;
   try {
-    const first = await stateDoc.get();
+    const first = await stateDoc.get({ source: 'server' });
     if (first.exists) await applyCloudState(first.data());
-  } catch (error) { console.error('Firebase 최초 읽기 실패', error); }
+    seedShortcuts();
+  } catch (error) {
+    console.error('Firebase 최초 읽기 실패', error);
+    cloudReady = false; markPending(); return;
+  }
   await saveCloudState();
   stateDoc.onSnapshot(snapshot => {
     if (!snapshot.exists || snapshot.metadata.hasPendingWrites) return;
@@ -3427,7 +3447,8 @@ setInterval(() => {
 window.addEventListener('focus', renderTodoReminders);
 document.addEventListener('visibilitychange', renderTodoReminders);
 
-seedShortcuts();   // 기본 바로가기는 없을 때만 만든다
+// 기본 즐겨찾기는 startCloudSync에서 서버를 확인한 뒤에만 만든다.
 renderAll();       // 모든 정의가 끝난 뒤에 첫 화면을 그린다
 restoreWindow();   // 지식창은 이전 상태·내용 그대로 되살린다
 initCloudAuth();
+
