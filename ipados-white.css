@@ -162,7 +162,7 @@ body:not(.overlay-mode) #dashboardHome .glass-brand-text b {
   line-height: 1;
 }
 body:not(.overlay-mode) .topbar { grid-area: search; z-index: 30; padding: 0 12px 0 20px; }
-body:not(.overlay-mode) .search-wrap { position: relative; flex: 1 1 auto; min-width: 0; max-width: 560px; margin: 0; }
+body:not(.overlay-mode) .search-wrap { position: relative; flex: 1 1 auto; min-width: 0; max-width: 560px; margin: 0; transform: translateY(4px); }
 body:not(.overlay-mode) .page-search {
   display: flex;
   align-items: center;
@@ -330,8 +330,9 @@ body:not(.overlay-mode) #shortcutSection {
   border-radius: 15px;
   box-shadow: var(--ip-shadow-card);
 }
+/* 즐겨찾기 제목표는 쓰지 않는다 — 카드만 보인다. */
 body:not(.overlay-mode) .crm-favorites-label {
-  display: flex;
+  display: none;
   align-items: center;
   gap: 6px;
   flex: none;
@@ -1706,7 +1707,7 @@ body.overlay-mode .orb span { background: #C9D6E6; }
   body:not(.overlay-mode) .top-tools { gap: 6px; padding: 0 16px 0 0; }
   body:not(.overlay-mode) .top-tools .sync-state { max-width: 96px; padding: 0 9px; font-size: 11px; }
   body:not(.overlay-mode) .topbar { height: auto; padding: 10px 16px; }
-  body:not(.overlay-mode) .search-wrap { max-width: none; }
+  body:not(.overlay-mode) .search-wrap { max-width: none; transform: none; }
   body:not(.overlay-mode) .page-search { height: 42px; }
   body:not(.overlay-mode) #pageSearch { font-size: 16px; }
   body:not(.overlay-mode) #pageAdd { width: 42px; height: 42px; }
@@ -1723,7 +1724,6 @@ body.overlay-mode .orb span { background: #C9D6E6; }
   body:not(.overlay-mode) #sideNav .top-item { width: auto; height: 40px; padding: 0 12px; gap: 7px; }
 
   body:not(.overlay-mode) #shortcutSection { margin: 12px 16px 0; padding: 10px; gap: 8px; }
-  body:not(.overlay-mode) .crm-favorites-label { flex-basis: 100%; }
   body:not(.overlay-mode) #shortcutGrid { flex-basis: 100%; }
   body:not(.overlay-mode) #shortcutGrid .shortcut { width: 96px; height: 58px; }
   body:not(.overlay-mode) #shortcutGrid .shortcut-more { width: 28px; height: 28px; top: 1px; right: 1px; }
