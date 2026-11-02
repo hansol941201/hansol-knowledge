@@ -766,6 +766,12 @@ function renderTodos() {
       saveTodos(); renderTodos(); renderLibrary();
       showToast(todo.starred ? '중요 표시함' : '중요 표시를 뗐습니다');
     };
+    // 완료 버튼: 완료 목록으로 옮긴다(잠깐 동안 되돌리기 안내가 뜬다).
+    const complete = row.querySelector('[data-todo-complete]');
+    if (complete) complete.onclick = event => {
+      event.preventDefault(); event.stopPropagation();
+      completeTodo(todo, row);
+    };
     const remove = row.querySelector('[data-todo-delete]');
     if (remove) remove.onclick = event => {
       event.preventDefault();

@@ -47,7 +47,7 @@
     </dialog>`;
   }
 
-  // 오른쪽 위: 할 일 목록 — 네모 칸(중요) + 제목 한 줄, 오른쪽 끝에 지우기(✕)
+  // 오른쪽 위: 할 일 목록 — 네모 칸(중요) + 제목 한 줄, 오른쪽 끝에 완료 버튼과 지우기(✕)
   // 네모 칸을 체크한 것은 중요 할 일이 되어 맨 위로 올라가고 제목에 형광펜이 그어진다.
   function todoSimpleList(list) {
     return `<ul class="todo-list">${list.map(todo => `
@@ -55,6 +55,7 @@
         <label class="todo-line-check" title="${todo.starred ? '중요 표시 끄기' : '중요 할 일로 표시'}"><input type="checkbox" aria-label="중요 할 일" ${todo.starred ? 'checked' : ''} /><span class="todo-box${todo.starred ? ' star' : ''}"></span></label>
         <span class="todo-line-text" title="${helper.escapeHtml(todo.text)}"><span class="todo-mark">${helper.escapeHtml(todo.text)}</span></span>
         ${todo.date ? `<time class="${helper.todoDateState(todo)}">${helper.escapeHtml(String(todo.date).slice(5).replace("-", "/"))}</time>` : ''}
+        <button type="button" class="todo-done-btn" data-todo-complete title="완료로 옮기기">완료</button>
         <button type="button" class="todo-x" data-todo-delete title="지우기">✕</button>
       </li>`).join('')}</ul>`;
   }

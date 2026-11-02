@@ -811,6 +811,21 @@ body:not(.overlay-mode) #todayPanel .todo-line time {
 }
 body:not(.overlay-mode) #todayPanel .todo-line time.today { color: var(--ip-mint); font-weight: 600; }
 body:not(.overlay-mode) #todayPanel .todo-line time.late { color: var(--ip-danger); font-weight: 600; }
+body:not(.overlay-mode) #todayPanel .todo-done-btn {
+  flex: none;
+  height: 26px;
+  margin: 0;
+  padding: 0 9px;
+  border: 1px solid #CDEBDD;
+  border-radius: 7px;
+  background: #fff;
+  color: var(--ip-mint);
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background var(--ip-ease);
+}
+body:not(.overlay-mode) #todayPanel .todo-done-btn:hover { background: var(--ip-mint-soft); }
 body:not(.overlay-mode) #todayPanel .todo-x {
   display: grid;
   place-items: center;
@@ -1765,6 +1780,7 @@ body.overlay-mode .orb span { background: #C9D6E6; }
   body:not(.overlay-mode) #todayPanel .todo-results { grid-column: 1; grid-row: 5; }
   body:not(.overlay-mode) #todayPanel .todo-line { min-height: 48px; }
   body:not(.overlay-mode) .todo-star, body:not(.overlay-mode) #todayPanel .todo-x { width: 32px; height: 32px; }
+  body:not(.overlay-mode) #todayPanel .todo-done-btn { height: 32px; padding: 0 10px; }
   body:not(.overlay-mode) #memoPanel { height: 360px; }
   body:not(.overlay-mode) #callNotesPanel { height: 400px; }
   body:not(.overlay-mode) #memoNote,
