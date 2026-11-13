@@ -2628,11 +2628,30 @@ function restoreWindow() {
 
 orb.addEventListener('click', openApp);
 $('#collapseBtn').addEventListener('click', collapseApp);
-$('#siteShortcut').addEventListener('click', () => {
-  const siteUrl = 'https://hansol941201.github.io/hansol-knowledge/';
-  if (window.knowledgeAPI?.openSite) window.knowledgeAPI.openSite();
-  else window.open(siteUrl, '_blank', 'noopener,noreferrer');
-});
+// 「전체 지식 사이트 열기」 — 같은 사이트를 새 탭으로 또 띄우지 않는다.
+//  · 데스크톱 앱(Electron): 이미 열린 브라우저 탭이 있으면 그 탭을 앞으로 가져온다(main.js).
+//  · 지금 이 화면이 이미 전체 사이트: 새 탭 대신 팝업을 접고 이 화면의 대시보드로 간다.
+//  · 브라우저에서 팝업 화면(?overlay=1)만 따로 연 경우: 고정 창 이름으로 한 창만 열고,
+//    다시 누르면 그 창을 앞으로 가져온다.
+const FULL_SITE_URL = 'https://hansol941201.github.io/hansol-knowledge/';
+const FULL_SITE_WINDOW_NAME = 'hansol-knowledge-main';
+let fullSiteWindow = null;
+function openFullSite() {
+  if (window.knowledgeAPI?.openSite) { window.knowledgeAPI.openSite(); return; }
+  if (!overlayMode) {
+    collapseApp();
+    goToView('대시보드');
+    try { window.focus(); } catch { /* 포커스를 못 줘도 화면 이동은 끝났다 */ }
+    return;
+  }
+  try {
+    if (fullSiteWindow && !fullSiteWindow.closed) { fullSiteWindow.focus(); return; }
+  } catch { /* 창을 잃었으면 아래에서 다시 연다 */ }
+  // 같은 사이트라 noopener 를 빼야 창 참조를 받아 다음 번에 focus() 할 수 있다.
+  fullSiteWindow = window.open(FULL_SITE_URL, FULL_SITE_WINDOW_NAME);
+  try { fullSiteWindow?.focus(); } catch { /* 브라우저가 막아도 열린 것으로 충분하다 */ }
+}
+$('#siteShortcut').addEventListener('click', openFullSite);
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
   if (openMenu) closeRowMenu();

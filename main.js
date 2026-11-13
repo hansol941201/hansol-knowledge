@@ -1,7 +1,33 @@
 const { app, BrowserWindow, Menu, Tray, globalShortcut, nativeImage, screen, ipcMain, shell } = require('electron');
 const path = require('path');
+const fs = require('fs');
+const { execFile } = require('child_process');
 
 const SITE_URL = 'https://hansol941201.github.io/hansol-knowledge/';
+
+// 「전체 지식 사이트 열기」를 누를 때마다 브라우저 탭이 늘어나지 않도록,
+// 바탕화면 바로가기와 같은 Windows 실행기로 이미 열린 탭을 찾아 앞으로 가져온다.
+// 실행기를 못 쓰면(다른 OS·파일 없음·오류) 예전처럼 기본 브라우저로 새로 연다.
+const LAUNCHER_PATH = path.join(__dirname, 'tools', 'windows-launcher', 'open-hansol-knowledge.ps1');
+let siteOpening = false;
+function openSiteReusingTab() {
+  if (process.platform !== 'win32') return shell.openExternal(SITE_URL);
+  if (siteOpening) return;                       // 연달아 눌러도 한 번만 처리
+  let script;
+  try { script = fs.readFileSync(LAUNCHER_PATH, 'utf8').replace(/^﻿/, ''); }
+  catch { return shell.openExternal(SITE_URL); }
+  siteOpening = true;
+  const encoded = Buffer.from(script, 'utf16le').toString('base64');
+  execFile('powershell.exe',
+    ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-WindowStyle', 'Hidden', '-EncodedCommand', encoded],
+    { windowsHide: true, timeout: 20000 },
+    (error, stdout) => {
+      siteOpening = false;
+      // 실행기가 끝까지 돌았으면(찾았든 새로 열었든) 'result:' 줄을 남긴다. 없으면 여기서 연다.
+      if (!/result:/.test(String(stdout || ''))) shell.openExternal(SITE_URL);
+      else if (error) console.warn('launcher', error.message);
+    });
+}
 // 배포된 사이트를 그대로 띄운다. 그래야 앱을 다시 받지 않아도 최신 코드가 적용되고,
 // 팝업과 웹사이트가 같은 주소·같은 저장 공간·같은 Firebase 문서를 쓰게 된다.
 // 인터넷이 안 되면 실행 파일에 들어 있는 사본으로 내려간다.
@@ -94,7 +120,7 @@ function createTray() {
   tray.setToolTip('한솔 지식창');
   tray.setContextMenu(Menu.buildFromTemplate([
     { label: '지식창 열기', click: showKnowledgeWindow },
-    { label: '전체 지식 사이트 열기', click: () => shell.openExternal(SITE_URL) },
+    { label: '전체 지식 사이트 열기', click: openSiteReusingTab },
     { type: 'separator' },
     { label: '종료', click: () => { quitting = true; app.quit(); } }
   ]));
@@ -130,7 +156,7 @@ app.whenReady().then(() => {
     setExpanded(Boolean(expanded));
     if (expanded && usingBundledCopy) loadKnowledgeWindow();   // 연결이 돌아오면 최신 사이트로 복귀
   });
-  ipcMain.on('open-site', () => shell.openExternal('https://hansol941201.github.io/hansol-knowledge/'));
+  ipcMain.on('open-site', () => openSiteReusingTab());
 });
 app.on('before-quit', () => { quitting = true; });
 app.on('will-quit', () => globalShortcut.unregisterAll());

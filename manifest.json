@@ -8,6 +8,9 @@
   "scope": "./",
   "id": "./",
   "display": "standalone",
+  "launch_handler": {
+    "client_mode": ["focus-existing", "auto"]
+  },
   "display_override": [
     "standalone",
     "minimal-ui"
